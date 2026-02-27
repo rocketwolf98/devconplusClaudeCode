@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { useJobsStore } from '../../stores/useJobsStore'
 import PromotedBadge from '../../components/PromotedBadge'
 
 const workTypeLabel: Record<string, string> = {
-  remote:    '🌐 Remote',
-  onsite:    '🏢 Onsite',
-  hybrid:    '🔀 Hybrid',
+  remote:    'Remote',
+  onsite:    'Onsite',
+  hybrid:    'Hybrid',
   full_time: 'Full-time',
   part_time: 'Part-time',
 }
@@ -23,7 +24,12 @@ export default function JobDetail() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-navy px-4 pt-14 pb-6 relative">
-        <button onClick={() => navigate(-1)} className="text-white/70 text-sm mb-3">← Back</button>
+        <button
+          onClick={() => navigate(-1)}
+          className="text-white/70 mb-3 flex items-center gap-1.5 text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
         {job.is_promoted && <div className="absolute top-14 right-4"><PromotedBadge /></div>}
         <p className="text-white/60 text-xs">{job.company}</p>
         <h1 className="text-white text-xl font-bold">{job.title}</h1>
@@ -31,7 +37,11 @@ export default function JobDetail() {
           <span className="bg-white/10 text-white/80 text-xs px-2 py-0.5 rounded-full">
             {workTypeLabel[job.work_type] ?? job.work_type}
           </span>
-          {job.location && <span className="text-white/60 text-xs">📍 {job.location}</span>}
+          {job.location && (
+            <span className="text-white/60 text-xs flex items-center gap-1">
+              <MapPin className="w-3 h-3 shrink-0" /> {job.location}
+            </span>
+          )}
         </div>
       </div>
 

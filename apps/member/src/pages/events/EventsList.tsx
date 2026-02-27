@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, Users, MapPin, ChevronRight } from 'lucide-react'
+import { TrendingUp, Users, MapPin, ChevronRight, Ticket } from 'lucide-react'
 import { useEventsStore } from '../../stores/useEventsStore'
 import ChipBar from '../../components/ChipBar'
 
@@ -165,7 +165,9 @@ export default function EventsList() {
       {/* ── My Tickets tab ── */}
       {tab === 'tickets' && (
         <div className="bg-slate-50 min-h-screen flex flex-col items-center justify-center px-8 pb-24">
-          <div className="text-5xl mb-4">🎟️</div>
+          <div className="w-16 h-16 rounded-full bg-blue/10 flex items-center justify-center mb-4">
+            <Ticket className="w-8 h-8 text-blue/50" />
+          </div>
           <h3 className="text-base font-bold text-slate-900 mb-1">No tickets yet</h3>
           <p className="text-sm text-slate-500 text-center mb-5">
             Register for an event to get your QR ticket here.

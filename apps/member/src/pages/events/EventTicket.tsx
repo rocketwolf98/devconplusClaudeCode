@@ -1,4 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft, MapPin } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -26,7 +27,12 @@ export default function EventTicket() {
 
   return (
     <div className="min-h-screen bg-navy flex flex-col items-center px-6 py-10">
-      <button onClick={() => navigate(-1)} className="self-start text-white/60 text-sm mb-6">← Back</button>
+      <button
+        onClick={() => navigate(-1)}
+        className="self-start text-white/60 mb-6 flex items-center gap-1.5 text-sm"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back
+      </button>
 
       <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-blue">
         {/* Ticket header */}
@@ -37,7 +43,11 @@ export default function EventTicket() {
           <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Event Ticket</p>
           <h2 className="text-base font-bold text-slate-900 mt-1">{event.title}</h2>
           <p className="text-xs text-slate-500 mt-1">{dateStr}</p>
-          {event.location && <p className="text-xs text-slate-400">📍 {event.location}</p>}
+          {event.location && (
+            <p className="text-xs text-slate-400 flex items-center justify-center gap-1 mt-0.5">
+              <MapPin className="w-3 h-3 shrink-0" /> {event.location}
+            </p>
+          )}
         </div>
 
         {/* QR code */}

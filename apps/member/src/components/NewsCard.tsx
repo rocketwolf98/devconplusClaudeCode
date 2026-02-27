@@ -1,3 +1,4 @@
+import { Newspaper } from 'lucide-react'
 import type { NewsPost } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
 
@@ -17,7 +18,7 @@ export default function NewsCard({ post }: { post: NewsPost }) {
         <img src={post.cover_image_url} alt={post.title} className="w-full h-32 object-cover" />
       ) : (
         <div className="w-full h-32 bg-gradient-to-br from-navy to-blue flex items-center justify-center">
-          <span className="text-white/20 text-4xl">📰</span>
+          <Newspaper className="w-10 h-10 text-white/20" />
         </div>
       )}
       <div className="p-3">

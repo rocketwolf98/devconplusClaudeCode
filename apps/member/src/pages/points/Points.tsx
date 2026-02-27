@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Ticket, Mic2, HandHeart, Coffee, Heart, Share2 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { usePointsStore } from '../../stores/usePointsStore'
 
-const EARN = [
-  { icon: '🎫', label: 'Attend an Event',   pts: '100–300 pts' },
-  { icon: '🎤', label: 'Speak at an Event', pts: '700 pts'     },
-  { icon: '🙋', label: 'Volunteer',         pts: '100–500 pts' },
-  { icon: '☕', label: 'Brown Bag Session', pts: '250 pts'     },
+const EARN: { Icon: LucideIcon; label: string; pts: string }[] = [
+  { Icon: Ticket,    label: 'Attend an Event',   pts: '100–300 pts' },
+  { Icon: Mic2,      label: 'Speak at an Event', pts: '700 pts'     },
+  { Icon: HandHeart, label: 'Volunteer',         pts: '100–500 pts' },
+  { Icon: Coffee,    label: 'Brown Bag Session', pts: '250 pts'     },
 ]
 
-const SHARE = [
-  { icon: '❤️', label: 'Like Content',          pts: '5 pts'     },
-  { icon: '🔗', label: 'Share + Submit Link',   pts: '10–25 pts' },
+const SHARE: { Icon: LucideIcon; label: string; pts: string }[] = [
+  { Icon: Heart,  label: 'Like Content',        pts: '5 pts'     },
+  { Icon: Share2, label: 'Share + Submit Link', pts: '10–25 pts' },
 ]
 
 export default function Points() {
@@ -44,8 +46,10 @@ export default function Points() {
 
       <div className="bg-slate-50 min-h-screen p-4 space-y-3">
         {items.map((item) => (
-          <div key={item.label} className="bg-white rounded-2xl shadow-card p-4 flex items-start gap-3">
-            <span className="text-2xl">{item.icon}</span>
+          <div key={item.label} className="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
+              <item.Icon className="w-5 h-5 text-blue" />
+            </div>
             <div className="flex-1">
               <div className="flex justify-between items-center">
                 <p className="font-semibold text-slate-900 text-sm">{item.label}</p>

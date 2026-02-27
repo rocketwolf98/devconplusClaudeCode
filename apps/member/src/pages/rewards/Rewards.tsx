@@ -1,16 +1,18 @@
 import { useState } from 'react'
+import { Tag, Coffee, Package, Keyboard, Headphones, Shirt, Gift } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { REWARDS } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
 
-const REWARD_ICONS: Record<string, string> = {
-  'Lanyard':        '🏷️',
-  'Coffee Voucher': '☕',
-  'DEVCON Cap':     '🧢',
-  'Keyboard':       '⌨️',
-  'Headset':        '🎧',
-  'DEVCON Shirt':   '👕',
-  'DEVCON Mug':     '☕',
+const REWARD_ICONS: Record<string, LucideIcon> = {
+  'Lanyard':        Tag,
+  'Coffee Voucher': Coffee,
+  'DEVCON Cap':     Package,
+  'Keyboard':       Keyboard,
+  'Headset':        Headphones,
+  'DEVCON Shirt':   Shirt,
+  'DEVCON Mug':     Gift,
 }
 
 export default function Rewards() {
@@ -28,19 +30,22 @@ export default function Rewards() {
 
       <div className="bg-slate-50 min-h-screen p-4">
         <div className="grid grid-cols-2 gap-3">
-          {REWARDS.map((reward) => (
-            <button
-              key={reward.id}
-              onClick={() => setSelected(reward.name)}
-              className="bg-white rounded-2xl shadow-card p-4 text-left"
-            >
-              <div className="w-full h-24 bg-gradient-to-br from-blue/10 to-navy/10 rounded-xl flex items-center justify-center mb-3">
-                <span className="text-3xl">{REWARD_ICONS[reward.name] ?? '🎁'}</span>
-              </div>
-              <p className="font-semibold text-slate-900 text-sm leading-tight">{reward.name}</p>
-              <p className="text-xs font-bold text-blue mt-1">{reward.points_cost.toLocaleString()} pts</p>
-            </button>
-          ))}
+          {REWARDS.map((reward) => {
+            const Icon = REWARD_ICONS[reward.name] ?? Gift
+            return (
+              <button
+                key={reward.id}
+                onClick={() => setSelected(reward.name)}
+                className="bg-white rounded-2xl shadow-card p-4 text-left"
+              >
+                <div className="w-full h-24 bg-gradient-to-br from-blue/10 to-navy/10 rounded-xl flex items-center justify-center mb-3">
+                  <Icon className="w-10 h-10 text-blue/60" />
+                </div>
+                <p className="font-semibold text-slate-900 text-sm leading-tight">{reward.name}</p>
+                <p className="text-xs font-bold text-blue mt-1">{reward.points_cost.toLocaleString()} pts</p>
+              </button>
+            )
+          })}
         </div>
       </div>
 

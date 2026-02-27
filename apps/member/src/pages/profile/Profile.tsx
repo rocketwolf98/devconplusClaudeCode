@@ -1,6 +1,14 @@
 import { useNavigate } from 'react-router-dom'
+import { Pencil, Bell, Lock, ChevronRight, LogOut } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
+
+const menu: { label: string; Icon: LucideIcon; path: string }[] = [
+  { label: 'Edit Profile',  Icon: Pencil, path: '/profile/edit'          },
+  { label: 'Notifications', Icon: Bell,   path: '/profile/notifications' },
+  { label: 'Privacy',       Icon: Lock,   path: '/profile/privacy'       },
+]
 
 export default function Profile() {
   const navigate = useNavigate()
@@ -9,12 +17,6 @@ export default function Profile() {
 
   const initials = user?.full_name
     ?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() ?? 'U'
-
-  const menu = [
-    { label: 'Edit Profile',  icon: '✏️', path: '/profile/edit'          },
-    { label: 'Notifications', icon: '🔔', path: '/profile/notifications' },
-    { label: 'Privacy',       icon: '🔒', path: '/profile/privacy'       },
-  ]
 
   return (
     <div>
@@ -37,16 +39,19 @@ export default function Profile() {
             onClick={() => navigate(item.path)}
             className="w-full bg-white rounded-2xl shadow-card px-4 py-4 flex items-center gap-3 text-left"
           >
-            <span className="text-xl">{item.icon}</span>
+            <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
+              <item.Icon className="w-4 h-4 text-blue" />
+            </div>
             <span className="flex-1 font-medium text-slate-900 text-sm">{item.label}</span>
-            <span className="text-slate-300">›</span>
+            <ChevronRight className="w-4 h-4 text-slate-300" />
           </button>
         ))}
 
         <button
           onClick={() => { signOut(); navigate('/sign-in') }}
-          className="w-full bg-red/10 text-red font-semibold py-4 rounded-2xl mt-4"
+          className="w-full bg-red/10 text-red font-semibold py-4 rounded-2xl mt-4 flex items-center justify-center gap-2"
         >
+          <LogOut className="w-4 h-4" />
           Sign Out
         </button>
       </div>

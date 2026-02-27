@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, MapPin } from 'lucide-react'
+import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useJobsStore } from '../../stores/useJobsStore'
@@ -149,7 +149,9 @@ export default function Dashboard() {
         {/* Hot Jobs — horizontal scroll carousel */}
         <section>
           <div className="flex justify-between items-center px-4 mb-3">
-            <h2 className="text-base font-bold text-slate-900">Hot Jobs 🔥</h2>
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+              Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
+            </h2>
             <button
               onClick={() => navigate('/jobs')}
               className="text-xs text-blue font-semibold flex items-center gap-0.5"

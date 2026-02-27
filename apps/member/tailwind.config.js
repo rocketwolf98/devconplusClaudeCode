@@ -5,9 +5,9 @@ export default {
     extend: {
       colors: {
         blue: {
-          DEFAULT: '#3B5BDE',
-          dark: '#2F48C0',
-          light: '#5B7BF8',
+          DEFAULT: '#367BDD',
+          dark: '#2962C4',
+          light: '#5A9AEA',
         },
         navy: '#1E2A56',
         gold: '#F8C630',
@@ -34,7 +34,7 @@ export default {
       },
       boxShadow: {
         card: '0 1px 4px rgba(0,0,0,0.07)',
-        blue: '0 4px 24px rgba(59,91,222,0.12)',
+        blue: '0 4px 24px rgba(54,123,221,0.12)',
       },
     },
   },

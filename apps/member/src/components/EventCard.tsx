@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { CalendarDays } from 'lucide-react'
 import type { Event } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
 import StatusPill from './StatusPill'
@@ -27,7 +28,7 @@ export default function EventCard({ event, compact = false }: { event: Event; co
         />
       ) : (
         <div className={`w-full rounded-xl mb-3 bg-gradient-to-br from-blue to-navy flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
-          <span className="text-white/20 text-5xl">🎪</span>
+          <CalendarDays className="w-12 h-12 text-white/20" />
         </div>
       )}
       <p className="text-xs text-slate-400 mb-0.5">{dateStr}</p>

@@ -3,9 +3,9 @@ import type { Job } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
 
 const workTypeLabel: Record<string, string> = {
-  remote:    '🌐 Remote',
-  onsite:    '🏢 Onsite',
-  hybrid:    '🔀 Hybrid',
+  remote:    'Remote',
+  onsite:    'Onsite',
+  hybrid:    'Hybrid',
   full_time: 'Full-time',
   part_time: 'Part-time',
 }
