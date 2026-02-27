@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DEVCON+ Prototype</title>
+<style>
+/* ── TOKENS ─────────────────────────────── */
+:root{
+  --blue:#3B5BDE;
+  --blue-dark:#2F48C0;
+  --blue-light:#5B7BF8;
+  --blue-10:rgba(59,91,222,.10);
+  --blue-20:rgba(59,91,222,.20);
+  --gold:#F8C630;
+  --gold-20:rgba(248,198,48,.20);
+  --green:#21C45D;
+  --green-10:rgba(33,196,93,.10);
+  --red:#EF4444;
+  --red-10:rgba(239,68,68,.10);
+  --white:#FFFFFF;
+  --bg:#FFFFFF;
+  --bg2:#F8FAFC;
+  --slate50:#F8FAFC;
+  --slate100:#F1F5F9;
+  --slate200:#E2E8F0;
+  --slate300:#CBD5E1;
+  --slate400:#94A3B8;
+  --slate500:#64748B;
+  --slate700:#334155;
+  --slate900:#0F172A;
+  --navy:#1E2A56;
+  --r:12px; --r-sm:8px; --r-lg:20px; --r-xl:24px;
+  --shadow:0 4px 24px rgba(59,91,222,.12);
+  --shadow-sm:0 1px 4px rgba(0,0,0,.07);
+}
+
+/* ── RESET ───────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(135deg,#EEF2FF 0%,#E2E8F0 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
+
+/* ── PHONE SHELL ─────────────────────────── */
+#phone{width:430px;height:932px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.20),0 0 0 1.5px rgba(255,255,255,.6),inset 0 0 0 1px rgba(0,0,0,.06);display:flex;flex-direction:column}
+
+/* status bar */
+.sbar{height:44px;padding:14px 28px 0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;position:relative;z-index:10}
+.sbar-time{font-size:15px;font-weight:700;color:var(--white)}
+.sbar-icons{display:flex;gap:5px;align-items:center;font-size:12px;color:var(--white)}
+.sbar.dark .sbar-time,.sbar.dark .sbar-icons{color:var(--slate700)}
+
+/* screen container */
+#screen{flex:1;overflow:hidden;position:relative}
+.view{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--bg);animation:fadeIn .2s ease}
+.view.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* home indicator */
+.hbar{height:34px;display:flex;justify-content:center;align-items:center;flex-shrink:0;background:var(--white)}
+.hbar div{width:134px;height:5px;background:var(--slate200);border-radius:3px}
+
+/* ── SCROLLABLE CONTENT ───────────────────── */
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ── BOTTOM NAV ──────────────────────────── */
+.bnav{flex-shrink:0;background:var(--white);border-top:1px solid var(--slate200);display:flex;align-items:center;padding:10px 0 6px;position:relative;z-index:20}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;position:relative}
+.bni-icon{font-size:20px;line-height:1}
+.bni-label{font-size:10px;font-weight:600;color:var(--slate400)}
+.bni.active .bni-label{color:var(--blue)}
+.bni-qr{width:52px;height:52px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:-20px;box-shadow:0 4px 16px rgba(59,91,222,.4);font-size:22px}
+
+/* ── BLUE HEADER ─────────────────────────── */
+.blue-hdr{background:var(--blue);padding:0 20px 24px;border-radius:0 0 28px 28px;position:relative;overflow:hidden;flex-shrink:0}
+.blue-hdr::before{content:'';position:absolute;top:-60px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
+.blue-hdr::after{content:'';position:absolute;bottom:-80px;left:-30px;width:220px;height:220px;background:rgba(255,255,255,.04);border-radius:50%;pointer-events:none}
+.blue-hdr-inner{position:relative;z-index:1}
+
+/* ── SECTION HEADER ──────────────────────── */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin:20px 0 10px}
+.sec-title{font-size:16px;font-weight:700;color:var(--slate900)}
+.sec-link{font-size:13px;font-weight:600;color:var(--blue)}
+
+/* ── CARDS ───────────────────────────────── */
+.card{background:var(--white);border:1px solid var(--slate200);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);transition:.15s}
+.card:hover{border-color:var(--blue);box-shadow:var(--shadow)}
+
+/* ── BUTTONS ─────────────────────────────── */
+.btn{padding:13px 20px;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;border:none;transition:.15s;text-align:center;display:block;width:100%}
+.btn-blue{background:var(--blue);color:var(--white);box-shadow:0 4px 14px rgba(59,91,222,.35)}
+.btn-blue:active{background:var(--blue-dark)}
+.btn-outline{background:transparent;color:var(--slate700);border:1.5px solid var(--slate300)}
+.btn-outline-blue{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn-white{background:var(--white);color:var(--slate900);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.btn-sm{padding:9px 16px;font-size:13px;border-radius:var(--r-sm)}
+.btn-ghost{background:transparent;color:var(--slate500);border:1.5px solid var(--slate200);font-size:14px;font-weight:600;padding:9px 16px;border-radius:var(--r-sm);cursor:pointer}
+
+/* ── INPUTS ──────────────────────────────── */
+.inp-wrap{margin-bottom:14px}
+.inp-label{font-size:12px;font-weight:600;color:var(--slate500);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.inp{width:100%;background:var(--slate50);border:1.5px solid var(--slate200);border-radius:var(--r-sm);padding:12px 14px;font-size:15px;color:var(--slate900);outline:none;transition:.15s;font-family:inherit}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,91,222,.12);background:var(--white)}
+select.inp{appearance:auto}
+
+/* ── DIVIDER ─────────────────────────────── */
+.divider{display:flex;align-items:center;gap:10px;color:var(--slate400);font-size:13px;margin:4px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--slate200)}
+
+/* ── SOCIAL BTNS ─────────────────────────── */
+.social-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border-radius:var(--r-sm);border:1.5px solid var(--slate200);background:var(--white);cursor:pointer;font-size:14px;font-weight:600;color:var(--slate900);transition:.15s;width:100%}
+.social-btn:hover{border-color:var(--blue);background:var(--blue-10)}
+.social-icon{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px}
+
+/* ── AVATAR ──────────────────────────────── */
+.avatar{border-radius:50%;background:rgba(255,255,255,.25);color:var(--white);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+
+/* ── CHIPS / TAGS ────────────────────────── */
+.chip{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1.5px solid var(--slate200);color:var(--slate500);background:var(--white);white-space:nowrap;cursor:pointer;transition:.15s}
+.chip.active,.chip-blue{background:var(--blue);border-color:var(--blue);color:var(--white)}
+.chip-light{background:var(--blue-10);border-color:transparent;color:var(--blue)}
+.chip-gold{background:rgba(248,198,48,.15);border-color:rgba(248,198,48,.4);color:#92620A}
+.chip-green{background:var(--green-10);border-color:rgba(33,196,93,.3);color:#166534}
+.chip-red{background:var(--red-10);border-color:rgba(239,68,68,.3);color:#991B1B}
+.chip-featured{background:rgba(248,198,48,.15);color:#92620A;border-color:rgba(248,198,48,.4);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+
+/* ── XP PROGRESS ─────────────────────────── */
+.xp-card{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:var(--r);padding:14px;margin-top:12px;backdrop-filter:blur(4px)}
+.xp-row{display:flex;align-items:center;gap:10px}
+.xp-star{width:40px;height:40px;border-radius:10px;background:var(--gold-20);display:flex;align-items:center;justify-content:center;font-size:20px}
+.xp-pts{font-size:28px;font-weight:900;color:var(--white);letter-spacing:-.5px}
+.xp-lbl{font-size:11px;color:rgba(255,255,255,.7);font-weight:500;text-transform:uppercase;letter-spacing:.8px}
+.xp-bar-wrap{margin-top:10px}
+.xp-track{height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden}
+.xp-fill{height:100%;background:var(--white);border-radius:3px;width:40%}
+.xp-hint{font-size:12px;color:rgba(255,255,255,.7);margin-top:6px}
+
+/* ── QUICK ACTIONS ───────────────────────── */
+.qa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px}
+.qa-item{background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:.15s;box-shadow:var(--shadow-sm)}
+.qa-item:hover{border-color:var(--blue);transform:translateY(-1px)}
+.qa-icon-wrap{width:44px;height:44px;border-radius:12px;background:var(--blue-10);display:flex;align-items:center;justify-content:center;font-size:20px}
+.qa-label{font-size:12px;font-weight:600;color:var(--slate700)}
+
+/* ── EVENT ROW ───────────────────────────── */
+.ev-row{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);margin:0 16px 10px;cursor:pointer;transition:.15s;box-shadow:var(--shadow-sm)}
+.ev-row:hover{border-color:var(--blue)}
+.ev-icon{width:36px;height:36px;border-radius:10px;background:var(--blue-10);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ev-info{flex:1}
+.ev-name{font-size:14px;font-weight:700;color:var(--slate900)}
+.ev-meta{font-size:12px;color:var(--slate400);margin-top:2px}
+.ev-arr{font-size:16px;color:var(--slate300)}
+
+/* date badge */
+.date-badge{width:44px;flex-shrink:0;text-align:center;background:var(--blue-10);border-radius:10px;padding:6px 4px}
+.date-mon{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase}
+.date-day{font-size:18px;font-weight:900;color:var(--blue);line-height:1}
+
+/* ── NEWS CARD ───────────────────────────── */
+.news-card{margin:0 16px 10px;background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);cursor:pointer;transition:.15s}
+.news-card:hover{border-color:var(--blue)}
+.news-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.news-title{font-size:14px;font-weight:700;color:var(--slate900);line-height:1.35}
+.news-desc{font-size:13px;color:var(--slate500);margin-top:4px;line-height:1.4}
+
+/* ── XP HISTORY ROW ──────────────────────── */
+.xph-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--slate100)}
+.xph-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.xph-plus{background:var(--green-10);color:var(--green)}
+.xph-minus{background:var(--red-10);color:var(--red)}
+.xph-info{flex:1}
+.xph-name{font-size:13px;font-weight:600;color:var(--slate900)}
+.xph-date{font-size:11px;color:var(--slate400);margin-top:1px}
+.xph-val{font-size:14px;font-weight:700}
+.xph-pos{color:var(--green)}
+.xph-neg{color:var(--red)}
+
+/* ── JOB CARD ────────────────────────────── */
+.job-card{margin:0 16px 12px;background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm);transition:.15s}
+.job-card:hover{border-color:var(--blue)}
+.jc-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.jc-av{width:42px;height:42px;border-radius:12px;background:var(--blue-10);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--blue);flex-shrink:0}
+.jc-info{flex:1}
+.jc-co{font-size:11px;color:var(--slate400);font-weight:500;margin-bottom:2px}
+.jc-title{font-size:14px;font-weight:700;color:var(--slate900)}
+.jc-heart{font-size:18px;cursor:pointer;color:var(--slate300)}
+.jc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.jc-meta span{font-size:11px;color:var(--slate500);display:flex;align-items:center;gap:3px}
+
+/* ── REWARD CARD ─────────────────────────── */
+.rw-card{background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.15s;box-shadow:var(--shadow-sm)}
+.rw-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:var(--shadow)}
+.rw-img{height:140px;background:var(--slate50);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rw-img img{width:100%;height:100%;object-fit:contain;padding:12px}
+.rw-body{padding:12px}
+.rw-name{font-size:13px;font-weight:700;color:var(--slate900);margin-bottom:6px}
+.rw-xp{display:inline-flex;align-items:center;gap:4px;background:var(--blue-10);color:var(--blue);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700}
+
+/* ── MODAL ───────────────────────────────── */
+.modal-wrap{position:absolute;inset:0;background:rgba(15,23,42,.6);z-index:100;display:none;align-items:flex-end;backdrop-filter:blur(2px)}
+.modal-wrap.open{display:flex}
+.modal{background:var(--white);border-radius:24px 24px 0 0;padding:20px;width:100%;max-height:88%;overflow-y:auto}
+.modal::-webkit-scrollbar{display:none}
+.mhandle{width:36px;height:4px;background:var(--slate200);border-radius:2px;margin:0 auto 18px}
+.mclose{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;background:var(--slate100);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--slate500)}
+
+/* ── PILL TABS ───────────────────────────── */
+.ptabs{display:flex;background:var(--slate100);border-radius:var(--r-sm);padding:3px;margin:0 16px 14px}
+.ptab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;border-radius:6px;cursor:pointer;color:var(--slate400);transition:.15s}
+.ptab.active{background:var(--white);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* toggle tabs */
+.ttabs{display:flex;gap:0;border:1.5px solid var(--slate200);border-radius:var(--r-sm);overflow:hidden;margin:0 16px 14px}
+.ttab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;color:var(--slate400);transition:.15s;background:var(--white)}
+.ttab.active{background:var(--blue);color:var(--white)}
+
+/* ── ORGANIZER ───────────────────────────── */
+.org-banner{background:linear-gradient(135deg,#1E2A56,#3B5BDE);border-radius:var(--r);padding:16px;margin:0 16px 14px;color:var(--white)}
+.org-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.org-stat{background:rgba(255,255,255,.12);border-radius:var(--r-sm);padding:10px;text-align:center}
+.org-stat-val{font-size:20px;font-weight:900}
+.org-stat-key{font-size:10px;opacity:.7;margin-top:2px}
+
+/* ── PROFILE ─────────────────────────────── */
+.profile-hdr{background:var(--blue);padding:0 20px 24px;text-align:center;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+.profile-av{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);color:var(--white);font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.profile-name{font-size:20px;font-weight:800;color:var(--white)}
+.profile-sub{font-size:13px;color:rgba(255,255,255,.75);margin-top:2px}
+.profile-xp-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 14px;margin-top:10px;font-size:13px;font-weight:700;color:var(--white)}
+
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.theme-opt{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r-sm);border:1.5px solid var(--slate200);background:var(--white);cursor:pointer;font-size:13px;font-weight:600;color:var(--slate700)}
+.theme-opt.active{border-color:var(--blue);background:var(--blue-10);color:var(--blue)}
+.theme-dot{width:10px;height:10px;border-radius:50%}
+
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--slate100);cursor:pointer;transition:.1s}
+.menu-item:hover{background:var(--slate50)}
+.menu-icon{font-size:18px;width:24px;text-align:center}
+.menu-label{flex:1;font-size:14px;font-weight:600;color:var(--slate900)}
+.menu-arr{font-size:14px;color:var(--slate300)}
+
+/* ── ONBOARDING ──────────────────────────── */
+.ob-wrap{flex:1;display:flex;flex-direction:column;background:var(--white)}
+.ob-photo{flex:1;position:relative;overflow:hidden;min-height:500px}
+.ob-photo-bg{width:100%;height:100%;object-fit:cover;display:block}
+.ob-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:80px}
+.ob-overlay{position:absolute;inset:0;background:linear-gradient(to bottom, rgba(59,91,222,.3) 0%, rgba(59,91,222,.55) 60%, rgba(20,30,90,.85) 100%)}
+.ob-content{position:absolute;bottom:0;left:0;right:0;padding:24px 24px 20px}
+.ob-title{font-size:28px;font-weight:900;color:var(--white);line-height:1.15;margin-bottom:8px}
+.ob-desc{font-size:15px;color:rgba(255,255,255,.85);line-height:1.5}
+.ob-dots{display:flex;gap:7px;justify-content:center;padding:12px 0}
+.ob-dot{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.35);transition:.3s}
+.ob-dot.active{background:var(--white);width:24px}
+.ob-actions{padding:0 24px 16px;display:flex;gap:10px}
+.ob-bar{background:var(--blue);padding:10px 20px 4px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ob-logo{display:flex;align-items:center;gap:6px;color:var(--white)}
+.ob-logo-mark{width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
+.ob-logo-name{font-size:14px;font-weight:700}
+.ob-skip{font-size:13px;font-weight:600;color:rgba(255,255,255,.8);cursor:pointer}
+
+/* ── AUTH ────────────────────────────────── */
+.auth-wrap{flex:1;overflow-y:auto;padding:32px 24px 24px;display:flex;flex-direction:column;gap:14px}
+.auth-wrap::-webkit-scrollbar{display:none}
+.auth-logo{width:60px;height:60px;background:var(--blue);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--white);margin:0 auto;box-shadow:0 6px 20px rgba(59,91,222,.35)}
+.auth-title{font-size:24px;font-weight:800;color:var(--slate900);text-align:center}
+.auth-sub{font-size:14px;color:var(--slate400);text-align:center}
+.org-gate{background:linear-gradient(135deg,#EEF2FF,#F0F4FF);border:1.5px solid var(--blue);border-radius:var(--r);padding:16px}
+.org-gate-title{font-size:13px;font-weight:800;color:var(--blue);margin-bottom:4px}
+.org-gate-desc{font-size:12px;color:var(--slate500);margin-bottom:10px;line-height:1.4}
+.auth-switch{text-align:center;font-size:13px;color:var(--slate500)}
+.auth-switch span{color:var(--blue);font-weight:700;cursor:pointer}
+
+/* ── EVENT DETAIL / HERO ─────────────────── */
+.ev-hero{height:160px;background:var(--navy);border-radius:var(--r);overflow:hidden;position:relative;margin:0 16px;display:flex;align-items:flex-end;padding:14px}
+.ev-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(59,91,222,.3),rgba(10,20,70,.9))}
+.ev-hero-content{position:relative;z-index:1}
+.ev-hero-tag{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.ev-hero-title{font-size:20px;font-weight:900;color:var(--white);line-height:1.1}
+.ev-hero-emoji{position:absolute;top:16px;right:16px;font-size:48px;opacity:.5}
+
+/* ── STATUS BADGE ────────────────────────── */
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.status-pending{background:rgba(245,158,11,.1);color:#92400E;border:1px solid rgba(245,158,11,.3)}
+.status-approved{background:var(--green-10);color:#166534;border:1px solid rgba(33,196,93,.3)}
+.status-open{background:var(--blue-10);color:var(--blue);border:1px solid rgba(59,91,222,.25)}
+
+/* ── QR TICKET ───────────────────────────── */
+.ticket{background:var(--white);border:2px dashed var(--blue);border-radius:var(--r-lg);padding:20px;margin:0 16px;text-align:center}
+.qr-box{width:150px;height:150px;background:var(--white);border-radius:12px;margin:12px auto;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--slate200);padding:8px}
+.qr-inner{width:100%;height:100%;background:repeating-conic-gradient(var(--navy) 0% 25%,var(--white) 0% 50%) 0 0/20% 20%;border-radius:4px;opacity:.9}
+.ticket-num{font-size:12px;color:var(--slate400);font-family:monospace;margin-top:6px}
+
+/* ── EARN ROWS ───────────────────────────── */
+.earn-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--slate100)}
+.earn-icon{width:44px;height:44px;border-radius:14px;background:var(--blue-10);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.earn-info{flex:1}
+.earn-name{font-size:14px;font-weight:700;color:var(--slate900)}
+.earn-desc{font-size:12px;color:var(--slate400);margin-top:2px}
+.earn-pts{font-size:13px;font-weight:800;color:var(--blue);white-space:nowrap}
+
+/* ── APPROVAL CARD ───────────────────────── */
+.approval-card{margin:0 16px 10px;background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);padding:14px;box-shadow:var(--shadow-sm)}
+.ac-member{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ac-av{width:36px;height:36px;border-radius:50%;background:var(--blue-10);color:var(--blue);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ac-name{font-size:14px;font-weight:700;color:var(--slate900)}
+.ac-event{font-size:12px;color:var(--slate400)}
+.ac-btns{display:flex;gap:8px}
+
+/* ── TOP BAR ─────────────────────────────── */
+.topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--slate100);flex-shrink:0;background:var(--white)}
+.topbar-back{font-size:20px;cursor:pointer;color:var(--blue);flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:700;color:var(--slate900);flex:1}
+.topbar-act{width:36px;height:36px;border-radius:var(--r-sm);background:var(--slate100);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+
+/* ── FEATURE BANNER ──────────────────────── */
+.feat-banner{margin:0 16px;background:linear-gradient(135deg,#3B5BDE,#6B48FF);border-radius:var(--r);padding:14px;color:var(--white)}
+.feat-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.8;display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.feat-title{font-size:15px;font-weight:700}
+.feat-sub{font-size:12px;opacity:.75;margin-top:2px}
+
+/* ── MISC ────────────────────────────────── */
+.pad16{padding:0 16px}
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+.mt16{margin-top:16px}
+.mt20{margin-top:20px}
+.mb16{margin-bottom:16px}
+.row{display:flex;gap:8px}
+.flex1{flex:1}
+.text-muted{color:var(--slate400);font-size:13px}
+.text-blue{color:var(--blue)}
+.text-red{color:var(--red)}
+.center{text-align:center}
+.bold{font-weight:700}
+.separator{height:1px;background:var(--slate100);margin:8px 0}
+.section-bg{background:var(--slate50);padding:12px 16px;margin:8px 0}
+.section-bg-title{font-size:12px;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div id="phone">
+
+  <!-- STATUS BAR (shared, color changes per view) -->
+  <div class="sbar" id="sbar">
+    <span class="sbar-time">9:41</span>
+    <div class="sbar-icons">📶 WiFi 🔋</div>
+  </div>
+
+  <div id="screen">
+
+    <!-- ══════════════════════════════
+         ONBOARDING
+    ══════════════════════════════ -->
+    <div class="view active" id="v-ob">
+      <div class="ob-bar">
+        <div class="ob-logo">
+          <div class="ob-logo-mark">D+</div>
+          <span class="ob-logo-name">DEVCON+</span>
+        </div>
+        <span class="ob-skip" onclick="nav('v-signin')">Skip</span>
+      </div>
+      <div class="ob-wrap">
+        <div class="ob-photo">
+          <!-- ✅ REAL DEVCON.PH PHOTO — Slide 1: 16 Years Anniversary / Main community gather -->
+          <img
+            src="https://devcon.ph/wp-content/uploads/2025/08/DEVCON_Philippines_16years.png"
+            class="ob-photo-bg"
+            alt="DEVCON Philippines 16 Years"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="ob-photo-placeholder" style="display:none">🇵🇭</div>
+          <div class="ob-overlay"></div>
+          <div class="ob-content">
+            <div class="ob-dots">
+              <div class="ob-dot active" id="dot-0"></div>
+              <div class="ob-dot" id="dot-1"></div>
+              <div class="ob-dot" id="dot-2"></div>
+              <div class="ob-dot" id="dot-3"></div>
+            </div>
+            <div class="ob-title" id="ob-title">The Heart of Philippine Tech</div>
+            <div class="ob-desc" id="ob-desc">DEVCON is the largest developer community in the Philippines, uniting thousands of tech enthusiasts for 16 years.</div>
+          </div>
+        </div>
+        <div class="ob-actions">
+          <button class="btn btn-outline flex1 btn-sm" id="ob-back-btn" onclick="obBack()" style="display:none">← Back</button>
+          <button class="btn btn-blue flex1" id="ob-next-btn" onclick="obNext()">Next</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SIGN IN
+    ══════════════════════════════ -->
+    <div class="view" id="v-signin">
+      <div style="background:var(--blue);padding:40px 24px 32px;text-align:center;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(255,255,255,.07);border-radius:50%"></div>
+        <div class="auth-logo" style="margin-bottom:16px">D+</div>
+        <div style="font-size:22px;font-weight:800;color:white">Welcome Back</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px">Sign in to your DEVCON+ account</div>
+      </div>
+      <div class="auth-wrap" style="padding-top:24px">
+        <div class="social-btn" onclick="nav('v-home')">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </div>
+        <div class="social-btn" onclick="nav('v-home')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Continue with Apple
+        </div>
+        <div class="divider">or sign in with email</div>
+        <div class="inp-wrap">
+          <div class="inp-label">Email</div>
+          <input class="inp" type="email" placeholder="you@email.com">
+        </div>
+        <div class="inp-wrap">
+          <div class="inp-label">Password</div>
+          <input class="inp" type="password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-blue" onclick="nav('v-home')">Sign In</button>
+        <div class="auth-switch">Don't have an account? <span onclick="nav('v-signup')">Create one</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         SIGN UP
+    ══════════════════════════════ -->
+    <div class="view" id="v-signup">
+      <div style="background:var(--blue);padding:40px 24px 28px;text-align:center;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(255,255,255,.07);border-radius:50%"></div>
+        <div class="auth-logo" style="margin-bottom:14px">D+</div>
+        <div style="font-size:22px;font-weight:800;color:white">Join DEVCON+</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px">Join 60,000+ Filipino tech builders</div>
+      </div>
+      <div class="auth-wrap" style="padding-top:20px">
+        <div class="social-btn" onclick="showOrgGate()">
+          <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </div>
+        <div class="inp-wrap" style="margin-bottom:10px">
+          <div class="inp-label">Full Name</div>
+          <input class="inp" type="text" placeholder="Juan dela Cruz">
+        </div>
+        <div class="inp-wrap" style="margin-bottom:10px">
+          <div class="inp-label">Email</div>
+          <input class="inp" type="email" placeholder="you@email.com">
+        </div>
+        <div class="inp-wrap" style="margin-bottom:10px">
+          <div class="inp-label">Password</div>
+          <input class="inp" type="password" placeholder="••••••••">
+        </div>
+        <div class="inp-wrap" style="margin-bottom:10px">
+          <div class="inp-label">School / Company</div>
+          <input class="inp" type="text" placeholder="e.g. PLM, Accenture">
+        </div>
+        <!-- ORGANIZER GATE -->
+        <div class="org-gate" id="org-gate" style="display:none">
+          <div class="org-gate-title">🔐 DO YOU HAVE AN ORGANIZER CODE?</div>
+          <div class="org-gate-desc">Chapter Officers & HQ Admins — enter your code to unlock organizer tools, event management, and separate organizer XP.</div>
+          <input class="inp" type="text" placeholder="Organizer code (optional)">
+          <div class="row mt8">
+            <button class="btn btn-blue btn-sm flex1" style="font-size:12px" onclick="nav('v-home')">Join as Organizer</button>
+            <button class="btn btn-outline btn-sm flex1" style="font-size:12px" onclick="nav('v-home')">Skip → Member</button>
+          </div>
+        </div>
+        <button class="btn btn-blue" id="signup-btn" onclick="showOrgGate()">Create Account</button>
+        <div class="auth-switch">Already have an account? <span onclick="nav('v-signin')">Sign In</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         HOME / DASHBOARD
+    ══════════════════════════════ -->
+    <div class="view" id="v-home">
+      <!-- Blue Header -->
+      <div class="blue-hdr">
+        <div class="blue-hdr-inner">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500">Welcome back,</div>
+              <div style="font-size:22px;font-weight:800;color:white">Hi, Marie! 👋</div>
+            </div>
+            <div class="avatar" style="width:40px;height:40px;font-size:15px;font-weight:700;cursor:pointer" onclick="nav('v-profile')">MS</div>
+          </div>
+          <!-- XP Card -->
+          <div class="xp-card">
+            <div class="xp-row">
+              <div class="xp-star">⭐</div>
+              <div>
+                <div class="xp-lbl">Points+ Balance</div>
+                <div class="xp-pts">100 XP</div>
+              </div>
+            </div>
+            <div class="xp-bar-wrap">
+              <div class="xp-track"><div class="xp-fill"></div></div>
+              <div class="xp-hint">150 XP to next reward milestone</div>
+            </div>
+          </div>
+          <button class="btn btn-white mt12" style="font-size:14px;font-weight:700;padding:12px" onclick="nav('v-events')">Attend Our Events →</button>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <!-- Quick Actions -->
+        <div style="height:16px"></div>
+        <div class="qa-grid">
+          <div class="qa-item" onclick="nav('v-jobs')">
+            <div class="qa-icon-wrap">💼</div>
+            <div class="qa-label">Find Jobs</div>
+          </div>
+          <div class="qa-item" onclick="nav('v-earn')">
+            <div class="qa-icon-wrap">🤝</div>
+            <div class="qa-label">Volunteer</div>
+          </div>
+          <div class="qa-item" onclick="nav('v-rewards')">
+            <div class="qa-icon-wrap">🎁</div>
+            <div class="qa-label">Redeem</div>
+          </div>
+        </div>
+
+        <!-- Events For You -->
+        <div class="sec-hdr">
+          <div class="sec-title">Events For You</div>
+          <div class="sec-link" onclick="nav('v-events')">View All ›</div>
+        </div>
+        <div class="ev-row" onclick="showEvModal('open')">
+          <div class="ev-icon">📅</div>
+          <div class="ev-info">
+            <div class="ev-name">Code Camp Visayas</div>
+            <div class="ev-meta">Apr 5, 2026 · Cebu</div>
+          </div>
+          <div class="ev-arr">›</div>
+        </div>
+        <div class="ev-row" onclick="showEvModal('open')">
+          <div class="ev-icon">📅</div>
+          <div class="ev-info">
+            <div class="ev-name">Hackathon: Build for Good</div>
+            <div class="ev-meta">May 10, 2026 · Manila</div>
+          </div>
+          <div class="ev-arr">›</div>
+        </div>
+        <div class="ev-row" onclick="showEvModal('open')">
+          <div class="ev-icon">📅</div>
+          <div class="ev-info">
+            <div class="ev-name">DEVCON Kids: Scratch Day</div>
+            <div class="ev-meta">May 25, 2026 · Cebu</div>
+          </div>
+          <div class="ev-arr">›</div>
+        </div>
+
+        <!-- Hot Jobs -->
+        <div class="sec-hdr">
+          <div class="sec-title">Hot Jobs 🔥</div>
+          <div class="sec-link" onclick="nav('v-jobs')">View All ›</div>
+        </div>
+        <div style="display:flex;gap:10px;padding:0 16px;overflow-x:auto;padding-bottom:4px;margin-bottom:4px">
+          <div style="min-width:220px;background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);padding:12px;cursor:pointer;box-shadow:var(--shadow-sm)" onclick="nav('v-job-detail')">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div class="jc-av">G</div>
+              <div>
+                <div style="font-size:10px;color:var(--slate400)">Globe Telecom</div>
+                <div style="font-size:13px;font-weight:700;color:var(--slate900)">Frontend Developer</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+              <span style="font-size:10px;color:var(--slate500)">📍 Manila</span>
+              <span style="font-size:10px;color:var(--slate500)">₱60K–₱90K</span>
+            </div>
+            <span class="chip-featured chip" style="font-size:9px">FEATURED</span>
+          </div>
+          <div style="min-width:220px;background:var(--white);border:1.5px solid var(--slate200);border-radius:var(--r);padding:12px;cursor:pointer;box-shadow:var(--shadow-sm)" onclick="nav('v-job-detail')">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div class="jc-av">C</div>
+              <div>
+                <div style="font-size:10px;color:var(--slate400)">Canva</div>
+                <div style="font-size:13px;font-weight:700;color:var(--slate900)">Product Designer</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+              <span style="font-size:10px;color:var(--slate500)">📍 Remote</span>
+              <span style="font-size:10px;color:var(--slate500)">₱80K–₱120K</span>
+            </div>
+            <span class="chip-featured chip" style="font-size:9px">FEATURED</span>
+          </div>
+        </div>
+
+        <!-- News Feed -->
+        <div class="sec-hdr" style="margin-top:8px">
+          <div class="sec-title">Updates</div>
+        </div>
+        <div style="display:flex;gap:6px;padding:0 16px;margin-bottom:12px;overflow-x:auto">
+          <span class="chip active">1/ DEVCON</span>
+          <span class="chip">2/ TECH COMMUNITY</span>
+        </div>
+        <div class="news-card">
+          <div class="news-top">
+            <span class="chip chip-blue" style="font-size:10px">DEVCON</span>
+            <span style="font-size:11px;color:var(--slate400)">⏱ 2 min read</span>
+          </div>
+          <div class="news-title">XP Rewards: New Items Added to the Store</div>
+          <div class="news-desc">Check out the latest rewards available for redemption including exclusive DEVCON merch.</div>
+        </div>
+        <div class="news-card">
+          <div class="news-top">
+            <span class="chip chip-blue" style="font-size:10px">DEVCON</span>
+            <span style="font-size:11px;color:var(--slate400)">⏱ 3 min read</span>
+          </div>
+          <div class="news-title">She is DEVCON: Empowering Women in Tech</div>
+          <div class="news-desc">Our initiative to support and amplify women in the Philippine tech scene continues to grow.</div>
+        </div>
+
+        <!-- XP History -->
+        <div class="sec-hdr">
+          <div class="sec-title">XP History</div>
+          <div class="sec-link" onclick="nav('v-xp')">View All ›</div>
+        </div>
+        <div style="padding:0 16px;margin-bottom:16px">
+          <div class="xph-row">
+            <div class="xph-icon xph-plus">+</div>
+            <div class="xph-info"><div class="xph-name">DEVCON Summit 2026 Attendance</div><div class="xph-date">Feb 10, 2026</div></div>
+            <div class="xph-val xph-pos">+15 XP</div>
+          </div>
+          <div class="xph-row">
+            <div class="xph-icon xph-plus">+</div>
+            <div class="xph-info"><div class="xph-name">Volunteer — Code Camp Manila</div><div class="xph-date">Feb 8, 2026</div></div>
+            <div class="xph-val xph-pos">+10 XP</div>
+          </div>
+          <div class="xph-row">
+            <div class="xph-icon xph-minus">−</div>
+            <div class="xph-info"><div class="xph-name">Redeemed DEVCON Sticker Pack</div><div class="xph-date">Feb 5, 2026</div></div>
+            <div class="xph-val xph-neg">−20 XP</div>
+          </div>
+          <div class="xph-row" style="border:none">
+            <div class="xph-icon xph-plus">+</div>
+            <div class="xph-info"><div class="xph-name">Referred 2 New Members</div><div class="xph-date">Feb 3, 2026</div></div>
+            <div class="xph-val xph-pos">+8 XP</div>
+          </div>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="bni active" onclick="nav('v-home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+        <div class="bni" onclick="nav('v-rewards')"><div class="bni-icon">🎁</div><div class="bni-label">Rewards</div></div>
+        <div class="bni" onclick="nav('v-events')"><div class="bni-qr">⊞</div></div>
+        <div class="bni" onclick="nav('v-jobs')"><div class="bni-icon">💼</div><div class="bni-label">Jobs</div></div>
+        <div class="bni" onclick="nav('v-profile')"><div class="bni-icon">👤</div><div class="bni-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         EVENTS
+    ══════════════════════════════ -->
+    <div class="view" id="v-events">
+      <div class="blue-hdr" style="padding-bottom:16px">
+        <div class="blue-hdr-inner">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:20px;font-weight:800;color:white">Events</div>
+            <div style="font-size:20px;cursor:pointer;color:rgba(255,255,255,.8)">🔍</div>
+          </div>
+        </div>
+      </div>
+      <div class="scroll">
+        <div class="ttabs mt16">
+          <div class="ttab active">Discover</div>
+          <div class="ttab">My Tickets</div>
+        </div>
+        <!-- Featured event -->
+        <div style="margin:0 16px 16px;background:var(--navy);border-radius:var(--r);overflow:hidden;padding:20px;position:relative;cursor:pointer" onclick="showEvModal('open')">
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(59,91,222,.6),rgba(10,20,80,.9))"></div>
+          <div style="position:relative;z-index:1">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+              <span style="font-size:14px">📈</span>
+              <span style="font-size:11px;font-weight:700;color:#F8C630;text-transform:uppercase;letter-spacing:1.5px">RECOMMENDED</span>
+            </div>
+            <div style="font-size:22px;font-weight:900;color:white;margin-bottom:6px">DEVCON Summit 2026</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:3px">📅 Mar 15, 2026 &nbsp; 📍 SMX Convention Center</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.6)">👥 2,400 attending</div>
+            <button class="btn btn-white mt12" style="font-size:13px;font-weight:700;padding:10px">RSVP Now</button>
+          </div>
+        </div>
+        <!-- Filter chips -->
+        <div style="display:flex;gap:6px;padding:0 16px;overflow-x:auto;margin-bottom:14px">
+          <span class="chip active">All</span>
+          <span class="chip">DEVCON+ Exclusive</span>
+          <span class="chip">Campus DEVCON</span>
+          <span class="chip">DEVCON Kids</span>
+          <span class="chip">#SheIsDEVCON</span>
+        </div>
+        <!-- Event rows -->
+        <div style="padding:0 16px">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--slate100);cursor:pointer" onclick="showEvModal('open')">
+            <div class="date-badge"><div class="date-mon">Apr</div><div class="date-day">5</div></div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--slate900)">Code Camp Visayas</div>
+              <div style="font-size:12px;color:var(--slate400);margin-top:2px">Cebu IT Park</div>
+              <div style="display:flex;gap:6px;margin-top:6px"><span class="chip chip-light" style="font-size:10px">Campus DEVCON</span><span style="font-size:11px;color:var(--slate400)">👥 850</span></div>
+            </div>
+            <div style="font-size:16px;color:var(--slate300)">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--slate100);cursor:pointer" onclick="showEvModal('pending')">
+            <div class="date-badge"><div class="date-mon">Apr</div><div class="date-day">20</div></div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--slate900)">AI/ML Workshop</div>
+              <div style="font-size:12px;color:var(--slate400);margin-top:2px">Ateneo de Davao</div>
+              <div style="display:flex;gap:6px;margin-top:6px"><span style="font-size:11px;color:var(--slate400)">👥 320</span></div>
+            </div>
+            <div style="font-size:16px;color:var(--slate300)">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--slate100);cursor:pointer" onclick="showEvModal('approved')">
+            <div class="date-badge"><div class="date-mon">May</div><div class="date-day">10</div></div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--slate900)">Hackathon: Build for Good</div>
+              <div style="font-size:12px;color:var(--slate400);margin-top:2px">Globe Tower, BGC</div>
+              <div style="display:flex;gap:6px;margin-top:6px"><span style="font-size:11px;color:var(--slate400)">👥 1200</span></div>
+            </div>
+            <div style="font-size:16px;color:var(--slate300)">›</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer" onclick="showEvModal('open')">
+            <div class="date-badge"><div class="date-mon">May</div><div class="date-day">25</div></div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--slate900)">DEVCON Kids: Scratch Day</div>
+              <div style="font-size:12px;color:var(--slate400);margin-top:2px">SM Seaside</div>
+              <div style="display:flex;gap:6px;margin-top:6px"><span class="chip chip-light" style="font-size:10px;color:#166534;background:var(--green-10)">DEVCON Kids</span><span style="font-size:11px;color:var(--slate400)">👥 450</span></div>
+            </div>
+            <div style="font-size:16px;color:var(--slate300)">›</div>
+          </div>
+        </div>
+        <div style="height:16px"></div>
+      </div>
+      <div class="bnav">
+        <div class="bni" onclick="nav('v-home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+        <div class="bni" onclick="nav('v-rewards')"><div class="bni-icon">🎁</div><div class="bni-label">Rewards</div></div>
+        <div class="bni active"><div class="bni-qr">⊞</div></div>
+        <div class="bni" onclick="nav('v-jobs')"><div class="bni-icon">💼</div><div class="bni-label">Jobs</div></div>
+        <div class="bni" onclick="nav('v-profile')"><div class="bni-icon">👤</div><div class="bni-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         REWARDS STORE
+    ══════════════════════════════ -->
+    <div class="view" id="v-rewards">
+      <div class="blue-hdr" style="padding-bottom:16px">
+        <div class="blue-hdr-inner">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:20px;cursor:pointer;color:rgba(255,255,255,.8)" onclick="nav('v-home')">←</div>
+            <div style="font-size:20px;font-weight:800;color:white;flex:1">Rewards Store</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:10px;background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:8px 12px">
+            <span style="font-size:16px">⭐</span>
+            <span style="font-size:14px;font-weight:700;color:white">100 XP Available</span>
+          </div>
+        </div>
+      </div>
+      <div class="scroll">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 16px 80px">
+          <div class="rw-card" onclick="showRewardModal('DEVCON T-Shirt','500')">
+            <div class="rw-img"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&q=70" alt="T-Shirt" onerror="this.style.display='none';this.parentElement.innerHTML='👕'"></div>
+            <div class="rw-body"><div class="rw-name">DEVCON T-Shirt</div><div class="rw-xp">⭐ 500 XP</div></div>
+          </div>
+          <div class="rw-card" onclick="showRewardModal('Sticker Pack','150')">
+            <div class="rw-img" style="background:var(--blue-10);font-size:40px;display:flex;align-items:center;justify-content:center">🎖️</div>
+            <div class="rw-body"><div class="rw-name">Sticker Pack</div><div class="rw-xp">⭐ 150 XP</div></div>
+          </div>
+          <div class="rw-card" onclick="showRewardModal('DEVCON Mug','400')">
+            <div class="rw-img"><img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=200&q=70" alt="Mug" onerror="this.style.display='none';this.parentElement.innerHTML='☕'"></div>
+            <div class="rw-body"><div class="rw-name">DEVCON Mug</div><div class="rw-xp">⭐ 400 XP</div></div>
+          </div>
+          <div class="rw-card" onclick="showRewardModal('Tech Hoodie','1200')">
+            <div class="rw-img"><img src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=200&q=70" alt="Hoodie" onerror="this.style.display='none';this.parentElement.innerHTML='👕'"></div>
+            <div class="rw-body"><div class="rw-name">Tech Hoodie</div><div class="rw-xp">⭐ 1,200 XP</div></div>
+          </div>
+          <div class="rw-card" onclick="showRewardModal('Laptop Sleeve','800')">
+            <div class="rw-img"><img src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=200&q=70" alt="Sleeve" onerror="this.style.display='none';this.parentElement.innerHTML='💻'"></div>
+            <div class="rw-body"><div class="rw-name">Laptop Sleeve</div><div class="rw-xp">⭐ 800 XP</div></div>
+          </div>
+          <div class="rw-card" onclick="showRewardModal('DEVCON Cap','350')">
+            <div class="rw-img"><img src="https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=200&q=70" alt="Cap" onerror="this.style.display='none';this.parentElement.innerHTML='🧢'"></div>
+            <div class="rw-body"><div class="rw-name">DEVCON Cap</div><div class="rw-xp">⭐ 350 XP</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="bni" onclick="nav('v-home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+        <div class="bni active"><div class="bni-icon">🎁</div><div class="bni-label">Rewards</div></div>
+        <div class="bni" onclick="nav('v-events')"><div class="bni-qr">⊞</div></div>
+        <div class="bni" onclick="nav('v-jobs')"><div class="bni-icon">💼</div><div class="bni-label">Jobs</div></div>
+        <div class="bni" onclick="nav('v-profile')"><div class="bni-icon">👤</div><div class="bni-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         JOBS BOARD
+    ══════════════════════════════ -->
+    <div class="view" id="v-jobs">
+      <div class="blue-hdr" style="padding-bottom:16px">
+        <div class="blue-hdr-inner">
+          <div style="font-size:20px;font-weight:800;color:white;margin-bottom:10px">← Jobs</div>
+          <div style="background:rgba(255,255,255,.15);border-radius:var(--r-sm);padding:10px 14px;display:flex;align-items:center;gap:8px">
+            <span style="color:rgba(255,255,255,.6)">🔍</span>
+            <span style="font-size:14px;color:rgba(255,255,255,.5)">Search jobs…</span>
+          </div>
+        </div>
+      </div>
+      <div class="scroll">
+        <div style="display:flex;gap:7px;padding:14px 16px;overflow-x:auto">
+          <span class="chip active">All Jobs</span>
+          <span class="chip">Remote</span>
+          <span class="chip">Manila</span>
+          <span class="chip">Full-time</span>
+        </div>
+        <div class="feat-banner mb16">
+          <div class="feat-label"><span>✨</span> Developer Equity</div>
+          <div class="feat-title">Your XP unlocks premium job roles</div>
+          <div class="feat-sub">Level up to access exclusive opportunities</div>
+        </div>
+        <div class="job-card" onclick="nav('v-job-detail')">
+          <div class="jc-top">
+            <div class="jc-av">G</div>
+            <div class="jc-info"><div class="jc-co">Globe Telecom</div><div class="jc-title">Frontend Developer</div></div>
+            <div class="jc-heart">🤍</div>
+          </div>
+          <div class="jc-meta"><span>📍 Manila</span><span>₱60K–₱90K</span><span>Full-time</span></div>
+          <span class="chip chip-featured">FEATURED</span>
+          <button class="btn btn-outline mt8" style="font-size:13px;padding:10px" onclick="nav('v-job-detail')">View Opportunity</button>
+        </div>
+        <div class="job-card" onclick="nav('v-job-detail')">
+          <div class="jc-top">
+            <div class="jc-av">C</div>
+            <div class="jc-info"><div class="jc-co">Canva</div><div class="jc-title">Product Designer</div></div>
+            <div class="jc-heart">🤍</div>
+          </div>
+          <div class="jc-meta"><span>📍 Remote</span><span>₱80K–₱120K</span><span>Full-time</span></div>
+          <span class="chip chip-featured">FEATURED</span>
+          <button class="btn btn-outline mt8" style="font-size:13px;padding:10px">View Opportunity</button>
+        </div>
+        <div class="job-card" onclick="nav('v-job-detail')">
+          <div class="jc-top">
+            <div class="jc-av">A</div>
+            <div class="jc-info"><div class="jc-co">Accenture PH</div><div class="jc-title">React Native Dev</div></div>
+            <div class="jc-heart">❤️</div>
+          </div>
+          <div class="jc-meta"><span>📍 Cebu</span><span>₱50K–₱75K</span><span>Contract</span></div>
+          <button class="btn btn-outline mt8" style="font-size:13px;padding:10px">View Opportunity</button>
+        </div>
+        <div class="job-card">
+          <div class="jc-top">
+            <div class="jc-av">U</div>
+            <div class="jc-info"><div class="jc-co">University of Zurich</div><div class="jc-title">Software Engineer (AI)</div></div>
+            <div class="jc-heart">🤍</div>
+          </div>
+          <div class="jc-meta"><span>📍 Switzerland</span><span>On-site</span><span>Full-time</span></div>
+          <button class="btn btn-outline mt8" style="font-size:13px;padding:10px">View Opportunity</button>
+        </div>
+        <div style="height:16px"></div>
+      </div>
+      <div class="bnav">
+        <div class="bni" onclick="nav('v-home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+        <div class="bni" onclick="nav('v-rewards')"><div class="bni-icon">🎁</div><div class="bni-label">Rewards</div></div>
+        <div class="bni" onclick="nav('v-events')"><div class="bni-qr">⊞</div></div>
+        <div class="bni active"><div class="bni-icon">💼</div><div class="bni-label">Jobs</div></div>
+        <div class="bni" onclick="nav('v-profile')"><div class="bni-icon">👤</div><div class="bni-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         JOB DETAIL
+    ══════════════════════════════ -->
+    <div class="view" id="v-job-detail">
+      <div class="topbar">
+        <div class="topbar-back" onclick="nav('v-jobs')">←</div>
+        <div class="topbar-title">Job Detail</div>
+        <div class="topbar-act">🤍</div>
+      </div>
+      <div class="scroll" style="padding-bottom:80px">
+        <div style="padding:20px 16px 16px;border-bottom:1px solid var(--slate100)">
+          <div style="width:64px;height:64px;border-radius:18px;background:var(--blue-10);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--blue);margin-bottom:14px">G</div>
+          <div style="font-size:22px;font-weight:800;color:var(--slate900)">Frontend Developer</div>
+          <div style="font-size:14px;color:var(--slate400);margin-top:4px">Globe Telecom · Manila</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+            <span class="chip chip-light">Manila</span>
+            <span class="chip chip-green">Full-time</span>
+            <span class="chip chip-gold">₱60K–₱90K</span>
+            <span class="chip chip-featured">FEATURED</span>
+          </div>
+        </div>
+        <div style="padding:16px">
+          <div style="margin-bottom:20px">
+            <div style="font-size:12px;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">About the Role</div>
+            <div style="font-size:14px;color:var(--slate600);line-height:1.7">Join Globe Telecom's Digital team to build next-generation mobile and web experiences serving millions of Filipinos. You'll work on products that power connectivity across the nation.</div>
+          </div>
+          <div style="margin-bottom:20px">
+            <div style="font-size:12px;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">What You'll Do</div>
+            <div style="font-size:13px;color:var(--slate500);line-height:1.8">• Build scalable React & React Native applications<br>• Collaborate with product and design teams<br>• Champion performance and accessibility<br>• Mentor junior developers in the team</div>
+          </div>
+          <div style="margin-bottom:20px">
+            <div style="font-size:12px;font-weight:700;color:var(--slate400);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Requirements</div>
+            <div style="font-size:13px;color:var(--slate500);line-height:1.8">• 3+ years in frontend development<br>• React Native or React experience required<br>• TypeScript proficiency<br>• DEVCON community engagement is a plus ⭐</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;background:var(--white);border-top:1px solid var(--slate200);display:flex;gap:10px;flex-shrink:0">
+        <button class="btn btn-outline flex1" style="padding:12px;font-size:14px">Save Job</button>
+        <button class="btn btn-blue flex1" style="padding:12px;font-size:14px">Apply Now →</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         PROFILE
+    ══════════════════════════════ -->
+    <div class="view" id="v-profile">
+      <div class="profile-hdr">
+        <div style="height:12px"></div>
+        <div class="profile-av">MS</div>
+        <div class="profile-name">Marie Santos</div>
+        <div class="profile-sub">University of the Philippines</div>
+        <div class="profile-xp-pill">⭐ 100 XP</div>
+        <div style="height:4px"></div>
+      </div>
+      <div class="scroll">
+        <div style="padding:16px">
+          <div style="font-size:14px;font-weight:700;color:var(--slate700);margin-bottom:10px">Program Theme</div>
+          <div class="theme-grid">
+            <div class="theme-opt active"><div class="theme-dot" style="background:var(--blue)"></div>DEVCON+</div>
+            <div class="theme-opt"><div class="theme-dot" style="background:#EF4444"></div>She is DEVCON</div>
+            <div class="theme-opt"><div class="theme-dot" style="background:var(--green)"></div>DEVCON Kids</div>
+            <div class="theme-opt"><div class="theme-dot" style="background:#F8C630"></div>Campus</div>
+          </div>
+        </div>
+        <div class="menu-item" onclick="nav('v-xp')"><div class="menu-icon">⭐</div><div class="menu-label">XP History</div><div class="menu-arr">›</div></div>
+        <div class="menu-item"><div class="menu-icon">✏️</div><div class="menu-label">Edit Profile</div><div class="menu-arr">›</div></div>
+        <div class="menu-item"><div class="menu-icon">🔔</div><div class="menu-label">Notifications</div><div class="menu-arr">›</div></div>
+        <div class="menu-item"><div class="menu-icon">🔒</div><div class="menu-label">Privacy & Security</div><div class="menu-arr">›</div></div>
+        <div class="menu-item"><div class="menu-icon">❓</div><div class="menu-label">Help & Support</div><div class="menu-arr">›</div></div>
+        <div class="menu-item" onclick="nav('v-organizer')" style="background:linear-gradient(135deg,#EEF2FF,#F0F4FF)">
+          <div class="menu-icon">🔑</div>
+          <div class="menu-label" style="color:var(--blue)">FOR ORGANIZERS</div>
+          <div class="menu-arr" style="color:var(--blue)">›</div>
+        </div>
+        <div style="padding:20px 16px 16px">
+          <button class="btn btn-outline" style="color:var(--red);border-color:var(--red);font-size:14px;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="nav('v-ob')">
+            ↪ Sign Out
+          </button>
+        </div>
+      </div>
+      <div class="bnav">
+        <div class="bni" onclick="nav('v-home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+        <div class="bni" onclick="nav('v-rewards')"><div class="bni-icon">🎁</div><div class="bni-label">Rewards</div></div>
+        <div class="bni" onclick="nav('v-events')"><div class="bni-qr">⊞</div></div>
+        <div class="bni" onclick="nav('v-jobs')"><div class="bni-icon">💼</div><div class="bni-label">Jobs</div></div>
+        <div class="bni active"><div class="bni-icon">👤</div><div class="bni-label">Profile</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         XP HISTORY (FULL)
+    ══════════════════════════════ -->
+    <div class="view" id="v-xp">
+      <div class="blue-hdr" style="padding-bottom:16px">
+        <div class="blue-hdr-inner">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="cursor:pointer;color:rgba(255,255,255,.8);font-size:20px" onclick="nav('v-home')">←</span>
+            <span style="font-size:20px;font-weight:800;color:white;flex:1">Points+ History</span>
+            <span style="cursor:pointer;color:rgba(255,255,255,.8);font-size:13px;font-weight:700" onclick="nav('v-earn')">+ Earn</span>
+          </div>
+          <div class="xp-card" style="margin-top:12px">
+            <div class="xp-row"><div class="xp-star">⭐</div><div><div class="xp-lbl">Total Balance</div><div class="xp-pts">100 XP</div></div></div>
+            <div class="xp-bar-wrap"><div class="xp-track"><div class="xp-fill"></div></div><div class="xp-hint">150 XP to next reward milestone</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="scroll">
+        <div style="padding:0 16px;margin-top:16px">
+          <div class="section-bg-title" style="padding:0">Today</div>
+          <div class="xph-row">
+            <div class="xph-icon xph-plus">+</div>
+            <div class="xph-info"><div class="xph-name">Shared DEVCON post — LinkedIn</div><div class="xph-date">TXN-20260224-001 · 9:15 AM</div></div>
+            <div class="xph-val xph-pos">+10 XP</div>
+          </div>
+          <div class="xph-row">
+            <div class="xph-icon xph-plus">+</div>
+            <div class="xph-info"><div class="xph-name">Liked community post</div><div class="xph-date">TXN-20260224-002 · 8:40 AM</div></div>
+            <div class="xph-val xph-pos">+5 XP</div>
+          </div>
+          <div class="section-bg-title" style="padding:0;margin-top:16px">This Week</div>
+          <div class="xph-row">
+            <div class="xph-icon xph-plus" style="font-size:14px">🎤</div>
+            <div class="xph-info"><div class="xph-name">Speaker — AI Academy Session</div><div class="xph-date">TXN-20260220-008 · Feb 20</div></div>
+            <div class="xph-val xph-pos">+700 XP</div>
+          </div>
+          <div class="xph-row">
+            <div class="xph-icon xph-minus">−</div>
+            <div class="xph-info"><div class="xph-name">Redeemed Coffee Voucher</div><div class="xph-date">TXN-20260219-007 · Feb 19</div></div>
+            <div class="xph-val xph-neg">−500 XP</div>
+          </div>
+          <div class="section-bg-title" style="padding:0;margin-top:16px">Earlier</div>
+          <div class="xph-row">
+            <div class="xph-icon xph-plus" style="font-size:14px">🎟️</div>
+            <div class="xph-info"><div class="xph-name">Attended DEVCON Summit Manila</div><div class="xph-date">TXN-20260215-005 · Feb 15</div></div>
+            <div class="xph-val xph-pos">+300 XP</div>
+          </div>
+          <div class="xph-row">
+            <div class="xph-icon xph-plus" style="font-size:14px">☕</div>
+            <div class="xph-info"><div class="xph-name">Brown Bag Session — Cebu</div><div class="xph-date">TXN-20260210-003 · Feb 10</div></div>
+            <div class="xph-val xph-pos">+250 XP</div>
+          </div>
+          <div class="xph-row" style="border:none">
+            <div class="xph-icon xph-plus" style="font-size:14px">✨</div>
+            <div class="xph-info"><div class="xph-name">Signup Points Bonus</div><div class="xph-date">TXN-20260101-001 · Jan 1</div></div>
+            <div class="xph-val xph-pos">+500 XP</div>
+          </div>
+          <div style="height:20px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         EARN POINTS
+    ══════════════════════════════ -->
+    <div class="view" id="v-earn">
+      <div class="topbar">
+        <div class="topbar-back" onclick="nav('v-home')">←</div>
+        <div class="topbar-title">Earn Points</div>
+        <div style="width:36px"></div>
+      </div>
+      <div class="ptabs" style="margin-top:12px">
+        <div class="ptab active" id="earn-t1" onclick="switchEarn(1)">Ways to Earn</div>
+        <div class="ptab" id="earn-t2" onclick="switchEarn(2)">Share & Earn</div>
+      </div>
+      <div class="scroll" id="earn-p1">
+        <div class="earn-row"><div class="earn-icon">🎟️</div><div class="earn-info"><div class="earn-name">Attend an Event</div><div class="earn-desc">Show up & check in at any chapter event</div></div><div class="earn-pts">100–300 XP</div></div>
+        <div class="earn-row"><div class="earn-icon">🎤</div><div class="earn-info"><div class="earn-name">Speak at an Event</div><div class="earn-desc">Present a talk or workshop session</div></div><div class="earn-pts">700 XP</div></div>
+        <div class="earn-row"><div class="earn-icon">☕</div><div class="earn-info"><div class="earn-name">Brown Bag Session</div><div class="earn-desc">Host or attend a lunch knowledge share</div></div><div class="earn-pts">250 XP</div></div>
+        <div class="earn-row"><div class="earn-icon">🤝</div><div class="earn-info"><div class="earn-name">Volunteer for Chapter</div><div class="earn-desc">Contribute to local chapter events</div></div><div class="earn-pts">100–500 XP</div></div>
+        <div class="earn-row"><div class="earn-icon">✨</div><div class="earn-info"><div class="earn-name">Signup Bonus</div><div class="earn-desc">One-time reward for joining DEVCON+</div></div><div class="earn-pts">500 XP</div></div>
+        <div class="earn-row"><div class="earn-icon">❤️</div><div class="earn-info"><div class="earn-name">Like a Community Post</div><div class="earn-desc">Engage with news and updates</div></div><div class="earn-pts">1–5 XP</div></div>
+        <div class="earn-row" style="border:none"><div class="earn-icon">🔗</div><div class="earn-info"><div class="earn-name">Share Content (with link)</div><div class="earn-desc">Post on social — submit URL for verification</div></div><div class="earn-pts">10–25 XP</div></div>
+        <div style="height:16px"></div>
+      </div>
+      <div class="scroll" id="earn-p2" style="display:none;padding:0 16px">
+        <div style="margin-top:4px;margin-bottom:16px;font-size:14px;color:var(--slate500);line-height:1.6">Share DEVCON+ content on social media and submit the link below for verification. Earn <strong style="color:var(--blue)">10–25 XP</strong> per verified share.</div>
+        <div style="background:var(--slate50);border:1.5px solid var(--slate200);border-radius:var(--r);padding:12px;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--slate900);margin-bottom:3px">DEVCON Celebrates 16 Years of Geeks for Good</div>
+          <div style="font-size:11px;color:var(--slate400)">Official DEVCON Philippines · devcon.ph</div>
+          <button class="btn btn-outline btn-sm" style="margin-top:10px;width:100%;font-size:12px;padding:8px">Copy Link</button>
+        </div>
+        <div class="inp-wrap"><div class="inp-label">Your Share Link</div><input class="inp" type="url" placeholder="Paste your social post URL here"></div>
+        <div class="inp-wrap"><div class="inp-label">Platform</div>
+          <select class="inp"><option>Facebook</option><option>Twitter / X</option><option>LinkedIn</option><option>Instagram</option></select>
+        </div>
+        <button class="btn btn-blue mt8">Submit for Verification (+10–25 XP)</button>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════
+         ORGANIZER PORTAL
+    ══════════════════════════════ -->
+    <div class="view" id="v-organizer">
+      <div class="topbar">
+        <div class="topbar-back" onclick="nav('v-profile')">←</div>
+        <div class="topbar-title">Organizer Portal</div>
+        <div class="topbar-act">⚙️</div>
+      </div>
+      <div class="scroll">
+        <div class="org-banner">
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:5px;margin-bottom:8px"><span>🔑</span> FOR ORGANIZERS</div>
+          <div style="font-size:18px;font-weight:800">Chapter Dashboard</div>
+          <div style="font-size:12px;opacity:.7;margin-top:2px">Manila Chapter · HQ Admin</div>
+          <div class="org-stat-row">
+            <div class="org-stat"><div class="org-stat-val">24</div><div class="org-stat-key">Pending</div></div>
+            <div class="org-stat"><div class="org-stat-val">142</div><div class="org-stat-key">Members</div></div>
+            <div class="org-stat"><div class="org-stat-val">4</div><div class="org-stat-key">Events</div></div>
+          </div>
+        </div>
+
+        <div class="ptabs">
+          <div class="ptab active">Approvals</div>
+          <div class="ptab">Events</div>
+          <div class="ptab">Org XP</div>
+        </div>
+
+        <div class="approval-card">
+          <div class="ac-member">
+            <div class="ac-av">MS</div>
+            <div><div class="ac-name">Maria Santos</div><div class="ac-event">DEVCON Summit 2026 · PLM Manila</div></div>
+          </div>
+          <div class="ac-btns">
+            <button class="btn btn-blue btn-sm flex1" style="font-size:12px;padding:8px;background:var(--green)">✓ Approve</button>
+            <button class="btn btn-outline btn-sm flex1" style="font-size:12px;padding:8px;color:var(--red);border-color:var(--red)">✕ Decline</button>
+            <button class="btn-ghost btn-sm" style="font-size:12px;padding:8px 12px">👁</button>
+          </div>
+        </div>
+        <div class="approval-card">
+          <div class="ac-member">
+            <div class="ac-av" style="background:rgba(16,185,129,.15);color:var(--green)">RR</div>
+            <div><div class="ac-name">Rodrigo Reyes</div><div class="ac-event">DEVCON Summit 2026 · Accenture PH</div></div>
+          </div>
+          <div class="ac-btns">
+            <button class="btn btn-blue btn-sm flex1" style="font-size:12px;padding:8px;background:var(--green)">✓ Approve</button>
+            <button class="btn btn-outline btn-sm flex1" style="font-size:12px;padding:8px;color:var(--red);border-color:var(--red)">✕ Decline</button>
+            <button class="btn-ghost btn-sm" style="font-size:12px;padding:8px 12px">👁</button>
+          </div>
+        </div>
+        <div class="approval-card">
+          <div class="ac-member">
+            <div class="ac-av" style="background:rgba(245,158,11,.15);color:#92400E">AR</div>
+            <div><div class="ac-name">Ana Reyes</div><div class="ac-event">Kids Hour of AI · Student</div></div>
+          </div>
+          <div class="ac-btns">
+            <button class="btn btn-blue btn-sm flex1" style="font-size:12px;padding:8px;background:var(--green)">✓ Approve</button>
+            <button class="btn btn-outline btn-sm flex1" style="font-size:12px;padding:8px;color:var(--red);border-color:var(--red)">✕ Decline</button>
+            <button class="btn-ghost btn-sm" style="font-size:12px;padding:8px 12px">👁</button>
+          </div>
+        </div>
+
+        <div style="margin:0 16px 16px;background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid rgba(248,198,48,.4);border-radius:var(--r);padding:16px;text-align:center">
+          <div style="font-size:20px;margin-bottom:6px">⭐ Organizer XP</div>
+          <div style="font-size:36px;font-weight:900;color:#92400E">1,250</div>
+          <div style="font-size:12px;color:var(--slate400);margin-top:4px">Separate from your member XP</div>
+          <button class="btn btn-outline btn-sm" style="margin-top:12px;width:100%;border-color:rgba(248,198,48,.6);color:#92400E;font-size:12px">View Organizer Points History</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         EVENT REGISTRATION — FULL SCREEN LUMA-STYLE FLOW
+    ══════════════════════════════════════════════════ -->
+    <div id="ev-modal" style="position:absolute;inset:0;z-index:150;display:none;flex-direction:column;background:#E8F1FB;overflow:hidden">
+
+      <!-- Shared Header -->
+      <div style="background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--slate200);flex-shrink:0">
+        <div id="ev-hdr-back" style="font-size:20px;color:var(--slate700);cursor:pointer;width:28px">←</div>
+        <div style="display:flex;align-items:center;gap:7px;flex:1">
+          <div style="width:28px;height:28px;background:var(--blue-10);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px">📅</div>
+          <span style="font-size:17px;font-weight:700;color:var(--slate900)">Registration</span>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--slate200);flex-shrink:0"></div>
+
+      <!-- ── STEP 1: Event Detail + Request to Join ── -->
+      <div id="ms-open" style="flex:1;overflow-y:auto;display:flex;flex-direction:column">
+        <!-- Event Banner -->
+        <div style="margin:16px 16px 0;border-radius:14px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12)">
+          <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&q=80"
+               style="width:100%;height:180px;object-fit:cover;display:block"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+               alt="Event banner">
+          <div style="display:none;height:180px;background:linear-gradient(135deg,#3B5BDE,#6B48FF);align-items:center;justify-content:center;font-size:48px">🎮</div>
+        </div>
+
+        <div style="padding:16px">
+          <!-- Event meta -->
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--slate400);margin-bottom:6px">EVENT TITLE</div>
+          <div style="font-size:20px;font-weight:900;color:var(--slate900);margin-bottom:3px" id="ev-title-label">DEVCON Summit 2026</div>
+          <div style="font-size:13px;color:var(--slate400);margin-bottom:16px">Hosted by DEVCON Philippines</div>
+
+          <!-- Date & Location rows -->
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--slate100)">
+            <div style="width:32px;height:32px;background:var(--blue-10);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📅</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--slate900)">Saturday, March 15, 2026</div>
+              <div style="font-size:12px;color:var(--slate400);margin-top:1px">9:00 AM – 6:00 PM</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--slate100);margin-bottom:16px">
+            <div style="width:32px;height:32px;background:var(--blue-10);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📍</div>
+            <div style="font-size:14px;color:var(--blue);font-weight:600">Register to See Address</div>
+          </div>
+
+          <!-- Registration Box -->
+          <div style="border:1.5px solid var(--slate200);border-radius:14px;overflow:hidden;background:#fff;margin-bottom:16px">
+            <div style="padding:10px 14px;background:var(--slate50);border-bottom:1px solid var(--slate200)">
+              <span style="font-size:11px;font-weight:700;color:var(--slate500);text-transform:uppercase;letter-spacing:1px">Registration</span>
+            </div>
+            <div style="padding:14px">
+              <!-- Approval Required notice -->
+              <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px">
+                <div style="width:32px;height:32px;background:rgba(59,91,222,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">ℹ️</div>
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--slate900)">Approval Required</div>
+                  <div style="font-size:12px;color:var(--slate400);margin-top:2px;line-height:1.4">Your registration is subject to approval by the host.</div>
+                </div>
+              </div>
+              <div style="height:1px;background:var(--slate100);margin-bottom:12px"></div>
+              <div style="font-size:13px;color:var(--slate600);margin-bottom:14px">Welcome! To join this event, please register below.</div>
+              <button class="btn btn-blue" style="border-radius:30px;font-size:14px;padding:13px" onclick="showMs('form')">Request to Join</button>
+            </div>
+          </div>
+
+          <!-- About Event -->
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--blue);margin-bottom:8px">About Event</div>
+            <div style="font-size:13px;color:var(--slate500);line-height:1.7">"DEVCON Summit 2026" is a full-day gathering of the Philippines' top developers, designers, and tech leaders. Featuring keynotes, workshops, and networking across 4 tracks — AI, Web3, Product, and Community.</div>
+          </div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+
+      <!-- ── STEP 2: Registration Form (Your Info) ── -->
+      <div id="ms-form" style="flex:1;overflow-y:auto;display:none;flex-direction:column">
+        <div style="padding:20px 16px 0">
+          <div style="font-size:17px;font-weight:800;color:var(--slate900);margin-bottom:18px">Your Info</div>
+
+          <!-- Pill Inputs -->
+          <div style="margin-bottom:14px">
+            <div style="font-size:12px;font-weight:700;color:var(--slate700);margin-bottom:6px">Name<span style="color:var(--red)">*</span></div>
+            <input style="width:100%;background:rgba(255,255,255,.7);border:1.5px solid var(--slate200);border-radius:30px;padding:13px 18px;font-size:14px;color:var(--slate900);outline:none;font-family:inherit;transition:.15s" placeholder="Your Name"
+              onfocus="this.style.borderColor='#3B5BDE';this.style.boxShadow='0 0 0 3px rgba(59,91,222,.12)'"
+              onblur="this.style.borderColor='';this.style.boxShadow=''">
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="font-size:12px;font-weight:700;color:var(--slate700);margin-bottom:6px">Email<span style="color:var(--red)">*</span></div>
+            <input style="width:100%;background:rgba(255,255,255,.7);border:1.5px solid var(--slate200);border-radius:30px;padding:13px 18px;font-size:14px;color:var(--slate900);outline:none;font-family:inherit;transition:.15s" placeholder="Youremail@gmail.com" type="email"
+              onfocus="this.style.borderColor='#3B5BDE';this.style.boxShadow='0 0 0 3px rgba(59,91,222,.12)'"
+              onblur="this.style.borderColor='';this.style.boxShadow=''">
+          </div>
+          <div style="margin-bottom:20px">
+            <div style="font-size:12px;font-weight:700;color:var(--slate700);margin-bottom:6px">School/Company<span style="color:var(--red)">*</span></div>
+            <input style="width:100%;background:rgba(255,255,255,.7);border:1.5px solid var(--slate200);border-radius:30px;padding:13px 18px;font-size:14px;color:var(--slate900);outline:none;font-family:inherit;transition:.15s" placeholder="School/Company"
+              onfocus="this.style.borderColor='#3B5BDE';this.style.boxShadow='0 0 0 3px rgba(59,91,222,.12)'"
+              onblur="this.style.borderColor='';this.style.boxShadow=''">
+          </div>
+
+          <!-- Checkboxes -->
+          <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer">
+            <div style="position:relative;margin-top:1px">
+              <input type="checkbox" checked id="chk1" style="position:absolute;opacity:0;width:0;height:0">
+              <div id="chk1-box" onclick="toggleChk('chk1')" style="width:20px;height:20px;border-radius:5px;border:2px solid var(--blue);background:var(--blue);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.15s">
+                <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <span style="font-size:13px;color:var(--slate600);line-height:1.5;padding-top:1px">By joining this event, you agree to <span style="color:var(--blue);font-weight:600">Terms and Conditions.</span></span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:24px;cursor:pointer">
+            <div style="position:relative;margin-top:1px">
+              <input type="checkbox" checked id="chk2" style="position:absolute;opacity:0;width:0;height:0">
+              <div id="chk2-box" onclick="toggleChk('chk2')" style="width:20px;height:20px;border-radius:5px;border:2px solid var(--blue);background:var(--blue);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.15s">
+                <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+            <span style="font-size:13px;color:var(--slate600);line-height:1.5;padding-top:1px">By joining this event, you agree to join <span style="color:var(--blue);font-weight:600">DEVCON+ XYZ.</span></span>
+          </label>
+
+          <button class="btn btn-blue" style="border-radius:30px;font-size:15px;padding:14px;font-weight:700" onclick="showMs('pending')">Apply Now</button>
+        </div>
+        <div style="height:24px"></div>
+      </div>
+
+      <!-- ── STEP 3: Pending ── -->
+      <div id="ms-pending" style="flex:1;overflow-y:auto;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center">
+        <div style="width:80px;height:80px;background:rgba(245,158,11,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 20px">⏳</div>
+        <div style="font-size:22px;font-weight:900;color:var(--slate900);margin-bottom:8px">Request Submitted!</div>
+        <div style="font-size:14px;color:var(--slate500);line-height:1.6;margin-bottom:28px;max-width:280px">Your registration is pending approval by the chapter organizers. You'll be notified once confirmed.</div>
+
+        <!-- Progress tracker -->
+        <div style="width:100%;background:#fff;border:1.5px solid var(--slate200);border-radius:14px;padding:16px;margin-bottom:24px;text-align:left">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--slate400);margin-bottom:12px">Registration Status</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="13" height="11" viewBox="0 0 13 11" fill="none"><path d="M1.5 5L5 9L11.5 1.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div><div style="font-size:14px;font-weight:700;color:var(--slate900)">Request Submitted</div><div style="font-size:11px;color:var(--slate400);margin-top:1px">Just now</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;opacity:.45">
+            <div style="width:28px;height:28px;border-radius:50%;border:2px solid var(--slate300);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--slate400)">2</div>
+            <div><div style="font-size:14px;font-weight:700;color:var(--slate400)">Pending Approval</div><div style="font-size:11px;color:var(--slate300);margin-top:1px">Awaiting organizer review</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;opacity:.3">
+            <div style="width:28px;height:28px;border-radius:50%;border:2px solid var(--slate300);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--slate400)">🎟️</div>
+            <div><div style="font-size:14px;font-weight:700;color:var(--slate400)">You're In!</div><div style="font-size:11px;color:var(--slate300);margin-top:1px">Ticket will appear here</div></div>
+          </div>
+        </div>
+        <button class="btn btn-outline" style="border-radius:30px;font-size:14px;padding:13px;width:100%" onclick="closeEvModal()">Done</button>
+      </div>
+
+      <!-- ── STEP 4: Approved / Digital Ticket ── -->
+      <div id="ms-approved" style="flex:1;overflow-y:auto;display:none;flex-direction:column;align-items:center;padding:24px 20px;text-align:center">
+        <div style="width:72px;height:72px;background:rgba(33,196,93,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="18" fill="#21C45D" fill-opacity=".15"/><path d="M11 18.5L15.5 23L25 13" stroke="#21C45D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="font-size:22px;font-weight:900;color:var(--slate900);margin-bottom:6px">You're In! 🎉</div>
+        <div style="font-size:13px;color:var(--slate500);line-height:1.5;margin-bottom:20px">Your spot at <strong>Hackathon: Build for Good</strong> is confirmed. Show this ticket at the entrance.</div>
+
+        <!-- Digital Ticket -->
+        <div style="width:100%;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(59,91,222,.15);margin-bottom:20px">
+          <!-- Top ticket half -->
+          <div style="background:linear-gradient(135deg,#3B5BDE,#6B48FF);padding:20px 20px 16px;text-align:left;position:relative;overflow:hidden">
+            <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(255,255,255,.07);border-radius:50%"></div>
+            <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:6px">DEVCON Philippines</div>
+            <div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px">Hackathon: Build for Good</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.75)">📅 May 10, 2026 &nbsp;·&nbsp; 📍 Globe Tower, BGC</div>
+          </div>
+          <!-- Ticket tear line -->
+          <div style="display:flex;align-items:center;position:relative">
+            <div style="width:20px;height:20px;background:#E8F1FB;border-radius:50%;margin-left:-10px;flex-shrink:0"></div>
+            <div style="flex:1;border-top:2px dashed var(--slate200);margin:0 8px"></div>
+            <div style="width:20px;height:20px;background:#E8F1FB;border-radius:50%;margin-right:-10px;flex-shrink:0"></div>
+          </div>
+          <!-- QR section -->
+          <div style="padding:16px 20px 20px;text-align:center">
+            <div style="width:130px;height:130px;background:var(--white);border-radius:12px;margin:0 auto 12px;padding:8px;border:1.5px solid var(--slate200)">
+              <div style="width:100%;height:100%;background:repeating-conic-gradient(#1E2A56 0% 25%,#fff 0% 50%) 0 0/18% 18%;border-radius:4px;opacity:.92"></div>
+            </div>
+            <div style="font-family:monospace;font-size:11px;color:var(--slate400);letter-spacing:.5px;margin-bottom:10px">DCN-2026-0510-BGC-00142</div>
+            <span class="chip chip-green" style="font-size:12px;font-weight:700">⭐ +300 XP on check-in</span>
+          </div>
+        </div>
+
+        <button class="btn btn-outline" style="border-radius:30px;font-size:14px;padding:13px;width:100%" onclick="closeEvModal()">Close</button>
+        <div style="height:16px"></div>
+      </div>
+    </div>
+
+    <!-- REWARD MODAL -->
+    <div class="modal-wrap" id="rw-modal">
+      <div class="modal" style="position:relative;text-align:center">
+        <div class="mhandle"></div>
+        <div class="mclose" onclick="closeModal('rw-modal')">✕</div>
+        <div style="font-size:18px;font-weight:800;color:var(--slate900);margin-bottom:4px" id="rw-name">DEVCON Cap</div>
+        <div style="font-size:13px;color:var(--slate400);margin-bottom:16px">Redeem this item for <span id="rw-pts" style="color:var(--blue);font-weight:700">350 XP</span>?</div>
+        <div style="width:160px;height:160px;background:var(--slate50);border-radius:var(--r);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:72px;border:1.5px solid var(--slate200)"><span id="rw-emoji">🧢</span></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline flex1" onclick="closeModal('rw-modal')">Cancel</button>
+          <button class="btn btn-blue flex1">Redeem</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screen -->
+  <div class="hbar"><div></div></div>
+</div>
+
+<script>
+// ── NAVIGATION ──────────────────────────────
+function nav(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el=document.getElementById(id);
+  if(el) el.classList.add('active');
+  const sbar=document.getElementById('sbar');
+  const darkViews=['v-home','v-events','v-jobs','v-rewards','v-xp','v-organizer'];
+  const signinViews=['v-signin','v-signup'];
+  if(id==='v-ob'){sbar.classList.remove('dark');}
+  else if(signinViews.includes(id)){sbar.classList.remove('dark');}
+  else if(darkViews.includes(id)||id==='v-earn'){sbar.classList.remove('dark');}
+  else{sbar.classList.add('dark');}
+}
+
+// ── ONBOARDING ──────────────────────────────
+// ✅ All 4 slides now use real photos sourced directly from devcon.ph
+const OB_SLIDES=[
+  {
+    title:'The Heart of Philippine Tech',
+    desc:'DEVCON is the Philippines\' largest volunteer tech community — 16 years of empowering developers nationwide.',
+    // devcon.ph — 16 Years Anniversary hero image
+    img:'https://devcon.ph/wp-content/uploads/2025/08/DEVCON_Philippines_16years.png'
+  },
+  {
+    title:'11 Chapters, One Community',
+    desc:'From Manila to Davao — developers across Luzon, Visayas, and Mindanao gathering to Sync, Support, and Succeed.',
+    // devcon.ph chapters page — Mindanao/Davao chapter event photo
+    img:'https://devcon.ph/wp-content/uploads/brizy/imgs/1-Developers-and-professionals-gather-in-Mindanao-to-learn-new-insights-in-technology-323x215x0x19x323x196x1755791807.jpg'
+  },
+  {
+    title:'Earn Points. Unlock Perks.',
+    desc:'Attend events, speak, volunteer, and share content to earn XP and redeem exclusive DEVCON merch and rewards.',
+    // devcon.ph chapters page — Cebu chapter community photo
+    img:'https://devcon.ph/wp-content/uploads/brizy/imgs/807f4c62e6d1d9bbb034f24b0b471aa6632a0378-534x196x106x0x323x196x1753803482.png'
+  },
+  {
+    title:'Your Global Opportunity Gateway',
+    desc:'Access tech roles worldwide. Our community has reached institutions like the University of Zurich — and you\'re next.',
+    // devcon.ph chapters page — Manila chapter community photo
+    img:'https://devcon.ph/wp-content/uploads/brizy/imgs/5-10-323x218x0x22x323x196x1752721227.png'
+  },
+];
+let obIdx=0;
+function obNext(){
+  if(obIdx<OB_SLIDES.length-1){
+    obIdx++;
+    updateOb();
+  } else {
+    nav('v-signin');
+  }
+}
+function obBack(){
+  if(obIdx>0){obIdx--;updateOb();}
+}
+function updateOb(){
+  const s=OB_SLIDES[obIdx];
+  document.getElementById('ob-title').textContent=s.title;
+  document.getElementById('ob-desc').textContent=s.desc;
+  const img=document.querySelector('.ob-photo-bg');
+  if(img){
+    img.style.display='block';
+    img.src=s.img;
+  }
+  document.querySelectorAll('.ob-dot').forEach((d,i)=>{d.className='ob-dot'+(i===obIdx?' active':'')});
+  document.getElementById('ob-back-btn').style.display=obIdx>0?'block':'none';
+  document.getElementById('ob-next-btn').textContent=obIdx===OB_SLIDES.length-1?'Get Started':'Next';
+}
+
+// ── SIGNUP ORGANIZER GATE ──────────────────
+let orgShown=false;
+function showOrgGate(){
+  if(!orgShown){
+    document.getElementById('org-gate').style.display='block';
+    document.getElementById('signup-btn').style.display='none';
+    orgShown=true;
+  }
+}
+
+// ── EVENT MODAL (full-screen) ──────────────
+function showEvModal(state){
+  const m=document.getElementById('ev-modal');
+  m.style.display='flex';
+  showMs(state);
+  document.getElementById('ev-hdr-back').onclick=function(){
+    if(document.getElementById('ms-form').style.display!=='none'){showMs('open');}
+    else{closeEvModal();}
+  };
+}
+function showMs(state){
+  ['open','form','pending','approved'].forEach(s=>{
+    const el=document.getElementById('ms-'+s);
+    if(el){el.style.display='none';}
+  });
+  const t=document.getElementById('ms-'+state);
+  if(t){t.style.display='flex';t.style.flexDirection='column';}
+}
+function closeEvModal(){
+  document.getElementById('ev-modal').style.display='none';
+}
+function closeModal(id){
+  const el=document.getElementById(id);
+  if(el){el.classList.remove('open');el.style.display='none';}
+}
+
+// ── REWARD MODAL ───────────────────────────
+const rewardEmojis={'DEVCON T-Shirt':'👕','Sticker Pack':'🎖️','DEVCON Mug':'☕','Tech Hoodie':'👕','Laptop Sleeve':'💻','DEVCON Cap':'🧢'};
+function showRewardModal(name,pts){
+  document.getElementById('rw-name').textContent=name;
+  document.getElementById('rw-pts').textContent=pts+' XP';
+  document.getElementById('rw-emoji').textContent=rewardEmojis[name]||'🎁';
+  document.getElementById('rw-modal').classList.add('open');
+}
+
+// ── CHECKBOX TOGGLE ────────────────────────
+function toggleChk(id){
+  const box=document.getElementById(id+'-box');
+  const chk=document.getElementById(id);
+  const checked=!chk.checked;
+  chk.checked=checked;
+  if(checked){
+    box.style.background='var(--blue)';
+    box.style.borderColor='var(--blue)';
+    box.innerHTML='<svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  } else {
+    box.style.background='transparent';
+    box.style.borderColor='var(--slate300)';
+    box.innerHTML='';
+  }
+}
+
+// ── EARN TABS ──────────────────────────────
+function switchEarn(n){
+  document.getElementById('earn-p1').style.display=n===1?'flex':'none';
+  document.getElementById('earn-p2').style.display=n===2?'flex':'none';
+  document.getElementById('earn-t1').className='ptab'+(n===1?' active':'');
+  document.getElementById('earn-t2').className='ptab'+(n===2?' active':'');
+}
+
+// init
+nav('v-ob');
+</script>
+</body>
+</html>
