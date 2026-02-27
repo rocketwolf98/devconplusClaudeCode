@@ -1,3 +1,6 @@
+import { RouterProvider } from 'react-router-dom'
+import { router } from './router'
+
 export default function App() {
-  return <div className="p-4 text-slate-900">DEVCON+ — loading…</div>
+  return <RouterProvider router={router} />
 }
