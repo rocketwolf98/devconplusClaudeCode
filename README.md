@@ -7,8 +7,8 @@ This monorepo contains two apps and one shared package:
 
 | App | Tech | Purpose |
 |-----|------|---------|
-| `apps/member` | React Native (Expo) | Mobile app for members |
-| `apps/organizer` | React + Vite | Web PWA for chapter officers |
+| `apps/member` | React + Vite PWA | Mobile-first web app for members |
+| `apps/organizer` | React + Vite PWA | Web PWA for chapter officers |
 | `packages/supabase` | TypeScript | Shared types + mock data |
 
 ---
@@ -22,7 +22,6 @@ Install these before anything else.
 | Node.js | **v20.x** (LTS) | https://nodejs.org |
 | npm | v10+ (comes with Node) | — |
 | Git | any recent version | https://git-scm.com |
-| Expo Go (optional) | latest | iOS / Android app store |
 
 > **Windows users:** Use **Git Bash** or **WSL** for all terminal commands — not Command Prompt or PowerShell.
 
@@ -34,28 +33,22 @@ Install these before anything else.
 git clone <repo-url>
 cd "devcon-plus"
 
-npm install --legacy-peer-deps
+npm install
 ```
-
-> `--legacy-peer-deps` is required — expo-linking has a peer conflict with the current Expo version.
 
 ---
 
 ## 2. Running the Apps
 
-### Member App (React Native / Web)
+### Member App (Vite PWA)
 
 ```bash
 npm run dev:member
 ```
 
-This starts the Expo dev server. Then:
+Opens at [http://localhost:5173](http://localhost:5173) (or next available port if 5173 is taken).
 
-- **Browser (recommended for testing):** Press `w` in the terminal, or open [http://localhost:8081](http://localhost:8081)
-- **Android device:** Press `a` (requires Android Studio + emulator, or Expo Go on a physical device)
-- **iOS:** Press `i` (macOS only, requires Xcode)
-
-> The app is fully functional in a browser. Use Chrome DevTools → Toggle Device Toolbar (Ctrl+Shift+M) to simulate a mobile viewport.
+> Use Chrome DevTools → Toggle Device Toolbar (Ctrl+Shift+M) to simulate a mobile viewport.
 
 ### Organizer PWA
 
@@ -65,7 +58,7 @@ npm run dev:organizer
 
 Opens at [http://localhost:5173](http://localhost:5173)
 
-> Use Chrome DevTools mobile emulation to test as an officer would use it on their phone.
+> If both apps run at the same time, the member app will use port 5174.
 
 ### Run both at the same time
 
@@ -104,14 +97,14 @@ All data is mocked. Use these to log in:
 | `/onboarding` | 4-step swipeable intro |
 | `/sign-in` | Login |
 | `/sign-up` | Registration (includes organizer code gate) |
-| `/` (tabs) | Dashboard — hero banner, XP bar, events, jobs, news |
+| `/` | Dashboard — hero banner, XP bar, events, jobs, news |
 | `/events` | Events list with chapter filter tabs |
-| `/events/[id]` | Event detail |
-| `/events/[id]/register` | Registration form (pre-filled) |
-| `/events/[id]/pending` | Pending approval screen |
-| `/events/[id]/ticket` | QR ticket |
+| `/events/:id` | Event detail |
+| `/events/:id/register` | Registration form (pre-filled) |
+| `/events/:id/pending` | Pending approval screen |
+| `/events/:id/ticket` | QR ticket |
 | `/jobs` | Jobs board with search + filter |
-| `/jobs/[id]` | Job detail + Apply Now |
+| `/jobs/:id` | Job detail + Apply Now |
 | `/points` | Ways to Earn / Share & Earn tabs |
 | `/points/history` | Transaction log grouped by date |
 | `/rewards` | Perks catalog (ComingSoonModal on tap) |
@@ -128,8 +121,8 @@ All data is mocked. Use these to log in:
 | `/` | Dashboard — pending approvals + event summary |
 | `/events` | Events list |
 | `/events/create` | Create new event |
-| `/events/[id]` | Event detail |
-| `/events/[id]/registrants` | Approve / Reject registrants |
+| `/events/:id` | Event detail |
+| `/events/:id/registrants` | Approve / Reject registrants |
 | `/scan` | QR scanner (camera) |
 | `/profile` | Officer profile |
 
@@ -149,9 +142,9 @@ All data is mocked. Use these to log in:
 | Token | Hex | Usage |
 |-------|-----|-------|
 | Primary blue | `#3B5BDE` | Buttons, active nav, headers |
-| Navy | `#1E2A4A` | Dark backgrounds, hero |
+| Navy | `#1E2A56` | Dark backgrounds, hero |
 | Promoted orange | `#F97316` | PROMOTED badge only |
-| Success green | `#22C55E` | "You're In" states |
+| Success green | `#21C45D` | "You're In" states |
 | Warning yellow | `#EAB308` | Pending states |
 | Error red | `#EF4444` | Rejected states |
 
@@ -159,11 +152,11 @@ All data is mocked. Use these to log in:
 
 ## 6. Making a Production Build
 
-### Member App (static web export)
+### Member App
 
 ```bash
 cd apps/member
-npx expo export --platform web
+npm run build
 # Output: apps/member/dist/
 ```
 
@@ -186,10 +179,10 @@ npm run typecheck
 ## 7. Project Conventions
 
 - `PascalCase.tsx` for components
-- `kebab-case.tsx` for Expo Router route files
-- Constants live in `constants/` — don't hardcode colors, points values, or role strings
+- `kebab-case.tsx` for route page files
 - Mock data lives in `packages/supabase/src/mock/`
-- Stores (Zustand) live in `stores/` inside each app
+- Stores (Zustand) live in `src/stores/` inside each app
+- Components live in `src/components/` inside each app
 
 ---
 
@@ -198,12 +191,12 @@ npm run typecheck
 ```
 devcon-plus/
 ├── apps/
-│   ├── member/              # Expo React Native app
-│   │   ├── app/             # Expo Router screens
-│   │   ├── components/      # Shared UI components
-│   │   ├── constants/       # Colors, points, roles, chapters
-│   │   └── stores/          # Zustand state
-│   ├── organizer/           # Vite React PWA
+│   ├── member/              # Vite React PWA (member app)
+│   │   └── src/
+│   │       ├── components/  # Shared UI components
+│   │       ├── pages/       # Route pages (auth/, dashboard/, events/, etc.)
+│   │       └── stores/      # Zustand state
+│   ├── organizer/           # Vite React PWA (organizer app)
 │   │   └── src/
 │   │       ├── components/  # Layout, cards
 │   │       ├── pages/       # Route pages
@@ -217,17 +210,17 @@ devcon-plus/
 
 ## 9. Common Issues
 
-**`npm install` fails with peer dependency error**
-→ Always use `npm install --legacy-peer-deps`
+**`npm install` fails**
+→ Make sure you're using Node.js v20.x. Run `node -v` to check.
 
-**Member app shows blank screen on web**
-→ Make sure you pressed `w` after the Expo server started, or open [http://localhost:8081](http://localhost:8081) directly in Chrome
+**Member app not loading**
+→ Open [http://localhost:5173](http://localhost:5173) directly in Chrome. If that port is taken, check the terminal for the actual port (e.g. 5174).
 
 **Organizer app shows login page in a loop**
 → Clear `localStorage` in DevTools → Application → Local Storage → Clear All
 
 **TypeScript errors after pulling changes**
-→ Run `npm install --legacy-peer-deps` again — a new package may have been added
+→ Run `npm install` again — a new package may have been added
 
 **QR scanner says "camera not available"**
 → The QR scanner requires HTTPS or localhost. It works on `localhost:5173` but will fail on `http://` deployed URLs — use Chrome on Android or desktop for scanning
@@ -241,11 +234,11 @@ Three separate Vercel projects from the same repo:
 | Project | Root Directory | Build Command | Output |
 |---------|---------------|---------------|--------|
 | Landing | `apps/landing` | *(none)* | `.` |
-| Member app | `apps/member` | `npx expo export --platform web` | `dist` |
+| Member app | `apps/member` | `npm run build` | `dist` |
 | Organizer | `apps/organizer` | `npm run build` | `dist` |
 
 See `docs/plans/2026-02-27-pwa-vercel-deployment.md` for full Vercel setup steps.
 
 ---
 
-*DEVCON Philippines · Built with React Native + Vite · MVP Target: April 2026*
+*DEVCON Philippines · Built with React + Vite · MVP Target: April 2026*
