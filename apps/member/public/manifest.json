@@ -1,0 +1,17 @@
+{
+  "name": "DEVCON+",
+  "short_name": "DEVCON+",
+  "description": "The Philippines' Largest Volunteer Tech Community",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1E2A56",
+  "theme_color": "#1E2A56",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
