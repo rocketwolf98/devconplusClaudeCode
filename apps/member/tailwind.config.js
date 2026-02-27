@@ -1,7 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
-  presets: [require('nativewind/preset')],
+export default {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -13,7 +12,8 @@ module.exports = {
         navy: '#1E2A56',
         gold: '#F8C630',
         promoted: '#F97316',
-        // Slate scale (matches prototype CSS vars)
+        green: '#21C45D',
+        red: '#EF4444',
         slate: {
           50: '#F8FAFC',
           100: '#F1F5F9',
@@ -29,11 +29,12 @@ module.exports = {
         sans: ['Geist', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
-        DEFAULT: '12px',
-        sm: '8px',
-        lg: '20px',
-        xl: '24px',
-        pill: '30px',
+        xl: '20px',
+        '2xl': '24px',
+      },
+      boxShadow: {
+        card: '0 1px 4px rgba(0,0,0,0.07)',
+        blue: '0 4px 24px rgba(59,91,222,0.12)',
       },
     },
   },
