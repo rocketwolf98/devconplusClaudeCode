@@ -336,10 +336,11 @@ app/
 
 ### Bottom Tab Navigation
 ```
-[Events]  [Jobs]  [● Home ●]  [Points]  [Profile]
-                      ↑
-              Center hero button — Dashboard
+[Home]  [Rewards]  [● Events ●]  [Jobs]  [Profile]
+                        ↑
+              Center hero button — Events (QR scan / register)
 ```
+> Updated to match remix-of-devcon-connect prototype. Events is the primary CTA (center). Home (Dashboard) and Rewards are left tabs. Jobs and Profile are right tabs.
 
 ### Organizer PWA — React Router v6
 ```

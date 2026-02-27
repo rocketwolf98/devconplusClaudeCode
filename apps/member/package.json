@@ -13,6 +13,7 @@
     "@devcon-plus/supabase": "*",
     "@hookform/resolvers": "^3.10.0",
     "@supabase/supabase-js": "^2.49.1",
+    "lucide-react": "^0.575.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

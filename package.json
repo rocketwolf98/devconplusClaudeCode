@@ -6,8 +6,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:member": "turbo run dev --filter=member",
-    "dev:organizer": "turbo run dev --filter=organizer",
+    "dev:member": "turbo run dev --filter=@devcon-plus/member",
+    "dev:organizer": "turbo run dev --filter=@devcon-plus/organizer",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck"
