@@ -11,7 +11,7 @@ interface OrgBannerProps {
 
 export function OrgBanner({ chapterName, role, stats }: OrgBannerProps) {
   return (
-    <div className="rounded-2xl p-6 text-white bg-gradient-to-br from-blue to-navy">
+    <div className="text-white">
       <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">
         DEVCON Philippines
       </p>

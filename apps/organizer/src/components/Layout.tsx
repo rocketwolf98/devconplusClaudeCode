@@ -21,7 +21,7 @@ export function Layout() {
   }
 
   return (
-    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
+    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden max-w-lg mx-auto">
       {/* Page content */}
       <main className="flex-1 overflow-y-auto pb-24">
         <Outlet />

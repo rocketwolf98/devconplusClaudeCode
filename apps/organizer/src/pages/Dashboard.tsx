@@ -74,15 +74,21 @@ export function Dashboard() {
   }
 
   return (
-    <div className="p-4 pt-12 max-w-lg mx-auto">
-      <OrgBanner
-        chapterName={user.chapter}
-        role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
-        stats={stats}
-      />
+    <div>
+      {/* Full-bleed navy header */}
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-8 rounded-b-3xl">
+        <OrgBanner
+          chapterName={user.chapter}
+          role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
+          stats={stats}
+        />
+      </div>
+
+      {/* Tab bar + content */}
+      <div className="p-4">
 
       {/* Tab bar */}
-      <div className="flex gap-1 mt-6 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mt-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
         {(['approvals', 'events'] as const).map((tab) => (
           <button
             key={tab}
@@ -147,6 +153,8 @@ export function Dashboard() {
           </button>
         </div>
       )}
+
+      </div>
     </div>
   )
 }

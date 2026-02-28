@@ -87,11 +87,16 @@ export function QRScanner() {
   }, [])
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      <h1 className="text-2xl font-black text-slate-900 mb-1">QR Scanner</h1>
-      <p className="text-sm text-slate-400 mb-6">
-        Scan member QR tickets at the door to award attendance XP.
-      </p>
+    <div>
+      {/* Full-bleed navy header */}
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
+        <h1 className="text-2xl font-black text-white mb-1">QR Scanner</h1>
+        <p className="text-white/60 text-sm">
+          Scan member QR tickets at the door to award attendance XP.
+        </p>
+      </div>
+
+      <div className="p-4">
 
       {scanState === 'idle' && (
         <div className="space-y-4">
@@ -194,6 +199,8 @@ export function QRScanner() {
           This scanner uses your device camera via getUserMedia. For best results, use Chrome on
           desktop or Android. iOS Safari has limited camera API support.
         </p>
+      </div>
+
       </div>
     </div>
   )

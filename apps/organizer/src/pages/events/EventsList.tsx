@@ -7,21 +7,24 @@ export function EventsList() {
   const navigate = useNavigate()
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900">Events</h1>
-          <p className="text-sm text-slate-400 mt-1">Manage your chapter events</p>
+    <div>
+      {/* Full-bleed navy header */}
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-black text-white">Events</h1>
+            <p className="text-white/60 text-sm mt-0.5">Manage your chapter events</p>
+          </div>
+          <button
+            onClick={() => navigate('/events/create')}
+            className="px-4 py-2 bg-white/20 text-white text-sm font-bold rounded-xl hover:bg-white/30 transition-colors shrink-0"
+          >
+            + New Event
+          </button>
         </div>
-        <button
-          onClick={() => navigate('/events/create')}
-          className="px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
-        >
-          + New Event
-        </button>
       </div>
 
-      <div className="space-y-3">
+      <div className="p-4 space-y-3">
         {EVENTS.map((event) => {
           const formattedDate = event.event_date
             ? new Date(event.event_date).toLocaleDateString('en-US', {
