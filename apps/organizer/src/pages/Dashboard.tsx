@@ -74,7 +74,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="p-4 max-w-lg mx-auto">
+    <div className="p-4 pt-12 max-w-lg mx-auto">
       <OrgBanner
         chapterName={user.chapter}
         role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
