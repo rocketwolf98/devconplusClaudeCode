@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev:member": "turbo run dev --filter=@devcon-plus/member",
-    "dev:organizer": "turbo run dev --filter=@devcon-plus/organizer",
+    "dev:organizer": "turbo run dev --filter=organizer",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck"
