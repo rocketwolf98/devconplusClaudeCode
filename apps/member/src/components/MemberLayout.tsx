@@ -13,7 +13,7 @@ const RIGHT_TABS = [
 
 export default function MemberLayout() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 max-w-lg mx-auto">
+    <div className="flex flex-col min-h-screen bg-slate-50 max-w-2xl mx-auto">
       {/* Scrollable page content — leave room for the bottom nav */}
       <div className="flex-1 overflow-y-auto pb-24">
         <Outlet />
@@ -21,7 +21,7 @@ export default function MemberLayout() {
 
       {/* Floating pill bottom nav */}
       <div
-        className="fixed bottom-4 left-0 right-0 max-w-lg mx-auto px-4 z-50"
+        className="fixed bottom-4 left-0 right-0 max-w-2xl mx-auto px-4 z-50"
         style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
         <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-blue border border-slate-100 px-2 py-2">

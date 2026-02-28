@@ -21,7 +21,7 @@ export function Layout() {
   }
 
   return (
-    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden max-w-lg mx-auto">
+    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden max-w-2xl mx-auto">
       {/* Page content */}
       <main className="flex-1 overflow-y-auto pb-24">
         <Outlet />
@@ -29,7 +29,7 @@ export function Layout() {
 
       {/* Floating pill bottom nav — 3 items: Home | ●Scan● | Profile */}
       <nav className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4">
-        <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-blue flex items-center px-2 py-2 max-w-lg mx-auto">
+        <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-blue flex items-center px-2 py-2 max-w-2xl mx-auto">
           {/* Left: Home */}
           {LEFT_TABS.map(({ path, label, Icon, end }) => (
             <NavLink key={path} to={path} end={end} className="flex-1">
