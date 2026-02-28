@@ -53,7 +53,7 @@ export default function Dashboard() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-navy px-4 pt-14 pb-6 rounded-b-3xl">
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
         {/* Greeting row */}
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -119,7 +119,7 @@ export default function Dashboard() {
               <button
                 key={label}
                 onClick={onClick}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border border-slate-100 shadow-card"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border border-slate-200 shadow-card"
               >
                 <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center">
                   <Icon className="w-5 h-5 text-blue" />
@@ -165,7 +165,7 @@ export default function Dashboard() {
                 <button
                   key={job.id}
                   onClick={() => navigate(`/jobs/${job.id}`)}
-                  className="flex-shrink-0 w-52 bg-white rounded-2xl shadow-card p-4 text-left relative"
+                  className="flex-shrink-0 w-52 bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
                 >
                   {job.is_promoted && (
                     <div className="absolute top-3 right-3">
@@ -226,7 +226,7 @@ export default function Dashboard() {
               View All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="mx-4 bg-white rounded-2xl shadow-card overflow-hidden">
+          <div className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
             {recentTxns.map((tx, i) => (
               <div
                 key={tx.id}

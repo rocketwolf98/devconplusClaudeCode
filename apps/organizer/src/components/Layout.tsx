@@ -1,10 +1,10 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ScanLine, User } from 'lucide-react'
+import { Home, ScanLine, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 
 const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/', label: 'Home', Icon: LayoutDashboard, end: true },
+  { path: '/', label: 'Home', Icon: Home, end: true },
 ]
 
 const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
@@ -46,7 +46,10 @@ export function Layout() {
           <div className="flex-1 flex justify-center">
             <NavLink to="/scan">
               {({ isActive }) => (
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center -mt-6 shadow-blue transition-colors ${isActive ? 'bg-navy' : 'bg-blue'}`}>
+                <div
+                  className={`w-14 h-14 rounded-full flex items-center justify-center -mt-6 shadow-blue transition-colors ${isActive ? 'bg-navy' : 'bg-blue'}`}
+                  style={{ border: '3px solid white' }}
+                >
                   <ScanLine className="w-6 h-6 text-white" />
                 </div>
               )}

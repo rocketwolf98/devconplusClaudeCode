@@ -43,7 +43,7 @@ export default function JobsList() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-navy px-4 pt-14 pb-4">
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-4 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold mb-3">Jobs Board</h1>
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
@@ -92,7 +92,7 @@ export default function JobsList() {
             <button
               key={job.id}
               onClick={() => navigate(`/jobs/${job.id}`)}
-              className="w-full bg-white rounded-2xl shadow-card p-4 text-left relative"
+              className="w-full bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
             >
               {job.is_promoted && (
                 <div className="absolute top-3 right-3">

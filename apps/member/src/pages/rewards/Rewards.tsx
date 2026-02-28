@@ -21,7 +21,7 @@ export default function Rewards() {
 
   return (
     <div>
-      <div className="bg-navy px-4 pt-14 pb-6">
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Rewards</h1>
         <p className="text-white/60 text-sm mt-1">
           You have <strong className="text-gold">{totalPoints.toLocaleString()} pts</strong>
@@ -36,7 +36,7 @@ export default function Rewards() {
               <button
                 key={reward.id}
                 onClick={() => setSelected(reward.name)}
-                className="bg-white rounded-2xl shadow-card p-4 text-left"
+                className="bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left"
               >
                 <div className="w-full h-24 bg-gradient-to-br from-blue/10 to-navy/10 rounded-xl flex items-center justify-center mb-3">
                   <Icon className="w-10 h-10 text-blue/60" />
