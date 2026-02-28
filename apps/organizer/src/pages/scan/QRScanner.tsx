@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Camera, CheckCircle2, XCircle, Zap, Info } from 'lucide-react'
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser'
 
 interface ScanResult {
@@ -30,12 +31,9 @@ export function QRScanner() {
     try {
       const reader = new BrowserQRCodeReader()
       const devices = await BrowserQRCodeReader.listVideoInputDevices()
-      if (devices.length === 0) {
-        throw new Error('No camera devices found.')
-      }
+      if (devices.length === 0) throw new Error('No camera devices found.')
 
       const deviceId = devices[devices.length - 1].deviceId
-
       const controls = await reader.decodeFromVideoDevice(
         deviceId,
         videoRef.current!,
@@ -56,7 +54,6 @@ export function QRScanner() {
   }
 
   const handleScannedToken = (token: string) => {
-    // Mock award-points-on-scan logic
     if (token.startsWith('DCN-') || token.length > 4) {
       setResult({
         memberName: 'Marie Santos',
@@ -86,9 +83,7 @@ export function QRScanner() {
   }
 
   useEffect(() => {
-    return () => {
-      stopScanning()
-    }
+    return () => { stopScanning() }
   }, [])
 
   return (
@@ -104,7 +99,9 @@ export function QRScanner() {
             className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center cursor-pointer hover:border-blue transition-colors"
             onClick={startCamera}
           >
-            <p className="text-5xl mb-4">📷</p>
+            <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mx-auto mb-4">
+              <Camera className="w-8 h-8 text-blue" />
+            </div>
             <p className="text-base font-bold text-slate-700 mb-1">Start Camera Scanner</p>
             <p className="text-sm text-slate-400">
               Opens your device camera to scan QR codes.
@@ -113,7 +110,7 @@ export function QRScanner() {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 p-4">
             <p className="text-sm font-bold text-slate-700 mb-3">Or enter token manually</p>
             <form onSubmit={handleManualSubmit} className="flex gap-2">
               <input
@@ -137,7 +134,6 @@ export function QRScanner() {
         <div className="space-y-4">
           <div className="bg-black rounded-2xl overflow-hidden aspect-square relative">
             <video ref={videoRef} className="w-full h-full object-cover" />
-            {/* Scan overlay */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-48 h-48 border-2 border-white/80 rounded-2xl" />
             </div>
@@ -154,11 +150,13 @@ export function QRScanner() {
       {scanState === 'success' && result && (
         <div className="space-y-4">
           <div className="bg-green/10 border border-green/30 rounded-2xl p-6 text-center">
-            <p className="text-5xl mb-4">✅</p>
+            <div className="w-16 h-16 rounded-full bg-green/20 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-green" />
+            </div>
             <p className="text-xl font-black text-slate-900 mb-1">{result.memberName}</p>
             <p className="text-sm text-slate-500 mb-4">{result.eventTitle}</p>
             <div className="inline-flex items-center gap-2 bg-green/10 rounded-full px-5 py-2 border border-green/30">
-              <span className="text-lg">⭐</span>
+              <Zap className="w-4 h-4 text-green" />
               <span className="text-lg font-black text-green">+{result.pointsAwarded} XP awarded!</span>
             </div>
           </div>
@@ -174,7 +172,9 @@ export function QRScanner() {
       {scanState === 'error' && (
         <div className="space-y-4">
           <div className="bg-red/10 border border-red/20 rounded-2xl p-8 text-center">
-            <p className="text-4xl mb-3">❌</p>
+            <div className="w-16 h-16 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
+              <XCircle className="w-8 h-8 text-red" />
+            </div>
             <p className="text-base font-bold text-slate-900 mb-1">Scan Failed</p>
             <p className="text-sm text-slate-500">{errorMsg}</p>
           </div>
@@ -188,8 +188,8 @@ export function QRScanner() {
       )}
 
       {/* Usage note */}
-      <div className="mt-6 bg-blue/5 border border-blue/10 rounded-xl p-4">
-        <p className="text-xs text-blue font-semibold mb-1">📌 Scanner Note</p>
+      <div className="mt-6 bg-blue/5 border border-blue/10 rounded-xl p-4 flex gap-3">
+        <Info className="w-4 h-4 text-blue shrink-0 mt-0.5" />
         <p className="text-xs text-slate-500 leading-relaxed">
           This scanner uses your device camera via getUserMedia. For best results, use Chrome on
           desktop or Android. iOS Safari has limited camera API support.

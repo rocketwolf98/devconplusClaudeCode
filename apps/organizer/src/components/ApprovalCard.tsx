@@ -1,3 +1,4 @@
+import { Check, X, CheckCircle2, XCircle } from 'lucide-react'
 import { StatusBadge } from './StatusBadge'
 
 export interface Registration {
@@ -32,9 +33,8 @@ export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCard
   })
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-card">
+    <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card">
       <div className="flex items-start gap-3 mb-3">
-        {/* Avatar */}
         <div className="w-10 h-10 rounded-full bg-blue/10 flex items-center justify-center text-blue text-sm font-bold shrink-0">
           {initials}
         </div>
@@ -46,7 +46,7 @@ export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCard
         <StatusBadge status={registration.status} />
       </div>
 
-      <div className="bg-slate-50 rounded-lg px-3 py-2 mb-3">
+      <div className="bg-slate-50 rounded-xl px-3 py-2 mb-3">
         <p className="text-xs text-slate-400 mb-0.5">Event</p>
         <p className="text-sm font-semibold text-slate-700 truncate">{registration.event_title}</p>
         <p className="text-xs text-slate-400 mt-1">Registered {formattedDate}</p>
@@ -56,28 +56,32 @@ export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCard
         <div className="flex gap-2">
           <button
             onClick={() => onReject(registration.id)}
-            className="flex-1 py-2 text-sm font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-red/5 hover:border-red hover:text-red transition-colors"
+            className="flex-1 py-2 text-sm font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-red/5 hover:border-red hover:text-red transition-colors flex items-center justify-center gap-1.5"
           >
+            <X className="w-3.5 h-3.5" />
             Reject
           </button>
           <button
             onClick={() => onApprove(registration.id)}
-            className="flex-1 py-2 text-sm font-semibold rounded-lg bg-blue text-white hover:bg-blue-dark transition-colors"
+            className="flex-1 py-2 text-sm font-semibold rounded-xl bg-blue text-white hover:bg-blue-dark transition-colors flex items-center justify-center gap-1.5"
           >
-            Approve ✓
+            <Check className="w-3.5 h-3.5" />
+            Approve
           </button>
         </div>
       )}
 
       {registration.status === 'approved' && (
-        <p className="text-xs text-green font-semibold text-center py-1">
-          ✓ Approved — QR ticket sent
+        <p className="text-xs text-green font-semibold text-center py-1 flex items-center justify-center gap-1">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          Approved — QR ticket sent
         </p>
       )}
 
       {registration.status === 'rejected' && (
-        <p className="text-xs text-red font-semibold text-center py-1">
-          ✗ Registration rejected
+        <p className="text-xs text-red font-semibold text-center py-1 flex items-center justify-center gap-1">
+          <XCircle className="w-3.5 h-3.5" />
+          Registration rejected
         </p>
       )}
     </div>

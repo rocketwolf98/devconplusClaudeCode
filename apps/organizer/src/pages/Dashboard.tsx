@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { CheckCircle2 } from 'lucide-react'
 import { OrgBanner } from '../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../components/ApprovalCard'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -55,7 +56,7 @@ export function Dashboard() {
 
   const pending = registrations.filter((r) => r.status === 'pending')
   const stats = [
-    { label: 'Events', value: 5 },
+    { label: 'Events',  value: 5    },
     { label: 'Members', value: 1243 },
     { label: 'Pending', value: pending.length },
   ]
@@ -92,7 +93,9 @@ export function Dashboard() {
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            {tab === 'approvals' ? `Approvals${pending.length > 0 ? ` (${pending.length})` : ''}` : 'Events'}
+            {tab === 'approvals'
+              ? `Approvals${pending.length > 0 ? ` (${pending.length})` : ''}`
+              : 'Events'}
           </button>
         ))}
       </div>
@@ -101,7 +104,9 @@ export function Dashboard() {
         <div>
           {pending.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-              <p className="text-3xl mb-3">✅</p>
+              <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
+                <CheckCircle2 className="w-7 h-7 text-green" />
+              </div>
               <p className="text-base font-bold text-slate-700">All caught up!</p>
               <p className="text-sm text-slate-400 mt-1">No pending registrations right now.</p>
             </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, Check, ClipboardList } from 'lucide-react'
 import { EVENTS } from '@devcon-plus/supabase'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
 
@@ -60,8 +61,8 @@ export function EventRegistrants() {
   const filtered = filter === 'all' ? registrants : registrants.filter((r) => r.status === filter)
 
   const counts = {
-    all: registrants.length,
-    pending: registrants.filter((r) => r.status === 'pending').length,
+    all:      registrants.length,
+    pending:  registrants.filter((r) => r.status === 'pending').length,
     approved: registrants.filter((r) => r.status === 'approved').length,
     rejected: registrants.filter((r) => r.status === 'rejected').length,
   }
@@ -72,7 +73,8 @@ export function EventRegistrants() {
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
       >
-        ← Back
+        <ArrowLeft className="w-4 h-4" />
+        Back
       </button>
 
       <h1 className="text-xl font-black text-slate-900 mb-1">Registrants</h1>
@@ -103,15 +105,18 @@ export function EventRegistrants() {
               prev.map((r) => (r.status === 'pending' ? { ...r, status: 'approved' as const } : r))
             )
           }}
-          className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors"
+          className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
         >
-          ✓ Approve All Pending ({counts.pending})
+          <Check className="w-4 h-4" />
+          Approve All Pending ({counts.pending})
         </button>
       )}
 
       {filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-          <p className="text-3xl mb-3">📋</p>
+          <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <ClipboardList className="w-7 h-7 text-slate-400" />
+          </div>
           <p className="text-base font-bold text-slate-700">No registrants found</p>
           <p className="text-sm text-slate-400 mt-1">
             {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}

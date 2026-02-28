@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, CalendarDays, Zap } from 'lucide-react'
 import { EVENTS } from '@devcon-plus/supabase'
 
 export function EventDetail() {
@@ -31,7 +32,8 @@ export function EventDetail() {
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-6 transition-colors"
       >
-        ← Back to Events
+        <ArrowLeft className="w-4 h-4" />
+        Back to Events
       </button>
 
       {/* Banner */}
@@ -40,7 +42,7 @@ export function EventDetail() {
           <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
         ) : (
           <div className="w-full h-48 bg-gradient-to-br from-blue to-navy flex items-center justify-center">
-            <span className="text-5xl">🎟️</span>
+            <CalendarDays className="w-16 h-16 text-white/20" />
           </div>
         )}
       </div>
@@ -63,8 +65,9 @@ export function EventDetail() {
       <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
         <h1 className="text-xl font-black text-slate-900 mb-1">{event.title}</h1>
         <div className="flex flex-wrap gap-2 mb-4">
-          <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full">
-            ⭐ {event.points_value} XP
+          <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            {event.points_value} XP
           </span>
           {event.requires_approval && (
             <span className="text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-full">

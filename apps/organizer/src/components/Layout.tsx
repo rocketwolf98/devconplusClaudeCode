@@ -1,17 +1,20 @@
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, CalendarDays, ScanLine, User, LogOut } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 
-const NAV_ITEMS = [
-  { to: '/', icon: '📊', label: 'Home', end: true },
-  { to: '/events', icon: '🎟️', label: 'Events', end: false },
-  { to: '/scan', icon: '📷', label: null, end: false }, // center hero
-  { to: '/profile', icon: '👤', label: 'Profile', end: false },
+const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
+  { path: '/',       label: 'Home',   Icon: LayoutDashboard, end: true  },
+  { path: '/events', label: 'Events', Icon: CalendarDays,    end: false },
+]
+
+const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
+  { path: '/profile', label: 'Profile', Icon: User, end: false },
 ]
 
 export function Layout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
-  const location = useLocation()
 
   if (!user) {
     navigate('/login')
@@ -23,106 +26,76 @@ export function Layout() {
     navigate('/login')
   }
 
-  const isActive = (to: string, end: boolean) => {
-    if (end) return location.pathname === to
-    return location.pathname.startsWith(to)
-  }
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: '#F8FAFC', overflow: 'hidden' }}>
+    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
       {/* Top header */}
-      <header style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #E2E8F0',
-        padding: '12px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexShrink: 0,
-        zIndex: 10,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 12,
-            background: '#3B82F6', display: 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontWeight: 900, fontSize: 13,
-          }}>
+      <header className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shrink-0 z-10">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-blue flex items-center justify-center text-white font-black text-sm shrink-0">
             D+
           </div>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 900, color: '#0F172A', lineHeight: 1 }}>DEVCON+</p>
-            <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 2 }}>Organizer Portal</p>
+            <p className="text-sm font-black text-slate-900 leading-none">DEVCON+</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Organizer Portal</p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            background: 'rgba(59,130,246,0.1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#3B82F6', fontSize: 11, fontWeight: 700,
-          }}>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-blue/10 flex items-center justify-center text-blue text-xs font-bold shrink-0">
             {user.initials}
           </div>
           <button
             onClick={handleLogout}
-            style={{ fontSize: 12, color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red transition-colors px-2 py-1"
           >
+            <LogOut className="w-3.5 h-3.5" />
             Sign out
           </button>
         </div>
       </header>
 
       {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto', paddingBottom: 80 }}>
+      <main className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </main>
 
-      {/* Bottom nav — mirrors member app CustomTabBar pattern */}
-      <nav style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: '#ffffff',
-        borderTop: '1px solid #E2E8F0',
-        display: 'flex', alignItems: 'center',
-        paddingTop: 10, paddingBottom: 10,
-        zIndex: 20,
-      }}>
-        {NAV_ITEMS.map((item, index) => {
-          const active = isActive(item.to, item.end)
-          const isCenter = index === 2
-
-          if (isCenter) {
-            return (
-              <div key={item.to} style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-                <NavLink to={item.to} style={{ textDecoration: 'none' }}>
-                  <div style={{
-                    width: 52, height: 52, borderRadius: 26,
-                    background: active ? '#1E2A4A' : '#3B82F6',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginTop: -20,
-                    boxShadow: '0 4px 16px rgba(59,130,246,0.4)',
-                  }}>
-                    <span style={{ fontSize: 22 }}>{item.icon}</span>
-                  </div>
-                </NavLink>
-              </div>
-            )
-          }
-
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, textDecoration: 'none' }}
-            >
-              <span style={{ fontSize: 20, lineHeight: '24px' }}>{item.icon}</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: active ? '#3B82F6' : '#94A3B8' }}>
-                {item.label}
-              </span>
+      {/* Floating pill bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4">
+        <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-blue flex items-center px-2 py-2 max-w-lg mx-auto">
+          {/* Left tabs */}
+          {LEFT_TABS.map(({ path, label, Icon, end }) => (
+            <NavLink key={path} to={path} end={end} className="flex-1">
+              {({ isActive }) => (
+                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-blue' : 'text-slate-400'}`}>
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[10px] font-semibold">{label}</span>
+                </div>
+              )}
             </NavLink>
-          )
-        })}
+          ))}
+
+          {/* Center hero — Scan */}
+          <div className="flex-1 flex justify-center">
+            <NavLink to="/scan">
+              {({ isActive }) => (
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center -mt-6 shadow-blue transition-colors ${isActive ? 'bg-navy' : 'bg-blue'}`}>
+                  <ScanLine className="w-6 h-6 text-white" />
+                </div>
+              )}
+            </NavLink>
+          </div>
+
+          {/* Right tabs */}
+          {RIGHT_TABS.map(({ path, label, Icon, end }) => (
+            <NavLink key={path} to={path} end={end} className="flex-1">
+              {({ isActive }) => (
+                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-blue' : 'text-slate-400'}`}>
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[10px] font-semibold">{label}</span>
+                </div>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </nav>
     </div>
   )

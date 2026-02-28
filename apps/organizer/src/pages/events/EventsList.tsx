@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { MapPin, Zap } from 'lucide-react'
 import { EVENTS } from '@devcon-plus/supabase'
 import { StatusBadge } from '../../components/StatusBadge'
 
@@ -24,17 +25,14 @@ export function EventsList() {
         {EVENTS.map((event) => {
           const formattedDate = event.event_date
             ? new Date(event.event_date).toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
+                weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
               })
             : 'TBA'
 
           return (
             <div
               key={event.id}
-              className="bg-white rounded-xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
+              className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
               onClick={() => navigate(`/events/${event.id}`)}
             >
               <div className="flex items-start gap-4">
@@ -57,11 +55,15 @@ export function EventsList() {
                   </div>
                   <p className="text-sm text-slate-400 mt-1">{formattedDate}</p>
                   {event.location && (
-                    <p className="text-xs text-slate-400 mt-0.5">📍 {event.location}</p>
+                    <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      {event.location}
+                    </p>
                   )}
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full">
-                      ⭐ {event.points_value} XP
+                    <span className="text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Zap className="w-3 h-3" />
+                      {event.points_value} XP
                     </span>
                     {event.requires_approval && (
                       <span className="text-xs text-slate-400">Approval required</span>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { Chrome } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 
 const schema = z.object({
@@ -56,7 +57,7 @@ export function Login() {
             onClick={handleGoogleAuth}
             className="w-full flex items-center justify-center gap-3 py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-4"
           >
-            <span className="text-lg">🔐</span>
+            <Chrome className="w-4 h-4 text-slate-500" />
             Continue with Google
           </button>
 
