@@ -136,6 +136,7 @@ export default function SignIn() {
               <input
                 value={orgCode}
                 onChange={(e) => { setOrgCode(e.target.value); setOrgError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleOrgCode()}
                 placeholder="e.g. ORG-MANILA"
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase"
               />
