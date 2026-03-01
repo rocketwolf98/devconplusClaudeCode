@@ -35,7 +35,7 @@ export default function Points() {
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                tab === t ? 'bg-blue text-white' : 'bg-white/10 text-white/70'
+                tab === t ? 'bg-white text-blue font-semibold' : 'bg-white/20 text-white'
               }`}
             >
               {t === 'earn' ? 'Ways to Earn' : 'Share & Earn'}

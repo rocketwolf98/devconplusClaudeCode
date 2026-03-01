@@ -60,7 +60,7 @@ export default function JobsList() {
               key={f}
               onClick={() => setFilter(f)}
               className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                filter === f ? 'bg-blue text-white' : 'bg-white/10 text-white/70'
+                filter === f ? 'bg-white text-blue font-semibold' : 'bg-white/20 text-white'
               }`}
             >
               {f}
