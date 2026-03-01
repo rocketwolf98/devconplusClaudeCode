@@ -1,12 +1,14 @@
 import { createBrowserRouter } from 'react-router-dom'
 import MemberLayout from './components/MemberLayout'
+import OrganizerLayout from './components/OrganizerLayout'
 
 // Auth pages (no tab nav)
 import Onboarding from './pages/auth/Onboarding'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
+import OrganizerCodeGate from './pages/auth/OrganizerCodeGate'
 
-// Tab pages
+// Member tab pages
 import Dashboard from './pages/dashboard/Dashboard'
 import EventsList from './pages/events/EventsList'
 import EventDetail from './pages/events/EventDetail'
@@ -23,13 +25,23 @@ import ProfileEdit from './pages/profile/ProfileEdit'
 import Notifications from './pages/profile/Notifications'
 import Privacy from './pages/profile/Privacy'
 
-export const router = createBrowserRouter([
-  // Auth routes — no MemberLayout
-  { path: '/onboarding', element: <Onboarding /> },
-  { path: '/sign-in',    element: <SignIn /> },
-  { path: '/sign-up',    element: <SignUp /> },
+// Organizer pages
+import { OrgDashboard } from './pages/organizer/Dashboard'
+import { OrgEventsList } from './pages/organizer/events/EventsList'
+import { OrgEventCreate } from './pages/organizer/events/EventCreate'
+import { OrgEventDetail } from './pages/organizer/events/EventDetail'
+import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
+import { OrgQRScanner } from './pages/organizer/scan/QRScanner'
+import { OrgProfile } from './pages/organizer/profile/Profile'
 
-  // App routes — all wrapped in MemberLayout with bottom tab nav
+export const router = createBrowserRouter([
+  // Auth routes — no layout
+  { path: '/onboarding',           element: <Onboarding /> },
+  { path: '/sign-in',              element: <SignIn /> },
+  { path: '/sign-up',              element: <SignUp /> },
+  { path: '/organizer-code-gate',  element: <OrganizerCodeGate /> },
+
+  // Member routes — wrapped in MemberLayout with bottom tab nav
   {
     element: <MemberLayout />,
     children: [
@@ -48,6 +60,20 @@ export const router = createBrowserRouter([
       { path: '/profile/edit',              element: <ProfileEdit /> },
       { path: '/profile/notifications',     element: <Notifications /> },
       { path: '/profile/privacy',           element: <Privacy /> },
+    ],
+  },
+
+  // Organizer routes — wrapped in OrganizerLayout (guards on isOrganizerSession)
+  {
+    element: <OrganizerLayout />,
+    children: [
+      { path: '/organizer',                              element: <OrgDashboard /> },
+      { path: '/organizer/events',                       element: <OrgEventsList /> },
+      { path: '/organizer/events/create',                element: <OrgEventCreate /> },
+      { path: '/organizer/events/:id',                   element: <OrgEventDetail /> },
+      { path: '/organizer/events/:id/registrants',       element: <OrgEventRegistrants /> },
+      { path: '/organizer/scan',                         element: <OrgQRScanner /> },
+      { path: '/organizer/profile',                      element: <OrgProfile /> },
     ],
   },
 ])

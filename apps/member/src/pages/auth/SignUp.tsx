@@ -1,12 +1,8 @@
-import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../../stores/useAuthStore'
-
-const ORGANIZER_URL = import.meta.env.VITE_ORGANIZER_URL ?? 'http://localhost:5174'
-const MOCK_ORG_CODES = new Set(['ORG-MANILA', 'ORG-CEBU', 'ORG-DAVAO', 'ORG-LAGUNA', 'DCN-ADMIN'])
 
 const schema = z.object({
   full_name:         z.string().min(2, 'Name required'),
@@ -30,9 +26,6 @@ function GoogleIcon() {
 export default function SignUp() {
   const navigate = useNavigate()
   const { signIn } = useAuthStore()
-  const [showOrgCode, setShowOrgCode] = useState(false)
-  const [orgCode, setOrgCode]         = useState('')
-  const [orgError, setOrgError]       = useState('')
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -40,22 +33,13 @@ export default function SignUp() {
 
   const onSubmit = async (data: FormData) => {
     await signIn(data.email, data.password)  // mock: signs in immediately
-    navigate('/')
+    navigate('/organizer-code-gate')
   }
 
   const handleGoogleSignUp = async () => {
     // TODO: Supabase Google OAuth
     await signIn('marie.santos@email.com', 'password')
-    navigate('/')
-  }
-
-  const handleOrgCode = () => {
-    const code = orgCode.trim().toUpperCase()
-    if (MOCK_ORG_CODES.has(code)) {
-      window.location.href = ORGANIZER_URL
-    } else {
-      setOrgError('Invalid organizer code. Please check and try again.')
-    }
+    navigate('/organizer-code-gate')
   }
 
   return (
@@ -70,7 +54,6 @@ export default function SignUp() {
 
       {/* Floating card */}
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 overflow-y-auto">
-        {/* Google */}
         <button
           type="button"
           onClick={handleGoogleSignUp}
@@ -143,40 +126,6 @@ export default function SignUp() {
           Already have an account?{' '}
           <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
         </p>
-
-        {/* Organizer code divider */}
-        <div className="mt-6 border-t border-slate-200 pt-5">
-          <button
-            type="button"
-            onClick={() => { setShowOrgCode((v) => !v); setOrgError('') }}
-            className="w-full text-sm text-blue font-semibold text-center hover:text-blue-dark transition-colors"
-          >
-            {showOrgCode ? 'Hide organizer code' : "I'm an organizer — enter access code"}
-          </button>
-
-          {showOrgCode && (
-            <div className="mt-3 space-y-2">
-              <p className="text-xs text-slate-400 text-center">
-                Chapter officers and HQ admins get a code from their chapter lead.
-              </p>
-              <input
-                value={orgCode}
-                onChange={(e) => { setOrgCode(e.target.value); setOrgError('') }}
-                onKeyDown={(e) => e.key === 'Enter' && handleOrgCode()}
-                placeholder="e.g. ORG-MANILA"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase"
-              />
-              {orgError && <p className="text-red text-xs">{orgError}</p>}
-              <button
-                type="button"
-                onClick={handleOrgCode}
-                className="w-full bg-navy text-white font-bold py-3 rounded-xl hover:bg-blue transition-colors"
-              >
-                Access Organizer Portal →
-              </button>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )

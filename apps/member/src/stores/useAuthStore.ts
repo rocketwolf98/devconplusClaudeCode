@@ -6,14 +6,17 @@ interface AuthState {
   user: Profile | null
   initials: string
   isLoading: boolean
+  isOrganizerSession: boolean
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => void
+  setOrganizerSession: (val: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: MOCK_PROFILE, // mock: pre-authenticated
   initials: 'MS',
   isLoading: false,
+  isOrganizerSession: false,
 
   signIn: async (_email: string, _password: string) => {
     set({ isLoading: true })
@@ -23,6 +26,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: () => {
-    set({ user: null, initials: '' })
+    set({ user: null, initials: '', isOrganizerSession: false })
+  },
+
+  setOrganizerSession: (val: boolean) => {
+    set({ isOrganizerSession: val })
   },
 }))
