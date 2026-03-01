@@ -27,13 +27,16 @@ export default function PointsHistory() {
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-white/70 text-sm mb-3 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-24 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Points History</h1>
         <p className="text-gold font-bold text-2xl mt-1">{totalPoints.toLocaleString()} pts</p>
       </div>
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute top-14 left-4 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
 
       <div className="bg-slate-50 min-h-screen p-4">
         {groups.length === 0 ? (

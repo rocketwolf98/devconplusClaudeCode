@@ -27,13 +27,16 @@ export default function EventRegister() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-white/70 text-sm mb-3 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Back
-        </button>
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-24 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Register</h1>
         <p className="text-white/60 text-sm mt-1">{event.title}</p>
       </div>
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute top-14 left-4 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
 
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
         <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Your Details (pre-filled)</p>
