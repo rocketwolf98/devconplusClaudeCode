@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -34,10 +34,23 @@ export default function Dashboard() {
   const [bannerIdx, setBannerIdx] = useState(0)
   const [newsTab, setNewsTab] = useState<'devcon' | 'community'>('devcon')
   const [showVolunteerModal, setShowVolunteerModal] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const xpSectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const t = setInterval(() => setBannerIdx((i) => (i + 1) % BANNERS.length), 4000)
     return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
+    const el = xpSectionRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => setIsScrolled(!entry.isIntersecting),
+      { threshold: 0 }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
   }, [])
 
   const banner = BANNERS[bannerIdx]
@@ -52,22 +65,29 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* ── Header ── */}
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
-        {/* Greeting row */}
-        <div className="flex items-center justify-between mb-4">
+      {/* ── Sticky greeting bar ── */}
+      <div className={`sticky top-0 z-40 bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-4 ${isScrolled ? 'rounded-b-3xl' : ''}`}>
+        <div className="flex items-center justify-between">
           <div>
             <p className="text-white/60 text-xs">Welcome back,</p>
-            <h1 className="text-white text-xl font-bold">Hi, {firstName}! 👋</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-white text-xl font-bold">Hi, {firstName}! 👋</h1>
+              {isScrolled && (
+                <span className="bg-gold/20 text-gold text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide">DEVCON+</span>
+              )}
+            </div>
           </div>
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
             <span className="text-sm font-bold text-white">{MOCK_PROFILE_INITIALS}</span>
           </div>
         </div>
+      </div>
 
+      {/* ── Collapsible: banner + XP card ── */}
+      <div ref={xpSectionRef} className="bg-gradient-to-br from-blue to-navy px-4 pb-6 rounded-b-3xl">
         {/* Rotating banner pill */}
         <div
-          className="bg-white/10 rounded-xl px-3 py-2 cursor-pointer mb-4"
+          className="bg-white/10 rounded-xl px-3 py-2 cursor-pointer mb-4 mt-1"
           onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
         >
           <p className="text-white/50 text-[10px] uppercase tracking-widest">{banner.sub}</p>
@@ -82,7 +102,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* XP card — glass panel inside header */}
+        {/* XP card */}
         <div className="bg-white/10 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
             <div>
