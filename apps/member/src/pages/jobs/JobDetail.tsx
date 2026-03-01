@@ -23,7 +23,7 @@ export default function JobDetail() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-navy px-4 pt-14 pb-6 relative">
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl relative">
         <button
           onClick={() => navigate(-1)}
           className="text-white/70 mb-3 flex items-center gap-1.5 text-sm"

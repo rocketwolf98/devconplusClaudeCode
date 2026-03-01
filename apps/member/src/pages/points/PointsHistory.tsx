@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { usePointsStore } from '../../stores/usePointsStore'
 import TransactionRow from '../../components/TransactionRow'
 import type { PointTransaction } from '@devcon-plus/supabase'
@@ -26,8 +27,10 @@ export default function PointsHistory() {
 
   return (
     <div>
-      <div className="bg-navy px-4 pt-14 pb-6">
-        <button onClick={() => navigate(-1)} className="text-white/70 text-sm mb-3">← Back</button>
+      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-white/70 text-sm mb-3 hover:text-white transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
         <h1 className="text-white text-xl font-bold">Points History</h1>
         <p className="text-gold font-bold text-2xl mt-1">{totalPoints.toLocaleString()} pts</p>
       </div>
