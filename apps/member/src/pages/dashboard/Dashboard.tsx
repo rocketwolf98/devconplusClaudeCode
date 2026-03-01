@@ -9,7 +9,7 @@ import EventCard from '../../components/EventCard'
 import NewsCard from '../../components/NewsCard'
 import PromotedBadge from '../../components/PromotedBadge'
 import ComingSoonModal from '../../components/ComingSoonModal'
-import { NEWS_POSTS, MOCK_PROFILE_INITIALS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabase'
+import { NEWS_POSTS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabase'
 
 const BANNERS = [
   {
