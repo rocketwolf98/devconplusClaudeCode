@@ -42,7 +42,7 @@ export default function EventsList() {
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                tab === t ? 'bg-white text-navy' : 'bg-white/10 text-white/70'
+                tab === t ? 'bg-blue text-white' : 'bg-white/10 text-white/70'
               }`}
             >
               {t === 'discover' ? 'Discover' : 'My Tickets'}
@@ -56,7 +56,7 @@ export default function EventsList() {
                 key={ch}
                 onClick={() => setChapter(ch)}
                 className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                  chapter === ch ? 'bg-white text-navy' : 'bg-white/10 text-white/70'
+                  chapter === ch ? 'bg-blue text-white' : 'bg-white/10 text-white/70'
                 }`}
               >
                 {ch}
