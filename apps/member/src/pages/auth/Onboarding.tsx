@@ -5,25 +5,21 @@ import type { LucideIcon } from 'lucide-react'
 
 const slides: { gradient: string; Icon: LucideIcon; title: string; subtitle: string }[] = [
   {
-    gradient: 'from-navy via-blue to-blue',
     Icon: Users,
     title: "The Philippines' Largest Volunteer Tech Community",
     subtitle: 'DEVCON Philippines',
   },
   {
-    gradient: 'from-blue to-navy',
     Icon: Map,
     title: '11 Chapters. 16 Years. 60,000+ Geeks for Good.',
     subtitle: 'Nationwide community',
   },
   {
-    gradient: 'from-navy to-blue-dark',
     Icon: Star,
     title: 'Volunteer. Earn Points. Unlock Rewards.',
     subtitle: 'Points+ system',
   },
   {
-    gradient: 'from-blue-dark to-navy',
     Icon: Globe,
     title: 'Access Global Opportunities. Level Up Your Career.',
     subtitle: 'Jobs + Career',
@@ -46,7 +42,7 @@ export default function Onboarding() {
           {slides.map((slide, i) => (
             <div
               key={i}
-              className={`min-w-full h-full bg-gradient-to-b ${slide.gradient} flex flex-col items-center justify-center px-8 text-center`}
+              className={`min-w-full h-full bg-blue flex flex-col items-center justify-center px-8 text-center`}
             >
               <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mb-8">
                 <slide.Icon className="w-12 h-12 text-white" strokeWidth={1.5} />

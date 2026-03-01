@@ -88,7 +88,7 @@ export function OrgQRScanner() {
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 pb-6 rounded-b-3xl">
         <h1 className="text-2xl font-black text-white mb-1">QR Scanner</h1>
         <p className="text-white/60 text-sm">
           Scan member QR tickets at the door to award attendance XP.

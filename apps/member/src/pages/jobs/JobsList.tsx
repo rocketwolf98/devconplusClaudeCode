@@ -43,7 +43,7 @@ export default function JobsList() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-4 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 pb-4 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold mb-3">Jobs Board</h1>
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
@@ -73,8 +73,7 @@ export default function JobsList() {
 
         {/* Developer Equity promo card */}
         <div
-          className="rounded-2xl p-4 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #6B3FA0, #3B5BDE)' }}
+          className="rounded-2xl p-4 overflow-hidden bg-blue"
         >
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-4 h-4 text-gold" />

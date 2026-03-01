@@ -15,7 +15,7 @@ export default function DesktopGuard({ children }: { children: React.ReactNode }
 
   if (isDesktop) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue to-navy flex flex-col items-center justify-center p-8 text-center">
+      <div className="min-h-screen bg-blue flex flex-col items-center justify-center p-8 text-center">
         <div className="w-20 h-20 rounded-3xl bg-white/20 border border-white/30 flex items-center justify-center text-white font-black text-3xl mb-6">
           D+
         </div>

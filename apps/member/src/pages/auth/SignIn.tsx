@@ -43,7 +43,7 @@ export default function SignIn() {
   return (
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Gradient header */}
-      <div className="bg-gradient-to-b from-navy to-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-blue px-6 pt-16 pb-10 text-center">
         <h1 className="text-white text-3xl font-bold">
           DEVCON<span className="text-gold">+</span>
         </h1>

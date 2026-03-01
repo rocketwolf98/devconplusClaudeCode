@@ -11,7 +11,7 @@ export default function Privacy() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-24 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-24 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Privacy</h1>
       </div>
       <button

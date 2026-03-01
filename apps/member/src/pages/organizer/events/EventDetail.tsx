@@ -41,7 +41,7 @@ export function OrgEventDetail() {
         {event.cover_image_url ? (
           <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
         ) : (
-          <div className="w-full h-48 bg-gradient-to-br from-blue to-navy flex items-center justify-center">
+          <div className="w-full h-48 bg-blue flex items-center justify-center">
             <CalendarDays className="w-16 h-16 text-white/20" />
           </div>
         )}

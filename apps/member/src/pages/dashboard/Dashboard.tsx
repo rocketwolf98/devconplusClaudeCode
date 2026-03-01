@@ -16,21 +16,18 @@ const BANNERS = [
     title:    '#SheIsDEVCON',
     sub:      'DEVCON Philippines · Nationwide',
     cta:      'Learn More',
-    gradient: 'from-purple-700 via-pink-600 to-rose-500',
     onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
   },
   {
     title:    'Kids Hour of AI',
     sub:      'DEVCON Philippines · All Chapters',
     cta:      'Register Now',
-    gradient: 'from-blue via-sky-500 to-cyan-400',
     onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
   },
   {
     title:    '16 Years of DEVCON',
     sub:      'DEVCON Philippines · Celebrating Tech',
     cta:      'See Highlights',
-    gradient: 'from-navy via-blue to-indigo-400',
     onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
   },
 ]
@@ -86,7 +83,7 @@ export default function Dashboard() {
     <div>
       {/* ── Sticky greeting bar ── */}
       <div
-        className="sticky top-0 z-40 bg-gradient-to-br from-blue to-navy px-6 pt-14 pb-6"
+        className="sticky top-0 z-40 bg-blue px-6 pt-14 pb-6"
         style={isScrolled ? { borderRadius: '0 0 100% 100% / 0 0 40px 40px' } : undefined}
       >
         <div className="flex items-center justify-between">
@@ -101,7 +98,7 @@ export default function Dashboard() {
       {/* ── Collapsible: XP card ── */}
       <div
         ref={xpSectionRef}
-        className="bg-gradient-to-br from-blue to-navy px-4 pb-10"
+        className="bg-blue px-4 pb-10"
         style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px' }}
       >
         {/* White XP card */}
@@ -155,7 +152,7 @@ export default function Dashboard() {
         {/* Rotating banner */}
         <div className="px-4">
           <div
-            className={`relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-br ${banner.gradient}`}
+            className={`relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-blue`}
             onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
           >
             <div className="absolute inset-0 bg-black/35" />

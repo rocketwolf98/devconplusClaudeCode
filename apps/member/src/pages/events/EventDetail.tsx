@@ -21,7 +21,7 @@ export default function EventDetail() {
       {event.cover_image_url ? (
         <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
       ) : (
-        <div className="w-full h-52 bg-gradient-to-br from-blue to-navy flex items-center justify-center rounded-b-3xl">
+        <div className="w-full h-52 bg-blue flex items-center justify-center rounded-b-3xl">
           <CalendarDays className="w-20 h-20 text-white/20" />
         </div>
       )}

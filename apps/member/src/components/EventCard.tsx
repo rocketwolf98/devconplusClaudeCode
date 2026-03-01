@@ -27,7 +27,7 @@ export default function EventCard({ event, compact = false }: { event: Event; co
           className={`w-full object-cover ${compact ? 'h-28' : 'h-36'}`}
         />
       ) : (
-        <div className={`w-full bg-gradient-to-br from-blue to-navy flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
+        <div className={`w-full bg-blue flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
           <CalendarDays className="w-12 h-12 text-white/20" />
         </div>
       )}

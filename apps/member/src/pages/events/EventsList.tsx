@@ -34,7 +34,7 @@ export default function EventsList() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-4 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 pb-4 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold mb-3">Events</h1>
         <div className="flex gap-2 mb-3">
           {(['discover', 'tickets'] as const).map((t) => (

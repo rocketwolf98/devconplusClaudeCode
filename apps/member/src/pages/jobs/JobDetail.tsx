@@ -23,7 +23,7 @@ export default function JobDetail() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-24 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-24 pb-6 rounded-b-3xl">
         <p className="text-white/60 text-xs">{job.company}</p>
         <h1 className="text-white text-xl font-bold">{job.title}</h1>
         <div className="flex items-center gap-2 mt-2">

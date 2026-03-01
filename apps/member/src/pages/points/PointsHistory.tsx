@@ -27,7 +27,7 @@ export default function PointsHistory() {
 
   return (
     <div>
-      <div className="bg-gradient-to-br from-blue to-navy px-4 pt-24 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-24 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Points History</h1>
         <p className="text-gold font-bold text-2xl mt-1">{totalPoints.toLocaleString()} pts</p>
       </div>
