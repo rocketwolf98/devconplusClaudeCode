@@ -36,13 +36,15 @@ export default function Rewards() {
               <button
                 key={reward.id}
                 onClick={() => setSelected(reward.name)}
-                className="bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left"
+                className="bg-white rounded-2xl border border-slate-200 shadow-card text-left overflow-hidden"
               >
-                <div className="w-full h-24 bg-gradient-to-br from-blue/10 to-navy/10 rounded-xl flex items-center justify-center mb-3">
-                  <Icon className="w-10 h-10 text-blue/60" />
+                <div className="w-full h-24 bg-gradient-to-br from-blue to-navy flex items-center justify-center">
+                  <Icon className="w-10 h-10 text-white/20" />
                 </div>
-                <p className="font-semibold text-slate-900 text-sm leading-tight">{reward.name}</p>
-                <p className="text-xs font-bold text-blue mt-1">{reward.points_cost.toLocaleString()} pts</p>
+                <div className="p-3 pt-2.5">
+                  <p className="font-semibold text-slate-900 text-sm leading-tight">{reward.name}</p>
+                  <p className="text-xs font-bold text-blue mt-1">{reward.points_cost.toLocaleString()} pts</p>
+                </div>
               </button>
             )
           })}

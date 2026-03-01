@@ -14,7 +14,7 @@ export const EVENTS: Event[] = [
     status: 'upcoming',
     is_featured: true,
     is_promoted: false,
-    cover_image_url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400&q=80',
+    cover_image_url: null,
     created_by: 'organizer-1',
     created_at: '2026-01-10T00:00:00Z',
   },

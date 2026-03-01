@@ -13,7 +13,7 @@ export default function EventCard({ event, compact = false }: { event: Event; co
   return (
     <button
       onClick={() => navigate(`/events/${event.id}`)}
-      className="w-full bg-white rounded-2xl shadow-card p-4 text-left relative overflow-hidden"
+      className="w-full bg-white rounded-2xl shadow-card text-left relative overflow-hidden"
     >
       {event.is_promoted && (
         <div className="absolute top-3 right-3 z-10">
@@ -24,18 +24,20 @@ export default function EventCard({ event, compact = false }: { event: Event; co
         <img
           src={event.cover_image_url}
           alt={event.title}
-          className={`w-full object-cover rounded-xl mb-3 ${compact ? 'h-28' : 'h-36'}`}
+          className={`w-full object-cover ${compact ? 'h-28' : 'h-36'}`}
         />
       ) : (
-        <div className={`w-full rounded-xl mb-3 bg-gradient-to-br from-blue to-navy flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
+        <div className={`w-full bg-gradient-to-br from-blue to-navy flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
           <CalendarDays className="w-12 h-12 text-white/20" />
         </div>
       )}
-      <p className="text-xs text-slate-400 mb-0.5">{dateStr}</p>
-      <p className="font-semibold text-slate-900 text-sm leading-tight mb-2 pr-12">{event.title}</p>
-      <div className="flex items-center gap-2">
-        <StatusPill status={event.status as 'upcoming' | 'ongoing' | 'past'} />
-        <span className="text-xs text-blue font-semibold">+{event.points_value} pts</span>
+      <div className="p-4 pt-3">
+        <p className="text-xs text-slate-400 mb-0.5">{dateStr}</p>
+        <p className="font-semibold text-slate-900 text-sm leading-tight mb-2 pr-12">{event.title}</p>
+        <div className="flex items-center gap-2">
+          <StatusPill status={event.status as 'upcoming' | 'ongoing' | 'past'} />
+          <span className="text-xs text-blue font-semibold">+{event.points_value} pts</span>
+        </div>
       </div>
     </button>
   )

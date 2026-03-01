@@ -12,9 +12,27 @@ import ComingSoonModal from '../../components/ComingSoonModal'
 import { NEWS_POSTS, MOCK_PROFILE_INITIALS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabase'
 
 const BANNERS = [
-  { tag: '#SHEISDEVCON',    sub: 'Empowering women in tech' },
-  { tag: 'KIDS HOUR OF AI', sub: 'Introducing AI to the next gen' },
-  { tag: '16 YEARS ANNIV',  sub: 'Celebrating 16 years of DEVCON' },
+  {
+    title:    '#SheIsDEVCON',
+    sub:      'DEVCON Philippines · Nationwide',
+    cta:      'Learn More',
+    gradient: 'from-purple-700 via-pink-600 to-rose-500',
+    onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
+  },
+  {
+    title:    'Kids Hour of AI',
+    sub:      'DEVCON Philippines · All Chapters',
+    cta:      'Register Now',
+    gradient: 'from-blue via-sky-500 to-cyan-400',
+    onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
+  },
+  {
+    title:    '16 Years of DEVCON',
+    sub:      'DEVCON Philippines · Celebrating Tech',
+    cta:      'See Highlights',
+    gradient: 'from-navy via-blue to-indigo-400',
+    onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
+  },
 ]
 
 const WORK_TYPE_LABEL: Record<string, string> = {
@@ -54,6 +72,7 @@ export default function Dashboard() {
   }, [])
 
   const banner = BANNERS[bannerIdx]
+  const handleBannerCta = () => banner.onClick(navigate)
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
   const progressPct = Math.min((totalPoints / MOCK_PROFILE_XP_NEXT_MILESTONE) * 100, 100)
   const forYouEvents = events.filter((e) => e.status === 'upcoming').slice(0, 3)
@@ -108,23 +127,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Rotating banner — in feed */}
-      <div
-        className="mx-4 mt-4 bg-navy rounded-2xl px-4 py-3 cursor-pointer"
-        onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
-      >
-        <p className="text-white/50 text-[10px] uppercase tracking-widest">{banner.sub}</p>
-        <p className="text-gold text-sm font-extrabold tracking-wide">{banner.tag}</p>
-        <div className="flex gap-1 mt-2">
-          {BANNERS.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1 rounded-full transition-all ${i === bannerIdx ? 'w-4 bg-gold' : 'w-1 bg-white/30'}`}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* ── Scrollable feed ── */}
       <div className="bg-slate-50 space-y-6 pb-8">
 
@@ -149,6 +151,36 @@ export default function Dashboard() {
             ))}
           </div>
         </section>
+
+        {/* Rotating banner */}
+        <div className="px-4">
+          <div
+            className={`relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-gradient-to-br ${banner.gradient}`}
+            onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
+          >
+            <div className="absolute inset-0 bg-black/35" />
+            <div className="absolute inset-0 flex flex-col justify-between p-5">
+              <div>
+                <p className="text-white/70 text-[11px] font-medium uppercase tracking-widest mb-1">{banner.sub}</p>
+                <p className="text-white text-2xl font-black leading-tight max-w-[70%]">{banner.title}</p>
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); handleBannerCta() }}
+                className="self-start bg-blue text-white text-xs font-bold px-4 py-2 rounded-full shadow"
+              >
+                {banner.cta}
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-center gap-1.5 mt-2.5">
+            {BANNERS.map((_, i) => (
+              <div
+                key={i}
+                className={`rounded-full transition-all ${i === bannerIdx ? 'w-4 h-1.5 bg-navy' : 'w-1.5 h-1.5 bg-slate-300'}`}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* Events For You */}
         <section>
