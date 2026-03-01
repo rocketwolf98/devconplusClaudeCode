@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame } from 'lucide-react'
+import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame, Star } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useJobsStore } from '../../stores/useJobsStore'
@@ -66,62 +66,62 @@ export default function Dashboard() {
   return (
     <div>
       {/* ── Sticky greeting bar ── */}
-      <div className={`sticky top-0 z-40 bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-4 ${isScrolled ? 'rounded-b-3xl' : ''}`}>
+      <div
+        className="sticky top-0 z-40 bg-gradient-to-br from-blue to-navy px-6 pt-14 pb-6"
+        style={isScrolled ? { borderRadius: '0 0 100% 100% / 0 0 40px 40px' } : undefined}
+      >
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white/60 text-xs">Welcome back,</p>
-            <div className="flex items-center gap-2">
-              <h1 className="text-white text-xl font-bold">Hi, {firstName}! 👋</h1>
-              {isScrolled && (
-                <span className="bg-gold/20 text-gold text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide">DEVCON+</span>
-              )}
-            </div>
-          </div>
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-sm font-bold text-white">{MOCK_PROFILE_INITIALS}</span>
+          <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-white font-black text-lg tracking-tight">DEVCON</span>
+            <span className="text-gold font-black text-xl">+</span>
           </div>
         </div>
       </div>
 
-      {/* ── Collapsible: banner + XP card ── */}
-      <div ref={xpSectionRef} className="bg-gradient-to-br from-blue to-navy px-4 pb-6 rounded-b-3xl">
-        {/* Rotating banner pill */}
-        <div
-          className="bg-white/10 rounded-xl px-3 py-2 cursor-pointer mb-4 mt-1"
-          onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
-        >
-          <p className="text-white/50 text-[10px] uppercase tracking-widest">{banner.sub}</p>
-          <p className="text-gold text-sm font-extrabold tracking-wide">{banner.tag}</p>
-          <div className="flex gap-1 mt-2">
-            {BANNERS.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1 rounded-full transition-all ${i === bannerIdx ? 'w-4 bg-gold' : 'w-1 bg-white/30'}`}
-              />
-            ))}
+      {/* ── Collapsible: XP card ── */}
+      <div
+        ref={xpSectionRef}
+        className="bg-gradient-to-br from-blue to-navy px-4 pb-10"
+        style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px' }}
+      >
+        {/* White XP card */}
+        <div className="bg-white rounded-3xl shadow-lg p-5">
+          <p className="text-slate-400 text-xs font-medium mb-3">Current DEVCON Points</p>
+          <div className="flex items-end gap-2 mb-3">
+            <Star className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
+            <span className="text-4xl font-black text-slate-900 leading-none">{totalPoints.toLocaleString()}</span>
+            <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
           </div>
-        </div>
-
-        {/* XP card */}
-        <div className="bg-white/10 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <p className="text-white/60 text-xs">Points+ Balance</p>
-              <p className="text-white text-2xl font-black">{totalPoints.toLocaleString()} pts</p>
-            </div>
-            <button
-              onClick={() => navigate('/rewards')}
-              className="bg-gold px-3 py-1.5 rounded-xl text-navy text-xs font-bold"
-            >
-              Redeem Now
-            </button>
-          </div>
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-1.5">
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
             <div className="h-full bg-gold rounded-full transition-all" style={{ width: `${progressPct}%` }} />
           </div>
-          <p className="text-white/50 text-xs">
+          <p className="text-slate-400 text-xs mb-4">
             {Math.max(MOCK_PROFILE_XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
           </p>
+          <button
+            onClick={() => navigate('/events')}
+            className="w-full bg-blue text-white font-bold py-3.5 rounded-2xl text-sm"
+          >
+            Attend Our Events
+          </button>
+        </div>
+      </div>
+
+      {/* Rotating banner — in feed */}
+      <div
+        className="mx-4 mt-4 bg-navy rounded-2xl px-4 py-3 cursor-pointer"
+        onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
+      >
+        <p className="text-white/50 text-[10px] uppercase tracking-widest">{banner.sub}</p>
+        <p className="text-gold text-sm font-extrabold tracking-wide">{banner.tag}</p>
+        <div className="flex gap-1 mt-2">
+          {BANNERS.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all ${i === bannerIdx ? 'w-4 bg-gold' : 'w-1 bg-white/30'}`}
+            />
+          ))}
         </div>
       </div>
 
