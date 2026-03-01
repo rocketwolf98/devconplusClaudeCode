@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TrendingUp, Users, MapPin, ChevronRight, Ticket } from 'lucide-react'
 import { useEventsStore } from '../../stores/useEventsStore'
-import ChipBar from '../../components/ChipBar'
 
 const CHAPTERS = ['All', 'Manila', 'Cebu', 'Davao', 'Laguna', 'Iloilo', 'Pampanga', 'Bulacan', 'Bacolod', 'CDO', 'GenSan', 'Zamboanga']
 
@@ -36,28 +35,36 @@ export default function EventsList() {
     <div>
       {/* ── Header ── */}
       <div className="bg-gradient-to-br from-blue to-navy px-4 pt-14 pb-4 rounded-b-3xl">
-        <h1 className="text-white text-xl font-bold mb-4">Events</h1>
-        <div className="flex gap-2">
+        <h1 className="text-white text-xl font-bold mb-3">Events</h1>
+        <div className="flex gap-2 mb-3">
           {(['discover', 'tickets'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                tab === t ? 'bg-blue text-white' : 'bg-white/10 text-white/70'
+                tab === t ? 'bg-white text-navy' : 'bg-white/10 text-white/70'
               }`}
             >
               {t === 'discover' ? 'Discover' : 'My Tickets'}
             </button>
           ))}
         </div>
+        {tab === 'discover' && (
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {CHAPTERS.map((ch) => (
+              <button
+                key={ch}
+                onClick={() => setChapter(ch)}
+                className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+                  chapter === ch ? 'bg-white text-navy' : 'bg-white/10 text-white/70'
+                }`}
+              >
+                {ch}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Chapter filter chips — Discover only */}
-      {tab === 'discover' && (
-        <div className="bg-navy pb-3">
-          <ChipBar options={CHAPTERS} selected={chapter} onChange={setChapter} />
-        </div>
-      )}
 
       {/* ── Discover tab ── */}
       {tab === 'discover' && (
