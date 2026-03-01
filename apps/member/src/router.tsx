@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import MemberLayout from './components/MemberLayout'
 import OrganizerLayout from './components/OrganizerLayout'
 
@@ -35,6 +35,9 @@ import { OrgQRScanner } from './pages/organizer/scan/QRScanner'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 
 export const router = createBrowserRouter([
+  // Root — always start at onboarding
+  { path: '/',                     element: <Navigate to="/onboarding" replace /> },
+
   // Auth routes — no layout
   { path: '/onboarding',           element: <Onboarding /> },
   { path: '/sign-in',              element: <SignIn /> },
@@ -45,7 +48,7 @@ export const router = createBrowserRouter([
   {
     element: <MemberLayout />,
     children: [
-      { path: '/',                          element: <Dashboard /> },
+      { path: '/home',                       element: <Dashboard /> },
       { path: '/events',                    element: <EventsList /> },
       { path: '/events/:id',                element: <EventDetail /> },
       { path: '/events/:id/register',       element: <EventRegister /> },

@@ -4,7 +4,7 @@ import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 
 const LEFT_TABS = [
-  { path: '/',        label: 'Home',    icon: Home,     end: true },
+  { path: '/home',    label: 'Home',    icon: Home,     end: true },
   { path: '/rewards', label: 'Rewards', icon: Gift,     end: false },
 ]
 
