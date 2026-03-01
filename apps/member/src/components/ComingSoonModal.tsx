@@ -12,7 +12,7 @@ export default function ComingSoonModal({ onClose, feature = 'This feature' }: P
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-lg rounded-t-2xl p-6 pb-10"
+        className="bg-white w-full max-w-lg rounded-t-2xl p-6 pb-32"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-6" />
