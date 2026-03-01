@@ -1,5 +1,7 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
+import { useAuthStore } from '../stores/useAuthStore'
 
 const LEFT_TABS = [
   { path: '/',        label: 'Home',    icon: Home,     end: true },
@@ -12,6 +14,15 @@ const RIGHT_TABS = [
 ]
 
 export default function MemberLayout() {
+  const { user } = useAuthStore()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!user) navigate('/onboarding', { replace: true })
+  }, [user, navigate])
+
+  if (!user) return null
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Scrollable page content — leave room for the bottom nav */}
