@@ -1,5 +1,5 @@
 # DEVCON+ — Claude Code Master Context File
-> Last Updated: February 25, 2026
+> Last Updated: March 3, 2026
 > Version: MVP 1.0
 > Team: 2 interns + Claude Code
 > Hard Deadline: April Week 1 (Cohort 3 Graduation)
@@ -17,10 +17,13 @@ These rules are non-negotiable. Read before generating anything.
 4. **Never create dead-end navigation.** Every tap must resolve to content or a `ComingSoonModal`.
 5. **Always pre-fill registration forms** from the authenticated Supabase user's profile data.
 6. **Always use TypeScript strict mode.** No `any` types.
-7. **The Organizer PWA and Member App are two separate codebases** sharing one Supabase project. Do not mix their routing or components.
+7. **The Member App and Organizer flow share ONE codebase** (`apps/member/`) but use separate layouts and route trees. Member routes are under `MemberLayout`. Organizer routes are under `OrganizerLayout` at `/organizer/*`. Do not mix their components.
 8. **Jobs Board is manually seeded in Supabase for MVP.** No external API integration needed.
-9. **Photos in onboarding are real chapter group photos.** If assets are missing, use named gradient placeholders — never stock illustration components.
+9. **Photos in onboarding are real chapter group photos** served from `public/photos/`. If assets are missing, use named gradient placeholders — never stock illustration components.
 10. **The 2nd job listing and 2nd news post always get an orange `PROMOTED` badge.** This is a design mandate, not optional.
+11. **The member app is a mobile-first web app** (React + Vite, not Expo). A `<DesktopGuard />` blocks the layout on desktop — all UI must be designed for a 390px-wide mobile viewport.
+12. **Primary color is CSS-custom-property driven** (`rgb(var(--color-primary))`). Always use `text-primary`, `bg-primary`, etc. — not hardcoded hex. Only use `text-blue` / `bg-blue` when you explicitly need the non-themed DEVCON blue alias.
+13. **All data is currently mocked.** Stores use `MOCK_*` exports from `@devcon-plus/supabase`. Do not add real Supabase calls until the Supabase project is provisioned.
 
 ---
 
@@ -34,7 +37,7 @@ These rules are non-negotiable. Read before generating anything.
 - Mandatory event registration tool for all 100+ annual chapter events
 - Gamified volunteer engagement via the Points+ system
 - Global tech career opportunities for Filipino developers
-- Chapter officer management layer (Organizer PWA)
+- Chapter officer management layer (Organizer flow)
 
 **UX Benchmark:** The nmblr+ app (reference photos — dashboard, events list, points history, profile screens). Pattern-match the layout, card style, navigation feel, and points display format exactly.
 
@@ -42,16 +45,18 @@ These rules are non-negotiable. Read before generating anything.
 
 ## 2. REPOSITORY STRUCTURE
 
-Monorepo using npm workspaces. Both apps share Supabase type definitions.
+Monorepo using npm workspaces + Turbo.
 
 ```
 devcon-plus/
 ├── apps/
-│   ├── member/              # React Native (Expo) — mobile app
-│   └── organizer/           # React + Vite — browser PWA
+│   ├── member/              # React + Vite — mobile-first web app
+│   │                        # Contains BOTH member UI and organizer UI
+│   │                        # (organizer is a separate route tree at /organizer/*)
+│   └── landing/             # Static landing page (index.html only)
 ├── packages/
-│   └── supabase/            # shared DB types, client config, migrations
-├── package.json             # workspace root
+│   └── supabase/            # Shared DB types, mock data, client config
+├── package.json             # Workspace root (framer-motion lives here)
 └── turbo.json
 ```
 
@@ -59,43 +64,33 @@ devcon-plus/
 
 ## 3. TECH STACK
 
-### Member App (`apps/member/`)
+### Member App + Organizer UI (`apps/member/`)
 | Concern | Choice |
 |---------|--------|
-| Framework | React Native via **Expo SDK 51+** |
-| Router | **Expo Router v3** (file-based) |
-| Styling | **NativeWind v4** (Tailwind for RN) |
-| State | **Zustand** |
-| Forms | **React Hook Form** + **Zod** |
-| Backend client | `@supabase/supabase-js` |
-| QR Display | `react-native-qrcode-svg` |
-| Auth | Supabase Auth (Google OAuth + email/password) |
-| Image handling | `expo-image` |
-| Language | TypeScript (strict) |
-
-### Organizer PWA (`apps/organizer/`)
-| Concern | Choice |
-|---------|--------|
-| Framework | **React 18** + **Vite** |
-| Router | **React Router v6** |
+| Framework | **React 19** + **Vite 7** |
+| Router | **React Router DOM v7** (flat `createBrowserRouter`) |
 | Styling | **Tailwind CSS v3** |
-| State | **Zustand** |
-| Forms | **React Hook Form** + **Zod** |
-| Backend client | `@supabase/supabase-js` |
-| QR Scanner | `@zxing/browser` (getUserMedia — Chrome/Android primary) |
+| Animation | **framer-motion** (workspace root dependency) |
+| State | **Zustand v5** |
+| Forms | **React Hook Form v7** + **Zod** |
+| Backend client | `@supabase/supabase-js` (wired — awaiting live project) |
+| QR Display | `qrcode.react` |
+| QR Scanning | `@zxing/browser` + `@zxing/library` |
+| Icons | `lucide-react` (only — no emoji icons in JSX) |
+| Auth | Supabase Auth (Google OAuth + email/password) |
 | Language | TypeScript (strict) |
+| Font | **Geist** (loaded in `index.css`) |
 
-> ⚠️ QR scanning in the Organizer PWA uses `getUserMedia`. Works on Chrome (desktop + Android). iOS Safari has limitations — advise officers to use Chrome on Android or desktop for door scanning.
+> This is a **web app**, not React Native. There is no Expo, no NativeWind, no RN StyleSheet. All styling is plain Tailwind CSS classes.
 
-### Backend (Shared)
+> A `<DesktopGuard />` wraps the app root. On non-mobile viewports it renders a "Please open on mobile" screen. All UI targets 390px width.
+
+### Shared Package (`packages/supabase/`)
 | Concern | Choice |
 |---------|--------|
-| Platform | **Supabase** (new project — not yet provisioned) |
-| Database | PostgreSQL via Supabase |
-| Auth | Supabase Auth |
-| Storage | Supabase Storage (chapter photos, assets) |
-| Serverless | Supabase Edge Functions (Deno/TypeScript) |
-| Realtime | Supabase Realtime (registration status updates) |
+| Exports | TypeScript types + mock data |
+| Mock data | `MOCK_PROFILE`, `MOCK_EVENTS`, `MOCK_JOBS`, `NEWS_POSTS`, etc. |
+| Real client | `@supabase/supabase-js` (not yet wired) |
 
 ---
 
@@ -174,7 +169,7 @@ CREATE TABLE event_registrations (
 );
 ```
 
-> **Approval logic:** If `events.requires_approval = false` → auto-set status to `approved` and generate `qr_code_token` on insert via Edge Function. If `true` → status stays `pending` until an officer approves in the Organizer PWA.
+> **Approval logic:** If `events.requires_approval = false` → auto-set status to `approved` and generate `qr_code_token` on insert via Edge Function. If `true` → status stays `pending` until an officer approves.
 
 ### `point_transactions`
 ```sql
@@ -237,8 +232,6 @@ CREATE TABLE jobs (
 );
 ```
 
-> **MVP note:** Jobs are manually seeded. No external API. Seed 8–10 realistic tech roles. The Sui-related role has `is_promoted = true` and renders as the 2nd listing with an orange PROMOTED badge.
-
 ### `news_posts`
 ```sql
 CREATE TABLE news_posts (
@@ -270,9 +263,9 @@ CREATE TABLE news_posts (
 Sign Up → "DO YOU HAVE AN ORGANIZER CODE?"
   → YES: validate against organizer_codes table
          → assign role + chapter_id to profile
-         → route to Organizer PWA (separate URL)
+         → route to /organizer (OrganizerLayout)
   → NO:  default to member role
-         → route to Member App (React Native)
+         → route to /home (MemberLayout)
 ```
 
 ### Key RLS Policies
@@ -301,61 +294,54 @@ CREATE POLICY "Users view own points" ON point_transactions
 
 ## 6. APPLICATION SCREENS & ROUTES
 
-### Member App — Expo Router
+### React Router (flat `createBrowserRouter` in `apps/member/src/router.tsx`)
+
 ```
-app/
-├── _layout.tsx
-├── (auth)/
-│   ├── onboarding.tsx         # 4-step swipeable intro
-│   ├── sign-in.tsx
-│   ├── sign-up.tsx
-│   └── organizer-code.tsx     # "DO YOU HAVE AN ORGANIZER CODE?"
-└── (tabs)/
-    ├── _layout.tsx            # 5-tab bottom navigator
-    ├── index.tsx              # Dashboard
-    ├── events/
-    │   ├── index.tsx          # Events list (For You + All + Chapter filter)
-    │   ├── [id].tsx           # Event detail
-    │   ├── [id]/register.tsx  # Registration form (pre-filled)
-    │   ├── [id]/pending.tsx   # Pending approval screen
-    │   └── [id]/ticket.tsx    # QR Ticket
-    ├── jobs/
-    │   ├── index.tsx          # Jobs board
-    │   └── [id].tsx           # Job detail → Apply Now
-    ├── points/
-    │   ├── index.tsx          # XP bar + earn options
-    │   └── history.tsx        # Transaction log
-    ├── rewards/
-    │   └── index.tsx          # Perks catalog (ComingSoonModal on tap for MVP)
-    └── profile/
-        ├── index.tsx
-        ├── edit.tsx
-        ├── notifications.tsx
-        └── privacy.tsx
+/                        → SplashScreen
+/onboarding              → Onboarding (4-step swipeable, real chapter photos)
+/sign-in                 → SignIn
+/sign-up                 → SignUp
+/organizer-code-gate     → OrganizerCodeGate
+
+— MemberLayout (floating pill bottom nav) —
+/home                    → Dashboard
+/events                  → EventsList
+/events/:id              → EventDetail
+/events/:id/register     → EventRegister
+/events/:id/pending      → EventPending
+/events/:id/ticket       → EventTicket
+/jobs                    → JobsList
+/jobs/:id                → JobDetail
+/points                  → Points
+/points/history          → PointsHistory
+/news/:id                → NewsDetail
+/rewards                 → Rewards
+/profile                 → Profile
+/profile/edit            → ProfileEdit
+/profile/notifications   → Notifications
+/profile/privacy         → Privacy
+
+— OrganizerLayout (sidebar nav) —
+/organizer                           → OrgDashboard
+/organizer/events                    → OrgEventsList
+/organizer/events/create             → OrgEventCreate
+/organizer/events/:id                → OrgEventDetail
+/organizer/events/:id/registrants    → OrgEventRegistrants
+/organizer/scan                      → OrgQRScanner
+/organizer/profile                   → OrgProfile
+/organizer/profile/edit              → OrgProfileEdit
+/organizer/profile/notifications     → Notifications (shared)
+/organizer/profile/privacy           → Privacy (shared)
 ```
 
-### Bottom Tab Navigation
+### Bottom Tab Navigation (MemberLayout)
 ```
 [Home]  [Rewards]  [● Events ●]  [Jobs]  [Profile]
                         ↑
-              Center hero button — Events (QR scan / register)
-```
-> Updated to match remix-of-devcon-connect prototype. Events is the primary CTA (center). Home (Dashboard) and Rewards are left tabs. Jobs and Profile are right tabs.
-
-### Organizer PWA — React Router v6
-```
-src/pages/
-├── Login.tsx
-├── Dashboard.tsx              # Pending approvals + ongoing events summary
-├── events/
-│   ├── EventsList.tsx
-│   ├── EventCreate.tsx
-│   ├── EventDetail.tsx
-│   └── EventRegistrants.tsx  # Approve / Reject list
-├── scan/
-│   └── QRScanner.tsx         # Camera QR scanner → award points
-└── profile/
-    └── Profile.tsx
+     Floating pill nav, fixed bottom-4. Events is center hero
+     button (elevated circle, QrCode icon, bg-primary).
+     Active state: text-primary / icon strokeWidth 2.5.
+     Inactive: text-slate-400 / strokeWidth 1.8.
 ```
 
 ---
@@ -364,16 +350,17 @@ src/pages/
 
 ### Onboarding (4 Screens — Swipeable)
 ```
-Screen 1: DEVCON logo + chapter hero photo (gradient placeholder until assets arrive)
-          "The Philippines' Largest Volunteer Tech Community"
-Screen 2: Chapter collage / map
-          "11 Chapters. 16 Years. 60,000+ Geeks for Good."
-Screen 3: Points+ visual
-          "Volunteer. Earn Points. Unlock Rewards."
-Screen 4: Globe / jobs visual
-          "Access Global Opportunities. Level Up Your Career."
+Slide 1: /photos/devcon-summit-group.jpg
+         "The Philippines' Largest Volunteer Tech Community"
+Slide 2: /photos/devcon-15-anniversary.jpg
+         "11 Chapters. 16 Years. 60,000+ Geeks for Good."
+Slide 3: /photos/devcon-certificate-ceremony.jpg
+         "Volunteer. Earn Points. Unlock Rewards."
+Slide 4: /photos/devcon-jumpstart-internships.jpg
+         "Access Global Opportunities. Level Up Your Career."
 
-CTA: [Get Started] → Sign Up | [I have an account] → Sign In
+CTA: [Get Started] → /sign-up | [I have an account] → /sign-in
+Each slide: DEVCON+ logomark top-left, Skip button top-right.
 ```
 
 ### Event Registration Lifecycle
@@ -383,22 +370,20 @@ Event Card → Event Detail → [Request to Join]
   → T&C + Privacy Consent checkbox (required)
   → Submit
 
-IF requires_approval = false → instant QR Ticket → "You're In! 🎉"
+IF requires_approval = false → instant QR Ticket
 IF requires_approval = true  → Pending screen (Realtime subscription)
-                             → Officer approves in Organizer PWA
-                             → Status updates live → "You're In! 🎉" → QR Ticket
+                             → Officer approves → QR Ticket
 ```
 
 ### QR Check-In at Venue
 ```
 Member: shows QR Ticket screen
-Officer: Organizer PWA → Scan QR → camera opens
-Officer: scans member QR → token sent to award-points-on-scan Edge Function
-  → marks registration checked_in
-  → inserts point_transaction (amount = event.points_value)
+Officer: /organizer/scan → camera opens
+Officer: scans member QR → award-points-on-scan Edge Function
+  → marks checked_in
+  → inserts point_transaction
   → updates profiles.total_points
 Officer sees: "✓ Juan dela Cruz — 200 pts awarded"
-Member app updates via Supabase Realtime
 ```
 
 ### Points Earning Reference
@@ -418,35 +403,42 @@ Member app updates via Supabase Realtime
 [Date]         [Description]            [+N pts]
                Transaction no. [REF]   [MM/DD/YYYY HH:MM]
 ```
-Group by date. Redemptions show negative (`-2850 points`). End with "That's it!" empty state.
+Group by date. Redemptions show negative. End with "That's it!" empty state.
 
 ---
 
 ## 8. DASHBOARD LAYOUT (Strict — Do Not Reorder)
 
 ```
-1. Dynamic rotating hero header
-   Cycles: #SHEISDEVCON | KIDS HOUR OF AI | 16 YEARS ANNIV
-   Auto-rotates every 4 seconds
+1. Sticky greeting bar (bg-primary, "Hi, {firstName}!")
+   + DEVCON+ logo-horizontal top-right
+   + Gradient tail that fades in on scroll (framer-motion)
 
-2. XP Progress Bar
-   "You have [N] points"
-   Progress toward next reward tier
-   Default mockup state: 100 pts
-   [Redeem Now] button
+2. Blue cradle (bg-primary, oval bottom border)
+   XP card (white, rounded-3xl, shadow-xl):
+     - "Current DEVCON Points" label
+     - Star icon (gold fill) + point total
+     - Gold progress bar toward next milestone
+     - "Attend Our Events" CTA button
 
-3. Events For You (simple cards, max 3, [See All])
-   Filtered by user's chapter_id
+3. Quick Actions row (3 cols):
+   Find Jobs → /jobs
+   Volunteer → ComingSoonModal
+   Redeem    → /rewards
 
-4. Hot Jobs (max 3, [See All])
+4. Rotating banner (crossfade, 4s interval, h-44)
+   #SheIsDEVCON | Kids Hour of AI | 16 Years of DEVCON
+   Dot indicator below (animated width pill)
+
+5. Events For You (max 3, See All → /events)
+
+6. Hot Jobs — horizontal scroll carousel (max 4, See All → /jobs)
    2nd listing → orange PROMOTED badge
 
-5. DEVCON Updates (category: devcon)
-   Official news + program highlights
+7. Updates — tabbed DEVCON / Tech
+   2nd post in Tech tab → orange PROMOTED badge
 
-6. TECH COMMUNITY Updates (category: tech_community)
-   Wider industry + partner news
-   2nd post → orange PROMOTED badge
+8. XP History preview (last 4 transactions, View All → /points/history)
 ```
 
 ---
@@ -455,45 +447,130 @@ Group by date. Redemptions show negative (`-2850 points`). End with "That's it!"
 
 ### Color Tokens
 ```
-Primary:      #1E2A4A   deep navy — buttons, headers, active nav
-Accent:       #3B82F6   DEVCON blue — links, progress fill
-Promoted:     #F97316   orange — ONLY for PROMOTED badge
-Background:   #F8FAFC   off-white
-Card:         #FFFFFF
-Text Primary: #0F172A
-Text Muted:   #64748B
-Success:      #22C55E   "You're In" states
-Warning:      #EAB308   pending states
-Error:        #EF4444   rejected states
+primary           → CSS var: rgb(var(--color-primary))   — driven by program theme
+primary-dark      → CSS var: rgb(var(--color-primary-dark))
+
+blue              #367BDD   legacy alias — non-themed blue (links, fallback)
+blue-dark         #2962C4
+blue-light        #5A9AEA
+navy              #1E2A56   deep navy (banner dot indicator, dark text)
+gold              #F8C630   XP bar fill, star icon fill
+promoted          #F97316   ONLY for PROMOTED badge
+green             #21C45D   success / positive XP
+red               #EF4444   error / negative XP / sign out button
+slate-50          #F8FAFC   page background
+slate-100         #F1F5F9
+slate-200         #E2E8F0   card borders
+slate-300         #CBD5E1
+slate-400         #94A3B8   muted text, inactive icons
+slate-500         #64748B
+slate-700         #334155
+slate-900         #0F172A   primary text
+```
+> Tailwind slate scale has NO 600 or 800 — do not use them.
+
+### Program Themes (user-selectable in Profile)
+```
+DEVCON+       id=devcon   primary=#367BDD   dark=#2962C4
+She is DEVCON id=she      primary=#EC4899   dark=#DB2777
+DEVCON Kids   id=kids     primary=#21C45D   dark=#16A34A
+Campus        id=campus   primary=#F8C630   dark=#EAB308
+```
+Theme is persisted via `useThemeStore` (Zustand persist). CSS custom properties
+`--color-primary` and `--color-primary-dark` are injected on the `<html>` element
+by the MemberLayout on mount. Organizer routes do NOT apply program themes.
+
+### Box Shadows
+```
+shadow-card     0 1px 4px rgba(0,0,0,0.07)
+shadow-blue     0 4px 24px rgba(54,123,221,0.12)
+shadow-primary  var(--shadow-primary)   (driven by theme)
 ```
 
-### Core Components (build first, reuse everywhere)
+### Typography (Geist font)
 ```
-<PointsBadge />       current XP + star icon (nmblr pattern)
-<XPProgressBar />     progress toward next reward
-<EventCard />         dashboard, events list, For You section
-<JobCard />           dashboard Hot Jobs + Jobs Board
-<NewsCard />          DEVCON + Tech Community feeds
-<PromotedBadge />     orange tag — overlay on cards
-<QRTicket />          full-screen QR with event details
-<ComingSoonModal />   reusable — incomplete features
-<TransactionRow />    points history list item (nmblr pattern)
-<StatusPill />        Pending / Approved / Rejected / You're In
-<ChapterFilterBar />  horizontal scroll — 11 chapters
+Display: 32px bold       hero headers (text-3xl font-black)
+H1:      24px semibold   page titles
+H2:      20px semibold   section headers (text-base font-bold)
+Body:    14px regular    (text-sm)
+Caption: 12px regular    timestamps, refs (text-xs / text-[10px])
 ```
 
-### Typography
+### Spacing & Shape
 ```
-Display:  32px bold      hero headers
-H1:       24px semibold
-H2:       20px semibold
-Body:     14px regular
-Caption:  12px regular   transaction refs, timestamps
+Border radius:  rounded-xl=20px  rounded-2xl=24px  rounded-3xl=28px+
+Card padding:   p-4 (standard)   p-5 (hero cards)
+Page gutters:   px-4
+Safe bottom:    pb-24 in scroll containers (clears floating nav)
+```
+
+### Animation (framer-motion)
+```js
+// apps/member/src/lib/animation.ts
+staggerContainer   — staggerChildren 0.07s
+cardItem           — y: 12→0, opacity: 0→1
+fadeUp             — y: 8→0, opacity: 0→1
+whileTap={{ scale: 0.95 }}  — standard press feedback on all buttons/cards
+```
+
+### Core Components (built — reuse everywhere)
+```
+<MemberLayout />         floating pill bottom nav, scroll container, auth guard
+<OrganizerLayout />      sidebar nav, isOrganizerSession guard
+<DesktopGuard />         blocks desktop viewports (wraps app root)
+<EventCard />            dashboard + events list cards (compact prop)
+<JobCard />              jobs board full card
+<NewsCard />             DEVCON + Tech Community feed items
+<PromotedBadge />        orange "PROMOTED" tag
+<ComingSoonModal />      reusable for incomplete features
+<TransactionRow />       points history list item
+<StatusPill />           Pending / Approved / Rejected / You're In
+<ChipBar />              horizontal scroll chip filter bar
+<XPCard />               standalone XP display card
+<OrgBanner />            organizer top banner strip
+<ApprovalCard />         organizer approval item card
+<StatusBadge />          organizer status badge
+```
+
+### Icon Rules
+- Use `lucide-react` exclusively — no emoji icons in JSX
+- Icon in colored container: `<div className="w-10 h-10 rounded-xl bg-primary/10 ..."><Icon className="w-5 h-5 text-primary" /></div>`
+- Back navigation: `<ArrowLeft />`
+- Location: `<MapPin />`
+- Events center tab: `<QrCode />`
+- Points: `<Star className="fill-gold text-gold" />`
+
+---
+
+## 10. STORES (`apps/member/src/stores/`)
+
+```
+useAuthStore.ts     — user (Profile|null), initials, signIn, signOut,
+                      setOrganizerSession, updateProfile
+useEventsStore.ts   — events[], registrations[], register(), getById()
+useJobsStore.ts     — jobs[], getById()
+usePointsStore.ts   — transactions[], totalPoints
+useOrgAuthStore.ts  — organizer session state
+useThemeStore.ts    — themeId, setTheme(), activeTheme()
+                      persisted to localStorage as 'devcon-theme'
+```
+
+All stores are currently seeded with mock data from `@devcon-plus/supabase`.
+Replace mock calls with Supabase client calls when the project is provisioned.
+
+---
+
+## 11. LIB UTILITIES (`apps/member/src/lib/`)
+
+```
+animation.ts    — framer-motion variants: staggerContainer, cardItem, fadeUp
+constants.ts    — WORK_TYPE_LABELS, CATEGORY_LABELS
+dates.ts        — formatDate.compact(), formatDate.full(), formatDate.time()
 ```
 
 ---
 
-## 10. EDGE FUNCTIONS (`supabase/functions/`)
+## 12. EDGE FUNCTIONS (`supabase/functions/`)
 
 ### `validate-organizer-code`
 - Input: `{ code: string }`
@@ -514,7 +591,7 @@ Caption:  12px regular   transaction refs, timestamps
 
 ---
 
-## 11. SEED DATA
+## 13. SEED DATA
 
 ### All 11 Chapters
 ```sql
@@ -537,6 +614,7 @@ INSERT INTO jobs (title, company, location, work_type, is_promoted) VALUES
   ('Data Engineer', 'GCash', 'Mandaluyong', 'hybrid', false),
   ('Product Manager', 'Maya', 'BGC, Taguig', 'onsite', false);
 ```
+> Sui Foundation is `is_promoted = true` → renders as 2nd listing with orange PROMOTED badge.
 
 ### Rewards Catalog
 ```sql
@@ -552,17 +630,9 @@ INSERT INTO rewards (name, points_cost, type, claim_method, is_coming_soon) VALU
 
 ---
 
-## 12. ENVIRONMENT VARIABLES
+## 14. ENVIRONMENT VARIABLES
 
 ### `apps/member/.env.local`
-```env
-EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
-EXPO_PUBLIC_GOOGLE_CLIENT_ID=
-EXPO_PUBLIC_APP_ENV=development
-```
-
-### `apps/organizer/.env.local`
 ```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
@@ -577,68 +647,71 @@ SUPABASE_SERVICE_ROLE_KEY=
 
 ---
 
-## 13. CODING STANDARDS
+## 15. CODING STANDARDS
 
-- TypeScript strict mode on both apps — no `any`, no `@ts-ignore`
-- `PascalCase.tsx` for components, `kebab-case.tsx` for Expo Router routes
-- Co-locate component + styles + types in the same folder
+- TypeScript strict mode — no `any`, no `@ts-ignore`
+- `PascalCase.tsx` for components, `camelCase.ts` for lib/store files
+- Co-locate component + types in the same folder when complex
 - All Supabase calls typed with generated types (`supabase gen types typescript`)
 - Every async call has loading + error + empty state
 - React Hook Form + Zod for every form — no uncontrolled inputs
-- Constants files for all magic values: `constants/points.ts`, `constants/roles.ts`, `constants/chapters.ts`
+- Constants in `lib/constants.ts` — no magic strings/numbers inline
 - No dead navigation — every route renders something
+- `framer-motion` `whileTap={{ scale: 0.95 }}` on all tappable cards and buttons
+- Use `motion.div` + `variants={staggerContainer}` + `variants={cardItem}` for list sections
 
 ---
 
-## 14. SPRINT PLAN
+## 16. BUILD COMMANDS
 
-> Dev A → Member App (React Native) | Dev B → Organizer PWA (Vite) | Claude Code → assists both
+```bash
+npm install --legacy-peer-deps        # required — peer conflict
+npm run dev:member                    # Vite dev server for member app
+                                      # turbo filter: @devcon-plus/member
+npm run dev                           # all apps via turbo
+npm run build                         # production build
+npm run typecheck                     # tsc --noEmit across all packages
+```
 
-### Week 1 — Foundation
+---
+
+## 17. CURRENT BUILD STATUS (as of March 3, 2026)
+
+### Completed
+- [x] Monorepo scaffold (apps/member, packages/supabase)
+- [x] Tailwind + Geist font + design tokens + CSS custom property theming
+- [x] Program theme system (4 themes, CSS vars, persisted via Zustand)
+- [x] Mock data layer (all stores seeded from @devcon-plus/supabase)
+- [x] Auth flow (SplashScreen, Onboarding, SignIn, SignUp, OrganizerCodeGate)
+- [x] MemberLayout (floating pill nav, scroll reset, auth guard)
+- [x] OrganizerLayout (sidebar nav, organizer guard)
+- [x] DesktopGuard
+- [x] Dashboard (cradle XP card, quick actions, rotating banner, events, jobs carousel, news tabs, XP history preview)
+- [x] EventsList, EventDetail, EventRegister, EventPending, EventTicket
+- [x] JobsList, JobDetail
+- [x] Points, PointsHistory
+- [x] Rewards (catalog grid + ComingSoonModal)
+- [x] Profile (program theme selector, XP badge, menu, sign out)
+- [x] ProfileEdit (photo upload), Notifications, Privacy
+- [x] NewsDetail
+- [x] Organizer: Dashboard, EventsList, EventCreate, EventDetail, EventRegistrants, QRScanner, Profile, ProfileEdit
+- [x] All core components (EventCard, JobCard, NewsCard, PromotedBadge, ComingSoonModal, TransactionRow, StatusPill, ChipBar, XPCard, OrgBanner, ApprovalCard, StatusBadge)
+- [x] framer-motion animations across all list/card sections
+
+### Remaining for MVP
+- [ ] Wire real Supabase auth (signIn, signUp, Google OAuth)
+- [ ] Wire real Supabase data queries (replace MOCK_* in all stores)
+- [ ] Deploy Edge Functions (auto-approve, award-points-on-scan, award-signup-bonus, validate-organizer-code)
 - [ ] Provision Supabase project + configure Google OAuth
-- [ ] Run schema migrations + seed data
-- [ ] Scaffold monorepo (apps/member, apps/organizer, packages/supabase)
-- [ ] Generate + share Supabase TypeScript types
-- [ ] Deploy `award-signup-bonus` Edge Function
-- [ ] **[Parallel — non-blocking]** Asset Sprint: collect chapter group photos from leads
-- [ ] Expo init + NativeWind setup (Dev A)
-- [ ] Vite + React + Tailwind init (Dev B)
-- [ ] 4-step onboarding with gradient placeholders (Dev A)
-- [ ] Organizer login + dashboard shell (Dev B)
-
-### Week 2 — Auth & Role Gateway
-- [ ] Google OAuth + email auth on both apps
-- [ ] Organizer Code screen + validation (Member App)
-- [ ] Auth guards + role-based routing (both apps)
-- [ ] Profile auto-creation + 500pt signup bonus trigger
-- [ ] Bottom tab navigator shell — Member App
-
-### Week 3 — Engagement Hub
-- [ ] Dashboard: rotating hero, XP bar, Events For You, Hot Jobs, news feeds (Dev A)
-- [ ] Events list + chapter filter + For You tab (Dev A)
-- [ ] Organizer: event list, create form, registrants list + approve/reject (Dev B)
-
-### Week 4 — Events, Jobs, QR
-- [ ] Event detail + registration form (pre-filled) + Pending screen + QR Ticket (Dev A)
-- [ ] Jobs board: search + filter + detail + Apply Now (Dev A)
-- [ ] Tech Community section on Events page (Dev A)
-- [ ] QR Scanner screen + award-points-on-scan integration (Dev B)
-
-### Week 5 — Polish & Delivery
-- [ ] Swap gradient placeholders with real chapter photos (if assets received)
-- [ ] Points History: full transaction log + date grouping + empty state
-- [ ] Rewards catalog grid + ComingSoonModal
-- [ ] Profile settings: edit, notifications, privacy
-- [ ] PROMOTED badge audit (2nd job + 2nd news post)
-- [ ] Remove all placeholder text from every screen
-- [ ] Emoji/image consistency audit per section
+- [ ] Run DB schema migrations + seed data
+- [ ] PROMOTED badge audit (verify 2nd job + 2nd news post in live data)
 - [ ] RLS policy review + security check
-- [ ] Final QA on both apps
-- [ ] Deploy: Expo EAS Build (member) + Vercel (organizer PWA)
+- [ ] Final QA on all flows
+- [ ] Deploy to Vercel
 
 ---
 
-## 15. OUT OF SCOPE FOR MVP
+## 18. OUT OF SCOPE FOR MVP
 
 Show `<ComingSoonModal />` if user reaches any of these:
 
@@ -651,3 +724,4 @@ Show `<ComingSoonModal />` if user reaches any of these:
 - Developer Spotlight CMS
 - Super Admin panel
 - Multi-language support
+- Volunteering registration flow
