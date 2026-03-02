@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useOrgAuthStore } from '../../stores/useOrgAuthStore'
+import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const MOCK_ORG_CODES = new Set(['ORG-MANILA', 'ORG-CEBU', 'ORG-DAVAO', 'ORG-LAGUNA', 'DCN-ADMIN'])
 
@@ -37,10 +38,8 @@ export default function OrganizerCodeGate() {
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Gradient header */}
       <div className="bg-blue px-6 pt-16 pb-10 text-center">
-        <h1 className="text-white text-3xl font-bold">
-          DEVCON<span className="text-gold">+</span>
-        </h1>
-        <p className="text-white/70 mt-1 text-sm">Welcome back, {firstName}!</p>
+        <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
+        <p className="text-white/70 mt-3 text-sm">Welcome back, {firstName}!</p>
       </div>
 
       {/* Card */}

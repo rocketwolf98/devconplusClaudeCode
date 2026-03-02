@@ -14,25 +14,29 @@ import { NEWS_POSTS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabas
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
+import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const BANNERS = [
   {
-    title:    '#SheIsDEVCON',
-    sub:      'DEVCON Philippines · Nationwide',
-    cta:      'Learn More',
-    onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
+    title:   '#SheIsDEVCON',
+    sub:     'DEVCON Philippines · Nationwide',
+    cta:     'Learn More',
+    image:   'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?auto=format&fit=crop&w=800&q=80',
+    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
   },
   {
-    title:    'Kids Hour of AI',
-    sub:      'DEVCON Philippines · All Chapters',
-    cta:      'Register Now',
-    onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
+    title:   'Kids Hour of AI',
+    sub:     'DEVCON Philippines · All Chapters',
+    cta:     'Register Now',
+    image:   'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
   },
   {
-    title:    '16 Years of DEVCON',
-    sub:      'DEVCON Philippines · Celebrating Tech',
-    cta:      'See Highlights',
-    onClick:  (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
+    title:   '16 Years of DEVCON',
+    sub:     'DEVCON Philippines · Celebrating Tech',
+    cta:     'See Highlights',
+    image:   'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
+    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
   },
 ]
 
@@ -83,10 +87,7 @@ export default function Dashboard() {
         <div className="bg-blue px-6 pt-14 pb-4">
           <div className="flex items-center justify-between">
             <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-white font-black text-lg tracking-tight">DEVCON</span>
-              <span className="text-gold font-black text-xl">+</span>
-            </div>
+            <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto" />
           </div>
         </div>
         {/* Gradient: absolutely positioned — no layout impact, overlaps cradle top */}
@@ -170,7 +171,19 @@ export default function Dashboard() {
             className="relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-blue"
             onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
           >
-            <div className="absolute inset-0 bg-black/35" />
+            <AnimatePresence>
+              <motion.img
+                key={`img-${bannerIdx}`}
+                src={BANNERS[bannerIdx].image}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4 }}
+              />
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-black/50" />
             <AnimatePresence mode="wait">
               <motion.div
                 key={bannerIdx}
@@ -290,13 +303,13 @@ export default function Dashboard() {
         <section>
           <div className="flex items-center justify-between px-4 mb-3">
             <h2 className="text-base font-bold text-slate-900">Updates</h2>
-            <div className="flex rounded-xl overflow-hidden border border-slate-200 bg-white">
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
               {(['devcon', 'community'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setNewsTab(t)}
-                  className={`text-xs font-semibold px-3 py-1.5 transition-colors ${
-                    newsTab === t ? 'bg-navy text-white' : 'text-slate-500'
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                    newsTab === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
                   {t === 'devcon' ? 'DEVCON' : 'Tech'}

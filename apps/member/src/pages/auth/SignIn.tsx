@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuthStore } from '../../stores/useAuthStore'
+import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const schema = z.object({
   email:    z.string().email('Invalid email'),
@@ -44,10 +45,8 @@ export default function SignIn() {
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Gradient header */}
       <div className="bg-blue px-6 pt-16 pb-10 text-center">
-        <h1 className="text-white text-3xl font-bold">
-          DEVCON<span className="text-gold">+</span>
-        </h1>
-        <p className="text-white/60 mt-1 text-sm">Sign in to your account</p>
+        <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
+        <p className="text-white/60 mt-3 text-sm">Sign in to your account</p>
       </div>
 
       {/* Floating card */}

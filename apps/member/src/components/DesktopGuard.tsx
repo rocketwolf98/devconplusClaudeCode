@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Smartphone } from 'lucide-react'
+import logoVertical from '../assets/logos/logo-vertical.svg'
 
 const DESKTOP_BREAKPOINT = 1024
 
@@ -16,12 +17,7 @@ export default function DesktopGuard({ children }: { children: React.ReactNode }
   if (isDesktop) {
     return (
       <div className="min-h-screen bg-blue flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-20 h-20 rounded-3xl bg-white/20 border border-white/30 flex items-center justify-center text-white font-black text-3xl mb-6">
-          D+
-        </div>
-        <h1 className="text-white text-3xl font-black mb-1">
-          DEVCON<span className="text-gold">+</span>
-        </h1>
+        <img src={logoVertical} alt="DEVCON+" className="h-16 w-auto mb-4" />
         <p className="text-white/50 text-xs mb-6 tracking-widest uppercase">Sync. Support. Succeed.</p>
         <div className="w-16 h-px bg-white/20 mx-auto mb-6" />
         <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-4">

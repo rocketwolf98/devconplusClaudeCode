@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import logoMark from '../../assets/logos/logo-mark.svg'
 
 const slides = [
   {
@@ -84,12 +85,7 @@ export default function Onboarding() {
       {/* ── Fixed header ─────────────────────────────────────── */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-            <span className="text-navy text-[11px] font-black leading-none tracking-tight">
-              D+
-            </span>
-          </div>
-          <span className="text-white font-bold text-[15px] tracking-wide">DEVCON+</span>
+          <img src={logoMark} alt="DEVCON+" className="h-7 w-auto" />
         </div>
         <button
           onClick={() => navigate('/sign-up')}

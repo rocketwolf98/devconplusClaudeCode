@@ -1,8 +1,9 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 import MemberLayout from './components/MemberLayout'
 import OrganizerLayout from './components/OrganizerLayout'
 
 // Auth pages (no tab nav)
+import SplashScreen from './pages/auth/SplashScreen'
 import Onboarding from './pages/auth/Onboarding'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
@@ -37,7 +38,7 @@ import { OrgProfile } from './pages/organizer/profile/Profile'
 
 export const router = createBrowserRouter([
   // Root — always start at onboarding
-  { path: '/',                     element: <Navigate to="/onboarding" replace /> },
+  { path: '/',                     element: <SplashScreen /> },
 
   // Auth routes — no layout
   { path: '/onboarding',           element: <Onboarding /> },
