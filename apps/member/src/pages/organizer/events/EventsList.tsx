@@ -8,7 +8,7 @@ export function OrgEventsList() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black text-white">Events</h1>

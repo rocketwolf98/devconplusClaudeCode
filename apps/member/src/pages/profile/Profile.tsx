@@ -20,7 +20,7 @@ export default function Profile() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl text-center">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-8 rounded-b-3xl text-center">
         <div className="w-20 h-20 bg-blue rounded-full flex items-center justify-center mx-auto mb-3">
           <span className="text-white text-2xl font-bold">{initials}</span>
         </div>

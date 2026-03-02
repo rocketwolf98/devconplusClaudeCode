@@ -68,70 +68,72 @@ export function OrgEventRegistrants() {
   }
 
   return (
-    <div className="p-4">
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-4 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </button>
-
-      <h1 className="text-xl font-black text-slate-900 mb-1">Registrants</h1>
-      <p className="text-sm text-slate-400 mb-5">{event?.title ?? 'Event'}</p>
-
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-5">
-        {(['all', 'pending', 'approved', 'rejected'] as FilterStatus[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors capitalize ${
-              filter === f
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            {f} ({counts[f]})
-          </button>
-        ))}
+    <div>
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <h1 className="text-xl font-bold text-white">Registrants</h1>
+        <p className="text-white/60 text-sm mt-0.5">{event?.title ?? 'Event'}</p>
       </div>
 
-      {filter === 'pending' && counts.pending > 0 && (
-        <button
-          onClick={() => {
-            setRegistrants((prev) =>
-              prev.map((r) => (r.status === 'pending' ? { ...r, status: 'approved' as const } : r))
-            )
-          }}
-          className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
-        >
-          <Check className="w-4 h-4" />
-          Approve All Pending ({counts.pending})
-        </button>
-      )}
-
-      {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-          <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-            <ClipboardList className="w-7 h-7 text-slate-400" />
-          </div>
-          <p className="text-base font-bold text-slate-700">No registrants found</p>
-          <p className="text-sm text-slate-400 mt-1">
-            {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map((reg) => (
-            <ApprovalCard
-              key={reg.id}
-              registration={reg}
-              onApprove={handleApprove}
-              onReject={handleReject}
-            />
+      <div className="p-4">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-5">
+          {(['all', 'pending', 'approved', 'rejected'] as FilterStatus[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors capitalize ${
+                filter === f
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              {f} ({counts[f]})
+            </button>
           ))}
         </div>
-      )}
+
+        {filter === 'pending' && counts.pending > 0 && (
+          <button
+            onClick={() => {
+              setRegistrants((prev) =>
+                prev.map((r) => (r.status === 'pending' ? { ...r, status: 'approved' as const } : r))
+              )
+            }}
+            className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
+          >
+            <Check className="w-4 h-4" />
+            Approve All Pending ({counts.pending})
+          </button>
+        )}
+
+        {filtered.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <ClipboardList className="w-7 h-7 text-slate-400" />
+            </div>
+            <p className="text-base font-bold text-slate-700">No registrants found</p>
+            <p className="text-sm text-slate-400 mt-1">
+              {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((reg) => (
+              <ApprovalCard
+                key={reg.id}
+                registration={reg}
+                onApprove={handleApprove}
+                onReject={handleReject}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

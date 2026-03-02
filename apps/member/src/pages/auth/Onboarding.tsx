@@ -1,93 +1,149 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Users, Map, Star, Globe } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 
-const slides: { gradient: string; Icon: LucideIcon; title: string; subtitle: string }[] = [
+const slides = [
   {
-    Icon: Users,
-    title: "The Philippines' Largest Volunteer Tech Community",
+    image:
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1080&q=80&auto=format&fit=crop',
     subtitle: 'DEVCON Philippines',
+    title: "The Philippines' Largest Volunteer Tech Community",
   },
   {
-    Icon: Map,
-    title: '11 Chapters. 16 Years. 60,000+ Geeks for Good.',
+    image:
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1080&q=80&auto=format&fit=crop',
     subtitle: 'Nationwide community',
+    title: '11 Chapters. 16 Years. 60,000+ Geeks for Good.',
   },
   {
-    Icon: Star,
-    title: 'Volunteer. Earn Points. Unlock Rewards.',
+    image:
+      'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1080&q=80&auto=format&fit=crop',
     subtitle: 'Points+ system',
+    title: 'Volunteer. Earn Points. Unlock Rewards.',
   },
   {
-    Icon: Globe,
-    title: 'Access Global Opportunities. Level Up Your Career.',
+    image:
+      'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1080&q=80&auto=format&fit=crop',
     subtitle: 'Jobs + Career',
+    title: 'Access Global Opportunities. Level Up Your Career.',
   },
 ]
 
 export default function Onboarding() {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
+  const [dragStart, setDragStart] = useState<number | null>(null)
   const isLast = current === slides.length - 1
 
-  return (
-    <div className="h-screen bg-navy flex flex-col overflow-hidden">
-      {/* Slide strip */}
-      <div className="flex-1 relative overflow-hidden">
-        <div
-          className="flex h-full transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${current * 100}%)` }}
-        >
-          {slides.map((slide, i) => (
-            <div
-              key={i}
-              className={`min-w-full h-full bg-blue flex flex-col items-center justify-center px-8 text-center`}
-            >
-              <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center mb-8">
-                <slide.Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
-              </div>
-              <p className="text-white/60 text-sm mb-2">{slide.subtitle}</p>
-              <h1 className="text-white text-2xl font-bold leading-tight">{slide.title}</h1>
-            </div>
-          ))}
-        </div>
-      </div>
+  const goTo = (i: number) => setCurrent(Math.max(0, Math.min(slides.length - 1, i)))
 
-      {/* Dot indicators */}
-      <div className="flex justify-center gap-2 py-4 bg-navy/80">
-        {slides.map((_, i) => (
-          <button
+  const handlePointerDown = (e: React.PointerEvent) => setDragStart(e.clientX)
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (dragStart === null) return
+    const diff = dragStart - e.clientX
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && current < slides.length - 1) setCurrent((c) => c + 1)
+      if (diff < 0 && current > 0) setCurrent((c) => c - 1)
+    }
+    setDragStart(null)
+  }
+
+  return (
+    <div
+      className="h-screen overflow-hidden relative bg-navy select-none"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+    >
+      {/* ── Sliding photo strip ──────────────────────────────── */}
+      <div
+        className="flex h-full transition-transform duration-500 ease-in-out"
+        style={{
+          width: `${slides.length * 100}%`,
+          transform: `translateX(-${(current / slides.length) * 100}%)`,
+        }}
+      >
+        {slides.map((slide, i) => (
+          <div
             key={i}
-            onClick={() => setCurrent(i)}
-            className={`h-1.5 rounded-full transition-all ${
-              i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/30'
-            }`}
-          />
+            className="relative h-full overflow-hidden"
+            style={{ width: `${100 / slides.length}%` }}
+          >
+            {/* High-res background photo */}
+            <img
+              src={slide.image}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              draggable={false}
+            />
+            {/* Subtle overlay — just enough to keep photo from clashing with header */}
+            <div className="absolute inset-0 bg-navy/30" />
+          </div>
         ))}
       </div>
 
-      {/* CTAs */}
-      <div className="px-6 pb-10 bg-navy space-y-3">
+      {/* ── Fixed header ─────────────────────────────────────── */}
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 pt-5 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+            <span className="text-navy text-[11px] font-black leading-none tracking-tight">
+              D+
+            </span>
+          </div>
+          <span className="text-white font-bold text-[15px] tracking-wide">DEVCON+</span>
+        </div>
+        <button
+          onClick={() => navigate('/sign-up')}
+          className="text-white/75 text-sm font-medium px-1 py-1"
+        >
+          Skip
+        </button>
+      </div>
+
+      {/* ── Fixed bottom panel ───────────────────────────────── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-blue rounded-t-[28px] px-6 pt-6 pb-10">
+        {/* Slide caption */}
+        <div key={current} className="mb-5 animate-[fadeIn_0.3s_ease-out]">
+          <p className="text-white/50 text-[11px] font-semibold uppercase tracking-widest mb-1.5">
+            {slides[current].subtitle}
+          </p>
+          <h2 className="text-white text-[22px] font-bold leading-snug">
+            {slides[current].title}
+          </h2>
+        </div>
+
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-2 mb-5">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Action buttons */}
         {isLast ? (
-          <>
+          <div className="space-y-3">
             <button
               onClick={() => navigate('/sign-up')}
-              className="w-full bg-blue text-white font-bold py-4 rounded-2xl"
+              className="w-full bg-white text-blue font-bold py-[15px] rounded-2xl text-[15px]"
             >
               Get Started
             </button>
             <button
               onClick={() => navigate('/sign-in')}
-              className="w-full bg-white/10 text-white font-semibold py-4 rounded-2xl"
+              className="w-full border border-white/20 text-white/80 font-semibold py-[15px] rounded-2xl text-[15px]"
             >
               I have an account
             </button>
-          </>
+          </div>
         ) : (
           <button
             onClick={() => setCurrent((c) => c + 1)}
-            className="w-full bg-blue text-white font-bold py-4 rounded-2xl"
+            className="w-full bg-white text-blue font-bold py-[15px] rounded-2xl text-[15px]"
           >
             Next
           </button>

@@ -26,10 +26,10 @@ export default function EventDetail() {
         </div>
       )}
 
-      {/* Back button */}
+      {/* Back button — fixed so it stays visible over the cover image */}
       <button
         onClick={() => navigate(-1)}
-        className="absolute top-14 left-4 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+        className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
       >
         <ArrowLeft className="w-5 h-5" />
       </button>

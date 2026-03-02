@@ -75,7 +75,7 @@ export function OrgDashboard() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-8 rounded-b-3xl">
         <OrgBanner
           chapterName={user.chapter}
           role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}

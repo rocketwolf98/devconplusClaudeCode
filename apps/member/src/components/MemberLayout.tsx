@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 
@@ -16,17 +16,23 @@ const RIGHT_TABS = [
 export default function MemberLayout() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!user) navigate('/onboarding', { replace: true })
   }, [user, navigate])
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+  }, [location.pathname])
+
   if (!user) return null
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
       {/* Scrollable page content — leave room for the bottom nav */}
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </div>
 

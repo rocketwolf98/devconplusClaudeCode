@@ -23,7 +23,16 @@ export default function JobDetail() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-blue px-4 pt-24 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+        <div className="flex items-center justify-between mb-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          {job.is_promoted && <PromotedBadge />}
+        </div>
         <p className="text-white/60 text-xs">{job.company}</p>
         <h1 className="text-white text-xl font-bold">{job.title}</h1>
         <div className="flex items-center gap-2 mt-2">
@@ -37,15 +46,6 @@ export default function JobDetail() {
           )}
         </div>
       </div>
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-14 left-4 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
-      {job.is_promoted && (
-        <div className="absolute top-14 right-4"><PromotedBadge /></div>
-      )}
 
       <div className="p-4 space-y-4">
         {job.description && (

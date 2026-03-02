@@ -24,7 +24,7 @@ export default function Points() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Points+</h1>
         <p className="text-white/60 text-sm mt-1">
           You have <strong className="text-gold">{totalPoints.toLocaleString()} pts</strong>

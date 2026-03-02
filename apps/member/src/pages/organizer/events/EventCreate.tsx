@@ -30,24 +30,23 @@ export function OrgEventCreate() {
   })
 
   const onSubmit = (_data: FormData) => {
-    // TODO: insert event via Supabase
     navigate('/organizer/events')
   }
 
   return (
-    <div className="p-4">
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </button>
+    <div>
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <h1 className="text-xl font-bold text-white">Create Event</h1>
+        <p className="text-white/60 text-sm mt-0.5">Fill in the details for your chapter event.</p>
+      </div>
 
-      <h1 className="text-2xl font-black text-slate-900 mb-1">Create Event</h1>
-      <p className="text-sm text-slate-400 mb-6">Fill in the details for your chapter event.</p>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-5">
         <div>
           <label className={labelClass}>Event Title</label>
           <input

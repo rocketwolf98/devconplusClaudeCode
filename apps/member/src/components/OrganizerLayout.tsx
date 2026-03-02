@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, ScanLine, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -15,6 +15,8 @@ const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean 
 export default function OrganizerLayout() {
   const { isOrganizerSession } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
+  const scrollRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!isOrganizerSession) {
@@ -22,11 +24,15 @@ export default function OrganizerLayout() {
     }
   }, [isOrganizerSession, navigate])
 
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+  }, [location.pathname])
+
   if (!isOrganizerSession) return null
 
   return (
     <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
-      <main className="flex-1 overflow-y-auto pb-24">
+      <main ref={scrollRef} className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </main>
 

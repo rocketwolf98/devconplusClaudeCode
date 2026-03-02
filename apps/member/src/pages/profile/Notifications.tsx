@@ -17,15 +17,15 @@ export default function Notifications() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="bg-blue px-4 pt-24 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
         <h1 className="text-white text-xl font-bold">Notifications</h1>
       </div>
-      <button
-        onClick={() => navigate(-1)}
-        className="absolute top-14 left-4 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
-      >
-        <ArrowLeft className="w-5 h-5" />
-      </button>
 
       <div className="p-4 space-y-2">
         {SETTINGS.map((s) => (
