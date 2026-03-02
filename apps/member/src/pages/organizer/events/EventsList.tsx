@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Zap } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { EVENTS } from '@devcon-plus/supabase'
 import { StatusBadge } from '../../../components/StatusBadge'
+import { staggerContainer, cardItem } from '../../../lib/animation'
 
 export function OrgEventsList() {
   const navigate = useNavigate()
@@ -23,7 +25,12 @@ export function OrgEventsList() {
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <motion.div
+        className="p-4 space-y-3"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         {EVENTS.map((event) => {
           const formattedDate = event.event_date
             ? new Date(event.event_date).toLocaleDateString('en-US', {
@@ -32,10 +39,12 @@ export function OrgEventsList() {
             : 'TBA'
 
           return (
-            <div
+            <motion.div
               key={event.id}
+              variants={cardItem}
               className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
               onClick={() => navigate(`/organizer/events/${event.id}`)}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-start gap-4">
                 <div className="w-12 shrink-0 bg-blue/10 rounded-xl px-2 py-2 text-center">
@@ -72,10 +81,10 @@ export function OrgEventsList() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
     </div>
   )
 }

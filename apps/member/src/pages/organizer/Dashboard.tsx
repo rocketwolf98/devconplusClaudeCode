@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
 import { useOrgAuthStore } from '../../stores/useOrgAuthStore'
+import { fadeUp, staggerContainer, cardItem } from '../../lib/animation'
 
 const MOCK_REGISTRATIONS: Registration[] = [
   {
@@ -83,8 +85,14 @@ export function OrgDashboard() {
         />
       </div>
 
-      <div className="p-4">
-        <div className="flex gap-1 mt-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
+      <motion.div
+        className="p-4"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Tab switcher */}
+        <motion.div variants={fadeUp} className="flex gap-1 mt-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
           {(['approvals', 'events'] as const).map((tab) => (
             <button
               key={tab}
@@ -100,56 +108,77 @@ export function OrgDashboard() {
                 : 'Events'}
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {activeTab === 'approvals' && (
-          <div>
-            {pending.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-                <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
-                  <CheckCircle2 className="w-7 h-7 text-green" />
-                </div>
-                <p className="text-base font-bold text-slate-700">All caught up!</p>
-                <p className="text-sm text-slate-400 mt-1">No pending registrations right now.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm text-slate-500 mb-2">
-                  {pending.length} registration{pending.length !== 1 ? 's' : ''} awaiting approval
-                </p>
-                {registrations.map((reg) => (
-                  <ApprovalCard
-                    key={reg.id}
-                    registration={reg}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'events' && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-500">Your chapter events</p>
-              <button
-                onClick={() => navigate('/organizer/events/create')}
-                className="px-4 py-2 bg-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-dark transition-colors"
-              >
-                + New Event
-              </button>
-            </div>
-            <button
-              onClick={() => navigate('/organizer/events')}
-              className="text-sm text-blue font-semibold hover:underline"
+        <AnimatePresence mode="wait">
+          {activeTab === 'approvals' && (
+            <motion.div
+              key="approvals"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
             >
-              View all events →
-            </button>
-          </div>
-        )}
-      </div>
+              {pending.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                  <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle2 className="w-7 h-7 text-green" />
+                  </div>
+                  <p className="text-base font-bold text-slate-700">All caught up!</p>
+                  <p className="text-sm text-slate-400 mt-1">No pending registrations right now.</p>
+                </div>
+              ) : (
+                <motion.div
+                  className="space-y-3"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <p className="text-sm text-slate-500 mb-2">
+                    {pending.length} registration{pending.length !== 1 ? 's' : ''} awaiting approval
+                  </p>
+                  {registrations.map((reg) => (
+                    <motion.div key={reg.id} variants={cardItem}>
+                      <ApprovalCard
+                        registration={reg}
+                        onApprove={handleApprove}
+                        onReject={handleReject}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+          {activeTab === 'events' && (
+            <motion.div
+              key="events"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-slate-500">Your chapter events</p>
+                <button
+                  onClick={() => navigate('/organizer/events/create')}
+                  className="px-4 py-2 bg-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-dark transition-colors"
+                >
+                  + New Event
+                </button>
+              </div>
+              <button
+                onClick={() => navigate('/organizer/events')}
+                className="text-sm text-blue font-semibold hover:underline"
+              >
+                View all events →
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, Zap } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { EVENTS } from '@devcon-plus/supabase'
+import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 
 export function OrgEventDetail() {
   const { id } = useParams<{ id: string }>()
@@ -39,9 +41,14 @@ export function OrgEventDetail() {
         <p className="text-white/60 text-sm mt-0.5 capitalize">{event.status}</p>
       </div>
 
-      <div className="p-4">
+      <motion.div
+        className="p-4"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Banner */}
-        <div className="rounded-2xl overflow-hidden mb-6">
+        <motion.div variants={fadeUp} className="rounded-2xl overflow-hidden mb-6">
           {event.cover_image_url ? (
             <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
           ) : (
@@ -49,24 +56,28 @@ export function OrgEventDetail() {
               <CalendarDays className="w-16 h-16 text-white/20" />
             </div>
           )}
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-black text-blue">0</p>
-            <p className="text-xs text-slate-400 mt-1">Registrations</p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-black text-yellow-500">0</p>
-            <p className="text-xs text-slate-400 mt-1">Pending</p>
-          </div>
-          <div className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-black text-green">0</p>
-            <p className="text-xs text-slate-400 mt-1">Checked In</p>
-          </div>
-        </div>
+        {/* Stats row */}
+        <motion.div variants={staggerContainer} className="grid grid-cols-3 gap-4 mb-6">
+          {[
+            { label: 'Registrations', value: 0, color: 'text-blue' },
+            { label: 'Pending',       value: 0, color: 'text-yellow-500' },
+            { label: 'Checked In',    value: 0, color: 'text-green' },
+          ].map(({ label, value, color }) => (
+            <motion.div
+              key={label}
+              variants={cardItem}
+              className="bg-white rounded-xl border border-slate-200 p-4 text-center"
+            >
+              <p className={`text-2xl font-black ${color}`}>{value}</p>
+              <p className="text-xs text-slate-400 mt-1">{label}</p>
+            </motion.div>
+          ))}
+        </motion.div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
+        {/* Detail card */}
+        <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
               <Zap className="w-3 h-3" />
@@ -94,15 +105,17 @@ export function OrgEventDetail() {
             <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">About</p>
             <p className="text-sm text-slate-600 leading-relaxed">{event.description}</p>
           </div>
-        </div>
+        </motion.div>
 
-        <button
+        <motion.button
+          variants={fadeUp}
           onClick={() => navigate(`/organizer/events/${event.id}/registrants`)}
           className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          whileTap={{ scale: 0.98 }}
         >
           View Registrants
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </div>
   )
 }

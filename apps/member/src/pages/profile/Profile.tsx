@@ -1,60 +1,109 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Pencil, Bell, Lock, ChevronRight, LogOut } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ChevronRight, LogOut, Star } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
+import ComingSoonModal from '../../components/ComingSoonModal'
 
-const menu: { label: string; Icon: LucideIcon; path: string }[] = [
-  { label: 'Edit Profile',  Icon: Pencil, path: '/profile/edit'          },
-  { label: 'Notifications', Icon: Bell,   path: '/profile/notifications' },
-  { label: 'Privacy',       Icon: Lock,   path: '/profile/privacy'       },
+const PROGRAM_THEMES = [
+  { label: 'DEVCON+',      color: 'bg-blue'   },
+  { label: 'She is DEVCON', color: 'bg-pink-500' },
+  { label: 'DEVCON Kids',  color: 'bg-green'  },
+  { label: 'Campus',       color: 'bg-gold'   },
+]
+
+const MENU_ITEMS: { label: string; path: string }[] = [
+  { label: 'XP History',       path: '/points/history'        },
+  { label: 'Edit Profile',     path: '/profile/edit'          },
+  { label: 'Notifications',    path: '/profile/notifications' },
+  { label: 'Privacy & Security', path: '/profile/privacy'    },
 ]
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { user, signOut } = useAuthStore()
+  const { user, initials, signOut } = useAuthStore()
   const { totalPoints } = usePointsStore()
-
-  const initials = user?.full_name
-    ?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() ?? 'U'
+  const [showThemeModal, setShowThemeModal] = useState(false)
+  const [showHelpModal, setShowHelpModal] = useState(false)
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-8 rounded-b-3xl text-center">
-        <div className="w-20 h-20 bg-blue rounded-full flex items-center justify-center mx-auto mb-3">
-          <span className="text-white text-2xl font-bold">{initials}</span>
+      {/* Header */}
+      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl text-center">
+        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3">
+          {initials}
         </div>
-        <h1 className="text-white text-xl font-bold">{user?.full_name}</h1>
-        <p className="text-white/60 text-sm">{user?.email}</p>
-        <div className="mt-4">
-          <p className="text-gold font-bold text-xl">{totalPoints.toLocaleString()}</p>
-          <p className="text-white/50 text-xs">Points</p>
+        <h1 className="text-xl font-black text-white">{user?.full_name}</h1>
+        {user?.school_or_company && (
+          <p className="text-white/60 text-sm mt-0.5">{user.school_or_company}</p>
+        )}
+        <div className="flex items-center justify-center mt-3">
+          <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1 text-white text-xs font-semibold">
+            <Star className="w-3 h-3 fill-gold text-gold" />
+            {totalPoints.toLocaleString()} XP
+          </span>
         </div>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-2">
-        {menu.map((item) => (
+      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8">
+
+        {/* Program Theme */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-4">
+          <p className="text-sm font-bold text-slate-900 mb-3">Program Theme</p>
+          <div className="grid grid-cols-2 gap-2">
+            {PROGRAM_THEMES.map((theme) => (
+              <button
+                key={theme.label}
+                onClick={() => setShowThemeModal(true)}
+                className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors text-left"
+              >
+                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${theme.color}`} />
+                {theme.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Menu */}
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          {MENU_ITEMS.map((item, i) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`w-full px-4 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors ${
+                i < MENU_ITEMS.length - 1 ? 'border-b border-slate-100' : ''
+              }`}
+            >
+              <span className="text-sm font-semibold text-slate-900">{item.label}</span>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
+            </button>
+          ))}
           <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className="w-full bg-white rounded-2xl shadow-card px-4 py-4 flex items-center gap-3 text-left"
+            onClick={() => setShowHelpModal(true)}
+            className="w-full px-4 py-4 flex items-center justify-between text-left border-t border-slate-100 hover:bg-slate-50 transition-colors"
           >
-            <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
-              <item.Icon className="w-4 h-4 text-blue" />
-            </div>
-            <span className="flex-1 font-medium text-slate-900 text-sm">{item.label}</span>
+            <span className="text-sm font-semibold text-slate-900">Help & Support</span>
             <ChevronRight className="w-4 h-4 text-slate-300" />
           </button>
-        ))}
+        </div>
 
+        {/* Sign Out */}
         <button
           onClick={() => { signOut(); navigate('/sign-in') }}
-          className="w-full bg-red/10 text-red font-semibold py-4 rounded-2xl mt-4 flex items-center justify-center gap-2"
+          className="w-full border border-red text-red font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-red/5 transition-colors"
         >
           <LogOut className="w-4 h-4" />
           Sign Out
         </button>
+
       </div>
+
+      {showThemeModal && (
+        <ComingSoonModal feature="Program Theme" onClose={() => setShowThemeModal(false)} />
+      )}
+      {showHelpModal && (
+        <ComingSoonModal feature="Help & Support" onClose={() => setShowHelpModal(false)} />
+      )}
     </div>
   )
 }

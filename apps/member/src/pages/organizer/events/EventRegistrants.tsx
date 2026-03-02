@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Check, ClipboardList } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { EVENTS } from '@devcon-plus/supabase'
 import { ApprovalCard, type Registration } from '../../../components/ApprovalCard'
+import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 
 const MOCK_REGISTRANTS: Registration[] = [
   {
@@ -80,8 +82,14 @@ export function OrgEventRegistrants() {
         <p className="text-white/60 text-sm mt-0.5">{event?.title ?? 'Event'}</p>
       </div>
 
-      <div className="p-4">
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-5">
+      <motion.div
+        className="p-4"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* Filter tabs */}
+        <motion.div variants={fadeUp} className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-5">
           {(['all', 'pending', 'approved', 'rejected'] as FilterStatus[]).map((f) => (
             <button
               key={f}
@@ -95,45 +103,69 @@ export function OrgEventRegistrants() {
               {f} ({counts[f]})
             </button>
           ))}
-        </div>
+        </motion.div>
 
-        {filter === 'pending' && counts.pending > 0 && (
-          <button
-            onClick={() => {
-              setRegistrants((prev) =>
-                prev.map((r) => (r.status === 'pending' ? { ...r, status: 'approved' as const } : r))
-              )
-            }}
-            className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
-          >
-            <Check className="w-4 h-4" />
-            Approve All Pending ({counts.pending})
-          </button>
-        )}
+        <AnimatePresence>
+          {filter === 'pending' && counts.pending > 0 && (
+            <motion.button
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={() => {
+                setRegistrants((prev) =>
+                  prev.map((r) => (r.status === 'pending' ? { ...r, status: 'approved' as const } : r))
+                )
+              }}
+              className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
+              whileTap={{ scale: 0.97 }}
+            >
+              <Check className="w-4 h-4" />
+              Approve All Pending ({counts.pending})
+            </motion.button>
+          )}
+        </AnimatePresence>
 
-        {filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-              <ClipboardList className="w-7 h-7 text-slate-400" />
-            </div>
-            <p className="text-base font-bold text-slate-700">No registrants found</p>
-            <p className="text-sm text-slate-400 mt-1">
-              {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filtered.map((reg) => (
-              <ApprovalCard
-                key={reg.id}
-                registration={reg}
-                onApprove={handleApprove}
-                onReject={handleReject}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+        <AnimatePresence mode="wait">
+          {filtered.length === 0 ? (
+            <motion.div
+              key="empty"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
+            >
+              <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                <ClipboardList className="w-7 h-7 text-slate-400" />
+              </div>
+              <p className="text-base font-bold text-slate-700">No registrants found</p>
+              <p className="text-sm text-slate-400 mt-1">
+                {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={filter}
+              className="space-y-3"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+            >
+              {filtered.map((reg) => (
+                <motion.div key={reg.id} variants={cardItem}>
+                  <ApprovalCard
+                    registration={reg}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }

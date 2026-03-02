@@ -3,7 +3,6 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
-import { NAV_SPRING } from '../lib/animation'
 
 const LEFT_TABS = [
   { path: '/home',    label: 'Home',    icon: Home,     end: true },
@@ -52,22 +51,15 @@ export default function MemberLayout() {
               to={tab.path}
               end={tab.end}
               className={({ isActive }) =>
-                `relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
                   isActive ? 'text-blue' : 'text-slate-400'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="tab-indicator"
-                      className="absolute inset-0 bg-blue/10 rounded-xl"
-                      transition={NAV_SPRING}
-                    />
-                  )}
-                  <tab.icon className="relative w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="relative text-[10px] font-medium">{tab.label}</span>
+                  <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[10px] font-medium">{tab.label}</span>
                 </>
               )}
             </NavLink>
@@ -100,22 +92,15 @@ export default function MemberLayout() {
               to={tab.path}
               end={tab.end}
               className={({ isActive }) =>
-                `relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
                   isActive ? 'text-blue' : 'text-slate-400'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  {isActive && (
-                    <motion.div
-                      layoutId="tab-indicator"
-                      className="absolute inset-0 bg-blue/10 rounded-xl"
-                      transition={NAV_SPRING}
-                    />
-                  )}
-                  <tab.icon className="relative w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="relative text-[10px] font-medium">{tab.label}</span>
+                  <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[10px] font-medium">{tab.label}</span>
                 </>
               )}
             </NavLink>

@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { fadeUp, staggerContainer } from '../../../lib/animation'
 
 const schema = z.object({
   title:             z.string().min(3, 'Title must be at least 3 characters'),
@@ -46,8 +48,14 @@ export function OrgEventCreate() {
         <p className="text-white/60 text-sm mt-0.5">Fill in the details for your chapter event.</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-5">
-        <div>
+      <motion.form
+        onSubmit={handleSubmit(onSubmit)}
+        className="p-4 space-y-5"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={fadeUp}>
           <label className={labelClass}>Event Title</label>
           <input
             {...register('title')}
@@ -55,9 +63,9 @@ export function OrgEventCreate() {
             placeholder="e.g. DEVCON Summit Manila 2026"
           />
           {errors.title && <p className="text-xs text-red mt-1">{errors.title.message}</p>}
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fadeUp}>
           <label className={labelClass}>Description</label>
           <textarea
             {...register('description')}
@@ -66,9 +74,9 @@ export function OrgEventCreate() {
             placeholder="What is this event about?"
           />
           {errors.description && <p className="text-xs text-red mt-1">{errors.description.message}</p>}
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Location</label>
             <input
@@ -88,9 +96,9 @@ export function OrgEventCreate() {
             />
             {errors.event_date && <p className="text-xs text-red mt-1">{errors.event_date.message}</p>}
           </div>
-        </div>
+        </motion.div>
 
-        <div>
+        <motion.div variants={fadeUp}>
           <label className={labelClass}>XP Points Value</label>
           <input
             {...register('points_value')}
@@ -102,9 +110,12 @@ export function OrgEventCreate() {
           />
           {errors.points_value && <p className="text-xs text-red mt-1">{errors.points_value.message}</p>}
           <p className="text-xs text-slate-400 mt-1">Members earn this many XP when checked in at the event.</p>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4">
+        <motion.div
+          variants={fadeUp}
+          className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4"
+        >
           <input
             {...register('requires_approval')}
             type="checkbox"
@@ -119,9 +130,9 @@ export function OrgEventCreate() {
               If checked, you must manually approve each registration before members receive their QR ticket.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex gap-3 pt-2">
+        <motion.div variants={fadeUp} className="flex gap-3 pt-2">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -135,8 +146,8 @@ export function OrgEventCreate() {
           >
             Create Event
           </button>
-        </div>
-      </form>
+        </motion.div>
+      </motion.form>
     </div>
   )
 }
