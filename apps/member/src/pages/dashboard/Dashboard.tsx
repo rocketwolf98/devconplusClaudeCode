@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame, Star } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useJobsStore } from '../../stores/useJobsStore'
@@ -12,6 +12,8 @@ import PromotedBadge from '../../components/PromotedBadge'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import { NEWS_POSTS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabase'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
+import { WORK_TYPE_LABELS } from '../../lib/constants'
+import { formatDate } from '../../lib/dates'
 
 const BANNERS = [
   {
@@ -34,13 +36,6 @@ const BANNERS = [
   },
 ]
 
-const WORK_TYPE_LABEL: Record<string, string> = {
-  remote:    'Remote',
-  onsite:    'Onsite',
-  hybrid:    'Hybrid',
-  full_time: 'Full-time',
-  part_time: 'Part-time',
-}
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -51,8 +46,11 @@ export default function Dashboard() {
   const [bannerIdx, setBannerIdx] = useState(0)
   const [newsTab, setNewsTab] = useState<'devcon' | 'community'>('devcon')
   const [showVolunteerModal, setShowVolunteerModal] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const xpSectionRef = useRef<HTMLDivElement>(null)
+
+  const scrollYMV      = useMotionValue(0)
+  const cradleOpacity  = useTransform(scrollYMV, [0,  110], [1, 0])
+  const cradleHeight   = useTransform(scrollYMV, [60, 180], [280, 0])
+  const gradientOpacity = useTransform(scrollYMV, [30, 140], [0, 1])
 
   useEffect(() => {
     const t = setInterval(() => setBannerIdx((i) => (i + 1) % BANNERS.length), 4000)
@@ -60,15 +58,12 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const el = xpSectionRef.current
+    const el = document.querySelector('[data-scroll-container]') as HTMLElement
     if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => setIsScrolled(!entry.isIntersecting),
-      { threshold: 0 }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
+    const handler = () => scrollYMV.set(el.scrollTop)
+    el.addEventListener('scroll', handler, { passive: true })
+    return () => el.removeEventListener('scroll', handler)
+  }, [scrollYMV])
 
   const banner = BANNERS[bannerIdx]
   const handleBannerCta = () => banner.onClick(navigate)
@@ -83,34 +78,40 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* ── Sticky greeting bar ── */}
-      <div
-        className="sticky top-0 z-40 bg-blue px-6 pt-14 pb-6"
-        style={isScrolled ? { borderRadius: '0 0 100% 100% / 0 0 40px 40px' } : undefined}
-      >
-        <div className="flex items-center justify-between">
-          <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
-          <div className="flex items-baseline gap-0.5">
-            <span className="text-white font-black text-lg tracking-tight">DEVCON</span>
-            <span className="text-gold font-black text-xl">+</span>
+      {/* ── Sticky greeting bar + gradient tail ── */}
+      <div className="sticky top-0 z-40 relative">
+        <div className="bg-blue px-6 pt-14 pb-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-white font-black text-lg tracking-tight">DEVCON</span>
+              <span className="text-gold font-black text-xl">+</span>
+            </div>
           </div>
         </div>
+        {/* Gradient: absolutely positioned — no layout impact, overlaps cradle top */}
+        <motion.div
+          className="absolute left-0 right-0 h-10 pointer-events-none"
+          style={{
+            top: '100%',
+            background: 'linear-gradient(to bottom, #367BDD, transparent)',
+            opacity: gradientOpacity,
+          }}
+        />
       </div>
 
-      {/* ── XP card ── */}
-      <div
-        ref={xpSectionRef}
-        className="bg-blue px-4 pb-10"
-        style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px' }}
+      {/* ── Blue cradle — fades and collapses on scroll ── */}
+      <motion.div
+        className="bg-blue px-4 pb-10 overflow-hidden"
+        style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px', opacity: cradleOpacity, maxHeight: cradleHeight }}
       >
-        <div className="bg-white rounded-3xl shadow-lg p-5">
+        <div className="bg-white rounded-3xl shadow-xl p-5">
           <p className="text-slate-400 text-xs font-medium mb-3">Current DEVCON Points</p>
           <div className="flex items-end gap-2 mb-3">
             <Star className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
             <span className="text-4xl font-black text-slate-900 leading-none">{totalPoints.toLocaleString()}</span>
             <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
           </div>
-          {/* Animated XP bar */}
           <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
             <motion.div
               className="h-full bg-gold rounded-full"
@@ -129,7 +130,7 @@ export default function Dashboard() {
             Attend Our Events
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Scrollable feed ── */}
       <div className="bg-slate-50 space-y-6 pb-8">
@@ -277,7 +278,7 @@ export default function Dashboard() {
                     <span className="text-xs text-slate-400 truncate">{job.location}</span>
                   </div>
                   <span className="inline-block mt-2 text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-                    {WORK_TYPE_LABEL[job.work_type] ?? job.work_type}
+                    {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
                   </span>
                 </motion.button>
               ))}
@@ -354,7 +355,7 @@ export default function Dashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-800 truncate">{tx.description}</p>
                   <p className="text-[10px] text-slate-400">
-                    {new Date(tx.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}
+                    {formatDate.compact(tx.created_at)}
                   </p>
                 </div>
                 <span className={`text-sm font-bold ${tx.amount > 0 ? 'text-green' : 'text-red'}`}>

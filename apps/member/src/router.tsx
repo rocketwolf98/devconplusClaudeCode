@@ -20,6 +20,7 @@ import JobDetail from './pages/jobs/JobDetail'
 import Points from './pages/points/Points'
 import PointsHistory from './pages/points/PointsHistory'
 import Rewards from './pages/rewards/Rewards'
+import NewsDetail from './pages/news/NewsDetail'
 import Profile from './pages/profile/Profile'
 import ProfileEdit from './pages/profile/ProfileEdit'
 import Notifications from './pages/profile/Notifications'
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: '/jobs/:id',                  element: <JobDetail /> },
       { path: '/points',                    element: <Points /> },
       { path: '/points/history',            element: <PointsHistory /> },
+      { path: '/news/:id',                  element: <NewsDetail /> },
       { path: '/rewards',                   element: <Rewards /> },
       { path: '/profile',                   element: <Profile /> },
       { path: '/profile/edit',              element: <ProfileEdit /> },

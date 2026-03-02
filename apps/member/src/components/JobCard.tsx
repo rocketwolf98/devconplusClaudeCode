@@ -1,14 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { Job } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
-
-const workTypeLabel: Record<string, string> = {
-  remote:    'Remote',
-  onsite:    'Onsite',
-  hybrid:    'Hybrid',
-  full_time: 'Full-time',
-  part_time: 'Part-time',
-}
+import { WORK_TYPE_LABELS } from '../lib/constants'
 
 export default function JobCard({ job }: { job: Job }) {
   const navigate = useNavigate()
@@ -26,7 +19,7 @@ export default function JobCard({ job }: { job: Job }) {
       <p className="text-xs text-slate-500 mt-0.5">{job.company}</p>
       <div className="flex items-center gap-2 mt-2">
         <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-          {workTypeLabel[job.work_type] ?? job.work_type}
+          {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
         </span>
         {job.location && <span className="text-xs text-slate-400">{job.location}</span>}
       </div>

@@ -1,14 +1,18 @@
 import { Newspaper } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import type { NewsPost } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
+import { formatDate } from '../lib/dates'
 
 export default function NewsCard({ post }: { post: NewsPost }) {
-  const dateStr = post.created_at
-    ? new Date(post.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
-    : ''
+  const navigate = useNavigate()
+  const dateStr = post.created_at ? formatDate.short(post.created_at) : ''
 
   return (
-    <div className="bg-white rounded-2xl shadow-card overflow-hidden relative">
+    <div
+      className="bg-white rounded-2xl shadow-card overflow-hidden relative cursor-pointer active:scale-[0.98] transition-transform"
+      onClick={() => navigate(`/news/${post.id}`)}
+    >
       {post.is_promoted && (
         <div className="absolute top-3 right-3 z-10">
           <PromotedBadge />

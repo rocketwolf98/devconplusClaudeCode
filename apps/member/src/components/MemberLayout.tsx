@@ -34,7 +34,7 @@ export default function MemberLayout() {
   return (
     <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
       {/* Scrollable page content */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto pb-24">
+      <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </div>
 

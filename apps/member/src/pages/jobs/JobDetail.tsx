@@ -3,14 +3,7 @@ import { ArrowLeft, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useJobsStore } from '../../stores/useJobsStore'
 import PromotedBadge from '../../components/PromotedBadge'
-
-const workTypeLabel: Record<string, string> = {
-  remote:    'Remote',
-  onsite:    'Onsite',
-  hybrid:    'Hybrid',
-  full_time: 'Full-time',
-  part_time: 'Part-time',
-}
+import { WORK_TYPE_LABELS } from '../../lib/constants'
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>()
@@ -43,7 +36,7 @@ export default function JobDetail() {
         <h1 className="text-white text-xl font-bold">{job.title}</h1>
         <div className="flex items-center gap-2 mt-2">
           <span className="bg-white/10 text-white/80 text-xs px-2 py-0.5 rounded-full">
-            {workTypeLabel[job.work_type] ?? job.work_type}
+            {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
           </span>
           {job.location && (
             <span className="text-white/60 text-xs flex items-center gap-1">
