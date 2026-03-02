@@ -35,6 +35,7 @@ import { OrgEventDetail } from './pages/organizer/events/EventDetail'
 import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
 import { OrgQRScanner } from './pages/organizer/scan/QRScanner'
 import { OrgProfile } from './pages/organizer/profile/Profile'
+import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
 
 export const router = createBrowserRouter([
   // Root — always start at onboarding
@@ -80,6 +81,9 @@ export const router = createBrowserRouter([
       { path: '/organizer/events/:id/registrants',       element: <OrgEventRegistrants /> },
       { path: '/organizer/scan',                         element: <OrgQRScanner /> },
       { path: '/organizer/profile',                      element: <OrgProfile /> },
+      { path: '/organizer/profile/edit',                 element: <OrgProfileEdit /> },
+      { path: '/organizer/profile/notifications',        element: <Notifications /> },
+      { path: '/organizer/profile/privacy',              element: <Privacy /> },
     ],
   },
 ])

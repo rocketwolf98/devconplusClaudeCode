@@ -37,7 +37,7 @@ export default function OrganizerLayout() {
       </main>
 
       {/* Floating pill bottom nav — Home | ●Scan● | Profile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
         <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-blue flex items-center px-2 py-2">
           {/* Left: Home */}
           {LEFT_TABS.map(({ path, label, Icon, end }) => (

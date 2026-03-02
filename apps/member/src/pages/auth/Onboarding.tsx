@@ -4,28 +4,24 @@ import logoMark from '../../assets/logos/logo-mark.svg'
 
 const slides = [
   {
-    image:
-      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1080&q=80&auto=format&fit=crop',
+    image:    '/photos/devcon-summit-group.jpg',
     subtitle: 'DEVCON Philippines',
-    title: "The Philippines' Largest Volunteer Tech Community",
+    title:    "The Philippines' Largest Volunteer Tech Community",
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1080&q=80&auto=format&fit=crop',
+    image:    '/photos/devcon-15-anniversary.jpg',
     subtitle: 'Nationwide community',
-    title: '11 Chapters. 16 Years. 60,000+ Geeks for Good.',
+    title:    '11 Chapters. 16 Years. 60,000+ Geeks for Good.',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=1080&q=80&auto=format&fit=crop',
+    image:    '/photos/devcon-certificate-ceremony.jpg',
     subtitle: 'Points+ system',
-    title: 'Volunteer. Earn Points. Unlock Rewards.',
+    title:    'Volunteer. Earn Points. Unlock Rewards.',
   },
   {
-    image:
-      'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1080&q=80&auto=format&fit=crop',
+    image:    '/photos/devcon-jumpstart-internships.jpg',
     subtitle: 'Jobs + Career',
-    title: 'Access Global Opportunities. Level Up Your Career.',
+    title:    'Access Global Opportunities. Level Up Your Career.',
   },
 ]
 

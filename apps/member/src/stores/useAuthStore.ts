@@ -2,6 +2,15 @@ import { create } from 'zustand'
 import type { Profile } from '@devcon-plus/supabase'
 import { MOCK_PROFILE } from '@devcon-plus/supabase'
 
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('')
+}
+
 interface AuthState {
   user: Profile | null
   initials: string
@@ -10,9 +19,10 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => void
   setOrganizerSession: (val: boolean) => void
+  updateProfile: (patch: Partial<Pick<Profile, 'full_name' | 'school_or_company' | 'avatar_url'>>) => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: MOCK_PROFILE, // mock: pre-authenticated
   initials: 'MS',
   isLoading: false,
@@ -31,5 +41,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setOrganizerSession: (val: boolean) => {
     set({ isOrganizerSession: val })
+  },
+
+  updateProfile: (patch) => {
+    const current = get().user
+    if (!current) return
+    const updated = { ...current, ...patch }
+    set({
+      user: updated,
+      initials: patch.full_name ? getInitials(patch.full_name) : get().initials,
+    })
   },
 }))

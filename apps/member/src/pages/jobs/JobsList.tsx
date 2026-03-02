@@ -116,15 +116,9 @@ export default function JobsList() {
               key={job.id}
               variants={cardItem}
               onClick={() => navigate(`/jobs/${job.id}`)}
-              className="w-full bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
+              className="w-full bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left"
               whileTap={{ scale: 0.98 }}
             >
-              {job.is_promoted && (
-                <div className="absolute top-3 right-3">
-                  <PromotedBadge />
-                </div>
-              )}
-
               {/* Top row: company avatar + title + save */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
@@ -151,6 +145,7 @@ export default function JobsList() {
 
               {/* Meta chips */}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
+                {job.is_promoted && <PromotedBadge />}
                 <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <MapPin className="w-3 h-3" /> {job.location}
                 </span>

@@ -7,6 +7,7 @@ export interface OrganizerUser {
   chapter: string
   role: 'chapter_officer' | 'hq_admin'
   initials: string
+  avatar_url: string | null
 }
 
 interface OrgAuthState {
@@ -14,6 +15,16 @@ interface OrgAuthState {
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => void
+  updateProfile: (patch: Partial<Pick<OrganizerUser, 'full_name' | 'avatar_url'>>) => void
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join('')
 }
 
 const MOCK_ORGANIZER: OrganizerUser = {
@@ -23,9 +34,10 @@ const MOCK_ORGANIZER: OrganizerUser = {
   chapter: 'Manila',
   role: 'hq_admin',
   initials: 'JC',
+  avatar_url: null,
 }
 
-export const useOrgAuthStore = create<OrgAuthState>((set) => ({
+export const useOrgAuthStore = create<OrgAuthState>((set, get) => ({
   user: null, // starts logged out — set on valid organizer code entry
 
   isLoading: false,
@@ -39,5 +51,17 @@ export const useOrgAuthStore = create<OrgAuthState>((set) => ({
 
   logout: () => {
     set({ user: null })
+  },
+
+  updateProfile: (patch) => {
+    const current = get().user
+    if (!current) return
+    set({
+      user: {
+        ...current,
+        ...patch,
+        initials: patch.full_name ? getInitials(patch.full_name) : current.initials,
+      },
+    })
   },
 }))
