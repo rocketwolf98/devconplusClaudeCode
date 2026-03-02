@@ -3,27 +3,27 @@
 > **Tagline:** Sync. Support. Succeed.
 > Platform for DEVCON Philippines — 11 chapters, 60,000+ members.
 
-This monorepo contains two apps and one shared package:
+This monorepo contains one main app and one shared package:
 
 | App | Tech | Purpose |
 |-----|------|---------|
-| `apps/member` | React + Vite PWA | Mobile-first web app for members |
-| `apps/organizer` | React + Vite PWA | Web PWA for chapter officers |
-| `packages/supabase` | TypeScript | Shared types + mock data |
+| `apps/member` | React 19 + Vite 7 | Mobile-first web app — member UI **and** organizer UI (separate route trees) |
+| `apps/landing` | Static HTML | Simple landing page |
+| `packages/supabase` | TypeScript | Shared DB types + mock data |
+
+> The organizer flow lives inside `apps/member` under `/organizer/*` routes with its own layout — there is no separate organizer app.
 
 ---
 
 ## Prerequisites
 
-Install these before anything else.
+| Tool | Required Version |
+|------|-----------------|
+| Node.js | **v20.x** (LTS) |
+| npm | v10+ (comes with Node) |
+| Git | any recent version |
 
-| Tool | Required Version | Download |
-|------|-----------------|---------|
-| Node.js | **v20.x** (LTS) | https://nodejs.org |
-| npm | v10+ (comes with Node) | — |
-| Git | any recent version | https://git-scm.com |
-
-> **Windows users:** Use **Git Bash** or **WSL** for all terminal commands — not Command Prompt or PowerShell.
+> **Windows users:** Use **Git Bash** or **WSL** — not Command Prompt or PowerShell.
 
 ---
 
@@ -31,36 +31,26 @@ Install these before anything else.
 
 ```bash
 git clone <repo-url>
-cd "devcon-plus"
+cd devcon-plus
 
-npm install
+npm install --legacy-peer-deps
 ```
+
+> `--legacy-peer-deps` is required due to a peer dependency conflict.
 
 ---
 
-## 2. Running the Apps
-
-### Member App (Vite PWA)
+## 2. Running the App
 
 ```bash
 npm run dev:member
 ```
 
-Opens at [http://localhost:5173](http://localhost:5173) (or next available port if 5173 is taken).
+Opens at [http://localhost:5173](http://localhost:5173).
 
-> Use Chrome DevTools → Toggle Device Toolbar (Ctrl+Shift+M) to simulate a mobile viewport.
+> Use Chrome DevTools → Toggle Device Toolbar (`Ctrl+Shift+M`) and set width to **390px**. The app has a `<DesktopGuard />` — it will show a "please open on mobile" screen on wider viewports.
 
-### Organizer PWA
-
-```bash
-npm run dev:organizer
-```
-
-Opens at [http://localhost:5173](http://localhost:5173)
-
-> If both apps run at the same time, the member app will use port 5174.
-
-### Run both at the same time
+### Run all apps via Turbo
 
 ```bash
 npm run dev
@@ -68,121 +58,117 @@ npm run dev
 
 ---
 
-## 3. Login Credentials (Mock Data — No Backend Yet)
+## 3. Login (Mock Data — No Backend Yet)
 
 All data is mocked. Use these to log in:
 
-### Member App
+**Member flow**
+
 | Field | Value |
 |-------|-------|
 | Email | `juan@example.com` |
-| Password | any value (not validated yet) |
+| Password | any value (not validated) |
 
-### Organizer PWA
-| Field | Value |
-|-------|-------|
-| Email | `officer@devcon.ph` |
-| Password | any value (not validated yet) |
+**Organizer flow**
 
-> Auth is mocked — any email/password combination will work at this stage. Real Supabase integration comes in a later sprint.
+From the sign-up screen, enter any organizer code (e.g. `DEVCON2025`) to be routed to `/organizer`.
+
+> Auth is fully mocked — any email/password works. Real Supabase integration is the next sprint.
 
 ---
 
 ## 4. App Structure — What's Built
 
-### Member App Screens
+### Member Screens
 
 | Route | Screen |
 |-------|--------|
-| `/onboarding` | 4-step swipeable intro |
+| `/` | Splash screen |
+| `/onboarding` | 4-step swipeable intro (real chapter photos) |
 | `/sign-in` | Login |
-| `/sign-up` | Registration (includes organizer code gate) |
-| `/` | Dashboard — hero banner, XP bar, events, jobs, news |
-| `/events` | Events list with chapter filter tabs |
+| `/sign-up` | Registration |
+| `/organizer-code-gate` | Organizer code entry |
+| `/home` | Dashboard — XP card, quick actions, rotating banner, events, jobs, news, XP history |
+| `/events` | Events list (Discover + My Tickets tabs, chapter filter) |
 | `/events/:id` | Event detail |
 | `/events/:id/register` | Registration form (pre-filled) |
 | `/events/:id/pending` | Pending approval screen |
 | `/events/:id/ticket` | QR ticket |
-| `/jobs` | Jobs board with search + filter |
+| `/jobs` | Jobs board |
 | `/jobs/:id` | Job detail + Apply Now |
-| `/points` | Ways to Earn / Share & Earn tabs |
+| `/points` | Ways to earn XP |
 | `/points/history` | Transaction log grouped by date |
 | `/rewards` | Perks catalog (ComingSoonModal on tap) |
-| `/profile` | Profile overview |
-| `/profile/edit` | Edit profile |
+| `/news/:id` | News article detail |
+| `/profile` | Profile — program theme selector, XP, menu |
+| `/profile/edit` | Edit profile + photo upload |
 | `/profile/notifications` | Notification settings |
 | `/profile/privacy` | Privacy settings |
 
-### Organizer PWA Screens
+### Organizer Screens (same codebase, `/organizer/*`)
 
 | Route | Screen |
 |-------|--------|
-| `/login` | Officer login |
-| `/` | Dashboard — pending approvals + event summary |
-| `/events` | Events list |
-| `/events/create` | Create new event |
-| `/events/:id` | Event detail |
-| `/events/:id/registrants` | Approve / Reject registrants |
-| `/scan` | QR scanner (camera) |
-| `/profile` | Officer profile |
+| `/organizer` | Dashboard — pending approvals + event summary |
+| `/organizer/events` | Events list |
+| `/organizer/events/create` | Create new event |
+| `/organizer/events/:id` | Event detail |
+| `/organizer/events/:id/registrants` | Approve / Reject registrants |
+| `/organizer/scan` | QR scanner (camera) |
+| `/organizer/profile` | Officer profile |
+| `/organizer/profile/edit` | Edit officer profile |
 
 ---
 
-## 5. Key Design Rules (Read Before Making Changes)
+## 5. Program Themes
+
+Users can switch their app theme from the Profile screen. The primary color drives all `bg-primary`, `text-primary`, and shadow tokens via CSS custom properties.
+
+| Theme | Color |
+|-------|-------|
+| DEVCON+ (default) | `#367BDD` blue |
+| She is DEVCON | `#EC4899` pink |
+| DEVCON Kids | `#21C45D` green |
+| Campus | `#F8C630` gold |
+
+---
+
+## 6. Key Design Rules
 
 1. **No Apple Sign-In** — auth is Google OAuth + Email/Password only
-2. **2nd job listing + 2nd news post** always get an orange `PROMOTED` badge — this is a design mandate
+2. **2nd job listing + 2nd news post** always get an orange `PROMOTED` badge
 3. **No placeholder text** — use `<ComingSoonModal />` for incomplete features
 4. **Every tap must go somewhere** — no dead-end navigation
-5. **TypeScript strict mode** — no `any` types, no `@ts-ignore`
-6. **Forms** use React Hook Form + Zod — no uncontrolled inputs
+5. **TypeScript strict mode** — no `any`, no `@ts-ignore`
+6. **Forms** use React Hook Form + Zod
+7. **Icons** — `lucide-react` only, no emoji in JSX
+8. **Primary color** — always use `text-primary` / `bg-primary` (CSS var), not hardcoded hex
 
 ### Color Reference
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| Primary blue | `#3B5BDE` | Buttons, active nav, headers |
-| Navy | `#1E2A56` | Dark backgrounds, hero |
-| Promoted orange | `#F97316` | PROMOTED badge only |
-| Success green | `#21C45D` | "You're In" states |
-| Warning yellow | `#EAB308` | Pending states |
-| Error red | `#EF4444` | Rejected states |
+| `primary` | CSS var (theme-driven) | Buttons, active nav, headers |
+| `blue` | `#367BDD` | Non-themed blue alias |
+| `navy` | `#1E2A56` | Dark text, indicator dots |
+| `gold` | `#F8C630` | XP bar fill, star icon |
+| `promoted` | `#F97316` | PROMOTED badge only |
+| `green` | `#21C45D` | Positive XP, success states |
+| `red` | `#EF4444` | Error, sign out |
 
 ---
 
-## 6. Making a Production Build
-
-### Member App
+## 7. Build + Typecheck
 
 ```bash
-cd apps/member
+# Production build
 npm run build
-# Output: apps/member/dist/
-```
 
-### Organizer PWA
-
-```bash
-cd apps/organizer
-npm run build
-# Output: apps/organizer/dist/
-```
-
-### TypeScript check (both apps)
-
-```bash
+# TypeScript check across all packages
 npm run typecheck
 ```
 
----
-
-## 7. Project Conventions
-
-- `PascalCase.tsx` for components
-- `kebab-case.tsx` for route page files
-- Mock data lives in `packages/supabase/src/mock/`
-- Stores (Zustand) live in `src/stores/` inside each app
-- Components live in `src/components/` inside each app
+Output: `apps/member/dist/`
 
 ---
 
@@ -191,19 +177,31 @@ npm run typecheck
 ```
 devcon-plus/
 ├── apps/
-│   ├── member/              # Vite React PWA (member app)
+│   ├── member/
+│   │   ├── public/
+│   │   │   └── photos/          # Real DEVCON chapter photos
 │   │   └── src/
-│   │       ├── components/  # Shared UI components
-│   │       ├── pages/       # Route pages (auth/, dashboard/, events/, etc.)
-│   │       └── stores/      # Zustand state
-│   ├── organizer/           # Vite React PWA (organizer app)
-│   │   └── src/
-│   │       ├── components/  # Layout, cards
-│   │       ├── pages/       # Route pages
-│   │       └── stores/      # Zustand state
-│   └── landing/             # Static landing page (HTML only)
+│   │       ├── assets/logos/    # DEVCON+ logo variants (SVG)
+│   │       ├── components/      # Shared UI components
+│   │       ├── lib/             # animation.ts, constants.ts, dates.ts
+│   │       ├── pages/
+│   │       │   ├── auth/        # Onboarding, SignIn, SignUp, etc.
+│   │       │   ├── dashboard/
+│   │       │   ├── events/
+│   │       │   ├── jobs/
+│   │       │   ├── news/
+│   │       │   ├── organizer/   # Organizer route pages
+│   │       │   ├── points/
+│   │       │   ├── profile/
+│   │       │   └── rewards/
+│   │       ├── stores/          # Zustand stores
+│   │       └── router.tsx       # Flat createBrowserRouter config
+│   └── landing/                 # Static HTML landing page
 └── packages/
-    └── supabase/            # Shared types + mock data
+    └── supabase/
+        └── src/
+            ├── mock/            # MOCK_PROFILE, MOCK_EVENTS, MOCK_JOBS, etc.
+            └── types.ts         # Shared TypeScript types
 ```
 
 ---
@@ -211,34 +209,31 @@ devcon-plus/
 ## 9. Common Issues
 
 **`npm install` fails**
-→ Make sure you're using Node.js v20.x. Run `node -v` to check.
+→ Always use `npm install --legacy-peer-deps`
 
-**Member app not loading**
-→ Open [http://localhost:5173](http://localhost:5173) directly in Chrome. If that port is taken, check the terminal for the actual port (e.g. 5174).
+**App shows "Please open on mobile"**
+→ Open DevTools → Toggle Device Toolbar → set width to 390px
 
-**Organizer app shows login page in a loop**
-→ Clear `localStorage` in DevTools → Application → Local Storage → Clear All
+**Organizer pages redirect to sign-in**
+→ From sign-up, enter an organizer code to set the organizer session flag
 
-**TypeScript errors after pulling changes**
-→ Run `npm install` again — a new package may have been added
+**TypeScript errors after pulling**
+→ Run `npm install --legacy-peer-deps` — a new package may have been added
 
 **QR scanner says "camera not available"**
-→ The QR scanner requires HTTPS or localhost. It works on `localhost:5173` but will fail on `http://` deployed URLs — use Chrome on Android or desktop for scanning
+→ Requires HTTPS or `localhost`. Works at `localhost:5173` — use Chrome on Android or desktop for scanning
 
 ---
 
 ## 10. Deployment (Vercel)
 
-Three separate Vercel projects from the same repo:
-
 | Project | Root Directory | Build Command | Output |
 |---------|---------------|---------------|--------|
-| Landing | `apps/landing` | *(none)* | `.` |
 | Member app | `apps/member` | `npm run build` | `dist` |
-| Organizer | `apps/organizer` | `npm run build` | `dist` |
+| Landing | `apps/landing` | *(none)* | `.` |
 
 See `docs/plans/2026-02-27-pwa-vercel-deployment.md` for full Vercel setup steps.
 
 ---
 
-*DEVCON Philippines · Built with React + Vite · MVP Target: April 2026*
+*DEVCON Philippines · React 19 + Vite 7 · MVP Target: April 2026*
