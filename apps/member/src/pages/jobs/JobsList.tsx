@@ -35,7 +35,7 @@ export default function JobsList() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold mb-3">Jobs Board</h1>
 
         {/* Search */}
@@ -56,7 +56,7 @@ export default function JobsList() {
               key={f}
               onClick={() => setFilter(f)}
               className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 ${
-                filter === f ? 'bg-white text-blue' : 'bg-white/20 text-white'
+                filter === f ? 'bg-white text-primary' : 'bg-white/20 text-white'
               }`}
             >
               {f === 'Saved' && <Bookmark className="w-3 h-3" />}
@@ -79,7 +79,7 @@ export default function JobsList() {
           {!isSavedTab && (
             <motion.div
               variants={fadeUp}
-              className="rounded-2xl p-4 overflow-hidden bg-blue"
+              className="rounded-2xl p-4 overflow-hidden bg-primary"
             >
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="w-4 h-4 text-gold" />
@@ -122,7 +122,7 @@ export default function JobsList() {
               {/* Top row: company avatar + title + save */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
-                  <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center text-sm font-bold text-blue shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
                     {job.company.charAt(0)}
                   </div>
                   <div className="min-w-0">

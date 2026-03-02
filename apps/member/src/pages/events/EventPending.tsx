@@ -22,7 +22,7 @@ export default function EventPending() {
       </div>
       <button
         onClick={() => navigate('/events')}
-        className="w-full max-w-xs bg-blue text-white font-bold py-4 rounded-2xl"
+        className="w-full max-w-xs bg-primary text-white font-bold py-4 rounded-2xl"
       >
         Back to Events
       </button>

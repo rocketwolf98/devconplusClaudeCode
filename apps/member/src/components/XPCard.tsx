@@ -7,7 +7,7 @@ export default function XPCard() {
   const { totalPoints } = usePointsStore()
 
   return (
-    <div className="mx-4 bg-navy rounded-2xl p-4 shadow-blue">
+    <div className="mx-4 bg-navy rounded-2xl p-4 shadow-primary">
       <div className="flex justify-between items-center mb-2">
         <div>
           <p className="text-white/60 text-xs">Your Points</p>
@@ -15,7 +15,7 @@ export default function XPCard() {
         </div>
         <button
           onClick={() => navigate('/rewards')}
-          className="bg-blue px-3 py-1.5 rounded-xl text-white text-xs font-semibold"
+          className="bg-primary px-3 py-1.5 rounded-xl text-white text-xs font-semibold"
         >
           Redeem Now
         </button>

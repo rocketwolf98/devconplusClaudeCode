@@ -35,9 +35,9 @@ export default function OrganizerCodeGate() {
   }
 
   return (
-    <div className="min-h-screen bg-blue flex flex-col">
+    <div className="min-h-screen bg-primary flex flex-col">
       {/* Gradient header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-primary px-6 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         <p className="text-white/70 mt-3 text-sm">Welcome back, {firstName}!</p>
       </div>
@@ -55,7 +55,7 @@ export default function OrganizerCodeGate() {
             onChange={(e) => { setCode(e.target.value); setError('') }}
             onKeyDown={(e) => e.key === 'Enter' && handleAccessPortal()}
             placeholder="e.g. ORG-MANILA"
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary uppercase tracking-wider"
           />
           {error && <p className="text-red text-xs">{error}</p>}
 
@@ -63,7 +63,7 @@ export default function OrganizerCodeGate() {
             type="button"
             onClick={handleAccessPortal}
             disabled={loading}
-            className="w-full bg-navy text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue transition-colors"
+            className="w-full bg-navy text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-primary transition-colors"
           >
             {loading ? 'Verifying…' : 'Access Officer Portal'}
           </button>

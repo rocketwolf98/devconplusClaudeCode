@@ -44,9 +44,9 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen bg-blue flex flex-col">
+    <div className="min-h-screen bg-primary flex flex-col">
       {/* Gradient header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-primary px-6 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         <p className="text-white/60 mt-3 text-sm">Create your account</p>
       </div>
@@ -74,7 +74,7 @@ export default function SignUp() {
             <input
               {...register('full_name')}
               placeholder="Juan dela Cruz"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {errors.full_name && <p className="text-red text-xs mt-1">{errors.full_name.message}</p>}
           </div>
@@ -85,7 +85,7 @@ export default function SignUp() {
               {...register('email')}
               type="email"
               placeholder="juan@devcon.ph"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {errors.email && <p className="text-red text-xs mt-1">{errors.email.message}</p>}
           </div>
@@ -96,7 +96,7 @@ export default function SignUp() {
               {...register('password')}
               type="password"
               placeholder="••••••••"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
             {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
           </div>
@@ -108,14 +108,14 @@ export default function SignUp() {
             <input
               {...register('school_or_company')}
               placeholder="University of Santo Tomas"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
+            className="w-full bg-primary text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-primary-dark transition-colors"
           >
             {isSubmitting ? 'Creating account…' : 'Create Account'}
           </button>
@@ -123,7 +123,7 @@ export default function SignUp() {
 
         <p className="text-center text-sm text-slate-500 mt-6">
           Already have an account?{' '}
-          <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
+          <Link to="/sign-in" className="text-primary font-semibold">Sign In</Link>
         </p>
       </div>
     </div>

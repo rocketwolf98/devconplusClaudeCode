@@ -21,3 +21,35 @@ body {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+/* ── Program Theme tokens ──────────────────────────────────────────── */
+/* Must be in @layer base so they are available before Tailwind utilities */
+/* Values are space-separated R G B channels for Tailwind opacity support */
+/* e.g. rgb(var(--color-primary) / 0.1) works for bg-primary/10         */
+
+@layer base {
+  :root,
+  .theme-devcon {
+    --color-primary:      54 123 221;   /* #367BDD */
+    --color-primary-dark: 41 98 196;    /* #2962C4 */
+    --shadow-primary: 0 4px 24px rgba(54, 123, 221, 0.12);
+  }
+
+  .theme-she {
+    --color-primary:      236 72 153;   /* #EC4899 pink-500 */
+    --color-primary-dark: 219 39 119;   /* #DB2777 pink-600 */
+    --shadow-primary: 0 4px 24px rgba(236, 72, 153, 0.12);
+  }
+
+  .theme-kids {
+    --color-primary:      33 196 93;    /* #21C45D */
+    --color-primary-dark: 22 163 74;    /* #16A34A */
+    --shadow-primary: 0 4px 24px rgba(33, 196, 93, 0.12);
+  }
+
+  .theme-campus {
+    --color-primary:      248 198 48;   /* #F8C630 */
+    --color-primary-dark: 234 179 8;    /* #EAB308 */
+    --shadow-primary: 0 4px 24px rgba(248, 198, 48, 0.12);
+  }
+}

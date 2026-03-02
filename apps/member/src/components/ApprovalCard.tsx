@@ -35,7 +35,7 @@ export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCard
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card">
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-blue/10 flex items-center justify-center text-blue text-sm font-bold shrink-0">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold shrink-0">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
@@ -63,7 +63,7 @@ export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCard
           </button>
           <button
             onClick={() => onApprove(registration.id)}
-            className="flex-1 py-2 text-sm font-semibold rounded-xl bg-blue text-white hover:bg-blue-dark transition-colors flex items-center justify-center gap-1.5"
+            className="flex-1 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-dark transition-colors flex items-center justify-center gap-1.5"
           >
             <Check className="w-3.5 h-3.5" />
             Approve

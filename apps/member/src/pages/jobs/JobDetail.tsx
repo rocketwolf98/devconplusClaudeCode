@@ -22,7 +22,7 @@ export default function JobDetail() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <div className="flex items-center justify-between mb-3">
           <button
             onClick={() => navigate(-1)}
@@ -58,7 +58,7 @@ export default function JobDetail() {
           <button
             onClick={() => toggleSave(job.id)}
             className={`flex-1 py-3 rounded-2xl font-semibold text-sm border transition-colors ${
-              isSaved ? 'border-blue bg-blue/10 text-blue' : 'border-slate-200 bg-white text-slate-600'
+              isSaved ? 'border-primary bg-primary/10 text-primary' : 'border-slate-200 bg-white text-slate-600'
             }`}
           >
             {isSaved ? '✓ Saved' : 'Save'}
@@ -67,7 +67,7 @@ export default function JobDetail() {
             href={job.apply_url ?? '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-3 rounded-2xl font-semibold text-sm bg-blue text-white text-center"
+            className="flex-1 py-3 rounded-2xl font-semibold text-sm bg-primary text-white text-center"
           >
             Apply Now
           </a>

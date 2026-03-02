@@ -43,13 +43,13 @@ export default function ComingSoonModal({ onClose, feature = 'This feature' }: P
             <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-6" />
             <div className="text-center">
               <div className="flex justify-center mb-3">
-                <Rocket className="w-12 h-12 text-blue" />
+                <Rocket className="w-12 h-12 text-primary" />
               </div>
               <h2 className="text-lg font-bold text-slate-900 mb-1">Coming Soon</h2>
               <p className="text-sm text-slate-500 mb-6">{feature} is launching soon. Stay tuned!</p>
               <button
                 onClick={handleClose}
-                className="w-full bg-blue text-white font-bold py-3 rounded-xl"
+                className="w-full bg-primary text-white font-bold py-3 rounded-xl"
               >
                 Got it
               </button>

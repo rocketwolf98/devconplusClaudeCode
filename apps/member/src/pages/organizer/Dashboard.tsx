@@ -77,7 +77,7 @@ export function OrgDashboard() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-8 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-8 rounded-b-3xl">
         <OrgBanner
           chapterName={user.chapter}
           role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
@@ -164,14 +164,14 @@ export function OrgDashboard() {
                 <p className="text-sm text-slate-500">Your chapter events</p>
                 <button
                   onClick={() => navigate('/organizer/events/create')}
-                  className="px-4 py-2 bg-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-dark transition-colors"
+                  className="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
                 >
                   + New Event
                 </button>
               </div>
               <button
                 onClick={() => navigate('/organizer/events')}
-                className="text-sm text-blue font-semibold hover:underline"
+                className="text-sm text-primary font-semibold hover:underline"
               >
                 View all events →
               </button>

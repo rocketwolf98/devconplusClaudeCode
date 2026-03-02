@@ -16,7 +16,7 @@ export default function EventTicket() {
     return (
       <div className="p-4 text-center text-slate-400 pt-20">
         Ticket not available.{' '}
-        <button onClick={() => navigate(-1)} className="text-blue">Go back</button>
+        <button onClick={() => navigate(-1)} className="text-primary">Go back</button>
       </div>
     )
   }
@@ -34,10 +34,10 @@ export default function EventTicket() {
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
 
-      <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-blue">
+      <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-primary">
         {/* Ticket header */}
         <div className="text-center mb-6">
-          <div className="w-10 h-10 bg-blue rounded-full mx-auto flex items-center justify-center mb-2">
+          <div className="w-10 h-10 bg-primary rounded-full mx-auto flex items-center justify-center mb-2">
             <span className="text-white font-bold">D+</span>
           </div>
           <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Event Ticket</p>

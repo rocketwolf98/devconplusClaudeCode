@@ -35,7 +35,7 @@ export default function EventsList() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold mb-3">Events</h1>
         <div className="flex gap-2 mb-3">
           {(['discover', 'tickets'] as const).map((t) => (
@@ -43,7 +43,7 @@ export default function EventsList() {
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                tab === t ? 'bg-white text-blue font-semibold' : 'bg-white/20 text-white'
+                tab === t ? 'bg-white text-primary font-semibold' : 'bg-white/20 text-white'
               }`}
             >
               {t === 'discover' ? 'Discover' : 'My Tickets'}
@@ -57,7 +57,7 @@ export default function EventsList() {
                 key={ch}
                 onClick={() => setChapter(ch)}
                 className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                  chapter === ch ? 'bg-white text-blue font-semibold' : 'bg-white/20 text-white'
+                  chapter === ch ? 'bg-white text-primary font-semibold' : 'bg-white/20 text-white'
                 }`}
               >
                 {ch}
@@ -122,7 +122,7 @@ export default function EventsList() {
                       +{featuredEvent.points_value} pts
                     </span>
                   </div>
-                  <div className="mt-3 bg-blue rounded-xl py-2.5 text-center">
+                  <div className="mt-3 bg-primary rounded-xl py-2.5 text-center">
                     <span className="text-white text-sm font-semibold">View Event</span>
                   </div>
                 </button>
@@ -150,8 +150,8 @@ export default function EventsList() {
                       whileTap={{ scale: 0.98 }}
                     >
                       {dateParts ? (
-                        <div className="w-12 h-14 rounded-xl bg-blue/10 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold text-blue leading-none">
+                        <div className="w-12 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                          <span className="text-[10px] font-bold text-primary leading-none">
                             {dateParts.month}
                           </span>
                           <span className="text-xl font-black text-navy leading-tight">
@@ -169,7 +169,7 @@ export default function EventsList() {
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] font-semibold bg-blue/10 text-blue px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                             +{event.points_value} pts
                           </span>
                           {MOCK_ATTENDEES[event.id] && (
@@ -199,8 +199,8 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            <div className="w-16 h-16 rounded-full bg-blue/10 flex items-center justify-center mb-4">
-              <Ticket className="w-8 h-8 text-blue/50" />
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Ticket className="w-8 h-8 text-primary/50" />
             </div>
             <h3 className="text-base font-bold text-slate-900 mb-1">No tickets yet</h3>
             <p className="text-sm text-slate-500 text-center mb-5">
@@ -208,7 +208,7 @@ export default function EventsList() {
             </p>
             <button
               onClick={() => setTab('discover')}
-              className="bg-blue text-white font-semibold text-sm px-6 py-2.5 rounded-xl"
+              className="bg-primary text-white font-semibold text-sm px-6 py-2.5 rounded-xl"
             >
               Browse Events
             </button>

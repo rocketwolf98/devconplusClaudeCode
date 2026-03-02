@@ -108,7 +108,7 @@ export function OrgQRScanner() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <h1 className="text-2xl font-black text-white mb-1">QR Scanner</h1>
         <p className="text-white/60 text-sm">
           Scan member QR tickets at the door to award attendance XP.
@@ -127,12 +127,12 @@ export function OrgQRScanner() {
               className="space-y-4"
             >
               <motion.div
-                className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center cursor-pointer hover:border-blue transition-colors"
+                className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center cursor-pointer hover:border-primary transition-colors"
                 onClick={() => startCamera()}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mx-auto mb-4">
-                  <Camera className="w-8 h-8 text-blue" />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Camera className="w-8 h-8 text-primary" />
                 </div>
                 <p className="text-base font-bold text-slate-700 mb-1">Start Camera Scanner</p>
                 <p className="text-sm text-slate-400">
@@ -149,11 +149,11 @@ export function OrgQRScanner() {
                     value={manualToken}
                     onChange={(e) => setManualToken(e.target.value)}
                     placeholder="Paste QR token (e.g. DCN-ABC123)"
-                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-primary"
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+                    className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
                   >
                     Scan
                   </button>
@@ -224,7 +224,7 @@ export function OrgQRScanner() {
               </div>
               <motion.button
                 onClick={reset}
-                className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+                className="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
                 whileTap={{ scale: 0.98 }}
               >
                 Scan Next Member
@@ -250,7 +250,7 @@ export function OrgQRScanner() {
               </div>
               <motion.button
                 onClick={reset}
-                className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+                className="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
                 whileTap={{ scale: 0.98 }}
               >
                 Try Again
@@ -260,12 +260,12 @@ export function OrgQRScanner() {
         </AnimatePresence>
 
         <motion.div
-          className="mt-6 bg-blue/5 border border-blue/10 rounded-xl p-4 flex gap-3"
+          className="mt-6 bg-primary/5 border border-primary/10 rounded-xl p-4 flex gap-3"
           variants={fadeUp}
           initial="hidden"
           animate="visible"
         >
-          <Info className="w-4 h-4 text-blue shrink-0 mt-0.5" />
+          <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
           <p className="text-xs text-slate-500 leading-relaxed">
             This scanner uses your device camera via getUserMedia. For best results, use Chrome on
             desktop or Android. iOS Safari has limited camera API support.

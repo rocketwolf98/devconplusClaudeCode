@@ -10,7 +10,7 @@ export function OrgEventsList() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-black text-white">Events</h1>
@@ -42,18 +42,18 @@ export function OrgEventsList() {
             <motion.div
               key={event.id}
               variants={cardItem}
-              className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
+              className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-primary hover:shadow-primary transition-all cursor-pointer"
               onClick={() => navigate(`/organizer/events/${event.id}`)}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 shrink-0 bg-blue/10 rounded-xl px-2 py-2 text-center">
-                  <p className="text-xs font-bold text-blue uppercase leading-none">
+                <div className="w-12 shrink-0 bg-primary/10 rounded-xl px-2 py-2 text-center">
+                  <p className="text-xs font-bold text-primary uppercase leading-none">
                     {event.event_date
                       ? new Date(event.event_date).toLocaleDateString('en-US', { month: 'short' })
                       : '—'}
                   </p>
-                  <p className="text-xl font-black text-blue leading-none mt-1">
+                  <p className="text-xl font-black text-primary leading-none mt-1">
                     {event.event_date ? new Date(event.event_date).getDate() : '—'}
                   </p>
                 </div>
@@ -71,7 +71,7 @@ export function OrgEventsList() {
                     </p>
                   )}
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-xs font-semibold text-primary/80 bg-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
                       <Zap className="w-3 h-3" />
                       {event.points_value} XP
                     </span>

@@ -92,7 +92,7 @@ export default function Onboarding() {
       </div>
 
       {/* ── Fixed bottom panel ───────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-blue rounded-t-[28px] px-6 pt-6 pb-10">
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-primary rounded-t-[28px] px-6 pt-6 pb-10">
         {/* Slide caption */}
         <div key={current} className="mb-5 animate-[fadeIn_0.3s_ease-out]">
           <p className="text-white/50 text-[11px] font-semibold uppercase tracking-widest mb-1.5">
@@ -121,7 +121,7 @@ export default function Onboarding() {
           <div className="space-y-3">
             <button
               onClick={() => navigate('/sign-up')}
-              className="w-full bg-white text-blue font-bold py-[15px] rounded-2xl text-[15px]"
+              className="w-full bg-white text-primary font-bold py-[15px] rounded-2xl text-[15px]"
             >
               Get Started
             </button>
@@ -135,7 +135,7 @@ export default function Onboarding() {
         ) : (
           <button
             onClick={() => setCurrent((c) => c + 1)}
-            className="w-full bg-white text-blue font-bold py-[15px] rounded-2xl text-[15px]"
+            className="w-full bg-white text-primary font-bold py-[15px] rounded-2xl text-[15px]"
           >
             Next
           </button>

@@ -84,7 +84,7 @@ export default function Dashboard() {
     <div>
       {/* ── Sticky greeting bar + gradient tail ── */}
       <div className="sticky top-0 z-40 relative">
-        <div className="bg-blue px-6 pt-14 pb-4">
+        <div className="bg-primary px-6 pt-14 pb-4">
           <div className="flex items-center justify-between">
             <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
             <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto" />
@@ -95,7 +95,7 @@ export default function Dashboard() {
           className="absolute left-0 right-0 h-10 pointer-events-none"
           style={{
             top: '100%',
-            background: 'linear-gradient(to bottom, #367BDD, transparent)',
+            background: 'linear-gradient(to bottom, rgb(var(--color-primary)), transparent)',
             opacity: gradientOpacity,
           }}
         />
@@ -103,7 +103,7 @@ export default function Dashboard() {
 
       {/* ── Blue cradle — fades and collapses on scroll ── */}
       <motion.div
-        className="bg-blue px-4 pb-10 overflow-hidden"
+        className="bg-primary px-4 pb-10 overflow-hidden"
         style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px', opacity: cradleOpacity, maxHeight: cradleHeight }}
       >
         <div className="bg-white rounded-3xl shadow-xl p-5">
@@ -126,7 +126,7 @@ export default function Dashboard() {
           </p>
           <button
             onClick={() => navigate('/events')}
-            className="w-full bg-blue text-white font-bold py-3.5 rounded-2xl text-sm"
+            className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-sm"
           >
             Attend Our Events
           </button>
@@ -156,8 +156,8 @@ export default function Dashboard() {
                 className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border border-slate-200 shadow-card"
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-blue" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-primary" />
                 </div>
                 <span className="text-xs font-semibold text-slate-700">{label}</span>
               </motion.button>
@@ -168,7 +168,7 @@ export default function Dashboard() {
         {/* Rotating banner — crossfade between slides */}
         <div className="px-4">
           <div
-            className="relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-blue"
+            className="relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-primary"
             onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
           >
             <AnimatePresence>
@@ -199,7 +199,7 @@ export default function Dashboard() {
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleBannerCta() }}
-                  className="self-start bg-blue text-white text-xs font-bold px-4 py-2 rounded-full shadow"
+                  className="self-start bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow"
                 >
                   {banner.cta}
                 </button>
@@ -227,7 +227,7 @@ export default function Dashboard() {
             <h2 className="text-base font-bold text-slate-900">Events For You</h2>
             <button
               onClick={() => navigate('/events')}
-              className="text-xs text-blue font-semibold flex items-center gap-0.5"
+              className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
               See All <ChevronRight className="w-3 h-3" />
             </button>
@@ -254,7 +254,7 @@ export default function Dashboard() {
             </h2>
             <button
               onClick={() => navigate('/jobs')}
-              className="text-xs text-blue font-semibold flex items-center gap-0.5"
+              className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
               See All <ChevronRight className="w-3 h-3" />
             </button>
@@ -279,7 +279,7 @@ export default function Dashboard() {
                       <PromotedBadge />
                     </div>
                   )}
-                  <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center text-sm font-bold text-blue mb-2">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary mb-2">
                     {job.company.charAt(0)}
                   </div>
                   <p className="text-[11px] text-slate-400 truncate">{job.company}</p>
@@ -341,7 +341,7 @@ export default function Dashboard() {
             <h2 className="text-base font-bold text-slate-900">XP History</h2>
             <button
               onClick={() => navigate('/points/history')}
-              className="text-xs text-blue font-semibold flex items-center gap-0.5"
+              className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
               View All <ChevronRight className="w-3 h-3" />
             </button>
