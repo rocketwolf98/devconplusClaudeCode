@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, MapPin, Ticket } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
 
 export default function EventDetail() {
@@ -16,7 +17,12 @@ export default function EventDetail() {
     : 'Date TBA'
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <motion.div
+      className="min-h-screen bg-slate-50"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+    >
       {/* Cover image */}
       {event.cover_image_url ? (
         <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
@@ -95,6 +101,6 @@ export default function EventDetail() {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Heart, MapPin, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useJobsStore } from '../../stores/useJobsStore'
 import PromotedBadge from '../../components/PromotedBadge'
+import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 
 const FILTERS = ['All', 'Remote', 'Onsite', 'Hybrid']
 
@@ -69,10 +71,15 @@ export default function JobsList() {
         </div>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8">
-
+      <motion.div
+        className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Developer Equity promo card */}
-        <div
+        <motion.div
+          variants={fadeUp}
           className="rounded-2xl p-4 overflow-hidden bg-blue"
         >
           <div className="flex items-center gap-2 mb-1">
@@ -81,17 +88,19 @@ export default function JobsList() {
           </div>
           <p className="text-sm font-bold text-white">Your XP unlocks premium job roles</p>
           <p className="text-xs text-white/60 mt-1">Level up to access exclusive opportunities</p>
-        </div>
+        </motion.div>
 
         {/* Job cards */}
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-slate-400 text-sm">No jobs found</div>
         ) : (
           filtered.map((job) => (
-            <button
+            <motion.button
               key={job.id}
+              variants={cardItem}
               onClick={() => navigate(`/jobs/${job.id}`)}
               className="w-full bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
+              whileTap={{ scale: 0.98 }}
             >
               {job.is_promoted && (
                 <div className="absolute top-3 right-3">
@@ -137,10 +146,10 @@ export default function JobsList() {
               <div className="mt-3 border border-slate-200 rounded-xl py-2 text-center">
                 <span className="text-sm font-semibold text-slate-700">View Opportunity</span>
               </div>
-            </button>
+            </motion.button>
           ))
         )}
-      </div>
+      </motion.div>
     </div>
   )
 }

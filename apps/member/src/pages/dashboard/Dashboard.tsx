@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame, Star } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useJobsStore } from '../../stores/useJobsStore'
@@ -10,6 +11,7 @@ import NewsCard from '../../components/NewsCard'
 import PromotedBadge from '../../components/PromotedBadge'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import { NEWS_POSTS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabase'
+import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 
 const BANNERS = [
   {
@@ -95,13 +97,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Collapsible: XP card ── */}
+      {/* ── XP card ── */}
       <div
         ref={xpSectionRef}
         className="bg-blue px-4 pb-10"
         style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px' }}
       >
-        {/* White XP card */}
         <div className="bg-white rounded-3xl shadow-lg p-5">
           <p className="text-slate-400 text-xs font-medium mb-3">Current DEVCON Points</p>
           <div className="flex items-end gap-2 mb-3">
@@ -109,8 +110,14 @@ export default function Dashboard() {
             <span className="text-4xl font-black text-slate-900 leading-none">{totalPoints.toLocaleString()}</span>
             <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
           </div>
+          {/* Animated XP bar */}
           <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
-            <div className="h-full bg-gold rounded-full transition-all" style={{ width: `${progressPct}%` }} />
+            <motion.div
+              className="h-full bg-gold rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.25 }}
+            />
           </div>
           <p className="text-slate-400 text-xs mb-4">
             {Math.max(MOCK_PROFILE_XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
@@ -128,52 +135,73 @@ export default function Dashboard() {
       <div className="bg-slate-50 space-y-6 pb-8">
 
         {/* Quick Actions */}
-        <section className="pt-5 px-4">
+        <motion.section
+          className="pt-5 px-4"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           <div className="grid grid-cols-3 gap-3">
             {[
               { icon: Briefcase, label: 'Find Jobs',  onClick: () => navigate('/jobs') },
               { icon: Heart,     label: 'Volunteer',  onClick: () => setShowVolunteerModal(true) },
               { icon: Gift,      label: 'Redeem',     onClick: () => navigate('/rewards') },
             ].map(({ icon: Icon, label, onClick }) => (
-              <button
+              <motion.button
                 key={label}
+                variants={cardItem}
                 onClick={onClick}
                 className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border border-slate-200 shadow-card"
+                whileTap={{ scale: 0.95 }}
               >
                 <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center">
                   <Icon className="w-5 h-5 text-blue" />
                 </div>
                 <span className="text-xs font-semibold text-slate-700">{label}</span>
-              </button>
+              </motion.button>
             ))}
           </div>
-        </section>
+        </motion.section>
 
-        {/* Rotating banner */}
+        {/* Rotating banner — crossfade between slides */}
         <div className="px-4">
           <div
-            className={`relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-blue`}
+            className="relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-blue"
             onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
           >
             <div className="absolute inset-0 bg-black/35" />
-            <div className="absolute inset-0 flex flex-col justify-between p-5">
-              <div>
-                <p className="text-white/70 text-[11px] font-medium uppercase tracking-widest mb-1">{banner.sub}</p>
-                <p className="text-white text-2xl font-black leading-tight max-w-[70%]">{banner.title}</p>
-              </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleBannerCta() }}
-                className="self-start bg-blue text-white text-xs font-bold px-4 py-2 rounded-full shadow"
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={bannerIdx}
+                className="absolute inset-0 flex flex-col justify-between p-5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35 }}
               >
-                {banner.cta}
-              </button>
-            </div>
+                <div>
+                  <p className="text-white/70 text-[11px] font-medium uppercase tracking-widest mb-1">{banner.sub}</p>
+                  <p className="text-white text-2xl font-black leading-tight max-w-[70%]">{banner.title}</p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleBannerCta() }}
+                  className="self-start bg-blue text-white text-xs font-bold px-4 py-2 rounded-full shadow"
+                >
+                  {banner.cta}
+                </button>
+              </motion.div>
+            </AnimatePresence>
           </div>
           <div className="flex justify-center gap-1.5 mt-2.5">
             {BANNERS.map((_, i) => (
-              <div
+              <motion.div
                 key={i}
-                className={`rounded-full transition-all ${i === bannerIdx ? 'w-4 h-1.5 bg-navy' : 'w-1.5 h-1.5 bg-slate-300'}`}
+                animate={{
+                  width:           i === bannerIdx ? 16 : 6,
+                  backgroundColor: i === bannerIdx ? '#1E2A56' : '#CBD5E1',
+                }}
+                transition={{ duration: 0.25 }}
+                className="h-1.5 rounded-full"
               />
             ))}
           </div>
@@ -190,9 +218,18 @@ export default function Dashboard() {
               See All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="px-4 space-y-3">
-            {forYouEvents.map((e) => <EventCard key={e.id} event={e} compact />)}
-          </div>
+          <motion.div
+            className="px-4 space-y-3"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            {forYouEvents.map((e) => (
+              <motion.div key={e.id} variants={cardItem}>
+                <EventCard event={e} compact />
+              </motion.div>
+            ))}
+          </motion.div>
         </section>
 
         {/* Hot Jobs — horizontal scroll carousel */}
@@ -209,12 +246,19 @@ export default function Dashboard() {
             </button>
           </div>
           <div className="overflow-x-auto px-4 pb-1">
-            <div className="flex gap-3">
+            <motion.div
+              className="flex gap-3"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
               {hotJobs.map((job) => (
-                <button
+                <motion.button
                   key={job.id}
+                  variants={cardItem}
                   onClick={() => navigate(`/jobs/${job.id}`)}
                   className="flex-shrink-0 w-52 bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
+                  whileTap={{ scale: 0.97 }}
                 >
                   {job.is_promoted && (
                     <div className="absolute top-3 right-3">
@@ -235,9 +279,9 @@ export default function Dashboard() {
                   <span className="inline-block mt-2 text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
                     {WORK_TYPE_LABEL[job.work_type] ?? job.work_type}
                   </span>
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -259,9 +303,22 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
-          <div className="px-4 space-y-3">
-            {visibleNews.map((p) => <NewsCard key={p.id} post={p} />)}
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={newsTab}
+              className="px-4 space-y-3"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
+            >
+              {visibleNews.map((p) => (
+                <motion.div key={p.id} variants={cardItem}>
+                  <NewsCard post={p} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         </section>
 
         {/* XP History preview */}
@@ -275,10 +332,16 @@ export default function Dashboard() {
               View All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+          <motion.div
+            className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
             {recentTxns.map((tx, i) => (
-              <div
+              <motion.div
                 key={tx.id}
+                variants={fadeUp}
                 className={`flex items-center gap-3 px-4 py-3 ${i < recentTxns.length - 1 ? 'border-b border-slate-100' : ''}`}
               >
                 <div
@@ -297,9 +360,9 @@ export default function Dashboard() {
                 <span className={`text-sm font-bold ${tx.amount > 0 ? 'text-green' : 'text-red'}`}>
                   {tx.amount > 0 ? '+' : ''}{tx.amount} pts
                 </span>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </section>
       </div>
 

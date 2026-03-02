@@ -1,8 +1,10 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Ticket, Mic2, HandHeart, Coffee, Heart, Share2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { usePointsStore } from '../../stores/usePointsStore'
+import { staggerContainer, cardItem } from '../../lib/animation'
 
 const EARN: { Icon: LucideIcon; label: string; pts: string }[] = [
   { Icon: Ticket,    label: 'Attend an Event',   pts: '100–300 pts' },
@@ -44,24 +46,39 @@ export default function Points() {
         </div>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3">
-        {items.map((item) => (
-          <div key={item.label} className="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
-              <item.Icon className="w-5 h-5 text-blue" />
-            </div>
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <p className="font-semibold text-slate-900 text-sm">{item.label}</p>
-                <span className="text-xs font-bold text-blue">{item.pts}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      <div className="bg-slate-50 min-h-screen p-4">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            className="space-y-3"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+          >
+            {items.map((item) => (
+              <motion.div
+                key={item.label}
+                variants={cardItem}
+                className="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
+                  <item.Icon className="w-5 h-5 text-blue" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-slate-900 text-sm">{item.label}</p>
+                    <span className="text-xs font-bold text-blue">{item.pts}</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
 
         <button
           onClick={() => navigate('/points/history')}
-          className="w-full mt-2 bg-white border border-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm shadow-card"
+          className="w-full mt-4 bg-white border border-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm shadow-card"
         >
           View Points History
         </button>

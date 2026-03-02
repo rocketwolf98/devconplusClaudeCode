@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useJobsStore } from '../../stores/useJobsStore'
 import PromotedBadge from '../../components/PromotedBadge'
 
@@ -22,7 +23,12 @@ export default function JobDetail() {
   const isSaved = savedIds.includes(job.id)
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <motion.div
+      className="min-h-screen bg-slate-50"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+    >
       <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <div className="flex items-center justify-between mb-3">
           <button
@@ -74,6 +80,6 @@ export default function JobDetail() {
           </a>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

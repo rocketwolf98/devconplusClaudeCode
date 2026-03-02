@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Tag, Coffee, Package, Keyboard, Headphones, Shirt, Gift } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { REWARDS } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
+import { staggerContainer, cardItem } from '../../lib/animation'
 
 const REWARD_ICONS: Record<string, LucideIcon> = {
   'Lanyard':        Tag,
@@ -29,14 +31,21 @@ export default function Rewards() {
       </div>
 
       <div className="bg-slate-50 min-h-screen p-4">
-        <div className="grid grid-cols-2 gap-3">
+        <motion.div
+          className="grid grid-cols-2 gap-3"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
           {REWARDS.map((reward) => {
             const Icon = REWARD_ICONS[reward.name] ?? Gift
             return (
-              <button
+              <motion.button
                 key={reward.id}
+                variants={cardItem}
                 onClick={() => setSelected(reward.name)}
                 className="bg-white rounded-2xl border border-slate-200 shadow-card text-left overflow-hidden"
+                whileTap={{ scale: 0.96 }}
               >
                 {reward.image_url ? (
                   <img src={reward.image_url} alt={reward.name} className="w-full h-24 object-cover" />
@@ -49,10 +58,10 @@ export default function Rewards() {
                   <p className="font-semibold text-slate-900 text-sm leading-tight">{reward.name}</p>
                   <p className="text-xs font-bold text-blue mt-1">{reward.points_cost.toLocaleString()} pts</p>
                 </div>
-              </button>
+              </motion.button>
             )
           })}
-        </div>
+        </motion.div>
       </div>
 
       {selected && (

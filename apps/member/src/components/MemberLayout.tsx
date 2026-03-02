@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
+import { NAV_SPRING } from '../lib/animation'
 
 const LEFT_TABS = [
   { path: '/home',    label: 'Home',    icon: Home,     end: true },
@@ -31,7 +33,7 @@ export default function MemberLayout() {
 
   return (
     <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
-      {/* Scrollable page content — leave room for the bottom nav */}
+      {/* Scrollable page content */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto pb-24">
         <Outlet />
       </div>
@@ -50,15 +52,22 @@ export default function MemberLayout() {
               to={tab.path}
               end={tab.end}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+                `relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
                   isActive ? 'text-blue' : 'text-slate-400'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="text-[10px] font-medium">{tab.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="tab-indicator"
+                      className="absolute inset-0 bg-blue/10 rounded-xl"
+                      transition={NAV_SPRING}
+                    />
+                  )}
+                  <tab.icon className="relative w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="relative text-[10px] font-medium">{tab.label}</span>
                 </>
               )}
             </NavLink>
@@ -71,14 +80,16 @@ export default function MemberLayout() {
             title="Events"
           >
             {({ isActive }) => (
-              <div
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-blue transition-transform hover:scale-105 ${
+              <motion.div
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-blue ${
                   isActive ? 'bg-blue-dark' : 'bg-blue'
                 }`}
                 style={{ border: '3px solid white' }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               >
                 <QrCode className="w-6 h-6 text-white" />
-              </div>
+              </motion.div>
             )}
           </NavLink>
 
@@ -89,15 +100,22 @@ export default function MemberLayout() {
               to={tab.path}
               end={tab.end}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
+                `relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors ${
                   isActive ? 'text-blue' : 'text-slate-400'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <tab.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="text-[10px] font-medium">{tab.label}</span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="tab-indicator"
+                      className="absolute inset-0 bg-blue/10 rounded-xl"
+                      transition={NAV_SPRING}
+                    />
+                  )}
+                  <tab.icon className="relative w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="relative text-[10px] font-medium">{tab.label}</span>
                 </>
               )}
             </NavLink>
