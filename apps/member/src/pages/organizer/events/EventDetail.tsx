@@ -30,7 +30,7 @@ export function OrgEventDetail() {
 
   return (
     <div>
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <button
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
@@ -52,7 +52,7 @@ export function OrgEventDetail() {
           {event.cover_image_url ? (
             <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
           ) : (
-            <div className="w-full h-48 bg-primary flex items-center justify-center">
+            <div className="w-full h-48 bg-blue flex items-center justify-center">
               <CalendarDays className="w-16 h-16 text-white/20" />
             </div>
           )}
@@ -61,7 +61,7 @@ export function OrgEventDetail() {
         {/* Stats row */}
         <motion.div variants={staggerContainer} className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { label: 'Registrations', value: 0, color: 'text-primary' },
+            { label: 'Registrations', value: 0, color: 'text-blue' },
             { label: 'Pending',       value: 0, color: 'text-yellow-500' },
             { label: 'Checked In',    value: 0, color: 'text-green' },
           ].map(({ label, value, color }) => (
@@ -79,7 +79,7 @@ export function OrgEventDetail() {
         {/* Detail card */}
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
               <Zap className="w-3 h-3" />
               {event.points_value} XP
             </span>
@@ -110,7 +110,7 @@ export function OrgEventDetail() {
         <motion.button
           variants={fadeUp}
           onClick={() => navigate(`/organizer/events/${event.id}/registrants`)}
-          className="w-full py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
+          className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
           whileTap={{ scale: 0.98 }}
         >
           View Registrants

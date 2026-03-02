@@ -12,7 +12,7 @@ export default function SplashScreen() {
   }, [navigate])
 
   return (
-    <div className="h-screen bg-primary flex flex-col items-center justify-center">
+    <div className="h-screen bg-blue flex flex-col items-center justify-center">
       <motion.img
         src={logoVertical}
         alt="DEVCON+"

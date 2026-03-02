@@ -40,7 +40,7 @@ export function OrgProfileEdit() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <button
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
@@ -59,14 +59,14 @@ export function OrgProfileEdit() {
             onClick={() => fileInputRef.current?.click()}
             className="relative"
           >
-            <div className="w-24 h-24 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
+            <div className="w-24 h-24 rounded-full bg-blue/10 border-2 border-blue/20 flex items-center justify-center overflow-hidden">
               {avatarPreview ? (
                 <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-2xl font-black text-primary">{user?.initials}</span>
+                <span className="text-2xl font-black text-blue">{user?.initials}</span>
               )}
             </div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-white shadow-sm">
+            <div className="absolute bottom-0 right-0 w-8 h-8 bg-blue rounded-full flex items-center justify-center border-2 border-white shadow-sm">
               <Camera className="w-4 h-4 text-white" />
             </div>
           </button>
@@ -94,7 +94,7 @@ export function OrgProfileEdit() {
           <label className="text-sm font-medium text-slate-700 block mb-1">Full Name</label>
           <input
             {...register('full_name')}
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
           />
           {errors.full_name && <p className="text-red text-xs mt-1">{errors.full_name.message}</p>}
         </div>
@@ -102,7 +102,7 @@ export function OrgProfileEdit() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-primary text-white font-bold py-4 rounded-2xl disabled:opacity-60 transition-opacity"
+          className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 transition-opacity"
         >
           {isSubmitting ? 'Saving…' : 'Save Changes'}
         </button>

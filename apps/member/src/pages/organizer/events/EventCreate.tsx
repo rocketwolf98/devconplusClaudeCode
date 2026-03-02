@@ -17,7 +17,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20'
+const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
 const labelClass = 'block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5'
 
 export function OrgEventCreate() {
@@ -37,7 +37,7 @@ export function OrgEventCreate() {
 
   return (
     <div>
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <button
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
@@ -142,7 +142,7 @@ export function OrgEventCreate() {
           </button>
           <button
             type="submit"
-            className="flex-1 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
+            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
           >
             Create Event
           </button>

@@ -16,7 +16,7 @@ export default function DesktopGuard({ children }: { children: React.ReactNode }
 
   if (isDesktop) {
     return (
-      <div className="min-h-screen bg-primary flex flex-col items-center justify-center p-8 text-center">
+      <div className="min-h-screen bg-blue flex flex-col items-center justify-center p-8 text-center">
         <img src={logoVertical} alt="DEVCON+" className="h-16 w-auto mb-4" />
         <p className="text-white/50 text-xs mb-6 tracking-widest uppercase">Sync. Support. Succeed.</p>
         <div className="w-16 h-px bg-white/20 mx-auto mb-6" />

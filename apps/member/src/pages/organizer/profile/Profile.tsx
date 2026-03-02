@@ -29,7 +29,7 @@ export function OrgProfile() {
   return (
     <div>
       {/* Header */}
-      <div className="bg-primary px-4 pt-14 pb-8 rounded-b-3xl text-center">
+      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl text-center">
         <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
           {user.avatar_url ? (
             <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />

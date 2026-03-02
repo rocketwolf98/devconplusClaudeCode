@@ -42,9 +42,9 @@ export default function SignIn() {
   }
 
   return (
-    <div className="min-h-screen bg-primary flex flex-col">
+    <div className="min-h-screen bg-blue flex flex-col">
       {/* Gradient header */}
-      <div className="bg-primary px-6 pt-16 pb-10 text-center">
+      <div className="bg-blue px-6 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         <p className="text-white/60 mt-3 text-sm">Sign in to your account</p>
       </div>
@@ -73,7 +73,7 @@ export default function SignIn() {
               {...register('email')}
               type="email"
               placeholder="juan@devcon.ph"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
             />
             {errors.email && <p className="text-red text-xs mt-1">{errors.email.message}</p>}
           </div>
@@ -84,7 +84,7 @@ export default function SignIn() {
               {...register('password')}
               type="password"
               placeholder="••••••••"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
             />
             {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
           </div>
@@ -92,7 +92,7 @@ export default function SignIn() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-primary text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-primary-dark transition-colors"
+            className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
           >
             {isSubmitting ? 'Signing in…' : 'Sign In'}
           </button>
@@ -100,7 +100,7 @@ export default function SignIn() {
 
         <p className="text-center text-sm text-slate-500 mt-6">
           Don't have an account?{' '}
-          <Link to="/sign-up" className="text-primary font-semibold">Sign Up</Link>
+          <Link to="/sign-up" className="text-blue font-semibold">Sign Up</Link>
         </p>
       </div>
     </div>

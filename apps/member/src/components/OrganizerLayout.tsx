@@ -38,12 +38,12 @@ export default function OrganizerLayout() {
 
       {/* Floating pill bottom nav — Home | ●Scan● | Profile */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-        <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-primary flex items-center px-2 py-2">
+        <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-blue flex items-center px-2 py-2">
           {/* Left: Home */}
           {LEFT_TABS.map(({ path, label, Icon, end }) => (
             <NavLink key={path} to={path} end={end} className="flex-1">
               {({ isActive }) => (
-                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`}>
+                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-blue' : 'text-slate-400'}`}>
                   <Icon className="w-5 h-5" />
                   <span className="text-[10px] font-semibold">{label}</span>
                 </div>
@@ -56,7 +56,7 @@ export default function OrganizerLayout() {
             <NavLink to="/organizer/scan">
               {({ isActive }) => (
                 <div
-                  className={`w-14 h-14 rounded-full flex items-center justify-center -mt-6 shadow-primary transition-colors ${isActive ? 'bg-navy' : 'bg-primary'}`}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center -mt-6 shadow-blue transition-colors ${isActive ? 'bg-navy' : 'bg-blue'}`}
                   style={{ border: '3px solid white' }}
                 >
                   <ScanLine className="w-6 h-6 text-white" />
@@ -69,7 +69,7 @@ export default function OrganizerLayout() {
           {RIGHT_TABS.map(({ path, label, Icon, end }) => (
             <NavLink key={path} to={path} end={end} className="flex-1">
               {({ isActive }) => (
-                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`}>
+                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-blue' : 'text-slate-400'}`}>
                   <Icon className="w-5 h-5" />
                   <span className="text-[10px] font-semibold">{label}</span>
                 </div>
