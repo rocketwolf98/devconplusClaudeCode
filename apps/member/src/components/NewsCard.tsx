@@ -21,7 +21,7 @@ export default function NewsCard({ post }: { post: NewsPost }) {
       {post.cover_image_url ? (
         <img src={post.cover_image_url} alt={post.title} className="w-full h-32 object-cover" />
       ) : (
-        <div className="w-full h-32 bg-blue flex items-center justify-center">
+        <div className="w-full h-32 bg-primary flex items-center justify-center">
           <Newspaper className="w-10 h-10 text-white/20" />
         </div>
       )}

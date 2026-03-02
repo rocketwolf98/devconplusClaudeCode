@@ -27,7 +27,7 @@ export default function EventDetail() {
       {event.cover_image_url ? (
         <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
       ) : (
-        <div className="w-full h-52 bg-blue flex items-center justify-center rounded-b-3xl">
+        <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
           <CalendarDays className="w-20 h-20 text-white/20" />
         </div>
       )}
@@ -53,9 +53,9 @@ export default function EventDetail() {
         </div>
 
         <div className="flex gap-3">
-          <div className="bg-blue/10 rounded-xl px-3 py-2 flex-1 text-center">
-            <p className="text-blue text-xs font-medium">Points Value</p>
-            <p className="text-blue font-bold">+{event.points_value} pts</p>
+          <div className="bg-primary/10 rounded-xl px-3 py-2 flex-1 text-center">
+            <p className="text-primary text-xs font-medium">Points Value</p>
+            <p className="text-primary font-bold">+{event.points_value} pts</p>
           </div>
           <div className="bg-slate-100 rounded-xl px-3 py-2 flex-1 text-center">
             <p className="text-slate-500 text-xs font-medium">Status</p>
@@ -75,7 +75,7 @@ export default function EventDetail() {
           {!reg ? (
             <button
               onClick={() => navigate(`/events/${id}/register`)}
-              className="w-full bg-blue text-white font-bold py-4 rounded-2xl"
+              className="w-full bg-primary text-white font-bold py-4 rounded-2xl"
             >
               Request to Join
             </button>

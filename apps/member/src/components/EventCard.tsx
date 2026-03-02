@@ -27,7 +27,7 @@ export default function EventCard({ event, compact = false }: { event: Event; co
           className={`w-full object-cover ${compact ? 'h-28' : 'h-36'}`}
         />
       ) : (
-        <div className={`w-full bg-blue flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
+        <div className={`w-full bg-primary flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
           <CalendarDays className="w-12 h-12 text-white/20" />
         </div>
       )}
@@ -36,7 +36,7 @@ export default function EventCard({ event, compact = false }: { event: Event; co
         <p className="font-semibold text-slate-900 text-sm leading-tight mb-2 pr-12">{event.title}</p>
         <div className="flex items-center gap-2">
           <StatusPill status={event.status as 'upcoming' | 'ongoing' | 'past'} />
-          <span className="text-xs text-blue font-semibold">+{event.points_value} pts</span>
+          <span className="text-xs text-primary font-semibold">+{event.points_value} pts</span>
         </div>
       </div>
     </button>

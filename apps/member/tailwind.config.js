@@ -13,6 +13,12 @@ export default {
         fadeIn: 'fadeIn 0.3s ease-out',
       },
       colors: {
+        // Themeable primary — driven by CSS custom properties set per program theme
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          dark:    'rgb(var(--color-primary-dark) / <alpha-value>)',
+        },
+        // Legacy alias — kept for explicit non-themed blue usage
         blue: {
           DEFAULT: '#367BDD',
           dark: '#2962C4',
@@ -44,6 +50,7 @@ export default {
       boxShadow: {
         card: '0 1px 4px rgba(0,0,0,0.07)',
         blue: '0 4px 24px rgba(54,123,221,0.12)',
+        primary: 'var(--shadow-primary)',
       },
     },
   },

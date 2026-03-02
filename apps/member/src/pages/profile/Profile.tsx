@@ -1,37 +1,35 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, Star } from 'lucide-react'
+import { Check, ChevronRight, LogOut, Star } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
+import { useThemeStore, PROGRAM_THEMES } from '../../stores/useThemeStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
 
-const PROGRAM_THEMES = [
-  { label: 'DEVCON+',      color: 'bg-blue'   },
-  { label: 'She is DEVCON', color: 'bg-pink-500' },
-  { label: 'DEVCON Kids',  color: 'bg-green'  },
-  { label: 'Campus',       color: 'bg-gold'   },
-]
-
 const MENU_ITEMS: { label: string; path: string }[] = [
-  { label: 'XP History',       path: '/points/history'        },
-  { label: 'Edit Profile',     path: '/profile/edit'          },
-  { label: 'Notifications',    path: '/profile/notifications' },
-  { label: 'Privacy & Security', path: '/profile/privacy'    },
+  { label: 'XP History',           path: '/points/history'        },
+  { label: 'Edit Profile',         path: '/profile/edit'          },
+  { label: 'Notifications',        path: '/profile/notifications' },
+  { label: 'Privacy & Security',   path: '/profile/privacy'       },
 ]
 
 export default function Profile() {
   const navigate = useNavigate()
   const { user, initials, signOut } = useAuthStore()
   const { totalPoints } = usePointsStore()
-  const [showThemeModal, setShowThemeModal] = useState(false)
+  const { themeId, setTheme } = useThemeStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
 
   return (
     <div>
       {/* Header */}
-      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl text-center">
-        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3">
-          {initials}
+      <div className="bg-primary px-4 pt-14 pb-8 rounded-b-3xl text-center">
+        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+          ) : (
+            initials
+          )}
         </div>
         <h1 className="text-xl font-black text-white">{user?.full_name}</h1>
         {user?.school_or_company && (
@@ -51,16 +49,27 @@ export default function Profile() {
         <div className="bg-white rounded-2xl border border-slate-100 p-4">
           <p className="text-sm font-bold text-slate-900 mb-3">Program Theme</p>
           <div className="grid grid-cols-2 gap-2">
-            {PROGRAM_THEMES.map((theme) => (
-              <button
-                key={theme.label}
-                onClick={() => setShowThemeModal(true)}
-                className="flex items-center gap-2 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors text-left"
-              >
-                <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${theme.color}`} />
-                {theme.label}
-              </button>
-            ))}
+            {PROGRAM_THEMES.map((theme) => {
+              const isActive = theme.id === themeId
+              return (
+                <button
+                  key={theme.id}
+                  onClick={() => setTheme(theme.id)}
+                  className={`flex items-center gap-2 border rounded-xl px-3 py-2.5 text-sm font-medium transition-colors text-left ${
+                    isActive
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: theme.hex }}
+                  />
+                  <span className="flex-1">{theme.label}</span>
+                  {isActive && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -98,9 +107,6 @@ export default function Profile() {
 
       </div>
 
-      {showThemeModal && (
-        <ComingSoonModal feature="Program Theme" onClose={() => setShowThemeModal(false)} />
-      )}
       {showHelpModal && (
         <ComingSoonModal feature="Help & Support" onClose={() => setShowHelpModal(false)} />
       )}

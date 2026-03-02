@@ -28,7 +28,7 @@ export default function NewsDetail() {
         <p className="font-semibold text-slate-700">Article not found</p>
         <button
           onClick={() => navigate(-1)}
-          className="mt-4 text-blue text-sm font-semibold"
+          className="mt-4 text-primary text-sm font-semibold"
         >
           Go back
         </button>
@@ -49,7 +49,7 @@ export default function NewsDetail() {
             className="w-full h-56 object-cover"
           />
         ) : (
-          <div className="w-full h-56 bg-blue flex items-center justify-center">
+          <div className="w-full h-56 bg-primary flex items-center justify-center">
             <Newspaper className="w-14 h-14 text-white/20" />
           </div>
         )}
@@ -81,7 +81,7 @@ export default function NewsDetail() {
       >
         {/* Meta row */}
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-blue/10 text-blue px-2.5 py-1 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
             <Tag className="w-3 h-3" />
             {CATEGORY_LABELS[post.category] ?? post.category}
           </span>

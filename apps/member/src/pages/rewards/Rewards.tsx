@@ -23,7 +23,7 @@ export default function Rewards() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Rewards</h1>
         <p className="text-white/60 text-sm mt-1">
           You have <strong className="text-gold">{totalPoints.toLocaleString()} pts</strong>
@@ -50,13 +50,13 @@ export default function Rewards() {
                 {reward.image_url ? (
                   <img src={reward.image_url} alt={reward.name} className="w-full h-24 object-cover" />
                 ) : (
-                  <div className="w-full h-24 bg-blue flex items-center justify-center">
+                  <div className="w-full h-24 bg-primary flex items-center justify-center">
                     <Icon className="w-10 h-10 text-white/20" />
                   </div>
                 )}
                 <div className="p-3 pt-2.5">
                   <p className="font-semibold text-slate-900 text-sm leading-tight">{reward.name}</p>
-                  <p className="text-xs font-bold text-blue mt-1">{reward.points_cost.toLocaleString()} pts</p>
+                  <p className="text-xs font-bold text-primary mt-1">{reward.points_cost.toLocaleString()} pts</p>
                 </div>
               </motion.button>
             )

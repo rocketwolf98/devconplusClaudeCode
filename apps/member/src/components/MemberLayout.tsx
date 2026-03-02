@@ -42,7 +42,7 @@ export default function MemberLayout() {
         className="fixed bottom-4 left-4 right-4 z-50"
         style={{ paddingBottom: 'var(--safe-bottom)' }}
       >
-        <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-blue border border-slate-100 px-2 py-2">
+        <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-primary border border-slate-100 px-2 py-2">
 
           {/* Left: Home + Rewards */}
           {LEFT_TABS.map((tab) => (
@@ -52,7 +52,7 @@ export default function MemberLayout() {
               end={tab.end}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-blue' : 'text-slate-400'
+                  isActive ? 'text-primary' : 'text-slate-400'
                 }`
               }
             >
@@ -73,8 +73,8 @@ export default function MemberLayout() {
           >
             {({ isActive }) => (
               <motion.div
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-blue ${
-                  isActive ? 'bg-blue-dark' : 'bg-blue'
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-primary ${
+                  isActive ? 'bg-primary-dark' : 'bg-primary'
                 }`}
                 style={{ border: '3px solid white' }}
                 whileTap={{ scale: 0.92 }}
@@ -93,7 +93,7 @@ export default function MemberLayout() {
               end={tab.end}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-blue' : 'text-slate-400'
+                  isActive ? 'text-primary' : 'text-slate-400'
                 }`
               }
             >

@@ -26,7 +26,7 @@ export default function Points() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold">Points+</h1>
         <p className="text-white/60 text-sm mt-1">
           You have <strong className="text-gold">{totalPoints.toLocaleString()} pts</strong>
@@ -37,7 +37,7 @@ export default function Points() {
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                tab === t ? 'bg-white text-blue font-semibold' : 'bg-white/20 text-white'
+                tab === t ? 'bg-white text-primary font-semibold' : 'bg-white/20 text-white'
               }`}
             >
               {t === 'earn' ? 'Ways to Earn' : 'Share & Earn'}
@@ -62,13 +62,13 @@ export default function Points() {
                 variants={cardItem}
                 className="bg-white rounded-2xl shadow-card p-4 flex items-center gap-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
-                  <item.Icon className="w-5 h-5 text-blue" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <item.Icon className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
                     <p className="font-semibold text-slate-900 text-sm">{item.label}</p>
-                    <span className="text-xs font-bold text-blue">{item.pts}</span>
+                    <span className="text-xs font-bold text-primary">{item.pts}</span>
                   </div>
                 </div>
               </motion.div>

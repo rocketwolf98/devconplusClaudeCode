@@ -35,7 +35,7 @@ export default function JobsList() {
   return (
     <div>
       {/* ── Header ── */}
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
+      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
         <h1 className="text-white text-xl font-bold mb-3">Jobs Board</h1>
 
         {/* Search */}
@@ -56,7 +56,7 @@ export default function JobsList() {
               key={f}
               onClick={() => setFilter(f)}
               className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 ${
-                filter === f ? 'bg-white text-blue' : 'bg-white/20 text-white'
+                filter === f ? 'bg-white text-primary' : 'bg-white/20 text-white'
               }`}
             >
               {f === 'Saved' && <Bookmark className="w-3 h-3" />}
@@ -79,7 +79,7 @@ export default function JobsList() {
           {!isSavedTab && (
             <motion.div
               variants={fadeUp}
-              className="rounded-2xl p-4 overflow-hidden bg-blue"
+              className="rounded-2xl p-4 overflow-hidden bg-primary"
             >
               <div className="flex items-center gap-2 mb-1">
                 <Sparkles className="w-4 h-4 text-gold" />
@@ -116,19 +116,13 @@ export default function JobsList() {
               key={job.id}
               variants={cardItem}
               onClick={() => navigate(`/jobs/${job.id}`)}
-              className="w-full bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
+              className="w-full bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left"
               whileTap={{ scale: 0.98 }}
             >
-              {job.is_promoted && (
-                <div className="absolute top-3 right-3">
-                  <PromotedBadge />
-                </div>
-              )}
-
               {/* Top row: company avatar + title + save */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
-                  <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center text-sm font-bold text-blue shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary shrink-0">
                     {job.company.charAt(0)}
                   </div>
                   <div className="min-w-0">
@@ -151,6 +145,7 @@ export default function JobsList() {
 
               {/* Meta chips */}
               <div className="flex items-center gap-2 mt-3 flex-wrap">
+                {job.is_promoted && <PromotedBadge />}
                 <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <MapPin className="w-3 h-3" /> {job.location}
                 </span>
