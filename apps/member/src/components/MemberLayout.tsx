@@ -21,7 +21,7 @@ export default function MemberLayout() {
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!user) navigate('/onboarding', { replace: true })
+    if (!user) navigate('/sign-in', { replace: true })
   }, [user, navigate])
 
   useEffect(() => {

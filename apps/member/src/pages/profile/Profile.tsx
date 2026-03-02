@@ -90,7 +90,7 @@ export default function Profile() {
         {/* Sign Out */}
         <button
           onClick={() => { signOut(); navigate('/sign-in') }}
-          className="w-full border border-red text-red font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-red/5 transition-colors"
+          className="w-full py-3.5 bg-red/10 text-red text-sm font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
         >
           <LogOut className="w-4 h-4" />
           Sign Out

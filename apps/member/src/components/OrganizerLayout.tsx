@@ -20,7 +20,7 @@ export default function OrganizerLayout() {
 
   useEffect(() => {
     if (!isOrganizerSession) {
-      navigate('/organizer-code-gate', { replace: true })
+      navigate('/sign-in', { replace: true })
     }
   }, [isOrganizerSession, navigate])
 
