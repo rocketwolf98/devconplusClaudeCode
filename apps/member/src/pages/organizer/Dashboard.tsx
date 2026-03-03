@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Bell, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
@@ -75,14 +75,39 @@ export function OrgDashboard() {
     )
   }
 
+  const handleRevert = (id: string) => {
+    setRegistrations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, status: 'pending' as const } : r))
+    )
+  }
+
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-8 rounded-b-3xl">
+      <div className="bg-blue px-4 pt-12 sticky top-0 z-10 pb-6 rounded-b-3xl">
+        {/* Bell icon — top right */}
+        <div className="flex justify-end mb-3">
+          <button
+            onClick={() => navigate('/organizer/notifications')}
+            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
+          >
+            <Bell className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
         <OrgBanner
           chapterName={user.chapter}
           role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
           stats={stats}
         />
+
+        {/* Add Event — below stat chips */}
+        <button
+          onClick={() => navigate('/organizer/events/create')}
+          className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          Add Event
+        </button>
       </div>
 
       <motion.div
@@ -143,6 +168,7 @@ export function OrgDashboard() {
                         registration={reg}
                         onApprove={handleApprove}
                         onReject={handleReject}
+                        onRevert={handleRevert}
                       />
                     </motion.div>
                   ))}

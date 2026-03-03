@@ -26,14 +26,16 @@ import Profile from './pages/profile/Profile'
 import ProfileEdit from './pages/profile/ProfileEdit'
 import Notifications from './pages/profile/Notifications'
 import Privacy from './pages/profile/Privacy'
+import NotificationsInbox from './pages/notifications/NotificationsInbox'
 
 // Organizer pages
 import { OrgDashboard } from './pages/organizer/Dashboard'
-import { OrgEventsList } from './pages/organizer/events/EventsList'
+import { OrgEventManagement } from './pages/organizer/events/EventManagement'
 import { OrgEventCreate } from './pages/organizer/events/EventCreate'
 import { OrgEventDetail } from './pages/organizer/events/EventDetail'
 import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
 import { OrgQRScanner } from './pages/organizer/scan/QRScanner'
+import { OrgRewardsManagement } from './pages/organizer/rewards/RewardsManagement'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
 
@@ -65,6 +67,7 @@ export const router = createBrowserRouter([
       { path: '/rewards',                   element: <Rewards /> },
       { path: '/profile',                   element: <Profile /> },
       { path: '/profile/edit',              element: <ProfileEdit /> },
+      { path: '/notifications',             element: <NotificationsInbox /> },
       { path: '/profile/notifications',     element: <Notifications /> },
       { path: '/profile/privacy',           element: <Privacy /> },
     ],
@@ -75,13 +78,15 @@ export const router = createBrowserRouter([
     element: <OrganizerLayout />,
     children: [
       { path: '/organizer',                              element: <OrgDashboard /> },
-      { path: '/organizer/events',                       element: <OrgEventsList /> },
+      { path: '/organizer/events',                       element: <OrgEventManagement /> },
       { path: '/organizer/events/create',                element: <OrgEventCreate /> },
       { path: '/organizer/events/:id',                   element: <OrgEventDetail /> },
       { path: '/organizer/events/:id/registrants',       element: <OrgEventRegistrants /> },
       { path: '/organizer/scan',                         element: <OrgQRScanner /> },
+      { path: '/organizer/rewards',                      element: <OrgRewardsManagement /> },
       { path: '/organizer/profile',                      element: <OrgProfile /> },
       { path: '/organizer/profile/edit',                 element: <OrgProfileEdit /> },
+      { path: '/organizer/notifications',                 element: <NotificationsInbox isOrganizer /> },
       { path: '/organizer/profile/notifications',        element: <Notifications /> },
       { path: '/organizer/profile/privacy',              element: <Privacy /> },
     ],

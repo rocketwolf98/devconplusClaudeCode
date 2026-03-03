@@ -22,10 +22,10 @@ export function OrgBanner({ chapterName, role, stats }: OrgBannerProps) {
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="flex-1 bg-white/10 rounded-xl border border-white/20 px-4 py-3"
+            className="flex-1 bg-white rounded-xl px-4 py-3"
           >
-            <p className="text-2xl font-black leading-none mb-1">{stat.value}</p>
-            <p className="text-xs text-white/60 font-medium">{stat.label}</p>
+            <p className="text-2xl font-black leading-none mb-1 text-blue">{stat.value}</p>
+            <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
           </div>
         ))}
       </div>

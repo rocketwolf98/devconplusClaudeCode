@@ -1,14 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { Home, ScanLine, User } from 'lucide-react'
+import { Home, CalendarDays, ScanLine, Gift, User } from 'lucide-react'
+import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 
 const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer', label: 'Home', Icon: Home, end: true },
+  { path: '/organizer',        label: 'Home',   Icon: Home,         end: true  },
+  { path: '/organizer/events', label: 'Events', Icon: CalendarDays, end: false },
 ]
 
 const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
+  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
   { path: '/organizer/profile', label: 'Profile', Icon: User, end: false },
 ]
 
@@ -36,48 +39,70 @@ export default function OrganizerLayout() {
         <Outlet />
       </main>
 
-      {/* Floating pill bottom nav — Home | ●Scan● | Profile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-        <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-blue flex items-center px-2 py-2">
-          {/* Left: Home */}
+      {/* Floating pill bottom nav — Home | Events | ●Scan● | Rewards | Profile */}
+      <div className="fixed bottom-4 left-4 right-4 z-50">
+        <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-card border border-slate-100 px-2 py-2">
+
+          {/* Left: Home, Events */}
           {LEFT_TABS.map(({ path, label, Icon, end }) => (
-            <NavLink key={path} to={path} end={end} className="flex-1">
+            <NavLink
+              key={path}
+              to={path}
+              end={end}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+                  isActive ? 'text-blue' : 'text-slate-400'
+                }`
+              }
+            >
               {({ isActive }) => (
-                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-blue' : 'text-slate-400'}`}>
-                  <Icon className="w-5 h-5" />
-                  <span className="text-[10px] font-semibold">{label}</span>
-                </div>
+                <>
+                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[10px] font-medium">{label}</span>
+                </>
               )}
             </NavLink>
           ))}
 
-          {/* Center hero — Scan */}
-          <div className="flex-1 flex justify-center">
-            <NavLink to="/organizer/scan">
-              {({ isActive }) => (
-                <div
-                  className={`w-14 h-14 rounded-full flex items-center justify-center -mt-6 shadow-blue transition-colors ${isActive ? 'bg-navy' : 'bg-blue'}`}
-                  style={{ border: '3px solid white' }}
-                >
-                  <ScanLine className="w-6 h-6 text-white" />
-                </div>
-              )}
-            </NavLink>
-          </div>
+          {/* Center hero — Scanner */}
+          <NavLink to="/organizer/scan" className="-mt-6" title="Scan">
+            {({ isActive }) => (
+              <motion.div
+                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-card transition-colors ${
+                  isActive ? 'bg-navy' : 'bg-blue'
+                }`}
+                style={{ border: '3px solid white' }}
+                whileTap={{ scale: 0.92 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <ScanLine className="w-6 h-6 text-white" />
+              </motion.div>
+            )}
+          </NavLink>
 
-          {/* Right: Profile */}
+          {/* Right: Rewards, Profile */}
           {RIGHT_TABS.map(({ path, label, Icon, end }) => (
-            <NavLink key={path} to={path} end={end} className="flex-1">
+            <NavLink
+              key={path}
+              to={path}
+              end={end}
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+                  isActive ? 'text-blue' : 'text-slate-400'
+                }`
+              }
+            >
               {({ isActive }) => (
-                <div className={`flex flex-col items-center gap-0.5 py-1.5 rounded-xl transition-colors ${isActive ? 'text-blue' : 'text-slate-400'}`}>
-                  <Icon className="w-5 h-5" />
-                  <span className="text-[10px] font-semibold">{label}</span>
-                </div>
+                <>
+                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[10px] font-medium">{label}</span>
+                </>
               )}
             </NavLink>
           ))}
+
         </div>
-      </nav>
+      </div>
     </div>
   )
 }

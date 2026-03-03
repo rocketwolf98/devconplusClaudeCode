@@ -1,4 +1,4 @@
-import { Check, X, CheckCircle2, XCircle } from 'lucide-react'
+import { Check, X, CheckCircle2, XCircle, RotateCcw } from 'lucide-react'
 import { StatusBadge } from './StatusBadge'
 
 export interface Registration {
@@ -15,9 +15,10 @@ interface ApprovalCardProps {
   registration: Registration
   onApprove: (id: string) => void
   onReject: (id: string) => void
+  onRevert: (id: string) => void
 }
 
-export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCardProps) {
+export function ApprovalCard({ registration, onApprove, onReject, onRevert }: ApprovalCardProps) {
   const initials = registration.member_name
     .split(' ')
     .map((n) => n[0])
@@ -79,10 +80,19 @@ export function ApprovalCard({ registration, onApprove, onReject }: ApprovalCard
       )}
 
       {registration.status === 'rejected' && (
-        <p className="text-xs text-red font-semibold text-center py-1 flex items-center justify-center gap-1">
-          <XCircle className="w-3.5 h-3.5" />
-          Registration rejected
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-red font-semibold flex items-center gap-1">
+            <XCircle className="w-3.5 h-3.5 shrink-0" />
+            Registration rejected
+          </p>
+          <button
+            onClick={() => onRevert(registration.id)}
+            className="flex items-center gap-1 text-xs font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Undo
+          </button>
+        </div>
       )}
     </div>
   )
