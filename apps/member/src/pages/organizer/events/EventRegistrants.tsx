@@ -60,6 +60,12 @@ export function OrgEventRegistrants() {
     )
   }
 
+  const handleRevert = (regId: string) => {
+    setRegistrants((prev) =>
+      prev.map((r) => (r.id === regId ? { ...r, status: 'pending' as const } : r))
+    )
+  }
+
   const filtered = filter === 'all' ? registrants : registrants.filter((r) => r.status === filter)
 
   const counts = {
@@ -159,6 +165,7 @@ export function OrgEventRegistrants() {
                     registration={reg}
                     onApprove={handleApprove}
                     onReject={handleReject}
+                    onRevert={handleRevert}
                   />
                 </motion.div>
               ))}
