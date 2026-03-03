@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame, Star } from 'lucide-react'
+import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame, Star, Bell } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -14,7 +14,7 @@ import { NEWS_POSTS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabas
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
-import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
+import logoMark from '../../assets/logos/logo-mark.svg'
 
 const BANNERS = [
   {
@@ -86,8 +86,18 @@ export default function Dashboard() {
       <div className="sticky top-0 z-40 relative">
         <div className="bg-primary px-6 pt-14 pb-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
-            <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto" />
+            {/* Logomark + greeting */}
+            <div className="flex items-center gap-2.5">
+              <img src={logoMark} alt="DEVCON+" className="h-8 w-auto" />
+              <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
+            </div>
+            {/* Notification bell */}
+            <button
+              onClick={() => navigate('/notifications')}
+              className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
+            >
+              <Bell className="w-4.5 h-4.5 text-white" />
+            </button>
           </div>
         </div>
         {/* Gradient: absolutely positioned — no layout impact, overlaps cradle top */}
