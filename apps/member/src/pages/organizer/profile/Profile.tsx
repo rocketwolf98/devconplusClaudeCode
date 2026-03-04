@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, LogOut, Heart } from 'lucide-react'
-import { useOrgAuthStore } from '../../../stores/useOrgAuthStore'
+import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import ComingSoonModal from '../../../components/ComingSoonModal'
 
@@ -13,7 +13,8 @@ const MENU_ITEMS: { label: string; path?: string; modal?: string }[] = [
 ]
 
 export function OrgProfile() {
-  const { user, logout: orgLogout } = useOrgAuthStore()
+  const user = useOrganizerUser()
+  const { logout: orgLogout } = useOrgAuthStore()
   const { setOrganizerSession } = useAuthStore()
   const navigate = useNavigate()
   const [activeModal, setActiveModal] = useState<string | null>(null)

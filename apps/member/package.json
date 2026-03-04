@@ -11,10 +11,11 @@
   },
   "dependencies": {
     "@devcon-plus/supabase": "*",
-    "@zxing/browser": "^0.1.5",
-    "@zxing/library": "^0.21.3",
     "@hookform/resolvers": "^3.10.0",
     "@supabase/supabase-js": "^2.49.1",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^0.575.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",

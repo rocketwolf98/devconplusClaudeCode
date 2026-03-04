@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { usePointsStore } from '../stores/usePointsStore'
-import { MOCK_PROFILE_XP_NEXT_MILESTONE, MOCK_PROFILE_XP_PROGRESS } from '@devcon-plus/supabase'
+
+const XP_NEXT_MILESTONE = 2500
 
 export default function XPCard() {
   const navigate = useNavigate()
   const { totalPoints } = usePointsStore()
+  const progressPct = Math.min((totalPoints / XP_NEXT_MILESTONE) * 100, 100)
 
   return (
     <div className="mx-4 bg-navy rounded-2xl p-4 shadow-primary">
@@ -23,11 +25,11 @@ export default function XPCard() {
       <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-1.5">
         <div
           className="h-full bg-gold rounded-full transition-all"
-          style={{ width: `${MOCK_PROFILE_XP_PROGRESS}%` }}
+          style={{ width: `${progressPct}%` }}
         />
       </div>
       <p className="text-white/50 text-xs">
-        {MOCK_PROFILE_XP_NEXT_MILESTONE.toLocaleString()} pts to next reward tier
+        {Math.max(XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
       </p>
     </div>
   )

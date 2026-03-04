@@ -1,9 +1,9 @@
-import { useState } from 'react'
-import { Tag, Coffee, Package, Keyboard, Headphones, Shirt, Gift } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Tag, Coffee, Package, Keyboard, Headphones, Shirt, Gift, Star } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { REWARDS } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
+import { useRewardsStore } from '../../stores/useRewardsStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import { staggerContainer, cardItem } from '../../lib/animation'
 
@@ -19,7 +19,10 @@ const REWARD_ICONS: Record<string, LucideIcon> = {
 
 export default function Rewards() {
   const { totalPoints } = usePointsStore()
+  const { rewards, fetchRewards } = useRewardsStore()
   const [selected, setSelected] = useState<string | null>(null)
+
+  useEffect(() => { void fetchRewards() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -31,13 +34,24 @@ export default function Rewards() {
       </div>
 
       <div className="bg-slate-50 min-h-screen p-4">
+        {rewards.length === 0 ? (
+          <div className="flex flex-col items-center justify-center pt-20 px-8">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Star className="w-8 h-8 text-primary/50" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-1">Rewards coming soon</h3>
+            <p className="text-sm text-slate-500 text-center">
+              Keep earning points — exciting rewards will be available here shortly!
+            </p>
+          </div>
+        ) : (
         <motion.div
           className="grid grid-cols-2 gap-3"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
         >
-          {REWARDS.map((reward) => {
+          {rewards.map((reward) => {
             const Icon = REWARD_ICONS[reward.name] ?? Gift
             return (
               <motion.button
@@ -62,6 +76,7 @@ export default function Rewards() {
             )
           })}
         </motion.div>
+        )}
       </div>
 
       {selected && (

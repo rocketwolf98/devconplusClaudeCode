@@ -1,29 +1,147 @@
 import { create } from 'zustand'
 import type { Event, EventRegistration } from '@devcon-plus/supabase'
-import { EVENTS } from '@devcon-plus/supabase'
+import { supabase } from '../lib/supabase'
+
+// EventRegistration extended with checked_in from DB schema
+type FullRegistration = EventRegistration & { checked_in: boolean }
 
 interface EventsState {
   events: Event[]
-  registrations: EventRegistration[]
-  register: (eventId: string) => void
+  registrations: FullRegistration[]
+  isLoading: boolean
+  error: string | null
+
+  fetchEvents: () => Promise<void>
+  deleteEvent: (id: string) => Promise<void>
+  subscribeToChanges: () => () => void
+  fetchRegistrations: (userId: string) => Promise<void>
+  register: (eventId: string, userId: string) => Promise<void>
+  subscribeToRegistration: (
+    registrationId: string,
+    onApproved: (reg: FullRegistration) => void
+  ) => () => void
 }
 
 export const useEventsStore = create<EventsState>((set, get) => ({
-  events: EVENTS,
+  events: [],
   registrations: [],
+  isLoading: false,
+  error: null,
 
-  register: (eventId: string) => {
-    const event = get().events.find((e) => e.id === eventId)
-    if (!event) return
-    const reg: EventRegistration = {
-      id: `reg-${Date.now()}`,
-      event_id: eventId,
-      user_id: 'user-marie-santos',
-      status: event.requires_approval ? 'pending' : 'approved',
-      qr_code_token: event.requires_approval ? null : `DCN-${Date.now()}`,
-      registered_at: new Date().toISOString(),
-      approved_at: event.requires_approval ? null : new Date().toISOString(),
+  fetchEvents: async () => {
+    set({ isLoading: true, error: null })
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .order('event_date', { ascending: true })
+    if (error) {
+      set({ error: error.message, isLoading: false })
+      return
     }
-    set((s) => ({ registrations: [...s.registrations, reg] }))
+    set({ events: (data ?? []) as Event[], isLoading: false })
   },
+
+  deleteEvent: async (id) => {
+    const { error } = await supabase.from('events').delete().eq('id', id)
+    if (error) throw error
+    set((s) => ({ events: s.events.filter((e) => e.id !== id) }))
+  },
+
+  subscribeToChanges: () => {
+    const channel = supabase
+      .channel('events-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'events' },
+        (payload) => {
+          set((s) => ({
+            events: [...s.events, payload.new as Event].sort(
+              (a, b) =>
+                new Date(a.event_date ?? 0).getTime() -
+                new Date(b.event_date ?? 0).getTime()
+            ),
+          }))
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'events' },
+        (payload) => {
+          const deletedId = (payload.old as Partial<Event>).id
+          if (deletedId) set((s) => ({ events: s.events.filter((e) => e.id !== deletedId) }))
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'events' },
+        (payload) => {
+          const updated = payload.new as Event
+          set((s) => ({
+            events: s.events.map((e) => (e.id === updated.id ? updated : e)),
+          }))
+        }
+      )
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  },
+
+  fetchRegistrations: async (userId) => {
+    const { data, error } = await supabase
+      .from('event_registrations')
+      .select('*')
+      .eq('user_id', userId)
+    if (error) return
+    set({ registrations: (data ?? []) as FullRegistration[] })
+  },
+
+  register: async (eventId, userId) => {
+    const { data, error } = await supabase
+      .from('event_registrations')
+      .insert({ event_id: eventId, user_id: userId })
+      .select()
+      .single()
+    if (error) throw error
+    set((s) => ({
+      registrations: [...s.registrations, data as FullRegistration],
+    }))
+  },
+
+  subscribeToRegistration: (registrationId, onApproved) => {
+    const channel = supabase
+      .channel(`reg-${registrationId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'event_registrations',
+          filter: `id=eq.${registrationId}`,
+        },
+        (payload) => {
+          const updated = payload.new as FullRegistration
+          if (updated.status === 'approved') {
+            set((s) => ({
+              registrations: s.registrations.map((r) =>
+                r.id === registrationId ? { ...r, ...updated } : r
+              ),
+            }))
+            onApproved(updated)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  },
+
+  // Keep a synchronous getById helper for convenience
 }))
+
+// Selector helpers
+export const getEventById = (id: string) =>
+  useEventsStore.getState().events.find((e) => e.id === id)
+
+export const getRegistrationByEventId = (eventId: string) =>
+  useEventsStore.getState().registrations.find((r) => r.event_id === eventId)

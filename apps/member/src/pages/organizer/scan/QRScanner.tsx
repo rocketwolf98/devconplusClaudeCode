@@ -3,6 +3,8 @@ import { Camera, CheckCircle2, XCircle, Zap, Info, SwitchCamera } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion'
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser'
 import { fadeUp } from '../../../lib/animation'
+import { supabase } from '../../../lib/supabase'
+import { useAuthStore } from '../../../stores/useAuthStore'
 
 interface ScanResult {
   memberName: string
@@ -22,6 +24,7 @@ export function OrgQRScanner() {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
   const [deviceIndex, setDeviceIndex] = useState(0)
   const [isSwitching, setIsSwitching] = useState(false)
+  const { user } = useAuthStore()
 
   const stopScanning = () => {
     controlsRef.current?.stop()
@@ -38,7 +41,6 @@ export function OrgQRScanner() {
       const allDevices = await BrowserQRCodeReader.listVideoInputDevices()
       if (allDevices.length === 0) throw new Error('No camera devices found.')
 
-      // Persist device list on first load
       if (devices.length === 0) setDevices(allDevices)
 
       const activeIndex = index ?? deviceIndex
@@ -50,7 +52,7 @@ export function OrgQRScanner() {
         (res, err) => {
           if (res) {
             stopScanning()
-            handleScannedToken(res.getText())
+            void handleScannedToken(res.getText())
           } else if (err && err.name !== 'NotFoundException') {
             console.error(err)
           }
@@ -73,24 +75,41 @@ export function OrgQRScanner() {
     setIsSwitching(false)
   }
 
-  const handleScannedToken = (token: string) => {
-    if (token.startsWith('DCN-') || token.length > 4) {
-      setResult({
-        memberName: 'Marie Santos',
-        pointsAwarded: 200,
-        eventTitle: 'DEVCON Summit Manila 2026',
-      })
-      setScanState('success')
-    } else {
+  const handleScannedToken = async (token: string) => {
+    if (!user) {
       setScanState('error')
-      setErrorMsg('Invalid QR code. Please try again.')
+      setErrorMsg('Session expired. Please sign in again.')
+      return
     }
+
+    const { data, error } = await supabase.functions.invoke<{
+      success: boolean
+      member_name?: string
+      points_awarded?: number
+      event_title?: string
+      error?: string
+    }>('award-points-on-scan', {
+      body: { qr_code_token: token, organizer_id: user.id },
+    })
+
+    if (error || !data?.success) {
+      setScanState('error')
+      setErrorMsg(data?.error ?? error?.message ?? 'Scan failed. Please try again.')
+      return
+    }
+
+    setResult({
+      memberName:    data.member_name ?? 'Member',
+      pointsAwarded: data.points_awarded ?? 0,
+      eventTitle:    data.event_title ?? '',
+    })
+    setScanState('success')
   }
 
   const handleManualSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (manualToken.trim()) {
-      handleScannedToken(manualToken.trim())
+      void handleScannedToken(manualToken.trim())
       setManualToken('')
     }
   }
@@ -128,7 +147,7 @@ export function OrgQRScanner() {
             >
               <motion.div
                 className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center cursor-pointer hover:border-blue transition-colors"
-                onClick={() => startCamera()}
+                onClick={() => void startCamera()}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mx-auto mb-4">
@@ -171,19 +190,14 @@ export function OrgQRScanner() {
               exit="exit"
               className="space-y-4"
             >
-              {/* Viewfinder */}
               <div className="bg-black rounded-2xl overflow-hidden aspect-square relative">
                 <video ref={videoRef} className="w-full h-full object-cover" />
-
-                {/* Targeting frame */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-48 h-48 border-2 border-white/80 rounded-2xl" />
                 </div>
-
-                {/* Swap camera button — only shown when multiple cameras available */}
                 {devices.length > 1 && (
                   <button
-                    onClick={switchCamera}
+                    onClick={() => void switchCamera()}
                     disabled={isSwitching}
                     className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center border border-white/20 transition-opacity disabled:opacity-40"
                     aria-label="Switch camera"

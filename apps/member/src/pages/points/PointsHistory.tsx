@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import TransactionRow from '../../components/TransactionRow'
 import type { PointTransaction } from '@devcon-plus/supabase'
@@ -18,7 +20,12 @@ function groupByDate(txs: PointTransaction[]): Array<[string, PointTransaction[]
 
 export default function PointsHistory() {
   const navigate = useNavigate()
-  const { transactions, totalPoints } = usePointsStore()
+  const { user } = useAuthStore()
+  const { transactions, totalPoints, fetchPoints } = usePointsStore()
+
+  useEffect(() => {
+    if (user?.id) void fetchPoints(user.id)
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const sorted = [...transactions].sort(
     (a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()

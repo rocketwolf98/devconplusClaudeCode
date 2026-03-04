@@ -1,25 +1,23 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, Tag, Newspaper } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { NEWS_POSTS } from '@devcon-plus/supabase'
+import { useNewsStore } from '../../stores/useNewsStore'
 import PromotedBadge from '../../components/PromotedBadge'
 import { fadeUp } from '../../lib/animation'
 import { CATEGORY_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
 
-const MOCK_BODY_PARAGRAPHS = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-  'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
-  'Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis.',
-  'Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.',
-]
-
-
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { posts, fetchNews } = useNewsStore()
 
-  const post = NEWS_POSTS.find((p) => p.id === id)
+  useEffect(() => {
+    if (posts.length === 0) void fetchNews()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const post = posts.find((p) => p.id === id)
 
   if (!post) {
     return (
@@ -99,17 +97,10 @@ export default function NewsDetail() {
         {/* Divider */}
         <hr className="border-slate-200" />
 
-        {/* Lead paragraph (real body from mock data) */}
+        {/* Article body */}
         {post.body && (
-          <p className="text-sm text-slate-700 leading-relaxed font-medium">{post.body}</p>
+          <p className="text-sm text-slate-700 leading-relaxed">{post.body}</p>
         )}
-
-        {/* Full article body (mock lorem ipsum) */}
-        {MOCK_BODY_PARAGRAPHS.map((para, i) => (
-          <p key={i} className="text-sm text-slate-600 leading-relaxed">
-            {para}
-          </p>
-        ))}
 
         {/* Footer tag */}
         <div className="pt-4 border-t border-slate-200">

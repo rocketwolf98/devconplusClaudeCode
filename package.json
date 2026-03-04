@@ -12,11 +12,19 @@
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
+    "supabase": "^2.76.15",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2",
     "vercel": "^50.25.4"
   },
   "packageManager": "npm@11.9.0",
+  "overrides": {
+    "ajv": "^8.18.0",
+    "minimatch": "^10.2.4",
+    "path-to-regexp": "^6.3.0",
+    "tar": "^7.5.9",
+    "undici": "^6.22.1"
+  },
   "dependencies": {
     "framer-motion": "^12.34.3"
   }

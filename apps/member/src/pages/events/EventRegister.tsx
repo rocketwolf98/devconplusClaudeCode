@@ -7,22 +7,44 @@ import { useAuthStore } from '../../stores/useAuthStore'
 export default function EventRegister() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { events, register } = useEventsStore()
+  const { events, registrations, register } = useEventsStore()
   const { user } = useAuthStore()
   const [agreed, setAgreed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const event = events.find((e) => e.id === id)
   if (!event || !user || !id) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!agreed) return
     setSubmitting(true)
-    register(id)
-    setTimeout(() => {
-      navigate(event.requires_approval ? `/events/${id}/pending` : `/events/${id}/ticket`, { replace: true })
-    }, 500)
+    setError(null)
+    try {
+      await register(id, user.id)
+      // Check the returned registration status from the store
+      const reg = useEventsStore.getState().registrations.find((r) => r.event_id === id)
+      const destination = reg?.status === 'approved'
+        ? `/events/${id}/ticket`
+        : `/events/${id}/pending`
+      navigate(destination, { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+      setSubmitting(false)
+    }
+  }
+
+  // If already registered, redirect to the appropriate screen
+  const existingReg = registrations.find((r) => r.event_id === id)
+  if (existingReg) {
+    const destination = existingReg.status === 'approved'
+      ? `/events/${id}/ticket`
+      : existingReg.status === 'rejected'
+        ? `/events/${id}`
+        : `/events/${id}/pending`
+    navigate(destination, { replace: true })
+    return null
   }
 
   return (
@@ -67,6 +89,12 @@ export default function EventRegister() {
             I agree to the Terms & Conditions and Privacy Policy for this event.
           </span>
         </label>
+
+        {error && (
+          <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"

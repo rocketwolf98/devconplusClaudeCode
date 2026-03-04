@@ -1,12 +1,16 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { EVENTS } from '@devcon-plus/supabase'
+import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem } from '../../../lib/animation'
 
 export function OrgEventsList() {
   const navigate = useNavigate()
+  const { events, fetchEvents } = useEventsStore()
+
+  useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -31,7 +35,7 @@ export function OrgEventsList() {
         initial="hidden"
         animate="visible"
       >
-        {EVENTS.map((event) => {
+        {events.map((event) => {
           const formattedDate = event.event_date
             ? new Date(event.event_date).toLocaleDateString('en-US', {
                 weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',

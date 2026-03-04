@@ -1,11 +1,13 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap, TrendingUp, Users, CalendarCheck, Clock, Plus } from 'lucide-react'
+import { MapPin, Zap, TrendingUp, Users, CalendarCheck, Clock, Plus, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { EVENTS } from '@devcon-plus/supabase'
+import type { Event } from '@devcon-plus/supabase'
+import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
 
-// Mock performance stats — replace with real Supabase aggregates when provisioned
+// Stats are placeholder until real Supabase aggregates are wired
 const MOCK_STATS = {
   totalRegistered: 24,
   attendanceRate: 78,
@@ -15,10 +17,29 @@ const MOCK_STATS = {
 
 export function OrgEventManagement() {
   const navigate = useNavigate()
+  const { events, fetchEvents, deleteEvent } = useEventsStore()
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const currentEvent = EVENTS.find((e) => e.status === 'upcoming' && e.is_featured) ?? EVENTS[0]
-  const upcomingEvents = EVENTS.filter((e) => e.status === 'upcoming')
-  const pastEvents = EVENTS.filter((e) => e.status === 'past')
+  useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentEvent = events.find((e) => e.status === 'upcoming' && e.is_featured) ?? events[0]
+  const upcomingEvents = events.filter((e) => e.status === 'upcoming')
+  const pastEvents = events.filter((e) => e.status === 'past')
+
+  const handleDelete = async (id: string) => {
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteEvent(id)
+      setDeleteConfirmId(null)
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Delete failed.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   return (
     <div>
@@ -93,6 +114,12 @@ export function OrgEventManagement() {
           </div>
         </motion.div>
 
+        {deleteError && (
+          <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+            {deleteError}
+          </p>
+        )}
+
         {/* Current / upcoming events */}
         {upcomingEvents.length > 0 && (
           <motion.div variants={fadeUp}>
@@ -156,7 +183,16 @@ export function OrgEventManagement() {
               {upcomingEvents
                 .filter((e) => e.id !== currentEvent?.id)
                 .map((event) => (
-                  <EventRow key={event.id} event={event} onTap={() => navigate(`/organizer/events/${event.id}`)} />
+                  <EventRow
+                    key={event.id}
+                    event={event}
+                    onTap={() => navigate(`/organizer/events/${event.id}`)}
+                    confirmingDelete={deleteConfirmId === event.id}
+                    onDelete={() => setDeleteConfirmId(event.id)}
+                    onCancelDelete={() => setDeleteConfirmId(null)}
+                    onConfirmDelete={() => void handleDelete(event.id)}
+                    isDeleting={isDeleting && deleteConfirmId === event.id}
+                  />
                 ))}
             </motion.div>
           </motion.div>
@@ -170,7 +206,16 @@ export function OrgEventManagement() {
             </p>
             <motion.div className="space-y-2.5" variants={staggerContainer} initial="hidden" animate="visible">
               {pastEvents.map((event) => (
-                <EventRow key={event.id} event={event} onTap={() => navigate(`/organizer/events/${event.id}`)} />
+                <EventRow
+                  key={event.id}
+                  event={event}
+                  onTap={() => navigate(`/organizer/events/${event.id}`)}
+                  confirmingDelete={deleteConfirmId === event.id}
+                  onDelete={() => setDeleteConfirmId(event.id)}
+                  onCancelDelete={() => setDeleteConfirmId(null)}
+                  onConfirmDelete={() => void handleDelete(event.id)}
+                  isDeleting={isDeleting && deleteConfirmId === event.id}
+                />
               ))}
             </motion.div>
           </motion.div>
@@ -187,22 +232,28 @@ export function OrgEventManagement() {
   )
 }
 
-// ─── Shared event row sub-component ───────────────────────────────────────────
+// ─── Event row sub-component ───────────────────────────────────────────────────
 
 interface EventRowProps {
-  event: (typeof EVENTS)[number]
+  event: Event
   onTap: () => void
+  confirmingDelete: boolean
+  onDelete: () => void
+  onCancelDelete: () => void
+  onConfirmDelete: () => void
+  isDeleting: boolean
 }
 
-function EventRow({ event, onTap }: EventRowProps) {
+function EventRow({ event, onTap, confirmingDelete, onDelete, onCancelDelete, onConfirmDelete, isDeleting }: EventRowProps) {
   return (
     <motion.div
       variants={cardItem}
-      className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card cursor-pointer"
-      onClick={onTap}
-      whileTap={{ scale: 0.98 }}
+      className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card"
     >
-      <div className="flex items-start gap-3">
+      <div
+        className="flex items-start gap-3 cursor-pointer"
+        onClick={!confirmingDelete ? onTap : undefined}
+      >
         <div className="w-11 shrink-0 bg-blue/10 rounded-xl px-2 py-2 text-center">
           <p className="text-[10px] font-bold text-blue uppercase leading-none">
             {event.event_date
@@ -217,15 +268,25 @@ function EventRow({ event, onTap }: EventRowProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm font-bold text-slate-900 leading-snug">{event.title}</p>
-            <StatusBadge
-              status={
-                event.status === 'upcoming'
-                  ? 'pending'
-                  : event.status === 'ongoing'
-                  ? 'approved'
-                  : 'rejected'
-              }
-            />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <StatusBadge
+                status={
+                  event.status === 'upcoming'
+                    ? 'pending'
+                    : event.status === 'ongoing'
+                    ? 'approved'
+                    : 'rejected'
+                }
+              />
+              {!confirmingDelete && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete() }}
+                  className="w-7 h-7 rounded-lg bg-red/10 flex items-center justify-center active:bg-red/20 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red" />
+                </button>
+              )}
+            </div>
           </div>
           {event.location && (
             <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
@@ -239,6 +300,29 @@ function EventRow({ event, onTap }: EventRowProps) {
           </span>
         </div>
       </div>
+
+      {/* Inline delete confirm */}
+      {confirmingDelete && (
+        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+          <p className="text-xs text-slate-500">Delete this event?</p>
+          <div className="flex gap-2">
+            <button
+              onClick={onCancelDelete}
+              disabled={isDeleting}
+              className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirmDelete}
+              disabled={isDeleting}
+              className="px-3 py-1.5 rounded-lg bg-red text-white text-xs font-semibold disabled:opacity-50"
+            >
+              {isDeleting ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }

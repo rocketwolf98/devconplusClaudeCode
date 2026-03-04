@@ -3,6 +3,8 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
+import { useEventsStore } from '../stores/useEventsStore'
+import { useRewardsStore } from '../stores/useRewardsStore'
 
 const LEFT_TABS = [
   { path: '/home',    label: 'Home',    icon: Home,     end: true },
@@ -19,10 +21,22 @@ export default function MemberLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
+  const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
 
   useEffect(() => {
     if (!user) navigate('/sign-in', { replace: true })
   }, [user, navigate])
+
+  // Realtime subscriptions — live for the entire member session
+  useEffect(() => {
+    const unsubEvents = subscribeToEventChanges()
+    const unsubRewards = subscribeToRewardChanges()
+    return () => {
+      unsubEvents()
+      unsubRewards()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })

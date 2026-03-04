@@ -1,14 +1,20 @@
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { EVENTS } from '@devcon-plus/supabase'
+import { useEventsStore } from '../../../stores/useEventsStore'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 
 export function OrgEventDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { events, fetchEvents } = useEventsStore()
 
-  const event = EVENTS.find((e) => e.id === id)
+  useEffect(() => {
+    if (events.length === 0) void fetchEvents()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const event = events.find((e) => e.id === id)
   if (!event) {
     return (
       <div className="p-6 text-center">

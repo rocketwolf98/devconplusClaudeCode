@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { Ticket, Mic2, HandHeart, Coffee, Heart, Share2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { staggerContainer, cardItem } from '../../lib/animation'
 
@@ -20,8 +21,13 @@ const SHARE: { Icon: LucideIcon; label: string; pts: string }[] = [
 
 export default function Points() {
   const navigate = useNavigate()
-  const { totalPoints } = usePointsStore()
+  const { user } = useAuthStore()
+  const { totalPoints, fetchPoints } = usePointsStore()
   const [tab, setTab] = useState<'earn' | 'share'>('earn')
+
+  useEffect(() => {
+    if (user?.id) void fetchPoints(user.id)
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const items = tab === 'earn' ? EARN : SHARE
 
   return (

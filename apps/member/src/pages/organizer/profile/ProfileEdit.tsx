@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ArrowLeft, Camera } from 'lucide-react'
-import { useOrgAuthStore } from '../../../stores/useOrgAuthStore'
+import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Name required'),
@@ -13,7 +13,8 @@ type FormData = z.infer<typeof schema>
 
 export function OrgProfileEdit() {
   const navigate = useNavigate()
-  const { user, updateProfile } = useOrgAuthStore()
+  const user = useOrganizerUser()
+  const { updateProfile } = useOrgAuthStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar_url ?? null)
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Heart, MapPin, Sparkles, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,9 +11,13 @@ const FILTERS = ['All', 'Remote', 'Onsite', 'Hybrid', 'Saved']
 
 export default function JobsList() {
   const navigate = useNavigate()
-  const { jobs, savedIds, toggleSave } = useJobsStore()
+  const { jobs, savedIds, toggleSave, fetchJobs } = useJobsStore()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('All')
+
+  useEffect(() => {
+    void fetchJobs()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleToggleSave = (id: string, e: React.MouseEvent) => {
     e.stopPropagation()

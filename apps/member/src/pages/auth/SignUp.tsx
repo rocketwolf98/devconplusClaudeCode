@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
+import ComingSoonModal from '../../components/ComingSoonModal'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const schema = z.object({
@@ -26,21 +29,27 @@ function GoogleIcon() {
 
 export default function SignUp() {
   const navigate = useNavigate()
-  const { signIn } = useAuthStore()
+  const { signUp, error: authError } = useAuthStore()
+  const [showGoogleModal, setShowGoogleModal] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
   const onSubmit = async (data: FormData) => {
-    await signIn(data.email, data.password)  // mock: signs in immediately
-    navigate('/organizer-code-gate')
-  }
-
-  const handleGoogleSignUp = async () => {
-    // TODO: Supabase Google OAuth
-    await signIn('marie.santos@email.com', 'password')
-    navigate('/organizer-code-gate')
+    setFormError(null)
+    try {
+      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.school_or_company)
+      if (emailConfirmationPending) {
+        navigate('/email-sent', { state: { email: data.email, type: 'signup' } })
+      } else {
+        navigate('/organizer-code-gate')
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Sign-up failed. Please try again.')
+    }
   }
 
   return (
@@ -55,7 +64,7 @@ export default function SignUp() {
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 overflow-y-auto">
         <button
           type="button"
-          onClick={handleGoogleSignUp}
+          onClick={() => setShowGoogleModal(true)}
           className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card"
         >
           <GoogleIcon />
@@ -92,12 +101,22 @@ export default function SignUp() {
 
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">Password</label>
-            <input
-              {...register('password')}
-              type="password"
-              placeholder="••••••••"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
-            />
+            <div className="relative">
+              <input
+                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
           </div>
 
@@ -111,6 +130,12 @@ export default function SignUp() {
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
             />
           </div>
+
+          {formError && (
+            <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+              {formError}
+            </p>
+          )}
 
           <button
             type="submit"
@@ -126,6 +151,13 @@ export default function SignUp() {
           <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
         </p>
       </div>
+
+      {showGoogleModal && (
+        <ComingSoonModal
+          feature="Google Sign-In"
+          onClose={() => setShowGoogleModal(false)}
+        />
+      )}
     </div>
   )
 }

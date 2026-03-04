@@ -10,8 +10,10 @@ import EventCard from '../../components/EventCard'
 import NewsCard from '../../components/NewsCard'
 import PromotedBadge from '../../components/PromotedBadge'
 import ComingSoonModal from '../../components/ComingSoonModal'
-import { NEWS_POSTS, MOCK_PROFILE_XP_NEXT_MILESTONE } from '@devcon-plus/supabase'
+import { useNewsStore } from '../../stores/useNewsStore'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
+
+const XP_NEXT_MILESTONE = 2500
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
 import logoMark from '../../assets/logos/logo-mark.svg'
@@ -44,9 +46,10 @@ const BANNERS = [
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { events } = useEventsStore()
-  const { jobs } = useJobsStore()
-  const { transactions, totalPoints } = usePointsStore()
+  const { events, fetchEvents } = useEventsStore()
+  const { jobs, fetchJobs } = useJobsStore()
+  const { transactions, totalPoints, fetchPoints } = usePointsStore()
+  const { posts, fetchNews } = useNewsStore()
   const [bannerIdx, setBannerIdx] = useState(0)
   const [newsTab, setNewsTab] = useState<'devcon' | 'community'>('devcon')
   const [showVolunteerModal, setShowVolunteerModal] = useState(false)
@@ -55,6 +58,13 @@ export default function Dashboard() {
   const cradleOpacity  = useTransform(scrollYMV, [0,  110], [1, 0])
   const cradleHeight   = useTransform(scrollYMV, [60, 180], [280, 0])
   const gradientOpacity = useTransform(scrollYMV, [30, 140], [0, 1])
+
+  useEffect(() => {
+    void fetchEvents()
+    void fetchJobs()
+    void fetchNews()
+    if (user?.id) void fetchPoints(user.id)
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const t = setInterval(() => setBannerIdx((i) => (i + 1) % BANNERS.length), 4000)
@@ -72,12 +82,12 @@ export default function Dashboard() {
   const banner = BANNERS[bannerIdx]
   const handleBannerCta = () => banner.onClick(navigate)
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
-  const progressPct = Math.min((totalPoints / MOCK_PROFILE_XP_NEXT_MILESTONE) * 100, 100)
+  const progressPct = Math.min((totalPoints / XP_NEXT_MILESTONE) * 100, 100)
   const forYouEvents = events.filter((e) => e.status === 'upcoming').slice(0, 3)
   const hotJobs = jobs.slice(0, 4)
   const visibleNews = newsTab === 'devcon'
-    ? NEWS_POSTS.filter((p) => p.category === 'devcon')
-    : NEWS_POSTS.filter((p) => p.category === 'tech_community')
+    ? posts.filter((p) => p.category === 'devcon')
+    : posts.filter((p) => p.category === 'tech_community')
   const recentTxns = transactions.slice(0, 4)
 
   return (
@@ -132,7 +142,7 @@ export default function Dashboard() {
             />
           </div>
           <p className="text-slate-400 text-xs mb-4">
-            {Math.max(MOCK_PROFILE_XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
+            {Math.max(XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
           </p>
           <button
             onClick={() => navigate('/events')}

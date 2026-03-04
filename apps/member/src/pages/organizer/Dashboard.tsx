@@ -4,7 +4,7 @@ import { CheckCircle2, Bell, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
-import { useOrgAuthStore } from '../../stores/useOrgAuthStore'
+import { useOrganizerUser } from '../../stores/useOrgAuthStore'
 import { fadeUp, staggerContainer, cardItem } from '../../lib/animation'
 
 const MOCK_REGISTRATIONS: Registration[] = [
@@ -49,7 +49,7 @@ const MOCK_REGISTRATIONS: Registration[] = [
 type TabId = 'approvals' | 'events'
 
 export function OrgDashboard() {
-  const { user } = useOrgAuthStore()
+  const user = useOrganizerUser()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('approvals')
   const [registrations, setRegistrations] = useState<Registration[]>(MOCK_REGISTRATIONS)

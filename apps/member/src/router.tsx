@@ -8,6 +8,9 @@ import Onboarding from './pages/auth/Onboarding'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
 import OrganizerCodeGate from './pages/auth/OrganizerCodeGate'
+import ForgotPassword from './pages/auth/ForgotPassword'
+import EmailSent from './pages/auth/EmailSent'
+import ResetPassword from './pages/auth/ResetPassword'
 
 // Member tab pages
 import Dashboard from './pages/dashboard/Dashboard'
@@ -48,6 +51,9 @@ export const router = createBrowserRouter([
   { path: '/sign-in',              element: <SignIn /> },
   { path: '/sign-up',              element: <SignUp /> },
   { path: '/organizer-code-gate',  element: <OrganizerCodeGate /> },
+  { path: '/forgot-password',      element: <ForgotPassword /> },
+  { path: '/email-sent',           element: <EmailSent /> },
+  { path: '/reset-password',       element: <ResetPassword /> },
 
   // Member routes — wrapped in MemberLayout with bottom tab nav
   {
