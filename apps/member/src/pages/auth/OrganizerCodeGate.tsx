@@ -49,9 +49,9 @@ export default function OrganizerCodeGate() {
       return
     }
 
-    // Re-fetch updated profile — auto-sets isOrganizerSession via onAuthStateChange
+    // Re-fetch updated profile then send to member home
     await initialize()
-    navigate('/organizer')
+    navigate('/home')
   }
 
   const handleContinueAsMember = () => {

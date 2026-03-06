@@ -27,9 +27,17 @@ function GoogleIcon() {
   )
 }
 
+const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin'] as const
+
+function getPostAuthRoute(role: string): string {
+  if (role === 'super_admin') return '/admin'
+  if (ORGANIZER_ROLES.includes(role as typeof ORGANIZER_ROLES[number])) return '/organizer'
+  return '/organizer-code-gate'
+}
+
 export default function SignUp() {
   const navigate = useNavigate()
-  const { signUp, error: authError } = useAuthStore()
+  const { signUp } = useAuthStore()
   const [showGoogleModal, setShowGoogleModal] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -45,7 +53,8 @@ export default function SignUp() {
       if (emailConfirmationPending) {
         navigate('/email-sent', { state: { email: data.email, type: 'signup' } })
       } else {
-        navigate('/organizer-code-gate')
+        const currentUser = useAuthStore.getState().user
+        navigate(currentUser ? getPostAuthRoute(currentUser.role) : '/organizer-code-gate')
       }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Sign-up failed. Please try again.')

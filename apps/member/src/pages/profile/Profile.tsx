@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronRight, LogOut, Star } from 'lucide-react'
+import { Check, ChevronRight, LogOut, Shield, Star } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useThemeStore, PROGRAM_THEMES } from '../../stores/useThemeStore'
@@ -95,6 +95,17 @@ export default function Profile() {
             <ChevronRight className="w-4 h-4 text-slate-300" />
           </button>
         </div>
+
+        {/* Officer Portal — only visible to organizer-role users */}
+        {user?.role && ['chapter_officer', 'hq_admin', 'super_admin'].includes(user.role) && (
+          <button
+            onClick={() => navigate('/organizer')}
+            className="w-full py-3.5 bg-blue/10 text-blue text-sm font-bold rounded-2xl hover:bg-blue/20 transition-colors flex items-center justify-center gap-2"
+          >
+            <Shield className="w-4 h-4" />
+            Officer Portal
+          </button>
+        )}
 
         {/* Sign Out */}
         <button

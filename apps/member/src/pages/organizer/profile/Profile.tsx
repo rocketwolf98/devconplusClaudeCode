@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, Heart } from 'lucide-react'
+import { ChevronRight, LogOut, Heart, User } from 'lucide-react'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import ComingSoonModal from '../../../components/ComingSoonModal'
@@ -76,6 +76,15 @@ export function OrgProfile() {
             Made with <Heart className="w-3 h-3 text-red inline" /> for DEVCON Philippines
           </p>
         </div>
+
+        {/* Switch to Member View */}
+        <button
+          onClick={() => navigate('/home')}
+          className="w-full py-3.5 bg-primary/10 text-primary text-sm font-bold rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
+        >
+          <User className="w-4 h-4" />
+          Switch to Member View
+        </button>
 
         {/* Sign Out */}
         <button

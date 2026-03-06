@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import MemberLayout from './components/MemberLayout'
 import OrganizerLayout from './components/OrganizerLayout'
+import AdminLayout from './components/AdminLayout'
 
 // Auth pages (no tab nav)
 import SplashScreen from './pages/auth/SplashScreen'
@@ -30,6 +31,13 @@ import ProfileEdit from './pages/profile/ProfileEdit'
 import Notifications from './pages/profile/Notifications'
 import Privacy from './pages/profile/Privacy'
 import NotificationsInbox from './pages/notifications/NotificationsInbox'
+
+// Admin pages
+import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminUsers from './pages/admin/AdminUsers'
+import AdminOrgCodes from './pages/admin/AdminOrgCodes'
+import AdminEvents from './pages/admin/AdminEvents'
+import AdminChapters from './pages/admin/AdminChapters'
 
 // Organizer pages
 import { OrgDashboard } from './pages/organizer/Dashboard'
@@ -76,6 +84,18 @@ export const router = createBrowserRouter([
       { path: '/notifications',             element: <NotificationsInbox /> },
       { path: '/profile/notifications',     element: <Notifications /> },
       { path: '/profile/privacy',           element: <Privacy /> },
+    ],
+  },
+
+  // Admin routes — wrapped in AdminLayout (guards on super_admin role only)
+  {
+    element: <AdminLayout />,
+    children: [
+      { path: '/admin',              element: <AdminDashboard /> },
+      { path: '/admin/users',        element: <AdminUsers /> },
+      { path: '/admin/org-codes',    element: <AdminOrgCodes /> },
+      { path: '/admin/events',       element: <AdminEvents /> },
+      { path: '/admin/chapters',     element: <AdminChapters /> },
     ],
   },
 

@@ -43,7 +43,7 @@ export default function SignIn() {
     setFormError(null)
     try {
       await signIn(data.email, data.password)
-      navigate('/organizer-code-gate')
+      navigate('/home')
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
     }

@@ -134,13 +134,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signIn: async (email, password) => {
     set({ isLoading: true, error: null })
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       set({ isLoading: false, error: error.message })
       throw error
     }
+    // Eagerly fetch profile so callers can read user.role immediately after signIn() returns
+    if (data.session?.user) {
+      const profile = await fetchProfileById(data.session.user.id)
+      if (profile) {
+        const chapterName = await fetchChapterName(profile.chapter_id)
+        set({
+          user: profile,
+          initials: getInitials(profile.full_name),
+          chapterName,
+          isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
+        })
+      }
+    }
     set({ isLoading: false })
-    // onAuthStateChange fires SIGNED_IN → profile fetched automatically
   },
 
   signOut: async () => {
