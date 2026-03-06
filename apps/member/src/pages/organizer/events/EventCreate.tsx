@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -5,6 +6,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { fadeUp, staggerContainer } from '../../../lib/animation'
+import { useEventsStore } from '../../../stores/useEventsStore'
+import { useAuthStore } from '../../../stores/useAuthStore'
 
 const schema = z.object({
   title:             z.string().min(3, 'Title must be at least 3 characters'),
@@ -22,8 +25,11 @@ const labelClass = 'block text-xs font-bold uppercase tracking-wide text-slate-5
 
 export function OrgEventCreate() {
   const navigate = useNavigate()
+  const { createEvent } = useEventsStore()
+  const { user } = useAuthStore()
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       points_value:      200,
@@ -31,8 +37,27 @@ export function OrgEventCreate() {
     },
   })
 
-  const onSubmit = (_data: FormData) => {
-    navigate('/organizer/events')
+  const onSubmit = async (data: FormData) => {
+    if (!user?.chapter_id) {
+      setSubmitError('Your account is not linked to a chapter. Contact an admin.')
+      return
+    }
+    setSubmitError(null)
+    try {
+      await createEvent({
+        title:             data.title,
+        description:       data.description,
+        location:          data.location,
+        event_date:        data.event_date,
+        points_value:      data.points_value,
+        requires_approval: data.requires_approval,
+        chapter_id:        user.chapter_id,
+        created_by:        user.id,
+      })
+      navigate('/organizer/events')
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to create event. Please try again.')
+    }
   }
 
   return (
@@ -132,6 +157,12 @@ export function OrgEventCreate() {
           </div>
         </motion.div>
 
+        {submitError && (
+          <motion.p variants={fadeUp} className="text-xs text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2">
+            {submitError}
+          </motion.p>
+        )}
+
         <motion.div variants={fadeUp} className="flex gap-3 pt-2">
           <button
             type="button"
@@ -142,9 +173,10 @@ export function OrgEventCreate() {
           </button>
           <button
             type="submit"
-            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+            disabled={isSubmitting}
+            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
           >
-            Create Event
+            {isSubmitting ? 'Creating…' : 'Create Event'}
           </button>
         </motion.div>
       </motion.form>

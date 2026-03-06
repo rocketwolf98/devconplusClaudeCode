@@ -14,9 +14,10 @@ type FormData = z.infer<typeof schema>
 
 export default function ProfileEdit() {
   const navigate = useNavigate()
-  const { user, initials, updateProfile } = useAuthStore()
+  const { user, initials, updateProfile, uploadAvatar } = useAuthStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(user?.avatar_url ?? null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -29,16 +30,19 @@ export default function ProfileEdit() {
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const url = URL.createObjectURL(file)
-    setAvatarPreview(url)
+    setPendingFile(file)
+    setAvatarPreview(URL.createObjectURL(file))
   }
 
   const onSubmit = async (data: FormData) => {
-    await new Promise((r) => setTimeout(r, 300)) // simulate async
-    updateProfile({
+    let avatarUrl: string | undefined
+    if (pendingFile) {
+      avatarUrl = await uploadAvatar(pendingFile)
+    }
+    await updateProfile({
       full_name:         data.full_name,
       school_or_company: data.school_or_company ?? '',
-      ...(avatarPreview ? { avatar_url: avatarPreview } : {}),
+      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
     })
     navigate('/profile')
   }

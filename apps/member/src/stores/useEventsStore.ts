@@ -5,6 +5,17 @@ import { supabase } from '../lib/supabase'
 // EventRegistration extended with checked_in from DB schema
 type FullRegistration = EventRegistration & { checked_in: boolean }
 
+interface CreateEventPayload {
+  title: string
+  description: string
+  location: string
+  event_date: string
+  points_value: number
+  requires_approval: boolean
+  chapter_id: string
+  created_by: string
+}
+
 interface EventsState {
   events: Event[]
   registrations: FullRegistration[]
@@ -12,6 +23,7 @@ interface EventsState {
   error: string | null
 
   fetchEvents: () => Promise<void>
+  createEvent: (payload: CreateEventPayload) => Promise<Event>
   deleteEvent: (id: string) => Promise<void>
   subscribeToChanges: () => () => void
   fetchRegistrations: (userId: string) => Promise<void>
@@ -39,6 +51,24 @@ export const useEventsStore = create<EventsState>((set, get) => ({
       return
     }
     set({ events: (data ?? []) as Event[], isLoading: false })
+  },
+
+  createEvent: async (payload) => {
+    const { data, error } = await supabase
+      .from('events')
+      .insert(payload)
+      .select()
+      .single()
+    if (error) throw error
+    const newEvent = data as Event
+    set((s) => ({
+      events: [...s.events, newEvent].sort(
+        (a, b) =>
+          new Date(a.event_date ?? 0).getTime() -
+          new Date(b.event_date ?? 0).getTime()
+      ),
+    }))
+    return newEvent
   },
 
   deleteEvent: async (id) => {

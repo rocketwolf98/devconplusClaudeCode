@@ -36,6 +36,8 @@ interface AuthState {
   updateProfile: (
     patch: Partial<Pick<Profile, 'full_name' | 'school_or_company' | 'avatar_url'>>
   ) => Promise<void>
+  uploadAvatar: (file: File) => Promise<string>
+  deleteAccount: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updatePassword: (password: string) => Promise<void>
 }
@@ -163,6 +165,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       user: updated,
       initials: patch.full_name ? getInitials(patch.full_name) : get().initials,
     })
+  },
+
+  uploadAvatar: async (file) => {
+    const current = get().user
+    if (!current) throw new Error('Not authenticated')
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `${current.id}/${Date.now()}.${ext}`
+    const { error } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true })
+    if (error) throw error
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+    return data.publicUrl
+  },
+
+  deleteAccount: async () => {
+    const { error } = await supabase.rpc('delete_own_account')
+    if (error) throw error
+    await supabase.auth.signOut()
   },
 
   resetPassword: async (email) => {
