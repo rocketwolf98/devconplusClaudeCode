@@ -1,32 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap, TrendingUp, Users, CalendarCheck, Clock, Plus, Trash2 } from 'lucide-react'
+import { MapPin, Zap, Clock, Plus, Trash2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Event } from '@devcon-plus/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
+import { useAuthStore } from '../../../stores/useAuthStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
-
-// Stats are placeholder until real Supabase aggregates are wired
-const MOCK_STATS = {
-  totalRegistered: 24,
-  attendanceRate: 78,
-  avgPointsEarned: 210,
-  approvalRate: 91,
-}
 
 export function OrgEventManagement() {
   const navigate = useNavigate()
   const { events, fetchEvents, deleteEvent } = useEventsStore()
+  const { user } = useAuthStore()
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const currentEvent = events.find((e) => e.status === 'upcoming' && e.is_featured) ?? events[0]
-  const upcomingEvents = events.filter((e) => e.status === 'upcoming')
-  const pastEvents = events.filter((e) => e.status === 'past')
+  const chapterEvents = events.filter((e) => e.chapter_id === (user?.chapter_id ?? null))
+  const currentEvent = chapterEvents.find((e) => e.status === 'upcoming' && e.is_featured) ?? chapterEvents[0]
+  const upcomingEvents = chapterEvents.filter((e) => e.status === 'upcoming')
+  const pastEvents = chapterEvents.filter((e) => e.status === 'past')
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
@@ -66,61 +61,13 @@ export function OrgEventManagement() {
         initial="hidden"
         animate="visible"
       >
-        {/* Performance statistics */}
-        <motion.div variants={fadeUp}>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
-            Performance Insights
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4">
-              <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center mb-2.5">
-                <Users className="w-4.5 h-4.5 text-blue" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 leading-none">
-                {MOCK_STATS.totalRegistered}
-              </p>
-              <p className="text-xs text-slate-400 font-medium mt-1">Total Registered</p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4">
-              <div className="w-9 h-9 rounded-xl bg-green/10 flex items-center justify-center mb-2.5">
-                <CalendarCheck className="w-4.5 h-4.5 text-green" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 leading-none">
-                {MOCK_STATS.attendanceRate}%
-              </p>
-              <p className="text-xs text-slate-400 font-medium mt-1">Attendance Rate</p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4">
-              <div className="w-9 h-9 rounded-xl bg-gold/10 flex items-center justify-center mb-2.5">
-                <Zap className="w-4.5 h-4.5 text-gold" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 leading-none">
-                {MOCK_STATS.avgPointsEarned}
-              </p>
-              <p className="text-xs text-slate-400 font-medium mt-1">Avg XP Earned</p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4">
-              <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center mb-2.5">
-                <TrendingUp className="w-4.5 h-4.5 text-blue" />
-              </div>
-              <p className="text-2xl font-black text-slate-900 leading-none">
-                {MOCK_STATS.approvalRate}%
-              </p>
-              <p className="text-xs text-slate-400 font-medium mt-1">Approval Rate</p>
-            </div>
-          </div>
-        </motion.div>
-
         {deleteError && (
           <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
             {deleteError}
           </p>
         )}
 
-        {/* Current / upcoming events */}
+        {/* Upcoming events */}
         {upcomingEvents.length > 0 && (
           <motion.div variants={fadeUp}>
             <div className="flex items-center gap-2 mb-3">
