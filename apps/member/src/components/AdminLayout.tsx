@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard } from 'lucide-react'
+import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -13,7 +13,7 @@ const NAV_ITEMS = [
 ]
 
 export default function AdminLayout() {
-  const { user } = useAuthStore()
+  const { user, signOut } = useAuthStore()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -29,10 +29,10 @@ export default function AdminLayout() {
   return (
     <div className="flex h-screen bg-slate-50 font-sans">
       {/* Sidebar */}
-      <aside className="w-56 shrink-0 bg-white border-r border-slate-200 flex flex-col">
-        <div className="px-5 py-5 border-b border-slate-100">
-          <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto" />
-          <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-slate-400">
+      <aside className="w-56 shrink-0 bg-blue border-r border-white/10 flex flex-col">
+        <div className="px-5 py-5 border-b border-white/10">
+          <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto brightness-0 invert" />
+          <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-white/50">
             Admin Panel
           </span>
         </div>
@@ -46,8 +46,8 @@ export default function AdminLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-blue/10 text-blue'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
             >
@@ -57,9 +57,16 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="px-4 py-4 border-t border-slate-100">
-          <p className="text-[11px] text-slate-400 font-medium truncate">{user.full_name}</p>
-          <p className="text-[10px] text-slate-300 truncate">{user.email}</p>
+        <div className="px-4 py-4 border-t border-white/10">
+          <p className="text-[11px] text-white/90 font-medium truncate">{user.full_name}</p>
+          <p className="text-[10px] text-white/50 truncate">{user.email}</p>
+          <button
+            onClick={() => { void signOut(); navigate('/sign-in') }}
+            className="mt-3 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Sign Out
+          </button>
         </div>
       </aside>
 

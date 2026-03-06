@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Check, X } from 'lucide-react'
+import { Pencil, Check, X, Plus, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 type Region = 'Luzon' | 'Visayas' | 'Mindanao'
@@ -16,10 +16,21 @@ export default function AdminChapters() {
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Edit state
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [editRegion, setEditRegion] = useState<Region>('Luzon')
   const [saving, setSaving] = useState(false)
+
+  // Add state
+  const [addName, setAddName] = useState('')
+  const [addRegion, setAddRegion] = useState<Region>('Luzon')
+  const [adding, setAdding] = useState(false)
+
+  // Delete state
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -42,9 +53,7 @@ export default function AdminChapters() {
     setError(null)
   }
 
-  const cancelEdit = () => {
-    setEditingId(null)
-  }
+  const cancelEdit = () => { setEditingId(null) }
 
   const saveEdit = async (id: string) => {
     setSaving(true)
@@ -61,6 +70,34 @@ export default function AdminChapters() {
     setEditingId(null)
   }
 
+  const addChapter = async () => {
+    if (!addName.trim()) return
+    setAdding(true)
+    setError(null)
+    const { data, error: dbErr } = await supabase
+      .from('chapters')
+      .insert({ name: addName.trim(), region: addRegion })
+      .select()
+      .single()
+    setAdding(false)
+    if (dbErr) { setError(dbErr.message); return }
+    setChapters((prev) =>
+      [...prev, data as Chapter].sort((a, b) => a.name.localeCompare(b.name))
+    )
+    setAddName('')
+    setAddRegion('Luzon')
+  }
+
+  const deleteChapter = async (id: string) => {
+    setDeletingId(id)
+    setError(null)
+    const { error: dbErr } = await supabase.from('chapters').delete().eq('id', id)
+    setDeletingId(null)
+    setConfirmDeleteId(null)
+    if (dbErr) { setError(dbErr.message); return }
+    setChapters((prev) => prev.filter((c) => c.id !== id))
+  }
+
   const regionColor: Record<Region, string> = {
     Luzon:    'bg-blue/10 text-blue',
     Visayas:  'bg-gold/10 text-gold',
@@ -68,13 +105,49 @@ export default function AdminChapters() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
-      <h1 className="text-2xl font-black text-slate-900 mb-1">Chapters</h1>
-      <p className="text-sm text-slate-500 mb-6">Manage the 11 DEVCON chapters</p>
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 mb-1">Chapters</h1>
+          <p className="text-sm text-slate-500">Manage DEVCON chapters</p>
+        </div>
+      </div>
 
       {error && (
         <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
+
+      {/* Add chapter form */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 mb-4 shadow-card flex items-end gap-3">
+        <div className="flex-1">
+          <label className="text-xs font-medium text-slate-700 block mb-1">Chapter Name</label>
+          <input
+            value={addName}
+            onChange={(e) => setAddName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && void addChapter()}
+            placeholder="e.g. Batangas"
+            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-slate-700 block mb-1">Region</label>
+          <select
+            value={addRegion}
+            onChange={(e) => setAddRegion(e.target.value as Region)}
+            className="border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+          >
+            {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+          </select>
+        </div>
+        <button
+          onClick={() => void addChapter()}
+          disabled={adding || !addName.trim()}
+          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark disabled:opacity-60 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          {adding ? 'Adding…' : 'Add Chapter'}
+        </button>
+      </div>
 
       {isLoading ? (
         <p className="text-slate-400 text-sm">Loading chapters…</p>
@@ -137,13 +210,38 @@ export default function AdminChapters() {
                           <X className="w-4 h-4" />
                         </button>
                       </div>
+                    ) : confirmDeleteId === chapter.id ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-xs text-slate-500">Sure?</span>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => void deleteChapter(chapter.id)}
+                          disabled={deletingId === chapter.id}
+                          className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
+                        >
+                          {deletingId === chapter.id ? '…' : 'Delete'}
+                        </button>
+                      </div>
                     ) : (
-                      <button
-                        onClick={() => startEdit(chapter)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => startEdit(chapter)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(chapter.id)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>

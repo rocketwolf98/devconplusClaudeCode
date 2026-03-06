@@ -40,7 +40,7 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-8">
       <h1 className="text-2xl font-black text-slate-900 mb-1">Admin Dashboard</h1>
       <p className="text-sm text-slate-500 mb-8">Platform overview for DEVCON+</p>
 
