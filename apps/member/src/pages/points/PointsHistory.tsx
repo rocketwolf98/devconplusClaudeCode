@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import TransactionRow from '../../components/TransactionRow'
+import { SkeletonTransactionGroup } from '../../components/Skeleton'
 import type { PointTransaction } from '@devcon-plus/supabase'
 
 function groupByDate(txs: PointTransaction[]): Array<[string, PointTransaction[]]> {
@@ -21,7 +22,7 @@ function groupByDate(txs: PointTransaction[]): Array<[string, PointTransaction[]
 export default function PointsHistory() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { transactions, totalPoints, fetchPoints } = usePointsStore()
+  const { transactions, totalPoints, fetchPoints, isLoading } = usePointsStore()
 
   useEffect(() => {
     if (user?.id) void fetchPoints(user.id)
@@ -46,7 +47,12 @@ export default function PointsHistory() {
       </div>
 
       <div className="bg-slate-50 min-h-screen p-4">
-        {groups.length === 0 ? (
+        {isLoading ? (
+          <>
+            <SkeletonTransactionGroup rows={3} />
+            <SkeletonTransactionGroup rows={2} />
+          </>
+        ) : groups.length === 0 ? (
           <div className="text-center py-12 text-slate-400 text-sm">No transactions yet</div>
         ) : (
           groups.map(([date, txs]) => (

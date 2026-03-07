@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useRewardsStore } from '../../stores/useRewardsStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
+import { SkeletonRewardCard } from '../../components/Skeleton'
 import { staggerContainer, cardItem } from '../../lib/animation'
 
 const REWARD_ICONS: Record<string, LucideIcon> = {
@@ -19,7 +20,7 @@ const REWARD_ICONS: Record<string, LucideIcon> = {
 
 export default function Rewards() {
   const { totalPoints } = usePointsStore()
-  const { rewards, fetchRewards } = useRewardsStore()
+  const { rewards, fetchRewards, isLoading } = useRewardsStore()
   const [selected, setSelected] = useState<string | null>(null)
 
   useEffect(() => { void fetchRewards() }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -34,7 +35,11 @@ export default function Rewards() {
       </div>
 
       <div className="bg-slate-50 min-h-screen p-4">
-        {rewards.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonRewardCard key={i} />)}
+          </div>
+        ) : rewards.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 px-8">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <Star className="w-8 h-8 text-primary/50" />

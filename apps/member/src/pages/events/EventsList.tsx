@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, Users, MapPin, ChevronRight, Ticket, QrCode, Clock, CalendarOff } from 'lucide-react'
+import {
+  TrendingUp, Users, MapPin, ChevronRight, Ticket, QrCode, Clock,
+  CalendarOff, SlidersHorizontal, Check, X,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import StatusPill from '../../components/StatusPill'
+import { SkeletonEventCard, SkeletonFeaturedEvent } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
-import type { Event, EventRegistration } from '@devcon-plus/supabase'
-
-const CHAPTERS = ['All', 'Manila', 'Cebu', 'Davao', 'Laguna', 'Iloilo', 'Pampanga', 'Bulacan', 'Bacolod', 'CDO', 'GenSan', 'Zamboanga']
+import { supabase } from '../../lib/supabase'
+import { CHAPTERS as MOCK_CHAPTERS } from '@devcon-plus/supabase'
+import type { Event, EventRegistration, Chapter } from '@devcon-plus/supabase'
 
 const MOCK_ATTENDEES: Record<string, number> = {
   'ev-1': 342,
@@ -18,11 +22,13 @@ const MOCK_ATTENDEES: Record<string, number> = {
   'ev-5': 53,
 }
 
+const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const
+
 function formatEventDate(iso: string): { month: string; day: string } {
   const d = new Date(iso)
   return {
     month: d.toLocaleDateString('en-PH', { month: 'short' }).toUpperCase(),
-    day:   String(d.getDate()),
+    day: String(d.getDate()),
   }
 }
 
@@ -31,19 +37,43 @@ type TicketEntry = { reg: EventRegistration; event: Event }
 export default function EventsList() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { events, registrations, fetchEvents, fetchRegistrations } = useEventsStore()
+  const { events, registrations, fetchEvents, fetchRegistrations, isLoading } = useEventsStore()
   const [tab, setTab] = useState<'discover' | 'tickets'>('discover')
-  const [chapter, setChapter] = useState('All')
+
+  // Chapter filter state
+  const [chapters, setChapters] = useState<Chapter[]>(MOCK_CHAPTERS)
+  const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null)
+  const [showChapterSheet, setShowChapterSheet] = useState(false)
 
   useEffect(() => {
     void fetchEvents()
     if (user?.id) void fetchRegistrations(user.id)
+
+    // Try to fetch real chapters; fall back to mock on error
+    supabase
+      .from('chapters')
+      .select('*')
+      .order('name')
+      .then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          setChapters(data as Chapter[])
+        }
+      })
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const featuredEvent = events.find((e) => e.is_featured) ?? events[0]
-  const listEvents = events.filter((e) => e.id !== featuredEvent?.id)
+  // Filter events by selected chapter
+  const filteredEvents = selectedChapterId
+    ? events.filter((e) => e.chapter_id === selectedChapterId)
+    : events
 
-  // Build the My Tickets list: approved first, then pending; exclude rejected
+  const featuredEvent = filteredEvents.find((e) => e.is_featured) ?? filteredEvents[0]
+  const listEvents = filteredEvents.filter((e) => e.id !== featuredEvent?.id)
+
+  const selectedChapterName = selectedChapterId
+    ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? 'Chapter')
+    : null
+
+  // My Tickets: approved first, then pending; exclude rejected
   const myTickets: TicketEntry[] = registrations
     .filter((r) => r.status === 'approved' || r.status === 'pending')
     .map((r) => ({ reg: r, event: events.find((e) => e.id === r.event_id) }))
@@ -56,8 +86,20 @@ export default function EventsList() {
     <div>
       {/* ── Header ── */}
       <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
-        <h1 className="text-white text-xl font-bold mb-3">Events</h1>
-        <div className="flex gap-2 mb-3">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="text-white text-xl font-bold">Events</h1>
+          {tab === 'discover' && (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowChapterSheet(true)}
+              className="flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              {selectedChapterName ?? 'All Chapters'}
+            </motion.button>
+          )}
+        </div>
+        <div className="flex gap-2">
           {(['discover', 'tickets'] as const).map((t) => (
             <button
               key={t}
@@ -77,21 +119,6 @@ export default function EventsList() {
             </button>
           ))}
         </div>
-        {tab === 'discover' && (
-          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-            {CHAPTERS.map((ch) => (
-              <button
-                key={ch}
-                onClick={() => setChapter(ch)}
-                className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
-                  chapter === ch ? 'bg-white text-primary font-semibold' : 'bg-white/20 text-white'
-                }`}
-              >
-                {ch}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <AnimatePresence mode="wait">
@@ -105,8 +132,16 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
+            {/* Loading skeletons */}
+            {isLoading && (
+              <div className="px-4 pt-4 space-y-3">
+                <SkeletonFeaturedEvent />
+                {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
+              </div>
+            )}
+
             {/* Empty state — no events at all */}
-            {events.length === 0 && (
+            {!isLoading && events.length === 0 && (
               <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <CalendarOff className="w-8 h-8 text-primary/50" />
@@ -118,8 +153,29 @@ export default function EventsList() {
               </div>
             )}
 
+            {/* Empty state — chapter filter yields nothing */}
+            {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
+              <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <CalendarOff className="w-8 h-8 text-primary/50" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 mb-1">
+                  No events in {selectedChapterName}
+                </h3>
+                <p className="text-sm text-slate-500 text-center mb-5">
+                  This chapter has no upcoming events. Try a different chapter.
+                </p>
+                <button
+                  onClick={() => setSelectedChapterId(null)}
+                  className="bg-primary text-white font-semibold text-sm px-6 py-2.5 rounded-xl"
+                >
+                  Show All Chapters
+                </button>
+              </div>
+            )}
+
             {/* Featured hero card */}
-            {featuredEvent && (
+            {!isLoading && featuredEvent && (
               <motion.div
                 className="px-4 pt-4 pb-2"
                 variants={fadeUp}
@@ -170,16 +226,14 @@ export default function EventsList() {
             )}
 
             {/* Event list — staggered */}
-            <motion.div
-              className="px-4 space-y-3 mt-2"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              {listEvents.length === 0 && events.length > 0 ? (
-                <p className="text-center py-12 text-slate-400 text-sm">No events in this chapter yet</p>
-              ) : (
-                listEvents.map((event) => {
+            {!isLoading && filteredEvents.length > 0 && (
+              <motion.div
+                className="px-4 space-y-3 mt-2"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+              >
+                {listEvents.map((event) => {
                   const dateParts = event.event_date ? formatEventDate(event.event_date) : null
                   return (
                     <motion.button
@@ -223,9 +277,9 @@ export default function EventsList() {
                       <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
                     </motion.button>
                   )
-                })
-              )}
-            </motion.div>
+                })}
+              </motion.div>
+            )}
           </motion.div>
         )}
 
@@ -240,7 +294,6 @@ export default function EventsList() {
             transition={{ duration: 0.15 }}
           >
             {myTickets.length === 0 ? (
-              /* Empty state */
               <div className="flex flex-col items-center justify-center px-8 pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Ticket className="w-8 h-8 text-primary/50" />
@@ -257,7 +310,6 @@ export default function EventsList() {
                 </button>
               </div>
             ) : (
-              /* Ticket list */
               <motion.div
                 className="px-4 pt-4 space-y-3"
                 variants={staggerContainer}
@@ -279,7 +331,6 @@ export default function EventsList() {
                       whileTap={{ scale: 0.98 }}
                       className="w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3"
                     >
-                      {/* Date block */}
                       {dateParts ? (
                         <div className="w-12 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
                           <span className="text-[10px] font-bold text-primary leading-none">
@@ -292,8 +343,6 @@ export default function EventsList() {
                       ) : (
                         <div className="w-12 h-14 rounded-xl bg-slate-100 shrink-0" />
                       )}
-
-                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <p className="text-sm font-bold text-slate-900 leading-tight flex-1 truncate">
@@ -321,7 +370,6 @@ export default function EventsList() {
                           )}
                         </div>
                       </div>
-
                       <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
                     </motion.button>
                   )
@@ -329,6 +377,84 @@ export default function EventsList() {
               </motion.div>
             )}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Chapter filter bottom sheet ── */}
+      <AnimatePresence>
+        {showChapterSheet && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              className="fixed inset-0 bg-black/40 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowChapterSheet(false)}
+            />
+            {/* Sheet */}
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl px-4 pt-4 pb-8"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            >
+              {/* Handle */}
+              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-base font-bold text-slate-900">Filter by Chapter</h2>
+                <button
+                  onClick={() => setShowChapterSheet(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              </div>
+
+              {/* All Chapters option */}
+              <button
+                onClick={() => { setSelectedChapterId(null); setShowChapterSheet(false) }}
+                className="w-full flex items-center justify-between py-3 border-b border-slate-100"
+              >
+                <span className={`text-sm font-semibold ${selectedChapterId === null ? 'text-primary' : 'text-slate-700'}`}>
+                  All Chapters
+                </span>
+                {selectedChapterId === null && (
+                  <Check className="w-4 h-4 text-primary" />
+                )}
+              </button>
+
+              {/* Region groups */}
+              {REGIONS.map((region) => {
+                const regionChapters = chapters.filter((c) => c.region === region)
+                if (regionChapters.length === 0) return null
+                return (
+                  <div key={region} className="mt-3">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      {region}
+                    </p>
+                    {regionChapters.map((ch) => (
+                      <button
+                        key={ch.id}
+                        onClick={() => { setSelectedChapterId(ch.id); setShowChapterSheet(false) }}
+                        className="w-full flex items-center justify-between py-2.5 border-b border-slate-50"
+                      >
+                        <span className={`text-sm ${selectedChapterId === ch.id ? 'font-semibold text-primary' : 'text-slate-700'}`}>
+                          {ch.name}
+                        </span>
+                        {selectedChapterId === ch.id && (
+                          <Check className="w-4 h-4 text-primary" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )
+              })}
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>

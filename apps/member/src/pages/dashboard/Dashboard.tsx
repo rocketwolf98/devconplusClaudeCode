@@ -1,58 +1,41 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, MapPin, Flame, Star, Bell } from 'lucide-react'
+import { Briefcase, Heart, Gift, ChevronRight, Flame, Star, Bell } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
-import { useJobsStore } from '../../stores/useJobsStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import EventCard from '../../components/EventCard'
-import NewsCard from '../../components/NewsCard'
-import PromotedBadge from '../../components/PromotedBadge'
 import ComingSoonModal from '../../components/ComingSoonModal'
-import { useNewsStore } from '../../stores/useNewsStore'
+import {
+  SkeletonEventCard,
+  SkeletonXPRow,
+} from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 
 const XP_NEXT_MILESTONE = 2500
-import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
 import logoMark from '../../assets/logos/logo-mark.svg'
 
-const BANNERS = [
-  {
-    title:   '#SheIsDEVCON',
-    sub:     'DEVCON Philippines · Nationwide',
-    cta:     'Learn More',
-    image:   '/photos/she-is-devcon-panel.jpg',
-    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
-  },
-  {
-    title:   'Kids Hour of AI',
-    sub:     'DEVCON Philippines · All Chapters',
-    cta:     'Register Now',
-    image:   '/photos/devcon-kids-workshop.jpg',
-    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
-  },
-  {
-    title:   '16 Years of DEVCON',
-    sub:     'DEVCON Philippines · Celebrating Tech',
-    cta:     'See Highlights',
-    image:   '/photos/devcon-15-anniversary.jpg',
-    onClick: (navigate: ReturnType<typeof useNavigate>) => navigate('/events'),
-  },
-]
+const WELCOME_BANNER = {
+  title: 'Welcome to DEVCON+',
+  sub:   'DEVCON Philippines · Your Tech Community',
+  cta:   'Learn More',
+  image: '/photos/devcon-summit-group.jpg',
+} as const
 
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const { events, fetchEvents } = useEventsStore()
-  const { jobs, fetchJobs } = useJobsStore()
-  const { transactions, totalPoints, fetchPoints } = usePointsStore()
-  const { posts, fetchNews } = useNewsStore()
+  const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
+  const { transactions, totalPoints, fetchPoints, isLoading: pointsLoading } = usePointsStore()
   const [bannerIdx, setBannerIdx] = useState(0)
-  const [newsTab, setNewsTab] = useState<'devcon' | 'community'>('devcon')
   const [showVolunteerModal, setShowVolunteerModal] = useState(false)
+  const [showJobsModal, setShowJobsModal] = useState(false)
+  const [showRedeemModal, setShowRedeemModal] = useState(false)
+
+  const bannersLengthRef = useRef(1)
 
   const scrollYMV      = useMotionValue(0)
   const cradleOpacity  = useTransform(scrollYMV, [0,  110], [1, 0])
@@ -61,13 +44,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     void fetchEvents()
-    void fetchJobs()
-    void fetchNews()
     if (user?.id) void fetchPoints(user.id)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    const t = setInterval(() => setBannerIdx((i) => (i + 1) % BANNERS.length), 4000)
+    const t = setInterval(() => setBannerIdx((i) => (i + 1) % Math.max(bannersLengthRef.current, 1)), 4000)
     return () => clearInterval(t)
   }, [])
 
@@ -79,15 +60,28 @@ export default function Dashboard() {
     return () => el.removeEventListener('scroll', handler)
   }, [scrollYMV])
 
-  const banner = BANNERS[bannerIdx]
-  const handleBannerCta = () => banner.onClick(navigate)
+  // Build carousel: welcome article + up to 2 nearest upcoming events (max 3 total)
+  const upcomingByDate = events
+    .filter((e) => e.status === 'upcoming')
+    .sort((a, b) => new Date(a.event_date ?? 0).getTime() - new Date(b.event_date ?? 0).getTime())
+
+  const banners = [
+    { ...WELCOME_BANNER, onClick: () => navigate('/news/welcome') },
+    ...upcomingByDate.slice(0, 2).map((e) => ({
+      title: e.title,
+      sub:   e.location ?? 'DEVCON Philippines',
+      cta:   'Register Now',
+      image: e.cover_image_url ?? '/photos/devcon-certificate-ceremony.jpg',
+      onClick: () => navigate(`/events/${e.id}`),
+    })),
+  ].slice(0, 3)
+
+  bannersLengthRef.current = banners.length
+  const safeIdx = bannerIdx % Math.max(banners.length, 1)
+  const banner = banners[safeIdx] ?? banners[0]
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
   const progressPct = Math.min((totalPoints / XP_NEXT_MILESTONE) * 100, 100)
   const forYouEvents = events.filter((e) => e.status === 'upcoming').slice(0, 3)
-  const hotJobs = jobs.slice(0, 4)
-  const visibleNews = newsTab === 'devcon'
-    ? posts.filter((p) => p.category === 'devcon')
-    : posts.filter((p) => p.category === 'tech_community')
   const recentTxns = transactions.slice(0, 4)
 
   return (
@@ -165,9 +159,9 @@ export default function Dashboard() {
         >
           <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: Briefcase, label: 'Find Jobs',  onClick: () => navigate('/jobs') },
+              { icon: Briefcase, label: 'Find Jobs',  onClick: () => setShowJobsModal(true) },
               { icon: Heart,     label: 'Volunteer',  onClick: () => setShowVolunteerModal(true) },
-              { icon: Gift,      label: 'Redeem',     onClick: () => navigate('/rewards') },
+              { icon: Gift,      label: 'Redeem',     onClick: () => setShowRedeemModal(true) },
             ].map(({ icon: Icon, label, onClick }) => (
               <motion.button
                 key={label}
@@ -189,12 +183,12 @@ export default function Dashboard() {
         <div className="px-4">
           <div
             className="relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-primary"
-            onClick={() => setBannerIdx((i) => (i + 1) % BANNERS.length)}
+            onClick={() => setBannerIdx((i) => (i + 1) % Math.max(banners.length, 1))}
           >
             <AnimatePresence>
               <motion.img
-                key={`img-${bannerIdx}`}
-                src={BANNERS[bannerIdx].image}
+                key={`img-${safeIdx}`}
+                src={banners[safeIdx]?.image ?? ''}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
                 initial={{ opacity: 0 }}
@@ -206,7 +200,7 @@ export default function Dashboard() {
             <div className="absolute inset-0 bg-black/50" />
             <AnimatePresence mode="wait">
               <motion.div
-                key={bannerIdx}
+                key={safeIdx}
                 className="absolute inset-0 flex flex-col justify-between p-5"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -218,7 +212,7 @@ export default function Dashboard() {
                   <p className="text-white text-2xl font-black leading-tight max-w-[70%]">{banner.title}</p>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleBannerCta() }}
+                  onClick={(e) => { e.stopPropagation(); banner?.onClick() }}
                   className="self-start bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow"
                 >
                   {banner.cta}
@@ -227,12 +221,12 @@ export default function Dashboard() {
             </AnimatePresence>
           </div>
           <div className="flex justify-center gap-1.5 mt-2.5">
-            {BANNERS.map((_, i) => (
+            {banners.map((_, i) => (
               <motion.div
                 key={i}
                 animate={{
-                  width:           i === bannerIdx ? 16 : 6,
-                  backgroundColor: i === bannerIdx ? '#1E2A56' : '#CBD5E1',
+                  width:           i === safeIdx ? 16 : 6,
+                  backgroundColor: i === safeIdx ? '#1E2A56' : '#CBD5E1',
                 }}
                 transition={{ duration: 0.25 }}
                 className="h-1.5 rounded-full"
@@ -252,107 +246,82 @@ export default function Dashboard() {
               See All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <motion.div
-            className="px-4 space-y-3"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {forYouEvents.map((e) => (
-              <motion.div key={e.id} variants={cardItem}>
-                <EventCard event={e} compact />
-              </motion.div>
-            ))}
-          </motion.div>
+          {eventsLoading ? (
+            <div className="px-4 space-y-3">
+              {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
+            </div>
+          ) : (
+            <motion.div
+              className="px-4 space-y-3"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
+              {forYouEvents.map((e) => (
+                <motion.div key={e.id} variants={cardItem}>
+                  <EventCard event={e} compact />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </section>
 
-        {/* Hot Jobs — horizontal scroll carousel */}
+        {/* Hot Jobs — Coming Soon teaser */}
         <section>
           <div className="flex justify-between items-center px-4 mb-3">
             <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
               Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
             </h2>
             <button
-              onClick={() => navigate('/jobs')}
+              onClick={() => setShowJobsModal(true)}
               className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
               See All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <div className="overflow-x-auto px-4 pb-1">
-            <motion.div
-              className="flex gap-3"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-            >
-              {hotJobs.map((job) => (
-                <motion.button
-                  key={job.id}
-                  variants={cardItem}
-                  onClick={() => navigate(`/jobs/${job.id}`)}
-                  className="flex-shrink-0 w-52 bg-white rounded-2xl border border-slate-200 shadow-card p-4 text-left relative"
-                  whileTap={{ scale: 0.97 }}
-                >
-                  {job.is_promoted && (
-                    <div className="absolute top-3 right-3">
-                      <PromotedBadge />
-                    </div>
-                  )}
-                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-sm font-bold text-primary mb-2">
-                    {job.company.charAt(0)}
-                  </div>
-                  <p className="text-[11px] text-slate-400 truncate">{job.company}</p>
-                  <p className="font-semibold text-slate-900 text-sm leading-tight mt-0.5 pr-6 line-clamp-2">
-                    {job.title}
-                  </p>
-                  <div className="flex items-center gap-1 mt-2">
-                    <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                    <span className="text-xs text-slate-400 truncate">{job.location}</span>
-                  </div>
-                  <span className="inline-block mt-2 text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-                    {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
-                  </span>
-                </motion.button>
-              ))}
-            </motion.div>
-          </div>
+          <motion.button
+            onClick={() => setShowJobsModal(true)}
+            className="mx-4 w-[calc(100%-2rem)] bg-primary rounded-2xl p-5 text-left"
+            whileTap={{ scale: 0.98 }}
+          >
+            <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-1">Coming Soon</p>
+            <p className="text-white text-base font-bold leading-tight">
+              Global tech opportunities for Filipino developers
+            </p>
+            <p className="text-white/60 text-xs mt-2">
+              Jobs Board launches with the full MVP — stay tuned!
+            </p>
+          </motion.button>
         </section>
 
-        {/* Updates — tabbed DEVCON / Tech Community */}
+        {/* Updates — welcome card */}
         <section>
           <div className="flex items-center justify-between px-4 mb-3">
             <h2 className="text-base font-bold text-slate-900">Updates</h2>
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
-              {(['devcon', 'community'] as const).map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setNewsTab(t)}
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                    newsTab === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                  }`}
-                >
-                  {t === 'devcon' ? 'DEVCON' : 'Tech'}
-                </button>
-              ))}
-            </div>
           </div>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={newsTab}
-              className="px-4 space-y-3"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              exit={{ opacity: 0, transition: { duration: 0.1 } }}
-            >
-              {visibleNews.map((p) => (
-                <motion.div key={p.id} variants={cardItem}>
-                  <NewsCard post={p} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          <motion.button
+            onClick={() => navigate('/news/welcome')}
+            className="mx-4 w-[calc(100%-2rem)] bg-white rounded-2xl shadow-card overflow-hidden text-left"
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            whileTap={{ scale: 0.98 }}
+          >
+            <img
+              src="/photos/devcon-summit-group.jpg"
+              alt="DEVCON Summit"
+              className="w-full h-36 object-cover"
+            />
+            <div className="p-4">
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-1">DEVCON Philippines</p>
+              <p className="font-bold text-slate-900 text-sm leading-snug mb-2">
+                Welcome to DEVCON+ — Your Tech Community Hub
+              </p>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Register for chapter events, earn Points+ for every activity, browse exclusive opportunities, and redeem rewards — all in one place. More updates coming soon!
+              </p>
+            </div>
+          </motion.button>
         </section>
 
         {/* XP History preview */}
@@ -366,42 +335,57 @@ export default function Dashboard() {
               View All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          <motion.div
-            className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            {recentTxns.map((tx, i) => (
+          <div className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+            {pointsLoading ? (
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <SkeletonXPRow key={i} border={i < 4} />
+                ))}
+              </>
+            ) : (
               <motion.div
-                key={tx.id}
-                variants={fadeUp}
-                className={`flex items-center gap-3 px-4 py-3 ${i < recentTxns.length - 1 ? 'border-b border-slate-100' : ''}`}
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
               >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                    tx.amount > 0 ? 'bg-green/10 text-green' : 'bg-red/10 text-red'
-                  }`}
-                >
-                  {tx.amount > 0 ? '+' : '−'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{tx.description}</p>
-                  <p className="text-[10px] text-slate-400">
-                    {formatDate.compact(tx.created_at)}
-                  </p>
-                </div>
-                <span className={`text-sm font-bold ${tx.amount > 0 ? 'text-green' : 'text-red'}`}>
-                  {tx.amount > 0 ? '+' : ''}{tx.amount} pts
-                </span>
+                {recentTxns.map((tx, i) => (
+                  <motion.div
+                    key={tx.id}
+                    variants={fadeUp}
+                    className={`flex items-center gap-3 px-4 py-3 ${i < recentTxns.length - 1 ? 'border-b border-slate-100' : ''}`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                        tx.amount > 0 ? 'bg-green/10 text-green' : 'bg-red/10 text-red'
+                      }`}
+                    >
+                      {tx.amount > 0 ? '+' : '−'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{tx.description}</p>
+                      <p className="text-[10px] text-slate-400">
+                        {formatDate.compact(tx.created_at)}
+                      </p>
+                    </div>
+                    <span className={`text-sm font-bold ${tx.amount > 0 ? 'text-green' : 'text-red'}`}>
+                      {tx.amount > 0 ? '+' : ''}{tx.amount} pts
+                    </span>
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
+            )}
+          </div>
         </section>
       </div>
 
       {showVolunteerModal && (
         <ComingSoonModal feature="Volunteering" onClose={() => setShowVolunteerModal(false)} />
+      )}
+      {showJobsModal && (
+        <ComingSoonModal feature="Jobs Board" onClose={() => setShowJobsModal(false)} />
+      )}
+      {showRedeemModal && (
+        <ComingSoonModal feature="Rewards" onClose={() => setShowRedeemModal(false)} />
       )}
     </div>
   )
