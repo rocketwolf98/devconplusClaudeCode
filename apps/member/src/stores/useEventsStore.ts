@@ -72,6 +72,9 @@ export const useEventsStore = create<EventsState>((set, get) => ({
   },
 
   deleteEvent: async (id) => {
+    // Delete registrations first to avoid FK constraint violation (409)
+    const { error: regErr } = await supabase.from('event_registrations').delete().eq('event_id', id)
+    if (regErr) throw regErr
     const { error } = await supabase.from('events').delete().eq('id', id)
     if (error) throw error
     set((s) => ({ events: s.events.filter((e) => e.id !== id) }))

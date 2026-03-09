@@ -79,7 +79,7 @@ export default function OrganizerCodeGate() {
             value={code}
             onChange={(e) => { setCode(e.target.value); setError('') }}
             onKeyDown={(e) => e.key === 'Enter' && handleAccessPortal()}
-            placeholder="e.g. ORG-MANILA"
+            placeholder="e.g. DCN-ABC-1234"
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
           />
           {error && <p className="text-red text-xs">{error}</p>}

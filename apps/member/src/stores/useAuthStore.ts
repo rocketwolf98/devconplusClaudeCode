@@ -43,11 +43,37 @@ interface AuthState {
 }
 
 async function fetchProfileById(userId: string): Promise<Profile | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
     .single()
+  if (error && error.code !== 'PGRST116') {
+    console.error('[fetchProfileById] error:', error.code, error.message)
+  }
+  return data ?? null
+}
+
+async function ensureProfile(userId: string, meta: Record<string, string | null>): Promise<Profile | null> {
+  const existing = await fetchProfileById(userId)
+  if (existing) return existing
+
+  // Profile row missing — create it now (handles cases before DB trigger is deployed)
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert({
+      id: userId,
+      full_name: meta.full_name ?? meta.email?.split('@')[0] ?? 'User',
+      email: meta.email ?? '',
+      school_or_company: meta.school_or_company ?? null,
+      role: 'member',
+      total_points: 0,
+    })
+    .select()
+    .single()
+  if (error) {
+    console.error('[ensureProfile] insert error:', error.code, error.message)
+  }
   return data ?? null
 }
 
@@ -76,7 +102,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // Restore existing session on page load
     const { data: { session } } = await supabase.auth.getSession()
     if (session?.user) {
-      const profile = await fetchProfileById(session.user.id)
+      const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
+      const profile = await ensureProfile(session.user.id, meta)
       if (profile) {
         const chapterName = await fetchChapterName(profile.chapter_id)
         set({
@@ -97,7 +124,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return
       }
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        const profile = await fetchProfileById(session.user.id)
+        const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
+        const profile = await ensureProfile(session.user.id, meta)
         if (profile) {
           const chapterName = await fetchChapterName(profile.chapter_id)
           set({
@@ -128,6 +156,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false, error: error.message })
       throw error
     }
+    // If session is immediately available (email confirmation disabled),
+    // eagerly create + set the profile so callers can read user.role right away
+    if (data.session?.user) {
+      const meta: Record<string, string | null> = {
+        full_name,
+        email,
+        school_or_company: school_or_company ?? null,
+      }
+      const profile = await ensureProfile(data.session.user.id, meta)
+      if (profile) {
+        const chapterName = await fetchChapterName(profile.chapter_id)
+        set({
+          user: profile,
+          initials: getInitials(profile.full_name),
+          chapterName,
+          isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
+        })
+      }
+    }
     set({ isLoading: false })
     return { emailConfirmationPending: !data.session }
   },
@@ -139,9 +186,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false, error: error.message })
       throw error
     }
-    // Eagerly fetch profile so callers can read user.role immediately after signIn() returns
+    // Eagerly fetch/create profile so callers can read user.role immediately after signIn() returns
     if (data.session?.user) {
-      const profile = await fetchProfileById(data.session.user.id)
+      const meta = { ...data.session.user.user_metadata, email: data.session.user.email ?? null } as Record<string, string | null>
+      const profile = await ensureProfile(data.session.user.id, meta)
       if (profile) {
         const chapterName = await fetchChapterName(profile.chapter_id)
         set({

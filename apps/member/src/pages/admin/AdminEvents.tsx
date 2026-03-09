@@ -31,6 +31,9 @@ export default function AdminEvents() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     setError(null)
+    // Delete registrations first to avoid FK constraint violation
+    const { error: regErr } = await supabase.from('event_registrations').delete().eq('event_id', id)
+    if (regErr) { setError(regErr.message); setDeletingId(null); setConfirmDeleteId(null); return }
     const { error: dbErr } = await supabase.from('events').delete().eq('id', id)
     setDeletingId(null)
     setConfirmDeleteId(null)

@@ -27,11 +27,11 @@ export default function AdminLayout() {
   if (!user || user.role !== 'super_admin') return null
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 bg-blue border-r border-white/10 flex flex-col">
+    <div className="flex h-screen bg-slate-100 font-sans p-4 gap-4">
+      {/* Floating sidebar */}
+      <aside className="w-56 shrink-0 bg-blue rounded-2xl shadow-card flex flex-col overflow-hidden">
         <div className="px-5 py-5 border-b border-white/10">
-          <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto brightness-0 invert" />
+          <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto" />
           <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-white/50">
             Admin Panel
           </span>
@@ -58,7 +58,7 @@ export default function AdminLayout() {
         </nav>
 
         <div className="px-4 py-4 border-t border-white/10">
-          <p className="text-[11px] text-white/90 font-medium truncate">{user.full_name}</p>
+          <p className="text-[11px] text-white/90 font-semibold truncate">{user.full_name}</p>
           <p className="text-[10px] text-white/50 truncate">{user.email}</p>
           <button
             onClick={() => { void signOut(); navigate('/sign-in') }}
@@ -70,8 +70,8 @@ export default function AdminLayout() {
         </div>
       </aside>
 
-      {/* Main content area */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Main content area — floating card */}
+      <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-y-auto">
         <Outlet />
       </main>
     </div>

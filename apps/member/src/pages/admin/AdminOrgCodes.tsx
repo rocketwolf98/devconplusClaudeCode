@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react'
-import { Plus, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Plus, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '../../lib/supabase'
+
+const generateCode = (): string => {
+  const letters = Array.from({ length: 3 }, () =>
+    String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  ).join('')
+  const numbers = Array.from({ length: 4 }, () =>
+    Math.floor(Math.random() * 10)
+  ).join('')
+  return `DCN-${letters}-${numbers}`
+}
 
 interface OrgCode {
   id: string
@@ -20,8 +30,10 @@ interface Chapter {
   name: string
 }
 
+const CODE_PATTERN = /^DCN-[A-Z]{3}-[0-9]{4}$/
+
 const schema = z.object({
-  code:          z.string().min(3, 'Code too short').toUpperCase(),
+  code:          z.string().regex(CODE_PATTERN, 'Must match DCN-XXX-XXXX format'),
   chapter_id:    z.string().min(1, 'Select a chapter'),
   assigned_role: z.enum(['chapter_officer', 'hq_admin']),
 })
@@ -34,9 +46,9 @@ export default function AdminOrgCodes() {
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { assigned_role: 'chapter_officer' },
+    defaultValues: { assigned_role: 'chapter_officer', code: generateCode() },
   })
 
   const load = async () => {
@@ -78,7 +90,7 @@ export default function AdminOrgCodes() {
       .single()
     if (dbErr) { setError(dbErr.message); return }
     setCodes((prev) => [inserted as OrgCode, ...prev])
-    reset()
+    reset({ assigned_role: 'chapter_officer', code: generateCode() })
     setShowForm(false)
   }
 
@@ -90,7 +102,7 @@ export default function AdminOrgCodes() {
           <p className="text-sm text-slate-500 mt-0.5">Issue codes to grant officer access per chapter</p>
         </div>
         <button
-          onClick={() => setShowForm((v) => !v)}
+          onClick={() => { setValue('code', generateCode()); setShowForm((v) => !v) }}
           className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -111,11 +123,21 @@ export default function AdminOrgCodes() {
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-xs font-medium text-slate-700 block mb-1">Code</label>
-              <input
-                {...register('code')}
-                placeholder="ORG-MANILA"
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase"
-              />
+              <div className="flex gap-1.5">
+                <input
+                  {...register('code')}
+                  readOnly
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue"
+                />
+                <button
+                  type="button"
+                  onClick={() => setValue('code', generateCode())}
+                  className="p-2 border border-slate-200 rounded-xl text-slate-500 hover:bg-blue/10 hover:text-blue hover:border-blue/30 transition-colors"
+                  title="Regenerate"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
               {errors.code && <p className="text-red text-[10px] mt-1">{errors.code.message}</p>}
             </div>
             <div>
@@ -152,7 +174,7 @@ export default function AdminOrgCodes() {
             </button>
             <button
               type="button"
-              onClick={() => { setShowForm(false); reset() }}
+              onClick={() => { setShowForm(false); reset({ assigned_role: 'chapter_officer', code: generateCode() }) }}
               className="px-4 py-2 bg-slate-100 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-colors"
             >
               Cancel
