@@ -55,7 +55,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8 md:max-w-2xl md:mx-auto">
+      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8 md:max-w-full md:px-8">
 
         {/* Program Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4">
