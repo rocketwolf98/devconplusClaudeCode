@@ -46,7 +46,7 @@ export default function PointsHistory() {
         <p className="text-gold font-bold text-2xl mt-1">{totalPoints.toLocaleString()} pts</p>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4">
+      <div className="bg-slate-50 min-h-screen p-4 md:max-w-2xl md:mx-auto">
         {isLoading ? (
           <>
             <SkeletonTransactionGroup rows={3} />

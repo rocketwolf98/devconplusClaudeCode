@@ -34,9 +34,9 @@ export default function Rewards() {
         </p>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4">
+      <div className="bg-slate-50 min-h-screen p-4 md:max-w-4xl md:mx-auto">
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonRewardCard key={i} />)}
           </div>
         ) : rewards.length === 0 ? (
@@ -51,7 +51,7 @@ export default function Rewards() {
           </div>
         ) : (
         <motion.div
-          className="grid grid-cols-2 gap-3"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut } from 'lucide-react'
+import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -9,7 +9,8 @@ const NAV_ITEMS = [
   { path: '/admin/users',    label: 'Users',      Icon: Users,          end: false },
   { path: '/admin/org-codes',label: 'Org Codes',  Icon: KeyRound,       end: false },
   { path: '/admin/events',   label: 'Events',     Icon: CalendarDays,   end: false },
-  { path: '/admin/chapters', label: 'Chapters',   Icon: Building2,      end: false },
+  { path: '/admin/chapters',  label: 'Chapters',  Icon: Building2,      end: false },
+  { path: '/admin/upgrades',  label: 'Upgrades',  Icon: ShieldCheck,    end: false },
 ]
 
 export default function AdminLayout() {

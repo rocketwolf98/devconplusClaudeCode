@@ -38,6 +38,7 @@ import AdminUsers from './pages/admin/AdminUsers'
 import AdminOrgCodes from './pages/admin/AdminOrgCodes'
 import AdminEvents from './pages/admin/AdminEvents'
 import AdminChapters from './pages/admin/AdminChapters'
+import AdminUpgradeRequests from './pages/admin/AdminUpgradeRequests'
 
 // Organizer pages
 import { OrgDashboard } from './pages/organizer/Dashboard'
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
       { path: '/admin/org-codes',    element: <AdminOrgCodes /> },
       { path: '/admin/events',       element: <AdminEvents /> },
       { path: '/admin/chapters',     element: <AdminChapters /> },
+      { path: '/admin/upgrades',     element: <AdminUpgradeRequests /> },
     ],
   },
 

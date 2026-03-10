@@ -7,6 +7,7 @@ import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
 import ComingSoonModal from './ComingSoonModal'
 import DesktopGuard from './DesktopGuard'
+import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 export default function MemberLayout() {
   const { user } = useAuthStore()
@@ -39,20 +40,19 @@ export default function MemberLayout() {
 
   return (
     <DesktopGuard>
-      <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
-        {/* Scrollable page content */}
+      {/* ── MOBILE layout (< md) ── */}
+      <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden md:hidden">
         <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24">
           <Outlet />
         </div>
 
-        {/* Floating pill bottom nav */}
+        {/* Floating pill bottom nav — mobile only */}
         <div
           className="fixed bottom-4 left-4 right-4 z-50"
           style={{ paddingBottom: 'var(--safe-bottom)' }}
         >
           <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-primary border border-slate-100 px-2 py-2">
 
-            {/* Home */}
             <NavLink
               to="/home"
               end
@@ -70,7 +70,6 @@ export default function MemberLayout() {
               )}
             </NavLink>
 
-            {/* Rewards — Coming Soon */}
             <button
               type="button"
               onClick={() => setComingSoonFeature('Rewards')}
@@ -81,11 +80,7 @@ export default function MemberLayout() {
             </button>
 
             {/* Center: Events — elevated hero circle */}
-            <NavLink
-              to="/events"
-              className="-mt-6"
-              title="Events"
-            >
+            <NavLink to="/events" className="-mt-6" title="Events">
               {({ isActive }) => (
                 <motion.div
                   className={`w-14 h-14 rounded-full flex items-center justify-center shadow-primary ${
@@ -100,7 +95,6 @@ export default function MemberLayout() {
               )}
             </NavLink>
 
-            {/* Jobs — Coming Soon */}
             <button
               type="button"
               onClick={() => setComingSoonFeature('Jobs Board')}
@@ -110,7 +104,6 @@ export default function MemberLayout() {
               <span className="text-[10px] font-medium">Jobs</span>
             </button>
 
-            {/* Profile */}
             <NavLink
               to="/profile"
               className={({ isActive }) =>
@@ -129,14 +122,113 @@ export default function MemberLayout() {
 
           </div>
         </div>
-
-        {comingSoonFeature && (
-          <ComingSoonModal
-            feature={comingSoonFeature}
-            onClose={() => setComingSoonFeature(null)}
-          />
-        )}
       </div>
+
+      {/* ── TABLET / DESKTOP layout (md+) ── */}
+      <div className="hidden md:flex h-screen bg-slate-100 p-4 gap-4 overflow-hidden">
+
+        {/* Floating sidebar */}
+        <aside className="w-48 lg:w-56 shrink-0 bg-primary rounded-2xl shadow-card flex flex-col overflow-hidden">
+          {/* Logo */}
+          <div className="px-5 py-5 border-b border-white/10">
+            <img src={logoHorizontal} alt="DEVCON+" className="h-5 w-auto" />
+            <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-white/50">
+              Member
+            </span>
+          </div>
+
+          {/* Nav items */}
+          <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+
+            <NavLink
+              to="/home"
+              end
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Home className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  Home
+                </>
+              )}
+            </NavLink>
+
+            <button
+              type="button"
+              onClick={() => setComingSoonFeature('Rewards')}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-white/70 hover:bg-white/10 hover:text-white"
+            >
+              <Gift className="w-4 h-4 shrink-0" strokeWidth={1.8} />
+              Rewards
+            </button>
+
+            {/* Events — circle accent */}
+            <NavLink
+              to="/events"
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                    isActive ? 'bg-white/30' : 'bg-white/15'
+                  }`}>
+                    <QrCode className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  Events
+                </>
+              )}
+            </NavLink>
+
+            <button
+              type="button"
+              onClick={() => setComingSoonFeature('Jobs Board')}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-white/70 hover:bg-white/10 hover:text-white"
+            >
+              <Briefcase className="w-4 h-4 shrink-0" strokeWidth={1.8} />
+              Jobs
+            </button>
+
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <User className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  Profile
+                </>
+              )}
+            </NavLink>
+
+          </nav>
+        </aside>
+
+        {/* Main content card */}
+        <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden flex flex-col">
+          <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+
+      {comingSoonFeature && (
+        <ComingSoonModal
+          feature={comingSoonFeature}
+          onClose={() => setComingSoonFeature(null)}
+        />
+      )}
     </DesktopGuard>
   )
 }

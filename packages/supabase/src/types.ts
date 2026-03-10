@@ -43,13 +43,30 @@ export interface Chapter {
 export interface Profile {
   id: string
   full_name: string
+  username: string | null
   email: string
   school_or_company: string | null
   chapter_id: string | null
   role: UserRole
   avatar_url: string | null
   total_points: number
+  pending_role: string | null
+  pending_chapter_id: string | null
   created_at: string
+}
+
+export type UpgradeRequestStatus = 'pending' | 'approved' | 'rejected'
+
+export interface OrganizerUpgradeRequest {
+  id: string
+  user_id: string
+  organizer_code: string
+  chapter_id: string | null
+  requested_role: 'chapter_officer' | 'hq_admin'
+  status: UpgradeRequestStatus
+  reviewed_by: string | null
+  created_at: string
+  reviewed_at: string | null
 }
 
 export interface OrganizerCode {

@@ -26,7 +26,19 @@ export default function Profile() {
       <div className="bg-primary px-4 pt-14 pb-8 rounded-b-3xl text-center">
         <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
           {user?.avatar_url ? (
-            <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+            <>
+              <img
+                src={user.avatar_url}
+                alt={user.full_name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  const fallback = e.currentTarget.nextElementSibling as HTMLElement | null
+                  if (fallback) fallback.style.display = 'block'
+                }}
+              />
+              <span style={{ display: 'none' }}>{initials}</span>
+            </>
           ) : (
             initials
           )}
@@ -43,7 +55,7 @@ export default function Profile() {
         </div>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8">
+      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8 md:max-w-2xl md:mx-auto">
 
         {/* Program Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4">

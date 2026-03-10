@@ -132,9 +132,10 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
+          <div className="md:max-w-4xl md:mx-auto">
             {/* Loading skeletons */}
             {isLoading && (
-              <div className="px-4 pt-4 space-y-3">
+              <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <SkeletonFeaturedEvent />
                 {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
               </div>
@@ -228,7 +229,7 @@ export default function EventsList() {
             {/* Event list — staggered */}
             {!isLoading && filteredEvents.length > 0 && (
               <motion.div
-                className="px-4 space-y-3 mt-2"
+                className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
@@ -280,6 +281,7 @@ export default function EventsList() {
                 })}
               </motion.div>
             )}
+          </div>
           </motion.div>
         )}
 
@@ -311,7 +313,7 @@ export default function EventsList() {
               </div>
             ) : (
               <motion.div
-                className="px-4 pt-4 space-y-3"
+                className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:max-w-4xl md:mx-auto"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"

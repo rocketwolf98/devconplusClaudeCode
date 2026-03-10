@@ -148,7 +148,8 @@ export default function Dashboard() {
       </motion.div>
 
       {/* ── Scrollable feed ── */}
-      <div className="bg-slate-50 space-y-6 pb-8">
+      <div className="bg-slate-50 pb-8">
+      <div className="space-y-6 md:max-w-4xl md:mx-auto">
 
         {/* Quick Actions */}
         <motion.section
@@ -247,12 +248,12 @@ export default function Dashboard() {
             </button>
           </div>
           {eventsLoading ? (
-            <div className="px-4 space-y-3">
+            <div className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
             </div>
           ) : (
             <motion.div
-              className="px-4 space-y-3"
+              className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
@@ -376,6 +377,7 @@ export default function Dashboard() {
             )}
           </div>
         </section>
+      </div>
       </div>
 
       {showVolunteerModal && (

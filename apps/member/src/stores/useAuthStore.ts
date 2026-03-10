@@ -14,6 +14,8 @@ function getInitials(name: string): string {
     .join('')
 }
 
+type UpgradeResult = 'submitted' | 'invalid_code' | 'wrong_chapter' | 'already_pending'
+
 interface AuthState {
   user: Profile | null
   initials: string
@@ -28,18 +30,23 @@ interface AuthState {
     email: string,
     password: string,
     full_name: string,
-    school_or_company?: string
+    username: string,
+    school_or_company?: string,
+    chapter_id?: string
   ) => Promise<{ emailConfirmationPending: boolean }>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   setOrganizerSession: (val: boolean) => void
   updateProfile: (
-    patch: Partial<Pick<Profile, 'full_name' | 'school_or_company' | 'avatar_url'>>
+    patch: Partial<Pick<Profile, 'full_name' | 'username' | 'school_or_company' | 'avatar_url' | 'chapter_id'>>
   ) => Promise<void>
+  updateEmail: (newEmail: string, currentPassword: string) => Promise<void>
+  updatePassword: (newPassword: string, currentPassword: string) => Promise<void>
   uploadAvatar: (file: File) => Promise<string>
   deleteAccount: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
-  updatePassword: (password: string) => Promise<void>
+  requestOrganizerUpgrade: (code: string) => Promise<UpgradeResult>
+  checkUsernameAvailable: (username: string) => Promise<boolean>
 }
 
 async function fetchProfileById(userId: string): Promise<Profile | null> {
@@ -64,8 +71,10 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
     .insert({
       id: userId,
       full_name: meta.full_name ?? meta.email?.split('@')[0] ?? 'User',
+      username: meta.username ?? null,
       email: meta.email ?? '',
       school_or_company: meta.school_or_company ?? null,
+      chapter_id: meta.chapter_id ?? null,
       role: 'member',
       total_points: 0,
     })
@@ -139,7 +148,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     })
   },
 
-  signUp: async (email, password, full_name, school_or_company) => {
+  signUp: async (email, password, full_name, username, school_or_company, chapter_id) => {
     set({ isLoading: true, error: null })
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -148,7 +157,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         emailRedirectTo: `${window.location.origin}/email-confirm`,
         data: {
           full_name,
+          username,
           school_or_company: school_or_company ?? null,
+          chapter_id: chapter_id ?? null,
         },
       },
     })
@@ -161,8 +172,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (data.session?.user) {
       const meta: Record<string, string | null> = {
         full_name,
+        username,
         email,
         school_or_company: school_or_company ?? null,
+        chapter_id: chapter_id ?? null,
       }
       const profile = await ensureProfile(data.session.user.id, meta)
       if (profile) {
@@ -221,10 +234,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       .eq('id', current.id)
     if (error) throw error
     const updated = { ...current, ...patch }
+    const chapterName = patch.chapter_id !== undefined
+      ? await fetchChapterName(patch.chapter_id ?? null)
+      : get().chapterName
     set({
       user: updated,
       initials: patch.full_name ? getInitials(patch.full_name) : get().initials,
+      chapterName,
     })
+  },
+
+  updateEmail: async (newEmail, currentPassword) => {
+    const current = get().user
+    if (!current) throw new Error('Not authenticated')
+    // Re-authenticate first
+    const { error: authErr } = await supabase.auth.signInWithPassword({
+      email: current.email,
+      password: currentPassword,
+    })
+    if (authErr) throw new Error('Incorrect password')
+    const { error } = await supabase.auth.updateUser({ email: newEmail })
+    if (error) throw error
   },
 
   uploadAvatar: async (file) => {
@@ -258,13 +288,77 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: false })
   },
 
-  updatePassword: async (password) => {
-    set({ isLoading: true, error: null })
-    const { error } = await supabase.auth.updateUser({ password })
-    if (error) {
-      set({ isLoading: false, error: error.message })
-      throw error
+  updatePassword: async (newPassword, currentPassword) => {
+    const current = get().user
+    if (!current) throw new Error('Not authenticated')
+    // Re-authenticate first
+    const { error: authErr } = await supabase.auth.signInWithPassword({
+      email: current.email,
+      password: currentPassword,
+    })
+    if (authErr) throw new Error('Incorrect password')
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+  },
+
+  requestOrganizerUpgrade: async (code) => {
+    const current = get().user
+    if (!current) throw new Error('Not authenticated')
+
+    // Check for existing pending request
+    const { data: existing } = await supabase
+      .from('organizer_upgrade_requests')
+      .select('id, status')
+      .eq('user_id', current.id)
+      .eq('status', 'pending')
+      .maybeSingle()
+    if (existing) return 'already_pending'
+
+    // Validate the code
+    const { data: codeRow } = await supabase
+      .from('organizer_codes')
+      .select('id, chapter_id, assigned_role, is_active')
+      .eq('code', code.toUpperCase())
+      .eq('is_active', true)
+      .maybeSingle()
+    if (!codeRow) return 'invalid_code'
+
+    // Chapter match check: HQ codes (null chapter_id) are valid for anyone
+    if (codeRow.chapter_id !== null && codeRow.chapter_id !== current.chapter_id) {
+      return 'wrong_chapter'
     }
-    set({ isLoading: false })
+
+    // Submit upgrade request
+    const { error } = await supabase
+      .from('organizer_upgrade_requests')
+      .insert({
+        user_id: current.id,
+        organizer_code: code.toUpperCase(),
+        chapter_id: codeRow.chapter_id,
+        requested_role: codeRow.assigned_role,
+        status: 'pending',
+      })
+    if (error) throw error
+
+    // Store pending state on profile so it's visible elsewhere
+    await supabase
+      .from('profiles')
+      .update({
+        pending_role: codeRow.assigned_role,
+        pending_chapter_id: codeRow.chapter_id,
+      })
+      .eq('id', current.id)
+
+    set({ user: { ...current, pending_role: codeRow.assigned_role, pending_chapter_id: codeRow.chapter_id } })
+    return 'submitted'
+  },
+
+  checkUsernameAvailable: async (username) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', username.toLowerCase())
+      .maybeSingle()
+    return !data
   },
 }))

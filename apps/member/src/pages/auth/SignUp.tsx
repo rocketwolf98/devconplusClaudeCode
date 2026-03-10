@@ -1,18 +1,25 @@
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
+import { supabase } from '../../lib/supabase'
+
+const USERNAME_RE = /^[a-z0-9_]+$/
+
+interface Chapter { id: string; name: string; region: string }
 
 const schema = z.object({
   full_name:         z.string().min(2, 'Name required'),
+  username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
   email:             z.string().email('Invalid email'),
   password:          z.string().min(6, 'At least 6 characters'),
   school_or_company: z.string().optional(),
+  chapter_id:        z.string().optional(),
 })
 type FormData = z.infer<typeof schema>
 
@@ -37,19 +44,46 @@ function getPostAuthRoute(role: string): string {
 
 export default function SignUp() {
   const navigate = useNavigate()
-  const { signUp } = useAuthStore()
+  const { signUp, checkUsernameAvailable } = useAuthStore()
   const [showGoogleModal, setShowGoogleModal] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
+  const [usernameTimer, setUsernameTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const [chapters, setChapters] = useState<Chapter[]>([])
+
+  useEffect(() => {
+    supabase.from('chapters').select('id, name, region').order('name').then(({ data }) => {
+      if (data) setChapters(data as Chapter[])
+    })
+  }, [])
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
+  const handleUsernameChange = useCallback((value: string) => {
+    if (usernameTimer) clearTimeout(usernameTimer)
+    if (!value || value.length < 3 || !USERNAME_RE.test(value)) {
+      setUsernameStatus('idle')
+      return
+    }
+    setUsernameStatus('checking')
+    const t = setTimeout(async () => {
+      const available = await checkUsernameAvailable(value)
+      setUsernameStatus(available ? 'available' : 'taken')
+    }, 400)
+    setUsernameTimer(t)
+  }, [usernameTimer, checkUsernameAvailable])
+
   const onSubmit = async (data: FormData) => {
+    if (usernameStatus === 'taken') {
+      setFormError('Username is already taken.')
+      return
+    }
     setFormError(null)
     try {
-      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.school_or_company)
+      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.school_or_company, data.chapter_id)
       if (emailConfirmationPending) {
         navigate('/email-sent', { state: { email: data.email, type: 'signup' } })
       } else {
@@ -98,6 +132,29 @@ export default function SignUp() {
           </div>
 
           <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">Username</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm select-none">@</span>
+              <input
+                {...register('username', {
+                  onChange: (e) => handleUsernameChange(e.target.value),
+                })}
+                placeholder="juan_delacruz"
+                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green" />}
+                {usernameStatus === 'taken' && <XCircle className="w-4 h-4 text-red" />}
+              </span>
+            </div>
+            {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
+            {usernameStatus === 'taken' && !errors.username && (
+              <p className="text-red text-xs mt-1">Username already taken</p>
+            )}
+          </div>
+
+          <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">Email</label>
             <input
               {...register('email')}
@@ -138,6 +195,29 @@ export default function SignUp() {
               placeholder="University of Santo Tomas"
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
             />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">
+              Chapter <span className="text-slate-400 font-normal">(optional)</span>
+            </label>
+            <select
+              {...register('chapter_id')}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+            >
+              <option value="">Select your chapter…</option>
+              {['Luzon', 'Visayas', 'Mindanao'].map((region) => {
+                const group = chapters.filter((c) => c.region === region)
+                if (!group.length) return null
+                return (
+                  <optgroup key={region} label={region}>
+                    {group.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </optgroup>
+                )
+              })}
+            </select>
           </div>
 
           {formError && (
