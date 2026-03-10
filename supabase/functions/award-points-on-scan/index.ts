@@ -1,7 +1,7 @@
 // award-points-on-scan Edge Function
 // Deploy: supabase functions deploy award-points-on-scan
 //
-// Input:  { qr_code_token: string, organizer_id: string }
+// Input:  { qr_code_token: string }
 // Output: { success: boolean, member_name?: string, points_awarded?: number, event_title?: string, error?: string }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
@@ -18,30 +18,39 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { qr_code_token, organizer_id } = await req.json() as {
-      qr_code_token: string
-      organizer_id: string
-    }
-
-    if (!qr_code_token || !organizer_id) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Missing required fields.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Use service role to bypass RLS
+    // Use service role to bypass RLS for data operations
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    // 1. Validate organizer role
+    // 1. Verify caller identity from JWT — never trust organizer_id from request body
+    const authHeader = req.headers.get('Authorization')
+    const { data: { user: callerUser }, error: authErr } = await supabase.auth.getUser(
+      authHeader?.replace('Bearer ', '') ?? ''
+    )
+    if (authErr || !callerUser) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { qr_code_token } = await req.json() as { qr_code_token: string }
+
+    if (!qr_code_token) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Missing required fields.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 2. Validate caller has organizer role
     const { data: organizer, error: orgError } = await supabase
       .from('profiles')
       .select('id, role, chapter_id')
-      .eq('id', organizer_id)
+      .eq('id', callerUser.id)
       .in('role', ['chapter_officer', 'hq_admin', 'super_admin'])
       .single()
 
@@ -52,7 +61,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 2. Find registration by QR token (must be approved and not yet checked in)
+    // 3. Find registration by QR token (must be approved)
     const { data: reg, error: regError } = await supabase
       .from('event_registrations')
       .select('id, user_id, event_id, status, checked_in')
@@ -67,14 +76,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    if (reg.checked_in) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'This member has already checked in.' }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // 3. Get event details (points_value, title)
+    // 4. Get event details (points_value, title)
     const { data: event, error: eventError } = await supabase
       .from('events')
       .select('id, title, points_value')
@@ -88,20 +90,31 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 4. Get member profile
+    // 5. Get member name for response
     const { data: member } = await supabase
       .from('profiles')
-      .select('full_name, total_points')
+      .select('full_name')
       .eq('id', reg.user_id)
       .single()
 
-    // 5. Mark as checked in
-    await supabase
+    // 6. Atomically claim check-in: only succeeds if checked_in is still false.
+    //    This prevents double-award from concurrent scan requests.
+    const { data: claimed, error: claimErr } = await supabase
       .from('event_registrations')
       .update({ checked_in: true })
       .eq('id', reg.id)
+      .eq('checked_in', false)
+      .select('id')
+      .maybeSingle()
 
-    // 6. Insert point transaction
+    if (claimErr || !claimed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'This member has already checked in.' }),
+        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 7. Insert point transaction
     await supabase.from('point_transactions').insert({
       user_id:     reg.user_id,
       amount:      event.points_value,
@@ -109,12 +122,11 @@ Deno.serve(async (req: Request) => {
       source:      'event_attendance',
     })
 
-    // 7. Update profile total_points
-    const currentPoints = member?.total_points ?? 0
-    await supabase
-      .from('profiles')
-      .update({ total_points: currentPoints + event.points_value })
-      .eq('id', reg.user_id)
+    // 8. Atomically increment total_points — avoids read-modify-write race
+    await supabase.rpc('increment_member_points', {
+      p_user_id: reg.user_id,
+      p_amount:  event.points_value,
+    })
 
     return new Response(
       JSON.stringify({

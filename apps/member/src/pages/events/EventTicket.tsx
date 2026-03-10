@@ -181,12 +181,13 @@ export default function EventTicket() {
               transition={{ delay: 0.3, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
               className="flex justify-center pt-6 pb-5 px-6"
             >
-              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="p-4 bg-white rounded-2xl ring-2 ring-primary/20 shadow-[0_8px_32px_rgba(30,42,86,0.18)]">
                 <QRCodeSVG
                   value={reg.qr_code_token ?? 'DEVCON-TICKET'}
                   size={172}
                   level="H"
-                  fgColor={theme.darkHex}
+                  fgColor="#1E2A56"
+                  bgColor="#FFFFFF"
                 />
               </div>
             </motion.div>
