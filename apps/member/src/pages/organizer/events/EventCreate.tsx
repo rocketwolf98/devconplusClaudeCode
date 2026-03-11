@@ -32,7 +32,10 @@ const schema = z
     visibility: z.enum(['public', 'unlisted', 'draft']).default('public'),
     is_free: z.boolean().default(true),
     ticket_price_php: z.number({ coerce: true }).int().min(0).default(0),
-    capacity: z.number({ coerce: true }).int().positive().optional(),
+    capacity: z.preprocess(
+      (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
+      z.number().int().positive().optional()
+    ),
     points_value: z
       .number({ coerce: true })
       .min(50, 'Minimum 50 XP')
