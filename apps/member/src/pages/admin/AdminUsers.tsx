@@ -1,10 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, X, Mail, Briefcase, Calendar, Star } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
-import type { Profile } from '@devcon-plus/supabase'
+import type { Profile, UserRole } from '@devcon-plus/supabase'
+import { TRANSACTIONS } from '@devcon-plus/supabase'
 
-type UserRole = 'member' | 'chapter_officer' | 'hq_admin' | 'super_admin'
 const ROLES: UserRole[] = ['member', 'chapter_officer', 'hq_admin', 'super_admin']
+
+function getRolePillClass(role: string): string {
+  switch (role) {
+    case 'chapter_officer': return 'bg-blue/10 text-blue'
+    case 'hq_admin': return 'bg-gold/10 text-gold'
+    case 'super_admin': return 'bg-promoted/10 text-promoted'
+    default: return 'bg-slate-100 text-slate-600'
+  }
+}
+
+function getUserInitials(fullName: string): string {
+  return fullName
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0] ?? '')
+    .join('')
+    .toUpperCase()
+}
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<Profile[]>([])
@@ -12,6 +31,7 @@ export default function AdminUsers() {
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
 
   const load = async () => {
     setIsLoading(true)
@@ -33,6 +53,9 @@ export default function AdminUsers() {
       .eq('id', userId)
     if (dbErr) { setError(dbErr.message); return }
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u))
+    if (selectedUser?.id === userId) {
+      setSelectedUser((prev) => prev ? { ...prev, role: newRole } : prev)
+    }
   }
 
   const handleDelete = async (userId: string) => {
@@ -46,7 +69,10 @@ export default function AdminUsers() {
     setConfirmDeleteId(null)
     if (dbErr) { setError(dbErr.message); return }
     setUsers((prev) => prev.filter((u) => u.id !== userId))
+    if (selectedUser?.id === userId) setSelectedUser(null)
   }
+
+  const previewTransactions = TRANSACTIONS.slice(0, 5)
 
   return (
     <div className="p-8">
@@ -73,10 +99,14 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {users.map((u) => (
-                <tr key={u.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                <tr
+                  key={u.id}
+                  className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => setSelectedUser(u)}
+                >
                   <td className="px-4 py-3 font-medium text-slate-900">{u.full_name}</td>
                   <td className="px-4 py-3 text-slate-500">{u.email}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <select
                       value={u.role}
                       onChange={(e) => void handleRoleChange(u.id, e.target.value as UserRole)}
@@ -88,7 +118,7 @@ export default function AdminUsers() {
                     </select>
                   </td>
                   <td className="px-4 py-3 text-slate-700 font-semibold">{(u.total_points ?? 0).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                     {confirmDeleteId === u.id ? (
                       <div className="flex items-center justify-end gap-2">
                         <span className="text-xs text-slate-500">Sure?</span>
@@ -124,6 +154,149 @@ export default function AdminUsers() {
           )}
         </div>
       )}
+
+      {/* Slide-over panel */}
+      <AnimatePresence>
+        {selectedUser && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedUser(null)}
+              className="fixed inset-0 bg-black/20 z-40"
+            />
+
+            {/* Panel */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50 overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="bg-slate-50 border-b border-slate-100 p-5 relative">
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-4 pr-8">
+                  <div className="w-14 h-14 rounded-full bg-blue text-white flex items-center justify-center text-xl font-bold flex-shrink-0">
+                    {getUserInitials(selectedUser.full_name)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-lg font-black text-slate-900 truncate">{selectedUser.full_name}</p>
+                    <span className={`inline-block mt-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${getRolePillClass(selectedUser.role ?? 'member')}`}>
+                      {selectedUser.role ?? 'member'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Info section */}
+              <div className="p-5 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span className="text-sm text-slate-700 truncate">{selectedUser.email}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Briefcase className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span className="text-sm text-slate-700">
+                    {selectedUser.school_or_company ?? '—'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <span className="text-sm text-slate-700">
+                    {selectedUser.created_at
+                      ? new Date(selectedUser.created_at).toLocaleDateString('en-PH', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })
+                      : '—'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Star className="w-4 h-4 fill-gold text-gold flex-shrink-0" />
+                  <span className="text-sm font-bold text-gold">
+                    {(selectedUser.total_points ?? 0).toLocaleString()} pts
+                  </span>
+                </div>
+              </div>
+
+              {/* Points History */}
+              <div className="px-5 pb-5">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">
+                  Points History
+                </p>
+                {previewTransactions.length > 0 ? (
+                  <div>
+                    {previewTransactions.map((tx) => {
+                      const isPositive = tx.amount > 0
+                      const dateStr = tx.created_at
+                        ? new Date(tx.created_at).toLocaleDateString('en-PH', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })
+                        : ''
+                      return (
+                        <div key={tx.id} className="flex items-start justify-between py-2.5 border-b border-slate-50 last:border-0">
+                          <div className="min-w-0 mr-3">
+                            <p className="text-sm font-medium text-slate-700 truncate">{tx.description}</p>
+                            <p className="text-xs text-slate-400 mt-0.5">{dateStr}</p>
+                          </div>
+                          <p className={`text-sm font-bold flex-shrink-0 ${isPositive ? 'text-green' : 'text-red'}`}>
+                            {isPositive ? '+' : ''}{tx.amount.toLocaleString()}
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400">No recent transactions.</p>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="px-5 pb-6 space-y-2 border-t border-slate-100 pt-5">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">
+                  Actions
+                </p>
+
+                <div>
+                  <label className="text-xs text-slate-500 mb-1 block">Change Role</label>
+                  <select
+                    value={selectedUser.role ?? 'member'}
+                    onChange={(e) => void handleRoleChange(selectedUser.id, e.target.value as UserRole)}
+                    className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+                  >
+                    {ROLES.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setConfirmDeleteId(selectedUser.id)
+                    setSelectedUser(null)
+                  }}
+                  className="w-full mt-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-red/10 text-red hover:bg-red hover:text-white transition-colors"
+                >
+                  Delete User
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

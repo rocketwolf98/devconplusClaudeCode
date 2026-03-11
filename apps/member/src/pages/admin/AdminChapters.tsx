@@ -1,21 +1,244 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Check, X, Plus, Trash2 } from 'lucide-react'
+import { Pencil, Check, X, Plus, Trash2, ChevronDown } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { MOCK_ADMIN_STATS } from '@devcon-plus/supabase'
+import type { Chapter, Region } from '@devcon-plus/supabase'
 
-type Region = 'Luzon' | 'Visayas' | 'Mindanao'
 const REGIONS: Region[] = ['Luzon', 'Visayas', 'Mindanao']
 
-interface Chapter {
-  id: string
-  name: string
-  region: Region | null
-  created_at: string
+// ─── ChapterCard ────────────────────────────────────────────────────────────
+
+interface ChapterCardProps {
+  chapter: Chapter
+  xp: number
+  isExpanded: boolean
+  onToggle: () => void
+  editingId: string | null
+  editName: string
+  editRegion: Region
+  onEditNameChange: (v: string) => void
+  onEditRegionChange: (v: Region) => void
+  onEdit: (chapter: Chapter) => void
+  onSaveEdit: (id: string) => Promise<void>
+  onCancelEdit: () => void
+  saving: boolean
+  confirmDeleteId: string | null
+  onDelete: (id: string) => void
+  onConfirmDelete: (id: string) => Promise<void>
+  onCancelDelete: () => void
+  deletingId: string | null
 }
+
+function ChapterCard({
+  chapter,
+  xp,
+  isExpanded,
+  onToggle,
+  editingId,
+  editName,
+  editRegion,
+  onEditNameChange,
+  onEditRegionChange,
+  onEdit,
+  onSaveEdit,
+  onCancelEdit,
+  saving,
+  confirmDeleteId,
+  onDelete,
+  onConfirmDelete,
+  onCancelDelete,
+  deletingId,
+}: ChapterCardProps) {
+  const memberCount = Math.floor(xp / 80)
+  const eventCount = Math.floor(xp / 35000)
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+      {/* Card header — collapsed view */}
+      <div
+        className="px-5 py-4 flex items-center gap-4 cursor-pointer hover:bg-slate-50 transition-colors"
+        onClick={onToggle}
+      >
+        {/* Left: chapter name + region badge */}
+        <div className="flex-1 min-w-0">
+          {editingId === chapter.id ? (
+            <div
+              className="flex items-center gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                value={editName}
+                onChange={(e) => onEditNameChange(e.target.value)}
+                className="border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue w-44"
+                autoFocus
+              />
+              <select
+                value={editRegion}
+                onChange={(e) => onEditRegionChange(e.target.value as Region)}
+                className="border border-slate-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+              >
+                {REGIONS.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => void onSaveEdit(chapter.id)}
+                disabled={saving || !editName.trim()}
+                className="p-1.5 rounded-lg bg-green/10 text-green hover:bg-green/20 disabled:opacity-50"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+              <button
+                onClick={onCancelEdit}
+                className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-900">{chapter.name}</span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                chapter.region === 'Luzon'    ? 'bg-blue/10 text-blue'   :
+                chapter.region === 'Visayas'  ? 'bg-gold/10 text-gold'   :
+                chapter.region === 'Mindanao' ? 'bg-green/10 text-green' :
+                'bg-slate-100 text-slate-400'
+              }`}>
+                {chapter.region ?? '—'}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Center: 3 inline stats (hidden while editing) */}
+        {editingId !== chapter.id && (
+          <div className="flex items-center gap-6 text-center shrink-0">
+            <div>
+              <p className="text-sm font-bold text-slate-900">{memberCount.toLocaleString()}</p>
+              <p className="text-[10px] text-slate-400">Members</p>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">{eventCount}</p>
+              <p className="text-[10px] text-slate-400">Events</p>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">{(xp / 1000).toFixed(0)}K</p>
+              <p className="text-[10px] text-slate-400">XP</p>
+            </div>
+          </div>
+        )}
+
+        {/* Right: Edit / Delete actions + expand chevron (hidden while editing) */}
+        {editingId !== chapter.id && (
+          <div
+            className="flex items-center gap-1 shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {confirmDeleteId === chapter.id ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-500">Sure?</span>
+                <button
+                  onClick={() => onCancelDelete()}
+                  className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => void onConfirmDelete(chapter.id)}
+                  disabled={deletingId === chapter.id}
+                  className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
+                >
+                  {deletingId === chapter.id ? '…' : 'Delete'}
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => onEdit(chapter)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onDelete(chapter.id)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </>
+            )}
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 ml-2 transition-transform duration-200 ${
+                isExpanded ? 'rotate-180' : ''
+              }`}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Expanded content */}
+      {isExpanded && editingId !== chapter.id && (
+        <div className="border-t border-slate-100 px-5 py-4 bg-slate-50/50">
+          <div className="grid grid-cols-2 gap-4">
+            {/* XP visualization */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">XP Overview</p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-600">Total XP Awarded</span>
+                  <span className="font-bold text-gold">{xp.toLocaleString()}</span>
+                </div>
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gold rounded-full"
+                    style={{ width: `${Math.min(100, (xp / 820000) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400">vs. top chapter (Manila: 820K XP)</p>
+              </div>
+            </div>
+
+            {/* Quick stats */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">Quick Stats</p>
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Avg XP / Member</span>
+                  <span className="font-semibold text-slate-700">
+                    {memberCount > 0 ? Math.round(xp / memberCount).toLocaleString() : '—'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Region</span>
+                  <span className="font-semibold text-slate-700">{chapter.region ?? '—'}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Created</span>
+                  <span className="font-semibold text-slate-700">
+                    {new Date(chapter.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── AdminChapters ───────────────────────────────────────────────────────────
 
 export default function AdminChapters() {
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Expand state
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -31,6 +254,12 @@ export default function AdminChapters() {
   // Delete state
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  // XP lookup: chapter name → xp value
+  const xpLookup: Record<string, number> = {}
+  MOCK_ADMIN_STATS.xpByChapter.forEach(({ chapter, xp }) => {
+    xpLookup[chapter] = xp
+  })
 
   useEffect(() => {
     const load = async () => {
@@ -98,12 +327,6 @@ export default function AdminChapters() {
     setChapters((prev) => prev.filter((c) => c.id !== id))
   }
 
-  const regionColor: Record<Region, string> = {
-    Luzon:    'bg-blue/10 text-blue',
-    Visayas:  'bg-gold/10 text-gold',
-    Mindanao: 'bg-green/10 text-green',
-  }
-
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
@@ -149,105 +372,36 @@ export default function AdminChapters() {
         </button>
       </div>
 
+      {/* Chapter cards */}
       {isLoading ? (
         <p className="text-slate-400 text-sm">Loading chapters…</p>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Chapter</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Region</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {chapters.map((chapter) => (
-                <tr key={chapter.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3">
-                    {editingId === chapter.id ? (
-                      <input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue w-44"
-                        autoFocus
-                      />
-                    ) : (
-                      <span className="font-semibold text-slate-900">{chapter.name}</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {editingId === chapter.id ? (
-                      <select
-                        value={editRegion}
-                        onChange={(e) => setEditRegion(e.target.value as Region)}
-                        className="border border-slate-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue"
-                      >
-                        {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
-                      </select>
-                    ) : (
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        chapter.region ? regionColor[chapter.region as Region] : 'bg-slate-100 text-slate-400'
-                      }`}>
-                        {chapter.region ?? '—'}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {editingId === chapter.id ? (
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => void saveEdit(chapter.id)}
-                          disabled={saving || !editName.trim()}
-                          className="p-1.5 rounded-lg bg-green/10 text-green hover:bg-green/20 transition-colors disabled:opacity-50"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ) : confirmDeleteId === chapter.id ? (
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-xs text-slate-500">Sure?</span>
-                        <button
-                          onClick={() => setConfirmDeleteId(null)}
-                          className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => void deleteChapter(chapter.id)}
-                          disabled={deletingId === chapter.id}
-                          className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
-                        >
-                          {deletingId === chapter.id ? '…' : 'Delete'}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-end gap-1">
-                        <button
-                          onClick={() => startEdit(chapter)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue transition-colors"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteId(chapter.id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          {chapters.map((chapter) => (
+            <ChapterCard
+              key={chapter.id}
+              chapter={chapter}
+              xp={xpLookup[chapter.name] ?? 0}
+              isExpanded={expandedId === chapter.id}
+              onToggle={() =>
+                setExpandedId((prev) => (prev === chapter.id ? null : chapter.id))
+              }
+              editingId={editingId}
+              editName={editName}
+              editRegion={editRegion}
+              onEditNameChange={setEditName}
+              onEditRegionChange={setEditRegion}
+              onEdit={startEdit}
+              onSaveEdit={saveEdit}
+              onCancelEdit={cancelEdit}
+              saving={saving}
+              confirmDeleteId={confirmDeleteId}
+              onDelete={(id) => setConfirmDeleteId(id)}
+              onConfirmDelete={deleteChapter}
+              onCancelDelete={() => setConfirmDeleteId(null)}
+              deletingId={deletingId}
+            />
+          ))}
           {chapters.length === 0 && (
             <p className="text-center py-10 text-slate-400 text-sm">No chapters found.</p>
           )}

@@ -8,6 +8,17 @@ export type UserRole = 'member' | 'chapter_officer' | 'hq_admin' | 'super_admin'
 
 export type EventStatus = 'upcoming' | 'ongoing' | 'past'
 
+export type EventCategory =
+  | 'tech_talk'
+  | 'hackathon'
+  | 'workshop'
+  | 'brown_bag'
+  | 'summit'
+  | 'social'
+  | 'networking'
+
+export type EventVisibility = 'public' | 'unlisted' | 'draft'
+
 export type RegistrationStatus = 'pending' | 'approved' | 'rejected'
 
 export type PointSource =
@@ -72,9 +83,14 @@ export interface OrganizerUpgradeRequest {
 export interface OrganizerCode {
   id: string
   code: string
-  chapter_id: string
+  chapter_id: string | null
+  program_id: string | null
+  scope_type: 'chapter' | 'program'
   assigned_role: 'chapter_officer' | 'hq_admin'
   is_active: boolean
+  usage_limit: number | null
+  usage_count: number
+  expires_at: string | null
   created_at: string
 }
 
@@ -85,6 +101,13 @@ export interface Event {
   description: string | null
   location: string | null
   event_date: string | null
+  end_date: string | null
+  category: EventCategory | null
+  tags: string[]
+  visibility: EventVisibility
+  is_free: boolean
+  ticket_price_php: number
+  capacity: number | null
   points_value: number
   requires_approval: boolean
   status: EventStatus
@@ -159,5 +182,24 @@ export interface NewsPost {
   is_promoted: boolean
   cover_image_url: string | null
   author_id: string | null
+  created_at: string
+}
+
+export interface Program {
+  id: string
+  name: string
+  theme_id: string | null
+  description: string | null
+  is_active: boolean
+  created_at: string
+}
+
+export interface XpTier {
+  id: string
+  name: string
+  label: string
+  min_points: number
+  max_points: number | null
+  badge_color: string | null
   created_at: string
 }

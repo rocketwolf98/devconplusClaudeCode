@@ -10,8 +10,10 @@ const NAV_ITEMS = [
   { path: '/admin/org-codes',label: 'Org Codes',  Icon: KeyRound,       end: false },
   { path: '/admin/events',   label: 'Events',     Icon: CalendarDays,   end: false },
   { path: '/admin/chapters',  label: 'Chapters',  Icon: Building2,      end: false },
-  { path: '/admin/upgrades',  label: 'Upgrades',  Icon: ShieldCheck,    end: false },
+  { path: '/admin/upgrades',  label: 'CMS',        Icon: ShieldCheck,    end: false },
 ]
+
+const ADMIN_ROLES = ['super_admin', 'hq_admin'] as const
 
 export default function AdminLayout() {
   const { user, signOut } = useAuthStore()
@@ -20,12 +22,12 @@ export default function AdminLayout() {
   useEffect(() => {
     if (!user) {
       navigate('/sign-in', { replace: true })
-    } else if (user.role !== 'super_admin') {
+    } else if (!ADMIN_ROLES.includes(user.role as typeof ADMIN_ROLES[number])) {
       navigate('/home', { replace: true })
     }
   }, [user, navigate])
 
-  if (!user || user.role !== 'super_admin') return null
+  if (!user || !ADMIN_ROLES.includes(user.role as typeof ADMIN_ROLES[number])) return null
 
   return (
     <div className="flex h-screen bg-slate-100 font-sans p-4 gap-4">

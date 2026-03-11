@@ -10,8 +10,16 @@ interface CreateEventPayload {
   description: string
   location: string
   event_date: string
+  end_date: string | null
+  category: 'tech_talk' | 'hackathon' | 'workshop' | 'brown_bag' | 'summit' | 'social' | 'networking'
+  tags: string[]
+  visibility: 'public' | 'unlisted' | 'draft'
+  is_free: boolean
+  ticket_price_php: number
+  capacity: number | null
   points_value: number
   requires_approval: boolean
+  cover_image_url: string | null
   chapter_id: string
   created_by: string
 }

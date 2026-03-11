@@ -8,13 +8,13 @@ import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer',        label: 'Home',   Icon: Home,         end: true  },
-  { path: '/organizer/events', label: 'Events', Icon: CalendarDays, end: false },
+  { path: '/organizer',         label: 'Home',    Icon: Home, end: true  },
+  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
 ]
 
 const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
-  { path: '/organizer/profile', label: 'Profile', Icon: User, end: false },
+  { path: '/organizer/events',  label: 'Events',  Icon: CalendarDays, end: false },
+  { path: '/organizer/profile', label: 'Profile', Icon: User,         end: false },
 ]
 
 const ALL_TABS = [
@@ -53,7 +53,7 @@ export default function OrganizerLayout() {
           <Outlet />
         </div>
 
-        {/* Floating pill bottom nav — Home | Events | ●Scan● | Rewards | Profile */}
+        {/* Floating pill bottom nav — Home | Rewards | ●Scan● | Events | Profile */}
         <div className="fixed bottom-4 left-4 right-4 z-50">
           <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-card border border-slate-100 px-2 py-2">
 
