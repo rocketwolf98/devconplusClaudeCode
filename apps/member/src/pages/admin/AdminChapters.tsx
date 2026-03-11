@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pencil, Check, X, Plus, Trash2, ChevronDown } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { MOCK_ADMIN_STATS } from '@devcon-plus/supabase'
 import type { Chapter, Region } from '@devcon-plus/supabase'
 
 const REGIONS: Region[] = ['Luzon', 'Visayas', 'Mindanao']
@@ -255,21 +254,22 @@ export default function AdminChapters() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  // XP lookup: chapter name → xp value
-  const xpLookup: Record<string, number> = {}
-  MOCK_ADMIN_STATS.xpByChapter.forEach(({ chapter, xp }) => {
-    xpLookup[chapter] = xp
-  })
+  const [xpLookup, setXpLookup] = useState<Record<string, number>>({})
 
   useEffect(() => {
     const load = async () => {
       setIsLoading(true)
-      const { data, error: dbErr } = await supabase
-        .from('chapters')
-        .select('*')
-        .order('name')
-      if (dbErr) { setError(dbErr.message); setIsLoading(false); return }
-      setChapters((data ?? []) as Chapter[])
+      const [chaptersRes, xpRes] = await Promise.all([
+        supabase.from('chapters').select('*').order('name'),
+        supabase.rpc('get_xp_by_chapter'),
+      ])
+      if (chaptersRes.error) { setError(chaptersRes.error.message); setIsLoading(false); return }
+      setChapters((chaptersRes.data ?? []) as Chapter[])
+      const lookup: Record<string, number> = {}
+      ;((xpRes.data ?? []) as { chapter: string; xp: number }[]).forEach(({ chapter, xp }) => {
+        lookup[chapter] = xp
+      })
+      setXpLookup(lookup)
       setIsLoading(false)
     }
     void load()

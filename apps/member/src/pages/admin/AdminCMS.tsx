@@ -821,6 +821,7 @@ function ArticlesTab() {
   const handleSave = async () => {
     setSaving(true)
     setError(null)
+    const { data: { user } } = await supabase.auth.getUser()
     const payload = {
       title: form.title.trim(),
       body: form.body.trim() || null,
@@ -831,7 +832,7 @@ function ArticlesTab() {
     }
     try {
       if (slideOver === 'create') {
-        const { error: err } = await supabase.from('news_posts').insert(payload)
+        const { error: err } = await supabase.from('news_posts').insert({ ...payload, author_id: user?.id ?? null })
         if (err) throw err
       } else if (editingItem) {
         const { error: err } = await supabase.from('news_posts').update(payload).eq('id', editingItem.id)

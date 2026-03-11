@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, ToggleLeft, ToggleRight, RefreshCw } from 'lucide-react'
+import { Plus, ToggleLeft, ToggleRight, RefreshCw, Trash2 } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -122,6 +122,21 @@ export default function AdminOrgCodes() {
       .eq('id', id)
     if (dbErr) { setError(dbErr.message); return }
     setCodes((prev) => prev.map((c) => c.id === id ? { ...c, is_active: !current } : c))
+  }
+
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id)
+    const { error: dbErr } = await supabase
+      .from('organizer_codes')
+      .delete()
+      .eq('id', id)
+    setDeletingId(null)
+    setConfirmDeleteId(null)
+    if (dbErr) { setError(dbErr.message); return }
+    setCodes((prev) => prev.filter((c) => c.id !== id))
   }
 
   const onSubmit = async (data: FormData) => {
@@ -381,16 +396,38 @@ export default function AdminOrgCodes() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => void handleToggle(c.id, c.is_active)}
-                      className="text-slate-400 hover:text-blue transition-colors"
-                      title={c.is_active ? 'Deactivate' : 'Activate'}
-                    >
-                      {c.is_active
-                        ? <ToggleRight className="w-5 h-5 text-green" />
-                        : <ToggleLeft className="w-5 h-5" />
-                      }
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => void handleToggle(c.id, c.is_active)}
+                        className="text-slate-400 hover:text-blue transition-colors"
+                        title={c.is_active ? 'Deactivate' : 'Activate'}
+                      >
+                        {c.is_active
+                          ? <ToggleRight className="w-5 h-5 text-green" />
+                          : <ToggleLeft className="w-5 h-5" />
+                        }
+                      </button>
+                      {confirmDeleteId === c.id ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setConfirmDeleteId(null)}
+                            className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                          >Cancel</button>
+                          <button
+                            onClick={() => void handleDelete(c.id)}
+                            disabled={deletingId === c.id}
+                            className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50 hover:bg-red/80 transition-colors"
+                          >{deletingId === c.id ? '…' : 'Delete'}</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteId(c.id)}
+                          className="p-1 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -124,6 +124,7 @@ export interface EventRegistration {
   user_id: string
   status: RegistrationStatus
   qr_code_token: string | null
+  checked_in: boolean | null
   registered_at: string
   approved_at: string | null
 }

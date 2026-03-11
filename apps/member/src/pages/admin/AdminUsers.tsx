@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { Trash2, X, Mail, Briefcase, Calendar, Star } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
-import type { Profile, UserRole } from '@devcon-plus/supabase'
-import { TRANSACTIONS } from '@devcon-plus/supabase'
+import type { Profile, UserRole, PointTransaction } from '@devcon-plus/supabase'
 
 const ROLES: UserRole[] = ['member', 'chapter_officer', 'hq_admin', 'super_admin']
 
@@ -32,6 +31,22 @@ export default function AdminUsers() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
+  const [userTxns, setUserTxns] = useState<PointTransaction[]>([])
+  const [txnsLoading, setTxnsLoading] = useState(false)
+
+  const openUser = async (user: Profile) => {
+    setSelectedUser(user)
+    setUserTxns([])
+    setTxnsLoading(true)
+    const { data } = await supabase
+      .from('point_transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5)
+    setUserTxns((data ?? []) as PointTransaction[])
+    setTxnsLoading(false)
+  }
 
   const load = async () => {
     setIsLoading(true)
@@ -72,7 +87,6 @@ export default function AdminUsers() {
     if (selectedUser?.id === userId) setSelectedUser(null)
   }
 
-  const previewTransactions = TRANSACTIONS.slice(0, 5)
 
   return (
     <div className="p-8">
@@ -102,7 +116,7 @@ export default function AdminUsers() {
                 <tr
                   key={u.id}
                   className="border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer"
-                  onClick={() => setSelectedUser(u)}
+                  onClick={() => void openUser(u)}
                 >
                   <td className="px-4 py-3 font-medium text-slate-900">{u.full_name}</td>
                   <td className="px-4 py-3 text-slate-500">{u.email}</td>
@@ -235,9 +249,11 @@ export default function AdminUsers() {
                 <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">
                   Points History
                 </p>
-                {previewTransactions.length > 0 ? (
+                {txnsLoading ? (
+                  <p className="text-xs text-slate-400">Loading…</p>
+                ) : userTxns.length > 0 ? (
                   <div>
-                    {previewTransactions.map((tx) => {
+                    {userTxns.map((tx) => {
                       const isPositive = tx.amount > 0
                       const dateStr = tx.created_at
                         ? new Date(tx.created_at).toLocaleDateString('en-PH', {
@@ -260,7 +276,7 @@ export default function AdminUsers() {
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-400">No recent transactions.</p>
+                  <p className="text-xs text-slate-400">No transactions yet.</p>
                 )}
               </div>
 
