@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { RouterProvider } from 'react-router-dom'
 import { MotionConfig } from 'framer-motion'
+import { Toaster } from 'sonner'
 import { router } from './router'
 import { useThemeStore, PROGRAM_THEMES } from './stores/useThemeStore'
 import { useAuthStore } from './stores/useAuthStore'
@@ -34,6 +35,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <RouterProvider router={router} />
+      <Toaster position="top-center" richColors closeButton />
     </MotionConfig>
   )
 }

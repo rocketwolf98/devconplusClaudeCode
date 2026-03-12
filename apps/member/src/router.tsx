@@ -39,6 +39,7 @@ import AdminOrgCodes from './pages/admin/AdminOrgCodes'
 import AdminEvents from './pages/admin/AdminEvents'
 import AdminChapters from './pages/admin/AdminChapters'
 import AdminCMS from './pages/admin/AdminCMS'
+import AdminKiosk from './pages/admin/AdminKiosk'
 
 // Organizer pages
 import { OrgDashboard } from './pages/organizer/Dashboard'
@@ -98,6 +99,7 @@ export const router = createBrowserRouter([
       { path: '/admin/events',       element: <AdminEvents /> },
       { path: '/admin/chapters',     element: <AdminChapters /> },
       { path: '/admin/upgrades',     element: <AdminCMS /> },
+      { path: '/admin/kiosk',        element: <AdminKiosk /> },
     ],
   },
 

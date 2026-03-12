@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck } from 'lucide-react'
+import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck, ScanLine } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const NAV_ITEMS = [
-  { path: '/admin',          label: 'Dashboard', Icon: LayoutDashboard, end: true  },
-  { path: '/admin/users',    label: 'Users',      Icon: Users,          end: false },
-  { path: '/admin/org-codes',label: 'Org Codes',  Icon: KeyRound,       end: false },
-  { path: '/admin/events',   label: 'Events',     Icon: CalendarDays,   end: false },
-  { path: '/admin/chapters',  label: 'Chapters',  Icon: Building2,      end: false },
-  { path: '/admin/upgrades',  label: 'CMS',        Icon: ShieldCheck,    end: false },
+  { path: '/admin',           label: 'Dashboard', Icon: LayoutDashboard, end: true,  superOnly: false },
+  { path: '/admin/users',     label: 'Users',      Icon: Users,           end: false, superOnly: false },
+  { path: '/admin/org-codes', label: 'Org Codes',  Icon: KeyRound,        end: false, superOnly: false },
+  { path: '/admin/events',    label: 'Events',     Icon: CalendarDays,    end: false, superOnly: false },
+  { path: '/admin/chapters',  label: 'Chapters',   Icon: Building2,       end: false, superOnly: false },
+  { path: '/admin/upgrades',  label: 'CMS',        Icon: ShieldCheck,     end: false, superOnly: false },
+  { path: '/admin/kiosk',     label: 'Kiosk',      Icon: ScanLine,        end: false, superOnly: true  },
 ]
 
 const ADMIN_ROLES = ['super_admin', 'hq_admin'] as const
@@ -41,7 +42,7 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map(({ path, label, Icon, end }) => (
+          {NAV_ITEMS.filter(item => !item.superOnly || user.role === 'super_admin').map(({ path, label, Icon, end }) => (
             <NavLink
               key={path}
               to={path}
