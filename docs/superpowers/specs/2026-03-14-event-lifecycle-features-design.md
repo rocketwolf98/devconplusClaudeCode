@@ -24,20 +24,21 @@ An event is considered **archived** when:
 now > (event.end_date ?? event.event_date)
 ```
 If `end_date` is set, that is the cutoff. If not, `event_date` (start time) is the fallback.
+Events with neither field set are never archived.
 
 ### Behaviour by Surface
 
 | Surface | Behaviour |
 |---|---|
 | Member Discover tab (EventsList) | Archived events **hidden** |
-| Member "My Tickets" tab | **Still shown** — member can view past attendance history |
+| Member "My Tickets" tab | **Still shown** — members can see past attendance history |
 | Member Dashboard "Events For You" | Archived events **hidden** |
-| Organizer EventsList | Two tabs: **Upcoming** (default, active events) and **Past** (archived) |
-| Admin Events page | Shows all events; existing status filter covers past events |
+| Organizer EventsList | Two tabs: **Upcoming** (default, active) and **Past** (archived) |
+| Admin Events page | Shows all; existing status filter covers past events |
 
 ### Implementation
 
-**No DB migration needed.** Filtering is done at render time using a pure utility function.
+**No DB migration needed.** Filtering is done at render time via a pure utility.
 
 **`apps/member/src/lib/dates.ts`** — add:
 ```ts
@@ -48,36 +49,44 @@ export function isEventArchived(event: Event, now = new Date()): boolean {
 ```
 
 **`apps/member/src/pages/events/EventsList.tsx`**
-- Discover tab: apply `!isEventArchived(e)` filter to `filteredEvents`
-- My Tickets tab: no change (show all, including past)
+- Discover tab: apply `!isEventArchived(e)` filter before displaying events
+- My Tickets tab: no change (show all registrations, including past events)
 
 **`apps/member/src/pages/dashboard/Dashboard.tsx`**
-- Existing `status === 'upcoming'` filter augmented with `!isEventArchived(e)`
+- Augment the existing `status === 'upcoming'` filter with `&& !isEventArchived(e)`
 
-**`apps/member/src/pages/organizer/events/OrgEventsList.tsx`** (or equivalent)
-- Add "Upcoming" / "Past" tab toggle
-- "Upcoming" tab: `!isEventArchived(e)`
-- "Past" tab: `isEventArchived(e)`
-
-### Edge Cases
-- Events with no `end_date` AND no `event_date`: treated as active (never archived)
-- Events created in the past with no dates: same — never archived unless a date is set
+**`apps/member/src/pages/organizer/events/EventsList.tsx`** (component: `OrgEventsList`)
+- Add local state: `activeTab: 'upcoming' | 'past'`
+- Add tab UI (pill tabs, matching existing design system)
+- "Upcoming" tab: render events where `!isEventArchived(e)`
+- "Past" tab: render events where `isEventArchived(e)`
+- This is a new UI section, not just a one-liner filter
 
 ---
 
 ## Feature 2: Cancel Registration
 
 ### Rules
-- Cancellable when `registration.status` is `pending` or `approved`
-- **Not cancellable** if `checked_in === true` (member has already attended)
-- On cancel: `status` set to `'cancelled'`, `qr_code_token` cleared to `null`
-- Cancelled registrations are **excluded** from:
-  - Member My Tickets tab
-  - Organizer registrants list
+- Cancellable when `status` is `pending` or `approved`
+- **Not cancellable** if `reg.checked_in === true`
+  - The cancel button visibility on `EventTicket` must read from **`reg.checked_in`** (the value in the store / fetched from DB), **not** from the local `checkedIn` state variable (which starts `false` and catches up via Realtime). This prevents a brief window where a checked-in member could see the cancel button.
+- On cancel: `status = 'cancelled'`, `qr_code_token = null`
+- Cancelled registrations excluded from: member My Tickets tab, organizer registrants list
+
+### Type Changes
+
+**`packages/supabase/src/types.ts`** — update `RegistrationStatus`:
+```ts
+// Before
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected'
+
+// After
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
+```
+
+This is required so that cancelled rows returned from Supabase don't cause TypeScript errors in `ApprovalCard`, `EventRegistrants`, and the store.
 
 ### DB Migration
-
-Add `'cancelled'` to the `event_registrations.status` CHECK constraint:
 
 ```sql
 ALTER TABLE event_registrations
@@ -90,47 +99,61 @@ ALTER TABLE event_registrations
 
 ### Store — `useEventsStore`
 
-Add `cancelRegistration(regId: string): Promise<void>`:
+**Update `EventsState` interface** to include the new action:
+```ts
+interface EventsState {
+  // ...existing actions...
+  cancelRegistration: (regId: string) => Promise<void>
+}
+```
+
+**Implementation** (consistent with all other store actions — throw on error):
 ```ts
 cancelRegistration: async (regId) => {
   const { error } = await supabase
     .from('event_registrations')
     .update({ status: 'cancelled', qr_code_token: null })
     .eq('id', regId)
-  if (error) throw error
+  if (error) throw error   // caller (cancel sheet) catches and shows error state
   set((s) => ({
     registrations: s.registrations.map((r) =>
-      r.id === regId ? { ...r, status: 'cancelled' as const, qr_code_token: null } : r
+      r.id === regId
+        ? { ...r, status: 'cancelled' as const, qr_code_token: null }
+        : r
     ),
   }))
 },
 ```
 
+### Orphaned Pending Subscription
+
+If a member is on the `EventPending` screen in one tab and cancels their registration in another, the `subscribeToRegistration` Realtime channel remains open. On cancellation, the store update will change `reg.status` to `'cancelled'`. `EventPending` already reads `reg` from the store — detecting `reg.status === 'cancelled'` should navigate the user away (e.g., back to `/events`). Add this check in `EventPending`'s `useEffect`.
+
 ### UX Flow — Double Confirmation
 
-Implemented as two sequential bottom sheets (using a `cancelStep` state: `null | 'first' | 'second'`).
+State: `cancelStep: null | 'first' | 'second'` (local to `EventTicket`)
 
-**Step 1 sheet** (appears on "Cancel Registration" tap):
+**Step 1 sheet** (triggered by "Cancel Registration" tap):
 > **Cancel your registration?**
-> You'll lose your spot for *[Event Title]*. This cannot be undone.
+> You'll lose your spot for *[event.title]*. This cannot be undone.
 >
-> [Keep my spot] [Yes, continue →]
+> `[Keep my spot]` &nbsp;&nbsp; `[Yes, continue →]`
 
-**Step 2 sheet** (appears after "Yes, continue"):
+**Step 2 sheet** (after "Yes, continue"):
 > **Are you absolutely sure?**
 > You will be permanently removed from the attendee list.
 >
-> [Go back] [Cancel Registration] ← red destructive button
+> `[Go back]` &nbsp;&nbsp; `[Cancel Registration]` ← red destructive button
 
 **On final confirm:**
-1. Call `cancelRegistration(reg.id)`
-2. Navigate back to `/events`
+1. Call `cancelRegistration(reg.id)` — if it throws, show an inline error inside the sheet
+2. Navigate to `/events`
 
 ### UI Placement
 
-`EventTicket.tsx` — Add at the bottom of the ticket card (below the info rows), only rendered when `!checkedIn`:
+`EventTicket.tsx` — rendered below the info rows, only when `!reg.checked_in` (store value):
 ```tsx
-{!checkedIn && (
+{!reg.checked_in && (
   <button onClick={() => setCancelStep('first')} className="...text-red...">
     Cancel Registration
   </button>
@@ -143,7 +166,7 @@ Implemented as two sequential bottom sheets (using a `cancelStep` state: `null |
 
 ### Server — SQL RPC
 
-New `manual_checkin` PostgreSQL function, `SECURITY DEFINER`:
+New `manual_checkin` function, `SECURITY DEFINER`. Includes idempotency, status validation, and role check:
 
 ```sql
 CREATE OR REPLACE FUNCTION manual_checkin(
@@ -155,10 +178,18 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_reg     event_registrations%ROWTYPE;
-  v_event   events%ROWTYPE;
-  v_profile profiles%ROWTYPE;
+  v_reg      event_registrations%ROWTYPE;
+  v_event    events%ROWTYPE;
+  v_profile  profiles%ROWTYPE;
+  v_org_role text;
 BEGIN
+  -- Verify organizer role
+  SELECT role INTO v_org_role FROM profiles WHERE id = p_organizer_id;
+  IF v_org_role NOT IN ('chapter_officer', 'hq_admin', 'super_admin') THEN
+    RETURN json_build_object('success', false, 'error', 'unauthorized');
+  END IF;
+
+  -- Get and validate registration
   SELECT * INTO v_reg FROM event_registrations WHERE id = p_registration_id;
   IF NOT FOUND THEN
     RETURN json_build_object('success', false, 'error', 'registration_not_found');
@@ -166,6 +197,7 @@ BEGIN
   IF v_reg.status != 'approved' THEN
     RETURN json_build_object('success', false, 'error', 'not_approved');
   END IF;
+  -- Idempotency guard — no double points
   IF v_reg.checked_in IS TRUE THEN
     RETURN json_build_object('success', false, 'error', 'already_checked_in');
   END IF;
@@ -173,18 +205,25 @@ BEGIN
   SELECT * INTO v_event   FROM events   WHERE id = v_reg.event_id;
   SELECT * INTO v_profile FROM profiles WHERE id = v_reg.user_id;
 
+  -- Mark checked in
   UPDATE event_registrations SET checked_in = true WHERE id = p_registration_id;
 
+  -- Award points
   INSERT INTO point_transactions (user_id, amount, description, source)
-  VALUES (v_reg.user_id, v_event.points_value, 'Attended: ' || v_event.title, 'event_attendance');
+  VALUES (
+    v_reg.user_id,
+    v_event.points_value,
+    'Attended: ' || v_event.title,
+    'event_attendance'
+  );
 
   UPDATE profiles
   SET total_points = total_points + v_event.points_value
   WHERE id = v_reg.user_id;
 
   RETURN json_build_object(
-    'success',       true,
-    'member_name',   v_profile.full_name,
+    'success',        true,
+    'member_name',    v_profile.full_name,
     'points_awarded', v_event.points_value
   );
 END;
@@ -193,40 +232,76 @@ $$;
 
 ### ApprovalCard Component
 
-**`Registration` interface** gains:
+**`Registration` interface** (in `ApprovalCard.tsx`) gains:
 ```ts
-checked_in?: boolean
+export interface Registration {
+  id: string
+  member_name: string
+  member_email: string
+  school_or_company: string
+  event_title: string
+  registered_at: string
+  status: 'pending' | 'approved' | 'rejected'  // 'cancelled' filtered out before reaching this component
+  checked_in?: boolean                           // new
+}
 ```
 
-**New prop:**
+Note: `'cancelled'` is intentionally excluded from the local `Registration.status` type — the organizer registrants query already excludes cancelled rows, so this type correctly reflects what the component receives.
+
+**New prop on `ApprovalCardProps`:**
 ```ts
 onCheckIn?: (id: string) => void
 ```
 
 **UI logic for `status === 'approved'`:**
-- If `!checked_in`: show **"Check In"** button (green, `UserCheck` icon)
-- If `checked_in`: show a green **"Checked In ✓"** pill (no action button)
+```tsx
+{registration.status === 'approved' && !registration.checked_in && (
+  <button onClick={() => onCheckIn?.(registration.id)} className="...bg-green...">
+    <UserCheck className="w-3.5 h-3.5" />
+    Check In
+  </button>
+)}
+{registration.status === 'approved' && registration.checked_in && (
+  <p className="text-xs text-green font-semibold flex items-center gap-1">
+    <CheckCircle2 className="w-3.5 h-3.5" />
+    Checked In
+  </p>
+)}
+```
 
 ### EventRegistrants Page
 
-1. Query gains `checked_in` column: `.select('id, status, registered_at, checked_in, profiles(...)')`
-2. Map `row.checked_in` into the `Registration` object
-3. New `handleCheckIn` handler:
-```ts
-const handleCheckIn = async (regId: string) => {
-  const result = await supabase.rpc('manual_checkin', {
-    p_registration_id: regId,
-    p_organizer_id:    organizerUser.id,
-  })
-  if (result.data?.success) {
-    setRegistrants((prev) =>
-      prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
-    )
-    // toast: "✓ {member_name} checked in — +{points_awarded} pts"
-  }
-}
-```
-4. Pass `onCheckIn={handleCheckIn}` to `<ApprovalCard />`
+1. **Query update** — add `checked_in` to select:
+   ```ts
+   .select('id, status, registered_at, checked_in, profiles(full_name, email, school_or_company)')
+   ```
+
+2. **Mapping update** — include `checked_in` in the mapped `Registration` object:
+   ```ts
+   checked_in: row.checked_in ?? false,
+   ```
+
+3. **Filter** — exclude cancelled registrations from the list:
+   ```ts
+   .neq('status', 'cancelled')
+   ```
+
+4. **`handleCheckIn` handler:**
+   ```ts
+   const handleCheckIn = async (regId: string) => {
+     const { data, error } = await supabase.rpc('manual_checkin', {
+       p_registration_id: regId,
+       p_organizer_id:    organizerUser.id,
+     })
+     if (error || !data?.success) return  // silent fail; could add toast
+     setRegistrants((prev) =>
+       prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
+     )
+     // toast: `✓ ${data.member_name} checked in — +${data.points_awarded} pts`
+   }
+   ```
+
+5. Pass `onCheckIn={handleCheckIn}` to `<ApprovalCard />`.
 
 ### Realtime on Member Side
 
@@ -238,21 +313,23 @@ No changes needed. The existing `postgres_changes` subscription in `EventTicket.
 
 | File | Change |
 |---|---|
+| `packages/supabase/src/types.ts` | Add `'cancelled'` to `RegistrationStatus` union |
 | `apps/member/src/lib/dates.ts` | Add `isEventArchived()` |
-| `apps/member/src/pages/events/EventsList.tsx` | Filter Discover by `!isEventArchived` |
+| `apps/member/src/pages/events/EventsList.tsx` | Filter Discover by `!isEventArchived`; filter My Tickets to exclude cancelled |
 | `apps/member/src/pages/dashboard/Dashboard.tsx` | Augment events filter with `!isEventArchived` |
-| `apps/member/src/pages/organizer/events/OrgEventsList.tsx` | Add Upcoming/Past tabs |
-| `apps/member/src/pages/events/EventTicket.tsx` | Add cancel button + double-confirm sheets |
-| `apps/member/src/stores/useEventsStore.ts` | Add `cancelRegistration` action |
-| `apps/member/src/components/ApprovalCard.tsx` | Add `checked_in` + `onCheckIn` prop |
-| `apps/member/src/pages/organizer/events/EventRegistrants.tsx` | Add `handleCheckIn`, fetch `checked_in` |
-| DB migration | Add `'cancelled'` to status CHECK + `manual_checkin` RPC |
+| `apps/member/src/pages/organizer/events/EventsList.tsx` | Add Upcoming/Past tab state + tab UI |
+| `apps/member/src/pages/events/EventTicket.tsx` | Add cancel button (reads `reg.checked_in`) + double-confirm sheets |
+| `apps/member/src/pages/events/EventPending.tsx` | Navigate away if `reg.status === 'cancelled'` |
+| `apps/member/src/stores/useEventsStore.ts` | Add `cancelRegistration` to interface + implementation |
+| `apps/member/src/components/ApprovalCard.tsx` | Add `checked_in` field + `onCheckIn` prop |
+| `apps/member/src/pages/organizer/events/EventRegistrants.tsx` | Add `handleCheckIn`, fetch `checked_in`, exclude cancelled |
+| DB migration | `'cancelled'` to status CHECK + `manual_checkin` RPC |
 
 ---
 
 ## Out of Scope
 
-- Refund of points on cancellation (points are only awarded at check-in, not before)
-- Re-registration after cancellation (member can simply register again)
+- Refund of points on cancellation (points only awarded at check-in)
+- Re-registration after cancellation (member can simply register again if the event allows)
 - Push notifications on cancellation
-- Admin-initiated cancellation (admin can delete the event entirely)
+- Admin-initiated cancellation
