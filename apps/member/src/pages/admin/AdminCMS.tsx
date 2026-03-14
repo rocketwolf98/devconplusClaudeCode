@@ -143,11 +143,11 @@ function UpgradeRequestsTab() {
       .from('organizer_upgrade_requests')
       .select(`
         *,
-        profiles:user_id (full_name, email, chapter_id, chapters:chapter_id(name)),
+        profiles!user_id (full_name, email, chapter_id, chapters:chapter_id(name)),
         chapters:chapter_id (name)
       `)
       .order('created_at', { ascending: false })
-    if (dbErr) { setError(dbErr.message) } else { setRequests((data ?? []) as UpgradeRequest[]) }
+    if (dbErr) { setError(dbErr.message) } else { setRequests((data ?? []) as unknown as UpgradeRequest[]) }
     setIsLoading(false)
   }
 
@@ -160,7 +160,7 @@ function UpgradeRequestsTab() {
     try {
       const { error } = await supabase.rpc('approve_organizer_upgrade', {
         p_user_id:     req.user_id,
-        p_role:        req.requested_role,
+        p_role:        req.requested_role ?? '',
         p_chapter_id:  req.chapter_id,
         p_request_id:  req.id,
         p_reviewer_id: user.id,

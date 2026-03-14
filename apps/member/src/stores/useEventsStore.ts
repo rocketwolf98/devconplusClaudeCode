@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import type { Event, EventRegistration } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
 
-// EventRegistration extended with checked_in from DB schema
-type FullRegistration = EventRegistration & { checked_in: boolean }
+// Alias — checked_in: boolean | null is already part of EventRegistration
+type FullRegistration = EventRegistration
 
 interface CreateEventPayload {
   title: string
@@ -42,7 +42,7 @@ interface EventsState {
   ) => () => void
 }
 
-export const useEventsStore = create<EventsState>((set, get) => ({
+export const useEventsStore = create<EventsState>((set) => ({
   events: [],
   registrations: [],
   isLoading: false,

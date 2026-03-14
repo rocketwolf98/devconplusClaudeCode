@@ -61,7 +61,7 @@ export function OrgDashboard() {
           member_email:      pObj?.email ?? '',
           school_or_company: pObj?.school_or_company ?? '',
           event_title:       evObj?.title ?? '',
-          registered_at:     row.registered_at,
+          registered_at:     row.registered_at ?? '',
           status:            row.status as Registration['status'],
         }
       })

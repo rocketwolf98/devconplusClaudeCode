@@ -58,7 +58,7 @@ async function fetchProfileById(userId: string): Promise<Profile | null> {
   if (error && error.code !== 'PGRST116') {
     console.error('[fetchProfileById] error:', error.code, error.message)
   }
-  return data ?? null
+  return (data ?? null) as unknown as Profile | null
 }
 
 async function ensureProfile(userId: string, meta: Record<string, string | null>): Promise<Profile | null> {
@@ -83,7 +83,7 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
   if (error) {
     console.error('[ensureProfile] insert error:', error.code, error.message)
   }
-  return data ?? null
+  return (data ?? null) as unknown as Profile | null
 }
 
 async function fetchChapterName(chapterId: string | null): Promise<string | null> {

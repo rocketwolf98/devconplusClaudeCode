@@ -37,7 +37,7 @@ export function OrgEventRegistrants() {
             member_email:      p?.email ?? '',
             school_or_company: p?.school_or_company ?? '',
             event_title:       event?.title ?? '',
-            registered_at:     row.registered_at,
+            registered_at:     row.registered_at ?? '',
             status:            row.status as Registration['status'],
           }
         })

@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import { useAuthStore } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const schema = z.object({
@@ -21,7 +20,6 @@ type PageState = 'waiting' | 'ready' | 'invalid'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
-  const { updatePassword } = useAuthStore()
   const [pageState, setPageState] = useState<PageState>('waiting')
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -56,7 +54,8 @@ export default function ResetPassword() {
   const onSubmit = async (data: FormData) => {
     setFormError(null)
     try {
-      await updatePassword(data.password)
+      const { error } = await supabase.auth.updateUser({ password: data.password })
+      if (error) throw error
       navigate('/sign-in', { state: { passwordReset: true } })
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Failed to update password.')
