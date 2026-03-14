@@ -14,9 +14,13 @@ export default function EventPending() {
   const reg = registrations.find((r) => r.event_id === id && r.user_id === user?.id)
 
   // If already approved (e.g. page refresh after approval), go straight to ticket
+  // If cancelled, navigate back to events list
   useEffect(() => {
     if (reg?.status === 'approved') {
       navigate(`/events/${id}/ticket`, { replace: true })
+    }
+    if (reg?.status === 'cancelled') {
+      navigate('/events', { replace: true })
     }
   }, [reg?.status, id, navigate])
 
