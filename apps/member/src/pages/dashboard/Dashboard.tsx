@@ -14,7 +14,7 @@ import {
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 
 const XP_NEXT_MILESTONE = 2500
-import { formatDate } from '../../lib/dates'
+import { formatDate, isEventArchived } from '../../lib/dates'
 import logoMark from '../../assets/logos/logo-mark.svg'
 
 const WELCOME_BANNER = {
@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   // Build carousel: welcome article + up to 2 nearest upcoming events (max 3 total)
   const upcomingByDate = events
-    .filter((e) => e.status === 'upcoming')
+    .filter((e) => e.status === 'upcoming' && !isEventArchived(e))
     .sort((a, b) => new Date(a.event_date ?? 0).getTime() - new Date(b.event_date ?? 0).getTime())
 
   const banners = [
@@ -81,7 +81,7 @@ export default function Dashboard() {
   const banner = banners[safeIdx] ?? banners[0]
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
   const progressPct = Math.min((totalPoints / XP_NEXT_MILESTONE) * 100, 100)
-  const forYouEvents = events.filter((e) => e.status === 'upcoming').slice(0, 3)
+  const forYouEvents = events.filter((e) => e.status === 'upcoming' && !isEventArchived(e)).slice(0, 3)
   const recentTxns = transactions.slice(0, 4)
 
   return (
