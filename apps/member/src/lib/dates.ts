@@ -1,3 +1,5 @@
+import type { Event } from '@devcon-plus/supabase'
+
 const PH = 'en-PH'
 
 export const formatDate = {
@@ -24,4 +26,10 @@ export const formatDate = {
   /** "20" — event date-block day number */
   day: (date: string | Date) =>
     new Date(date).toLocaleDateString(PH, { day: 'numeric' }),
+}
+
+/** Returns true when the event's end time (or start time if no end) has passed. */
+export function isEventArchived(event: Event, now = new Date()): boolean {
+  const cutoff = event.end_date ?? event.event_date
+  return cutoff ? new Date(cutoff) < now : false
 }
