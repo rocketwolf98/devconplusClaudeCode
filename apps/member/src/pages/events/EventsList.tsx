@@ -10,6 +10,7 @@ import { useEventsStore } from '../../stores/useEventsStore'
 import StatusPill from '../../components/StatusPill'
 import { SkeletonEventCard, SkeletonFeaturedEvent } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
+import { isEventArchived } from '../../lib/dates'
 import { supabase } from '../../lib/supabase'
 import { CHAPTERS as MOCK_CHAPTERS } from '@devcon-plus/supabase'
 import type { Event, EventRegistration, Chapter } from '@devcon-plus/supabase'
@@ -61,10 +62,12 @@ export default function EventsList() {
       })
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter events by selected chapter
+  // Filter events by selected chapter, excluding archived events in Discover tab
+  const activeEvents = events.filter((e) => !isEventArchived(e))
+
   const filteredEvents = selectedChapterId
-    ? events.filter((e) => e.chapter_id === selectedChapterId)
-    : events
+    ? activeEvents.filter((e) => e.chapter_id === selectedChapterId)
+    : activeEvents
 
   const featuredEvent = filteredEvents.find((e) => e.is_featured) ?? filteredEvents[0]
   const listEvents = filteredEvents.filter((e) => e.id !== featuredEvent?.id)
