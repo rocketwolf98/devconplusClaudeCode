@@ -1,14 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem } from '../../../lib/animation'
+import { isEventArchived } from '../../../lib/dates'
 
 export function OrgEventsList() {
   const navigate = useNavigate()
   const { events, fetchEvents } = useEventsStore()
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
+
+  const upcomingEvents = events.filter((e) => !isEventArchived(e))
+  const pastEvents     = events.filter((e) => isEventArchived(e))
+  const displayEvents  = activeTab === 'upcoming' ? upcomingEvents : pastEvents
 
   useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -27,15 +33,33 @@ export function OrgEventsList() {
             + New Event
           </button>
         </div>
+
+        {/* Upcoming / Past tabs */}
+        <div className="flex gap-1 bg-white/20 p-1 rounded-xl w-fit mt-3">
+          {(['upcoming', 'past'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-colors ${
+                activeTab === tab
+                  ? 'bg-white text-blue'
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              {tab} ({tab === 'upcoming' ? upcomingEvents.length : pastEvents.length})
+            </button>
+          ))}
+        </div>
       </div>
 
       <motion.div
+        key={activeTab}
         className="p-4 space-y-3"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
-        {events.map((event) => {
+        {displayEvents.map((event) => {
           const formattedDate = event.event_date
             ? new Date(event.event_date).toLocaleDateString('en-US', {
                 weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
