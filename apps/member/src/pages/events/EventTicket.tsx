@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap } from 'lucide-react'
+import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap, AlertTriangle } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Variants } from 'framer-motion'
@@ -58,7 +58,7 @@ export default function EventTicket() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { events, registrations } = useEventsStore()
+  const { events, registrations, cancelRegistration } = useEventsStore()
   const { user } = useAuthStore()
   const { activeTheme } = useThemeStore()
   const theme = activeTheme()
@@ -69,6 +69,10 @@ export default function EventTicket() {
   const [fetchError, setFetchError] = useState(false)
   const [retryKey, setRetryKey] = useState(0)
   const [checkedIn, setCheckedIn] = useState(false)
+
+  const [cancelStep, setCancelStep] = useState<null | 'first' | 'second'>(null)
+  const [isCancelling, setIsCancelling]     = useState(false)
+  const [cancelError, setCancelError]       = useState<string | null>(null)
 
   const event = events.find((e) => e.id === id)
   const reg = registrations.find((r) => r.event_id === id)
@@ -174,6 +178,19 @@ export default function EventTicket() {
     { label: 'Name',         value: user?.full_name ?? '—',       valueClass: 'text-slate-900 font-medium' },
     { label: 'Points Value', value: `+${event.points_value} pts`, valueClass: 'text-green font-bold' },
   ]
+
+  const handleConfirmCancel = async () => {
+    if (!reg) return
+    setIsCancelling(true)
+    setCancelError(null)
+    try {
+      await cancelRegistration(reg.id)
+      navigate('/events', { replace: true })
+    } catch {
+      setCancelError('Failed to cancel. Please try again.')
+      setIsCancelling(false)
+    }
+  }
 
   return (
     <div
@@ -398,6 +415,18 @@ export default function EventTicket() {
               ))}
             </motion.div>
 
+            {/* Cancel registration — only shown when not yet checked in */}
+            {!reg.checked_in && !checkedIn && (
+              <div className="px-6 pb-5">
+                <button
+                  onClick={() => setCancelStep('first')}
+                  className="w-full py-2.5 text-sm font-semibold text-red border border-red/20 rounded-xl hover:bg-red/5 transition-colors"
+                >
+                  Cancel Registration
+                </button>
+              </div>
+            )}
+
           </div>
         </motion.div>
 
@@ -414,6 +443,89 @@ export default function EventTicket() {
         </motion.p>
 
       </div>
+
+      {/* ── Cancel confirmation sheets ── */}
+      <AnimatePresence>
+        {cancelStep && (
+          <motion.div
+            key="cancel-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-30 flex items-end"
+            onClick={() => { if (!isCancelling) setCancelStep(null) }}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="w-full bg-white rounded-t-3xl p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {cancelStep === 'first' ? (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="w-6 h-6 text-red" />
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900 text-center mb-1">
+                    Cancel your registration?
+                  </h3>
+                  <p className="text-sm text-slate-500 text-center mb-6">
+                    You'll lose your spot for <span className="font-semibold text-slate-700">{event.title}</span>. This cannot be undone.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setCancelStep(null)}
+                      className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700"
+                    >
+                      Keep my spot
+                    </button>
+                    <button
+                      onClick={() => setCancelStep('second')}
+                      className="flex-1 py-3 rounded-2xl bg-slate-100 text-sm font-bold text-slate-900"
+                    >
+                      Yes, continue →
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="w-6 h-6 text-red" />
+                  </div>
+                  <h3 className="text-lg font-black text-slate-900 text-center mb-1">
+                    Are you absolutely sure?
+                  </h3>
+                  <p className="text-sm text-slate-500 text-center mb-2">
+                    You will be permanently removed from the attendee list.
+                  </p>
+                  {cancelError && (
+                    <p className="text-xs text-red text-center mb-2">{cancelError}</p>
+                  )}
+                  <div className="flex gap-3 mt-4">
+                    <button
+                      onClick={() => setCancelStep('first')}
+                      disabled={isCancelling}
+                      className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 disabled:opacity-50"
+                    >
+                      Go back
+                    </button>
+                    <button
+                      onClick={handleConfirmCancel}
+                      disabled={isCancelling}
+                      className="flex-1 py-3 rounded-2xl bg-red text-white text-sm font-bold disabled:opacity-50"
+                    >
+                      {isCancelling ? 'Cancelling…' : 'Cancel Registration'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   )
 }
