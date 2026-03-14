@@ -120,25 +120,29 @@ export default function EventTicket() {
   useEffect(() => {
     if (!reg) return
 
-    // Check if already checked in (e.g. user re-opens ticket after being scanned)
-    void supabase
-      .from('event_registrations')
-      .select('checked_in')
-      .eq('id', reg.id)
-      .single()
-      .then(({ data }) => { if (data?.checked_in) setCheckedIn(true) })
-
     // Live: organizer scans → checked_in flips to true
+    const regId = reg.id
     const channel = supabase
-      .channel(`checkin-${reg.id}`)
+      .channel(`checkin-${regId}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'event_registrations', filter: `id=eq.${reg.id}` },
+        { event: 'UPDATE', schema: 'public', table: 'event_registrations', filter: `id=eq.${regId}` },
         (payload) => {
-          if ((payload.new as { checked_in: boolean }).checked_in) setCheckedIn(true)
+          if ((payload.new as { checked_in: boolean | null }).checked_in) setCheckedIn(true)
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        // Re-check once subscribed — catches any scan that happened in the
+        // ~200ms window between component mount and subscription confirmation
+        if (status === 'SUBSCRIBED') {
+          void supabase
+            .from('event_registrations')
+            .select('checked_in')
+            .eq('id', regId)
+            .single()
+            .then(({ data }) => { if (data?.checked_in) setCheckedIn(true) })
+        }
+      })
 
     return () => { void supabase.removeChannel(channel) }
   }, [reg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
