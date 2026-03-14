@@ -12,13 +12,18 @@ interface ScanResult {
   eventTitle: string
 }
 
-type ScanState = 'idle' | 'scanning' | 'success' | 'error'
+interface AlreadyCheckedInResult {
+  memberName: string
+}
+
+type ScanState = 'idle' | 'scanning' | 'success' | 'already_checked_in' | 'error'
 
 export function OrgQRScanner() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
   const [scanState, setScanState] = useState<ScanState>('idle')
   const [result, setResult] = useState<ScanResult | null>(null)
+  const [alreadyCheckedIn, setAlreadyCheckedIn] = useState<AlreadyCheckedInResult | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [manualToken, setManualToken] = useState('')
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
@@ -87,14 +92,39 @@ export function OrgQRScanner() {
       member_name?: string
       points_awarded?: number
       event_title?: string
+      already_checked_in?: boolean
       error?: string
     }>('award-points-on-scan', {
-      body: { qr_code_token: token, organizer_id: user.id },
+      body: { token },
     })
 
-    if (error || !data?.success) {
+    if (error) {
       setScanState('error')
-      setErrorMsg(data?.error ?? error?.message ?? 'Scan failed. Please try again.')
+      setErrorMsg(error.message ?? 'Scan failed. Please try again.')
+      return
+    }
+
+    if (data?.already_checked_in) {
+      setAlreadyCheckedIn({ memberName: data.member_name ?? 'Member' })
+      setScanState('already_checked_in')
+      return
+    }
+
+    if (data?.error === 'token_expired') {
+      setScanState('error')
+      setErrorMsg('QR expired — ask member to refresh their screen.')
+      return
+    }
+
+    if (data?.error === 'invalid_token') {
+      setScanState('error')
+      setErrorMsg('Invalid QR code.')
+      return
+    }
+
+    if (!data?.success) {
+      setScanState('error')
+      setErrorMsg(data?.error ?? 'Scan failed. Please try again.')
       return
     }
 
@@ -118,6 +148,7 @@ export function OrgQRScanner() {
     stopScanning()
     setScanState('idle')
     setResult(null)
+    setAlreadyCheckedIn(null)
     setErrorMsg('')
   }
 
@@ -167,7 +198,7 @@ export function OrgQRScanner() {
                   <input
                     value={manualToken}
                     onChange={(e) => setManualToken(e.target.value)}
-                    placeholder="Paste QR token (e.g. DCN-ABC123)"
+                    placeholder="Paste JWT token from member's screen"
                     className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue"
                   />
                   <button
@@ -235,6 +266,32 @@ export function OrgQRScanner() {
                   <Zap className="w-4 h-4 text-green" />
                   <span className="text-lg font-black text-green">+{result.pointsAwarded} XP awarded!</span>
                 </div>
+              </div>
+              <motion.button
+                onClick={reset}
+                className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+                whileTap={{ scale: 0.98 }}
+              >
+                Scan Next Member
+              </motion.button>
+            </motion.div>
+          )}
+
+          {scanState === 'already_checked_in' && alreadyCheckedIn && (
+            <motion.div
+              key="already_checked_in"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Info className="w-8 h-8 text-amber-500" />
+                </div>
+                <p className="text-xl font-black text-slate-900 mb-1">{alreadyCheckedIn.memberName}</p>
+                <p className="text-sm text-amber-600 font-medium">Already checked in</p>
               </div>
               <motion.button
                 onClick={reset}

@@ -1,0 +1,113 @@
+// generate-qr-token Edge Function
+// Deploy: supabase functions deploy generate-qr-token
+//
+// Input:  { registration_id: string }
+// Output: { token: string, expires_at: number }
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { create, getNumericDate } from 'https://deno.land/x/djwt@v3.0.2/mod.ts'
+
+// Encode UUID (36 hex chars) → 22-char base64url (128 bits, no hyphens)
+function uuidToCompact(uuid: string): string {
+  const hex = uuid.replace(/-/g, '')
+  const bytes = new Uint8Array(16)
+  for (let i = 0; i < 16; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    // 1. Verify caller identity — anon client with user JWT in global headers (correct Supabase pattern)
+    const authHeader = req.headers.get('Authorization')
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader ?? '' } },
+        auth: { autoRefreshToken: false, persistSession: false },
+      }
+    )
+    const { data: { user }, error: authErr } = await supabaseAuth.auth.getUser()
+    if (authErr || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Service role client for data operations (bypasses RLS)
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    const { registration_id } = await req.json() as { registration_id: string }
+    if (!registration_id) {
+      return new Response(
+        JSON.stringify({ error: 'Missing registration_id.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 2. Validate registration: must belong to caller and be approved
+    const { data: reg, error: regErr } = await supabase
+      .from('event_registrations')
+      .select('id, user_id, event_id, status, events(status)')
+      .eq('id', registration_id)
+      .eq('user_id', user.id)
+      .eq('status', 'approved')
+      .single()
+
+    if (regErr || !reg) {
+      return new Response(
+        JSON.stringify({ error: 'Registration not found or not approved.' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 3. Reject if event has already passed
+    const eventStatus = (reg.events as { status: string } | null)?.status
+    if (eventStatus === 'past') {
+      return new Response(
+        JSON.stringify({ error: 'Event has already passed.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 4. Sign a short-lived JWT (35s TTL — slightly over the 30s client rotation interval)
+    const rawSecret = Deno.env.get('QR_JWT_SECRET') ?? ''
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(rawSecret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    )
+    const expiresAt = getNumericDate(35)
+    const token = await create(
+      { alg: 'HS256', typ: 'JWT' },
+      { sub: uuidToCompact(reg.id), exp: expiresAt },
+      key
+    )
+
+    return new Response(
+      JSON.stringify({ token, expires_at: expiresAt }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  } catch (err) {
+    return new Response(
+      JSON.stringify({ error: err instanceof Error ? err.message : 'Internal error.' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+})

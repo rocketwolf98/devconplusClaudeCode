@@ -1,10 +1,21 @@
 // award-points-on-scan Edge Function
 // Deploy: supabase functions deploy award-points-on-scan
 //
-// Input:  { qr_code_token: string }
-// Output: { success: boolean, member_name?: string, points_awarded?: number, event_title?: string, error?: string }
+// Input:  { token: string }  — short-lived JWT from generate-qr-token
+// Output: { success: boolean, member_name?: string, points_awarded?: number,
+//           event_title?: string, already_checked_in?: boolean, error?: string }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { verify } from 'https://deno.land/x/djwt@v3.0.2/mod.ts'
+
+// Decode 22-char base64url back to standard UUID string
+function compactToUuid(compact: string): string {
+  const pad = (4 - compact.length % 4) % 4
+  const b64 = compact.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat(pad)
+  const bin = atob(b64)
+  const hex = Array.from(bin).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin':  '*',
@@ -18,18 +29,17 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Use service role to bypass RLS for data operations
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-
-    // 1. Verify caller identity from JWT — never trust organizer_id from request body
+    // 1. Verify caller identity — anon client with user JWT in global headers (correct Supabase pattern)
     const authHeader = req.headers.get('Authorization')
-    const { data: { user: callerUser }, error: authErr } = await supabase.auth.getUser(
-      authHeader?.replace('Bearer ', '') ?? ''
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader ?? '' } },
+        auth: { autoRefreshToken: false, persistSession: false },
+      }
     )
+    const { data: { user: callerUser }, error: authErr } = await supabaseAuth.auth.getUser()
     if (authErr || !callerUser) {
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized.' }),
@@ -37,16 +47,45 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    const { qr_code_token } = await req.json() as { qr_code_token: string }
+    // Service role client for data operations — bypasses RLS
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
 
-    if (!qr_code_token) {
+    const { token } = await req.json() as { token: string }
+
+    if (!token) {
       return new Response(
         JSON.stringify({ success: false, error: 'Missing required fields.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // 2. Validate caller has organizer role
+    // 2. Verify QR JWT signature and expiry — signing secret never leaves the server
+    let registrationId: string
+    try {
+      const rawSecret = Deno.env.get('QR_JWT_SECRET') ?? ''
+      const key = await crypto.subtle.importKey(
+        'raw',
+        new TextEncoder().encode(rawSecret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign', 'verify']
+      )
+      const payload = await verify(token, key)
+      registrationId = compactToUuid(payload.sub as string)
+    } catch (jwtErr) {
+      const isExpired = jwtErr instanceof Error && jwtErr.message.toLowerCase().includes('expired')
+      // Return 200 so client can read the structured error body
+      return new Response(
+        JSON.stringify({ success: false, error: isExpired ? 'token_expired' : 'invalid_token' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 3. Validate caller has organizer role
     const { data: organizer, error: orgError } = await supabase
       .from('profiles')
       .select('id, role, chapter_id')
@@ -61,11 +100,11 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 3. Find registration by QR token (must be approved)
+    // 4. Find registration by ID extracted from JWT (must be approved)
     const { data: reg, error: regError } = await supabase
       .from('event_registrations')
       .select('id, user_id, event_id, status, checked_in')
-      .eq('qr_code_token', qr_code_token)
+      .eq('id', registrationId)
       .eq('status', 'approved')
       .single()
 
@@ -76,7 +115,7 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 4. Get event details (points_value, title)
+    // 5. Get event details (points_value, title)
     const { data: event, error: eventError } = await supabase
       .from('events')
       .select('id, title, points_value')
@@ -90,14 +129,14 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 5. Get member name for response
+    // 6. Get member name for response (needed for both success and already-checked-in paths)
     const { data: member } = await supabase
       .from('profiles')
       .select('full_name')
       .eq('id', reg.user_id)
       .single()
 
-    // 6. Atomically claim check-in: only succeeds if checked_in is still false.
+    // 7. Atomically claim check-in: only succeeds if checked_in is still false.
     //    This prevents double-award from concurrent scan requests.
     const { data: claimed, error: claimErr } = await supabase
       .from('event_registrations')
@@ -108,13 +147,18 @@ Deno.serve(async (req: Request) => {
       .maybeSingle()
 
     if (claimErr || !claimed) {
+      // Return 200 so client can read the structured body
       return new Response(
-        JSON.stringify({ success: false, error: 'This member has already checked in.' }),
-        { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({
+          success: false,
+          already_checked_in: true,
+          member_name: member?.full_name ?? 'Member',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // 7. Insert point transaction
+    // 8. Insert point transaction
     await supabase.from('point_transactions').insert({
       user_id:     reg.user_id,
       amount:      event.points_value,
@@ -122,7 +166,7 @@ Deno.serve(async (req: Request) => {
       source:      'event_attendance',
     })
 
-    // 8. Atomically increment total_points — avoids read-modify-write race
+    // 9. Atomically increment total_points — avoids read-modify-write race
     await supabase.rpc('increment_member_points', {
       p_user_id: reg.user_id,
       p_amount:  event.points_value,

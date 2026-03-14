@@ -1,13 +1,13 @@
-import { useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Download } from 'lucide-react'
+import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { Variants } from 'framer-motion'
-import { toPng } from 'html-to-image'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useThemeStore } from '../../stores/useThemeStore'
+import { supabase } from '../../lib/supabase'
 
 // Animation variants
 const cardVariants: Variants = {
@@ -27,6 +27,11 @@ const rowItem: Variants = {
   hidden: { opacity: 0, y: 6 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 }
+
+// Countdown border geometry — rounded rect that wraps the QR container
+const RECT_SIZE = 220   // slightly larger than the 204px QR container
+const RECT_RX   = 24   // rounded-3xl to match the card aesthetic
+const RECT_CIRCUMFERENCE = 4 * (RECT_SIZE - 2 * RECT_RX) + 2 * Math.PI * RECT_RX
 
 // Inline horizontal logo — white text paths + multicolor ICON
 function LogoHorizontalWhite({ width = 132 }: { width?: number }) {
@@ -52,16 +57,91 @@ function LogoHorizontalWhite({ width = 132 }: { width?: number }) {
 export default function EventTicket() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const ticketRef = useRef<HTMLDivElement>(null)
-  const [downloading, setDownloading] = useState(false)
 
   const { events, registrations } = useEventsStore()
   const { user } = useAuthStore()
   const { activeTheme } = useThemeStore()
   const theme = activeTheme()
 
+  const [token, setToken] = useState<string | null>(null)
+  const [secondsLeft, setSecondsLeft] = useState(30)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
+  const [retryKey, setRetryKey] = useState(0)
+  const [checkedIn, setCheckedIn] = useState(false)
+
   const event = events.find((e) => e.id === id)
   const reg = registrations.find((r) => r.event_id === id)
+
+  // Token rotation — fetch on mount and 6s before each expiry
+  useEffect(() => {
+    if (!reg) return
+    let cancelled = false
+    let inErrorState = false
+
+    async function fetchToken() {
+      if (cancelled || inErrorState) return
+      setIsRefreshing(true)
+      setFetchError(false)
+
+      const { data, error } = await supabase.functions.invoke<{ token: string; expires_at: number }>(
+        'generate-qr-token',
+        { body: { registration_id: reg!.id } }
+      )
+
+      if (cancelled) return
+
+      if (error || !data?.token) {
+        setFetchError(true)
+        inErrorState = true
+      } else {
+        setToken(data.token)
+        setSecondsLeft(30)
+      }
+      setIsRefreshing(false)
+    }
+
+    void fetchToken()
+
+    const intervalId = setInterval(() => {
+      setSecondsLeft(prev => {
+        if (prev === 6) void fetchToken()
+        return prev <= 1 ? 1 : prev - 1
+      })
+    }, 1000)
+
+    return () => {
+      cancelled = true
+      clearInterval(intervalId)
+    }
+  }, [reg?.id, retryKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Check-in detection — initial fetch + Realtime subscription
+  useEffect(() => {
+    if (!reg) return
+
+    // Check if already checked in (e.g. user re-opens ticket after being scanned)
+    void supabase
+      .from('event_registrations')
+      .select('checked_in')
+      .eq('id', reg.id)
+      .single()
+      .then(({ data }) => { if (data?.checked_in) setCheckedIn(true) })
+
+    // Live: organizer scans → checked_in flips to true
+    const channel = supabase
+      .channel(`checkin-${reg.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'event_registrations', filter: `id=eq.${reg.id}` },
+        (payload) => {
+          if ((payload.new as { checked_in: boolean }).checked_in) setCheckedIn(true)
+        }
+      )
+      .subscribe()
+
+    return () => { void supabase.removeChannel(channel) }
+  }, [reg?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!event || !reg || reg.status !== 'approved') {
     return (
@@ -78,31 +158,17 @@ export default function EventTicket() {
       })
     : 'Date TBA'
 
-  async function handleDownload() {
-    if (!ticketRef.current || downloading) return
-    setDownloading(true)
-    try {
-      const dataUrl = await toPng(ticketRef.current, {
-        cacheBust: true,
-        pixelRatio: 3,
-        style: { borderRadius: '24px' },
-      })
-      const link = document.createElement('a')
-      const slug = event?.title.replace(/\s+/g, '-').toLowerCase() ?? 'ticket'
-      link.download = `devcon-ticket-${slug}.png`
-      link.href = dataUrl
-      link.click()
-    } catch {
-      // silently fail — ticket still usable
-    } finally {
-      setDownloading(false)
-    }
-  }
+  // Countdown border progress
+  const strokeDashoffset = RECT_CIRCUMFERENCE * (1 - secondsLeft / 30)
+  const ringColor = fetchError
+    ? '#EF4444'
+    : secondsLeft > 10
+      ? 'rgb(var(--color-primary))'
+      : '#F59E0B'
 
   const infoRows: { label: string; value: string; valueClass: string }[] = [
-    { label: 'Name',         value: user?.full_name ?? '—',        valueClass: 'text-slate-900 font-medium' },
-    { label: 'Ticket ID',    value: reg.qr_code_token ?? '—',      valueClass: 'font-mono text-[11px] text-slate-700 truncate max-w-[160px]' },
-    { label: 'Points Value', value: `+${event.points_value} pts`,  valueClass: 'text-green font-bold' },
+    { label: 'Name',         value: user?.full_name ?? '—',       valueClass: 'text-slate-900 font-medium' },
+    { label: 'Points Value', value: `+${event.points_value} pts`, valueClass: 'text-green font-bold' },
   ]
 
   return (
@@ -127,9 +193,8 @@ export default function EventTicket() {
       {/* Scrollable content */}
       <div className="flex flex-col items-center px-5 pt-20 pb-12">
 
-        {/* Ticket card — ref captures this for download */}
+        {/* Ticket card */}
         <motion.div
-          ref={ticketRef}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -139,7 +204,7 @@ export default function EventTicket() {
           {/* ── Primary header strip ── */}
           <div
             className="px-6 pt-6 pb-5 text-center"
-            style={{ backgroundColor: theme.hex }}
+            style={{ backgroundColor: checkedIn ? '#21C45D' : theme.hex, transition: 'background-color 0.6s ease' }}
           >
             <motion.div
               initial={{ opacity: 0, y: 6 }}
@@ -174,22 +239,137 @@ export default function EventTicket() {
           {/* ── White ticket body ── */}
           <div className="bg-white">
 
-            {/* QR code */}
+            {/* QR code / success card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="flex justify-center pt-6 pb-5 px-6"
+              className="flex flex-col items-center pt-6 pb-3 px-6 gap-3"
             >
-              <div className="p-4 bg-white rounded-2xl ring-2 ring-primary/20 shadow-[0_8px_32px_rgba(30,42,86,0.18)]">
-                <QRCodeSVG
-                  value={reg.qr_code_token ?? 'DEVCON-TICKET'}
-                  size={172}
-                  level="H"
-                  fgColor="#1E2A56"
-                  bgColor="#FFFFFF"
-                />
+              {/* Fixed-size wrapper so QR and success card share the same footprint */}
+              <div className="relative w-[240px] h-[240px] flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  {checkedIn ? (
+                    <motion.div
+                      key="checked-in"
+                      initial={{ opacity: 0, scale: 0.82 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="w-[204px] h-[204px] bg-white rounded-2xl shadow-[0_8px_32px_rgba(33,196,93,0.20)] border border-green/20 flex flex-col items-center justify-center gap-2"
+                    >
+                      <motion.div
+                        initial={{ scale: 0, rotate: -20 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
+                        className="w-16 h-16 rounded-full bg-green/15 flex items-center justify-center"
+                      >
+                        <CheckCircle2 className="w-9 h-9 text-green" />
+                      </motion.div>
+                      <motion.p
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.26, duration: 0.22 }}
+                        className="text-base font-black text-slate-900"
+                      >
+                        Signed In!
+                      </motion.p>
+                      <motion.p
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.32, duration: 0.2 }}
+                        className="text-[11px] text-slate-400 text-center px-4"
+                      >
+                        Attendance recorded
+                      </motion.p>
+                      <motion.div
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4, duration: 0.2 }}
+                        className="flex items-center gap-1 bg-green/10 rounded-full px-3 py-1 border border-green/20"
+                      >
+                        <Zap className="w-3 h-3 text-green" />
+                        <span className="text-xs font-bold text-green">+{event.points_value} XP earned!</span>
+                      </motion.div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="qr-code"
+                      initial={{ opacity: 1 }}
+                      exit={{ opacity: 0, scale: 0.92 }}
+                      transition={{ duration: 0.2 }}
+                      className="relative flex items-center justify-center"
+                    >
+                      {/* SVG countdown border — rounded rect around the QR container */}
+                      <svg
+                        width={240}
+                        height={240}
+                        className="absolute pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        <rect
+                          x={10} y={10}
+                          width={RECT_SIZE} height={RECT_SIZE}
+                          rx={RECT_RX} ry={RECT_RX}
+                          fill="none"
+                          stroke="rgba(0,0,0,0.07)"
+                          strokeWidth={4}
+                        />
+                        <rect
+                          x={10} y={10}
+                          width={RECT_SIZE} height={RECT_SIZE}
+                          rx={RECT_RX} ry={RECT_RX}
+                          fill="none"
+                          stroke={ringColor}
+                          strokeWidth={4}
+                          strokeLinecap="round"
+                          strokeDasharray={RECT_CIRCUMFERENCE}
+                          strokeDashoffset={strokeDashoffset}
+                          style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s ease' }}
+                        />
+                      </svg>
+
+                      {/* QR container */}
+                      <div
+                        className="p-4 bg-white rounded-2xl shadow-[0_8px_32px_rgba(30,42,86,0.18)]"
+                        style={{ opacity: isRefreshing || !token ? 0.4 : 1, transition: 'opacity 0.3s' }}
+                      >
+                        {token ? (
+                          <QRCodeSVG
+                            value={token}
+                            size={172}
+                            level="M"
+                            fgColor="#1E2A56"
+                            bgColor="#FFFFFF"
+                          />
+                        ) : (
+                          <div className="w-[172px] h-[172px] flex items-center justify-center">
+                            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgb(var(--color-primary)) transparent transparent transparent' }} />
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+
+              {/* Countdown label / retry — hidden after check-in */}
+              {!checkedIn && (
+                fetchError ? (
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setRetryKey(k => k + 1)}
+                    className="flex items-center gap-1.5 text-red text-xs font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Tap to retry
+                  </motion.button>
+                ) : (
+                  <p className="text-xs font-medium" style={{ color: secondsLeft <= 10 ? '#F59E0B' : 'rgb(var(--color-primary))' }}>
+                    {isRefreshing ? 'Refreshing…' : `Refreshes in ${secondsLeft}s`}
+                  </p>
+                )
+              )}
             </motion.div>
 
             {/* Perforated divider with side notches */}
@@ -217,28 +397,16 @@ export default function EventTicket() {
           </div>
         </motion.div>
 
-        {/* Download button */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.52, duration: 0.25 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleDownload}
-          disabled={downloading}
-          className="mt-5 flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-7 py-3 rounded-full text-sm font-semibold border border-white/25 disabled:opacity-50 transition-opacity"
-        >
-          <Download className="w-4 h-4" />
-          {downloading ? 'Saving…' : 'Download Ticket'}
-        </motion.button>
-
         {/* Hint */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.62, duration: 0.3 }}
-          className="text-white/40 text-xs text-center mt-4"
+          className="text-white/40 text-xs text-center mt-5"
         >
-          Show this QR code at the venue entrance
+          {checkedIn
+            ? 'You\'re all set — enjoy the event!'
+            : 'Show this QR code at the venue entrance.\nKeep this screen open — QR refreshes automatically.'}
         </motion.p>
 
       </div>
