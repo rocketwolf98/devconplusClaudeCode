@@ -418,12 +418,13 @@ export default function EventTicket() {
             {/* Cancel registration — only shown when not yet checked in */}
             {!reg.checked_in && !checkedIn && (
               <div className="px-6 pb-5">
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setCancelStep('first')}
                   className="w-full py-2.5 text-sm font-semibold text-red border border-red/20 rounded-xl hover:bg-red/5 transition-colors"
                 >
                   Cancel Registration
-                </button>
+                </motion.button>
               </div>
             )}
 
@@ -475,18 +476,20 @@ export default function EventTicket() {
                     You'll lose your spot for <span className="font-semibold text-slate-700">{event.title}</span>. This cannot be undone.
                   </p>
                   <div className="flex gap-3">
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setCancelStep(null)}
                       className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700"
                     >
                       Keep my spot
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setCancelStep('second')}
                       className="flex-1 py-3 rounded-2xl bg-slate-100 text-sm font-bold text-slate-900"
                     >
                       Yes, continue →
-                    </button>
+                    </motion.button>
                   </div>
                 </>
               ) : (
@@ -504,20 +507,22 @@ export default function EventTicket() {
                     <p className="text-xs text-red text-center mb-2">{cancelError}</p>
                   )}
                   <div className="flex gap-3 mt-4">
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setCancelStep('first')}
                       disabled={isCancelling}
                       className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 disabled:opacity-50"
                     >
                       Go back
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
                       onClick={handleConfirmCancel}
                       disabled={isCancelling}
                       className="flex-1 py-3 rounded-2xl bg-red text-white text-sm font-bold disabled:opacity-50"
                     >
                       {isCancelling ? 'Cancelling…' : 'Cancel Registration'}
-                    </button>
+                    </motion.button>
                   </div>
                 </>
               )}
