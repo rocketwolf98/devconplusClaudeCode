@@ -36,6 +36,7 @@ interface EventsState {
   subscribeToChanges: () => () => void
   fetchRegistrations: (userId: string) => Promise<void>
   register: (eventId: string, userId: string) => Promise<void>
+  cancelRegistration: (regId: string) => Promise<void>
   subscribeToRegistration: (
     registrationId: string,
     onApproved: (reg: FullRegistration) => void
@@ -144,6 +145,21 @@ export const useEventsStore = create<EventsState>((set) => ({
     if (error) throw error
     set((s) => ({
       registrations: [...s.registrations, data as FullRegistration],
+    }))
+  },
+
+  cancelRegistration: async (regId) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'cancelled', qr_code_token: null })
+      .eq('id', regId)
+    if (error) throw error
+    set((s) => ({
+      registrations: s.registrations.map((r) =>
+        r.id === regId
+          ? { ...r, status: 'cancelled' as const, qr_code_token: null }
+          : r
+      ),
     }))
   },
 
