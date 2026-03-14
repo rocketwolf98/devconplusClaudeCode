@@ -19,7 +19,7 @@ export type EventCategory =
 
 export type EventVisibility = 'public' | 'unlisted' | 'draft'
 
-export type RegistrationStatus = 'pending' | 'approved' | 'rejected'
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 
 export type PointSource =
   | 'signup'
