@@ -63,7 +63,7 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
             id: string
             event_id: string
             message: string
-            created_at: string
+            created_at: string | null
           }
           // Drop announcements for events the user is not registered to
           if (!approvedSet.has(row.event_id)) return
@@ -73,7 +73,7 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
             event_id: row.event_id,
             event_title: eventTitle,
             message: row.message,
-            created_at: row.created_at,
+            created_at: row.created_at ?? new Date().toISOString(),
             read: false,
           }
           set((state) => ({
