@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
+import { useNotificationsStore } from '../stores/useNotificationsStore'
 import ComingSoonModal from './ComingSoonModal'
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
@@ -16,6 +17,10 @@ export default function MemberLayout() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
   const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
+  const fetchRegistrations = useEventsStore((s) => s.fetchRegistrations)
+  const registrations = useEventsStore((s) => s.registrations)
+  const events = useEventsStore((s) => s.events)
+  const { fetchRecent, subscribe } = useNotificationsStore()
   const [comingSoonFeature, setComingSoonFeature] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,6 +40,21 @@ export default function MemberLayout() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
   }, [location.pathname])
+
+  useEffect(() => {
+    if (user) void fetchRegistrations(user.id)
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const approvedIds = registrations
+      .filter((r) => r.status === 'approved')
+      .map((r) => r.event_id)
+    if (approvedIds.length === 0) return
+    const eventTitles = Object.fromEntries(events.map((e) => [e.id, e.title]))
+    void fetchRecent(approvedIds, eventTitles)
+    const unsub = subscribe(approvedIds, eventTitles)
+    return unsub
+  }, [registrations.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return null
 

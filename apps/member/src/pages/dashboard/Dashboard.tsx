@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { usePointsStore } from '../../stores/usePointsStore'
+import { useNotificationsStore } from '../../stores/useNotificationsStore'
 import EventCard from '../../components/EventCard'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import {
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const { user } = useAuthStore()
   const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
   const { transactions, totalPoints, fetchPoints, isLoading: pointsLoading } = usePointsStore()
+  const unreadCount = useNotificationsStore((s) => s.unreadCount)
   const [bannerIdx, setBannerIdx] = useState(0)
   const [showVolunteerModal, setShowVolunteerModal] = useState(false)
   const [showJobsModal, setShowJobsModal] = useState(false)
@@ -98,9 +100,16 @@ export default function Dashboard() {
             {/* Notification bell */}
             <button
               onClick={() => navigate('/notifications')}
-              className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
+              className="relative w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
             >
-              <Bell className="w-4.5 h-4.5 text-white" />
+              <Bell className="w-[18px] h-[18px] text-white" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4
+                                 bg-red text-white text-[9px] font-bold rounded-full
+                                 flex items-center justify-center px-1 leading-none">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
