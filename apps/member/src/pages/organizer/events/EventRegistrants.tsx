@@ -4,6 +4,8 @@ import { ArrowLeft, Check, ClipboardList } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
+import { useOrganizerUser } from '../../../stores/useOrgAuthStore'
+import { toast } from 'sonner'
 import { ApprovalCard, type Registration } from '../../../components/ApprovalCard'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 
@@ -15,6 +17,7 @@ export function OrgEventRegistrants() {
   const { events } = useEventsStore()
 
   const event = events.find((e) => e.id === id)
+  const organizerUser = useOrganizerUser()
   const [registrants, setRegistrants] = useState<Registration[]>([])
   const [isLoading, setIsLoading]     = useState(true)
   const [filter, setFilter]           = useState<FilterStatus>('all')
@@ -25,8 +28,9 @@ export function OrgEventRegistrants() {
     setIsLoading(true)
     supabase
       .from('event_registrations')
-      .select('id, status, registered_at, profiles(full_name, email, school_or_company)')
+      .select('id, status, registered_at, checked_in, profiles(full_name, email, school_or_company)')
       .eq('event_id', id)
+      .neq('status', 'cancelled')
       .then(({ data }) => {
         const mapped: Registration[] = (data ?? []).map((row) => {
           const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
@@ -39,6 +43,7 @@ export function OrgEventRegistrants() {
             event_title:       event?.title ?? '',
             registered_at:     row.registered_at ?? '',
             status:            row.status as Registration['status'],
+            checked_in:        (row.checked_in as boolean | null) ?? false,
           }
         })
         setRegistrants(mapped)
@@ -85,6 +90,20 @@ export function OrgEventRegistrants() {
         prev.map((r) => (r.id === regId ? { ...r, status: 'pending' as const } : r))
       )
     }
+  }
+
+  const handleCheckIn = async (regId: string) => {
+    if (!organizerUser?.id) return
+    const { data, error } = await supabase.rpc('manual_checkin', {
+      p_registration_id: regId,
+      p_organizer_id:    organizerUser.id,
+    })
+    if (error || !(data as { success?: boolean })?.success) return
+    const result = data as { success: boolean; member_name: string; points_awarded: number }
+    setRegistrants((prev) =>
+      prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
+    )
+    toast.success(`${result.member_name} checked in — +${result.points_awarded} pts`)
   }
 
   const handleApproveAll = async () => {
@@ -203,6 +222,7 @@ export function OrgEventRegistrants() {
                       onApprove={handleApprove}
                       onReject={handleReject}
                       onRevert={handleRevert}
+                      onCheckIn={handleCheckIn}
                     />
                   </motion.div>
                 ))}
