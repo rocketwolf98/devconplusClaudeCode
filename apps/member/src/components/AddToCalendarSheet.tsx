@@ -67,8 +67,10 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
     const a = document.createElement('a')
     a.href = url
     a.download = `${event.title.toLowerCase().replace(/\s+/g, '-')}.ics`
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
     onClose()
   }
 
