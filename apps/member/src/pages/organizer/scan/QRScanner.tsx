@@ -27,16 +27,39 @@ export function OrgQRScanner() {
   const [errorMsg, setErrorMsg] = useState('')
   const [manualToken, setManualToken] = useState('')
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
-  const [deviceIndex, setDeviceIndex] = useState(0)
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('')
   const [isSwitching, setIsSwitching] = useState(false)
   const { user } = useAuthStore()
+
+  // Pre-enumerate cameras on mount so the dropdown is ready before scanning starts.
+  // This may silently fail if permissions aren't granted yet — that's fine, we
+  // enumerate again inside startCamera once the user triggers camera access.
+  useEffect(() => {
+    BrowserQRCodeReader.listVideoInputDevices()
+      .then((list) => {
+        setDevices(list)
+        if (list.length > 0 && !selectedDeviceId) setSelectedDeviceId(list[0].deviceId)
+      })
+      .catch(() => undefined)
+
+    return () => { stopScanning() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const stopScanning = () => {
     controlsRef.current?.stop()
     controlsRef.current = null
+
+    // Explicitly release the MediaStream so the camera hardware is fully freed.
+    // zxing's stop() is inconsistent across browsers about releasing tracks.
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach((t) => t.stop())
+      videoRef.current.srcObject = null
+    }
   }
 
-  const startCamera = async (index?: number) => {
+  const startCamera = async (deviceId?: string) => {
     setScanState('scanning')
     setResult(null)
     setErrorMsg('')
@@ -46,13 +69,14 @@ export function OrgQRScanner() {
       const allDevices = await BrowserQRCodeReader.listVideoInputDevices()
       if (allDevices.length === 0) throw new Error('No camera devices found.')
 
-      if (devices.length === 0) setDevices(allDevices)
+      // Update device list now that we have camera permission
+      setDevices(allDevices)
 
-      const activeIndex = index ?? deviceIndex
-      const deviceId = allDevices[activeIndex]?.deviceId ?? allDevices[allDevices.length - 1].deviceId
+      const activeId = deviceId ?? selectedDeviceId ?? allDevices[0].deviceId
+      if (!selectedDeviceId) setSelectedDeviceId(allDevices[0].deviceId)
 
       const controls = await reader.decodeFromVideoDevice(
-        deviceId,
+        activeId || allDevices[0].deviceId,
         videoRef.current!,
         (res, err) => {
           if (res) {
@@ -70,13 +94,12 @@ export function OrgQRScanner() {
     }
   }
 
-  const switchCamera = async () => {
-    if (devices.length < 2 || isSwitching) return
+  const switchCamera = async (newDeviceId: string) => {
+    if (isSwitching || newDeviceId === selectedDeviceId) return
     setIsSwitching(true)
+    setSelectedDeviceId(newDeviceId)
     stopScanning()
-    const nextIndex = (deviceIndex + 1) % devices.length
-    setDeviceIndex(nextIndex)
-    await startCamera(nextIndex)
+    await startCamera(newDeviceId)
     setIsSwitching(false)
   }
 
@@ -87,53 +110,60 @@ export function OrgQRScanner() {
       return
     }
 
-    const { data, error } = await supabase.functions.invoke<{
-      success: boolean
-      member_name?: string
-      points_awarded?: number
-      event_title?: string
-      already_checked_in?: boolean
-      error?: string
-    }>('award-points-on-scan', {
-      body: { token },
-    })
+    try {
+      const { data, error } = await supabase.functions.invoke<{
+        success: boolean
+        member_name?: string
+        points_awarded?: number
+        event_title?: string
+        already_checked_in?: boolean
+        error?: string
+      }>('award-points-on-scan', {
+        body: { token },
+      })
 
-    if (error) {
+      if (error) {
+        setScanState('error')
+        setErrorMsg(error.message ?? 'Scan failed. Please try again.')
+        return
+      }
+
+      if (data?.already_checked_in) {
+        setAlreadyCheckedIn({ memberName: data.member_name ?? 'Member' })
+        setScanState('already_checked_in')
+        return
+      }
+
+      if (data?.error === 'token_expired') {
+        setScanState('error')
+        setErrorMsg('QR expired — ask member to refresh their screen.')
+        return
+      }
+
+      if (data?.error === 'invalid_token') {
+        setScanState('error')
+        setErrorMsg('Invalid QR code.')
+        return
+      }
+
+      if (!data?.success) {
+        setScanState('error')
+        setErrorMsg(data?.error ?? 'Scan failed. Please try again.')
+        return
+      }
+
+      setResult({
+        memberName:    data.member_name ?? 'Member',
+        pointsAwarded: data.points_awarded ?? 0,
+        eventTitle:    data.event_title ?? '',
+      })
+      setScanState('success')
+    } catch (e) {
+      // supabase.functions.invoke can throw on network errors (e.g. no URL configured).
+      // Catch here so the promise rejection is never silently swallowed.
       setScanState('error')
-      setErrorMsg(error.message ?? 'Scan failed. Please try again.')
-      return
+      setErrorMsg(e instanceof Error ? e.message : 'Scan failed. Please try again.')
     }
-
-    if (data?.already_checked_in) {
-      setAlreadyCheckedIn({ memberName: data.member_name ?? 'Member' })
-      setScanState('already_checked_in')
-      return
-    }
-
-    if (data?.error === 'token_expired') {
-      setScanState('error')
-      setErrorMsg('QR expired — ask member to refresh their screen.')
-      return
-    }
-
-    if (data?.error === 'invalid_token') {
-      setScanState('error')
-      setErrorMsg('Invalid QR code.')
-      return
-    }
-
-    if (!data?.success) {
-      setScanState('error')
-      setErrorMsg(data?.error ?? 'Scan failed. Please try again.')
-      return
-    }
-
-    setResult({
-      memberName:    data.member_name ?? 'Member',
-      pointsAwarded: data.points_awarded ?? 0,
-      eventTitle:    data.event_title ?? '',
-    })
-    setScanState('success')
   }
 
   const handleManualSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -151,10 +181,6 @@ export function OrgQRScanner() {
     setAlreadyCheckedIn(null)
     setErrorMsg('')
   }
-
-  useEffect(() => {
-    return () => { stopScanning() }
-  }, [])
 
   return (
     <div>
@@ -221,20 +247,34 @@ export function OrgQRScanner() {
               exit="exit"
               className="space-y-4"
             >
+              {/* Camera selector dropdown — shown whenever multiple cameras are detected */}
+              {devices.length > 1 && (
+                <div className="bg-white rounded-xl border border-slate-200 px-3 py-2.5 flex items-center gap-2">
+                  <SwitchCamera className="w-4 h-4 text-slate-400 shrink-0" />
+                  <select
+                    value={selectedDeviceId}
+                    onChange={(e) => void switchCamera(e.target.value)}
+                    disabled={isSwitching}
+                    className="flex-1 text-sm text-slate-700 bg-transparent focus:outline-none disabled:opacity-50 cursor-pointer"
+                  >
+                    {devices.map((device, i) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Camera ${i + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="bg-black rounded-2xl overflow-hidden aspect-square relative">
                 <video ref={videoRef} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-48 h-48 border-2 border-white/80 rounded-2xl" />
                 </div>
-                {devices.length > 1 && (
-                  <button
-                    onClick={() => void switchCamera()}
-                    disabled={isSwitching}
-                    className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center border border-white/20 transition-opacity disabled:opacity-40"
-                    aria-label="Switch camera"
-                  >
-                    <SwitchCamera className={`w-5 h-5 text-white ${isSwitching ? 'animate-spin' : ''}`} />
-                  </button>
+                {isSwitching && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-2xl">
+                    <p className="text-white text-sm font-semibold">Switching camera…</p>
+                  </div>
                 )}
               </div>
 
