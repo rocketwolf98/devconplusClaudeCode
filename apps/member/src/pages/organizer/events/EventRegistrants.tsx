@@ -98,8 +98,8 @@ export function OrgEventRegistrants() {
       p_registration_id: regId,
       p_organizer_id:    organizerUser.id,
     })
-    if (error || !(data as { success?: boolean })?.success) return
-    const result = data as { success: boolean; member_name: string; points_awarded: number }
+    if (error || !(data as unknown as { success?: boolean })?.success) return
+    const result = data as unknown as { success: boolean; member_name: string; points_awarded: number }
     setRegistrants((prev) =>
       prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
     )

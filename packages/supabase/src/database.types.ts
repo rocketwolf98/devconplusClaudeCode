@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-03-11 (Sprint 3)
+// Last generated: 2026-03-16 (Sprint 2 QA — adds manual_checkin RPC)
 
 export type Json =
   | string
@@ -632,25 +632,38 @@ export type Database = {
         }
         Returns: undefined
       }
-      delete_own_account: { Args: Record<PropertyKey, never>; Returns: undefined }
-      get_active_chapters_count: { Args: Record<PropertyKey, never>; Returns: number }
+      delete_own_account: { Args: never; Returns: undefined }
+      get_active_chapters_count: { Args: never; Returns: number }
       get_attendance_trend: {
-        Args: Record<PropertyKey, never>
-        Returns: { event: string; attendance: number }[]
+        Args: never
+        Returns: {
+          attendance: number
+          event: string
+        }[]
       }
       get_member_growth: {
-        Args: Record<PropertyKey, never>
-        Returns: { month: string; count: number }[]
+        Args: never
+        Returns: {
+          count: number
+          month: string
+        }[]
       }
-      get_my_role: { Args: Record<PropertyKey, never>; Returns: string }
-      get_total_xp_distributed: { Args: Record<PropertyKey, never>; Returns: number }
+      get_my_role: { Args: never; Returns: string }
+      get_total_xp_distributed: { Args: never; Returns: number }
       get_xp_by_chapter: {
-        Args: Record<PropertyKey, never>
-        Returns: { chapter: string; xp: number }[]
+        Args: never
+        Returns: {
+          chapter: string
+          xp: number
+        }[]
       }
       increment_member_points: {
         Args: { p_amount: number; p_user_id: string }
         Returns: undefined
+      }
+      manual_checkin: {
+        Args: { p_organizer_id: string; p_registration_id: string }
+        Returns: Json
       }
     }
     Enums: {
