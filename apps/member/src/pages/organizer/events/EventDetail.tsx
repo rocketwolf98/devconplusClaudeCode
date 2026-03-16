@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, Zap, Trash2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Zap, Trash2, AlertTriangle, Megaphone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
+import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
 
 export function OrgEventDetail() {
   const { id } = useParams<{ id: string }>()
@@ -12,6 +13,7 @@ export function OrgEventDetail() {
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0) // 0=hidden, 1=first confirm, 2=final confirm
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [showAnnounce, setShowAnnounce] = useState(false)
 
   useEffect(() => {
     if (events.length === 0) void fetchEvents()
@@ -139,6 +141,17 @@ export function OrgEventDetail() {
 
         <motion.button
           variants={fadeUp}
+          onClick={() => setShowAnnounce(true)}
+          className="w-full py-3 mb-3 border border-blue/30 text-blue text-sm font-bold rounded-xl
+                     hover:bg-blue/5 transition-colors flex items-center justify-center gap-2"
+          whileTap={{ scale: 0.98 }}
+        >
+          <Megaphone className="w-4 h-4" />
+          Send Announcement
+        </motion.button>
+
+        <motion.button
+          variants={fadeUp}
           onClick={() => navigate(`/organizer/events/${event.id}/registrants`)}
           className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
           whileTap={{ scale: 0.98 }}
@@ -146,6 +159,13 @@ export function OrgEventDetail() {
           View Registrants
         </motion.button>
       </motion.div>
+
+      <SendAnnouncementSheet
+        eventId={event.id}
+        eventTitle={event.title}
+        isOpen={showAnnounce}
+        onClose={() => setShowAnnounce(false)}
+      />
 
       {/* ── Delete confirmation bottom sheets (2-step) ── */}
       <AnimatePresence>
