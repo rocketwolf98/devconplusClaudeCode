@@ -83,7 +83,7 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
           const preview = row.message.length > 60
             ? `${row.message.slice(0, 60)}…`
             : row.message
-          toast.info(`📣 ${eventTitle}: ${preview}`)
+          toast.info(`${eventTitle}: ${preview}`)
         }
       )
       .subscribe()

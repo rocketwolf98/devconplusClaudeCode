@@ -92,14 +92,15 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
             )}
 
             <div className="flex gap-3">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={handleClose}
                 disabled={isSending}
                 className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold
                            disabled:opacity-50"
               >
                 Cancel
-              </button>
+              </motion.button>
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSend}
