@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap, AlertTriangle, CalendarPlus } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Variants } from 'framer-motion'
+import AddToCalendarSheet from '../../components/AddToCalendarSheet'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useThemeStore } from '../../stores/useThemeStore'
@@ -69,6 +70,8 @@ export default function EventTicket() {
   const [fetchError, setFetchError] = useState(false)
   const [retryKey, setRetryKey] = useState(0)
   const [checkedIn, setCheckedIn] = useState(false)
+
+  const [showCalSheet, setShowCalSheet] = useState(false)
 
   const [cancelStep, setCancelStep] = useState<null | 'first' | 'second'>(null)
   const [isCancelling, setIsCancelling]     = useState(false)
@@ -431,6 +434,23 @@ export default function EventTicket() {
           </div>
         </motion.div>
 
+        {/* Add to Calendar — hidden when no date or event is past */}
+        {event.event_date && event.status !== 'past' && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.65, duration: 0.3 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCalSheet(true)}
+            className="w-full max-w-sm flex items-center justify-center gap-2
+                       bg-white/[0.18] border border-white/30 text-white
+                       rounded-2xl py-3 text-sm font-semibold backdrop-blur-sm mt-4"
+          >
+            <CalendarPlus className="w-4 h-4" />
+            Add to Calendar
+          </motion.button>
+        )}
+
         {/* Hint */}
         <motion.p
           initial={{ opacity: 0 }}
@@ -530,6 +550,12 @@ export default function EventTicket() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AddToCalendarSheet
+        event={event}
+        isOpen={showCalSheet}
+        onClose={() => setShowCalSheet(false)}
+      />
 
     </div>
   )
