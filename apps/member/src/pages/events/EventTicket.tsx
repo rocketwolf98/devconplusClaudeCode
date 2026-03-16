@@ -175,7 +175,7 @@ export default function EventTicket() {
     ? '#EF4444'
     : secondsLeft > 10
       ? 'rgb(var(--color-primary))'
-      : '#F59E0B'
+      : '#F8C630'
 
   const infoRows: { label: string; value: string; valueClass: string }[] = [
     { label: 'Name',         value: user?.full_name ?? '—',       valueClass: 'text-slate-900 font-medium' },
@@ -389,7 +389,7 @@ export default function EventTicket() {
                     Tap to retry
                   </motion.button>
                 ) : (
-                  <p className="text-xs font-medium" style={{ color: secondsLeft <= 10 ? '#F59E0B' : 'rgb(var(--color-primary))' }}>
+                  <p className="text-xs font-medium" style={{ color: secondsLeft <= 10 ? '#F8C630' : 'rgb(var(--color-primary))' }}>
                     {isRefreshing ? 'Refreshing…' : `Refreshes in ${secondsLeft}s`}
                   </p>
                 )

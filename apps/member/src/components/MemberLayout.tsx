@@ -45,16 +45,23 @@ export default function MemberLayout() {
     if (user) void fetchRegistrations(user.id)
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Derive a stable key from the sorted approved event IDs — re-runs when a
+  // registration status changes (e.g. pending → approved) even if the array
+  // length stays the same.
+  const approvedKey = registrations
+    .filter((r) => r.status === 'approved')
+    .map((r) => r.event_id)
+    .sort()
+    .join(',')
+
   useEffect(() => {
-    const approvedIds = registrations
-      .filter((r) => r.status === 'approved')
-      .map((r) => r.event_id)
-    if (approvedIds.length === 0) return
+    if (!approvedKey) return
+    const approvedIds = approvedKey.split(',')
     const eventTitles = Object.fromEntries(events.map((e) => [e.id, e.title]))
     void fetchRecent(approvedIds, eventTitles)
     const unsub = subscribe(approvedIds, eventTitles)
     return unsub
-  }, [registrations.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [approvedKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return null
 
