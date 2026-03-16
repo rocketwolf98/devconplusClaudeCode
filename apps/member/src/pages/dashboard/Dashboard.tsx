@@ -14,9 +14,10 @@ import {
 } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 
-const XP_NEXT_MILESTONE = 2500
 import { formatDate, isEventArchived } from '../../lib/dates'
 import logoMark from '../../assets/logos/logo-mark.svg'
+
+const XP_NEXT_MILESTONE = 2500
 
 const WELCOME_BANNER = {
   title: 'Welcome to DEVCON+',
