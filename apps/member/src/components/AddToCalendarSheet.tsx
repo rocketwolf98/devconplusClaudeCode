@@ -18,7 +18,7 @@ function toManilaLocal(date: Date): string {
 
 /** Format a Date as YYYYMMDDTHHmmssZ (UTC, for Google Calendar) */
 function toUTCCompact(date: Date): string {
-  return date.toISOString().replace(/[-:.]/g, '').slice(0, 15) + 'Z'
+  return date.toISOString().replace(/[:\-.]/g, '').slice(0, 15) + 'Z'
 }
 
 export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {

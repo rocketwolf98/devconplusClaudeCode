@@ -32,25 +32,19 @@ import Notifications from './pages/profile/Notifications'
 import Privacy from './pages/profile/Privacy'
 import NotificationsInbox from './pages/notifications/NotificationsInbox'
 
-// Admin pages
-import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminUsers from './pages/admin/AdminUsers'
-import AdminOrgCodes from './pages/admin/AdminOrgCodes'
-import AdminEvents from './pages/admin/AdminEvents'
-import AdminChapters from './pages/admin/AdminChapters'
-import AdminCMS from './pages/admin/AdminCMS'
-import AdminKiosk from './pages/admin/AdminKiosk'
-
-// Organizer pages
+// Organizer pages (eagerly loaded — used by chapter officers on every session)
 import { OrgDashboard } from './pages/organizer/Dashboard'
 import { OrgEventManagement } from './pages/organizer/events/EventManagement'
 import { OrgEventCreate } from './pages/organizer/events/EventCreate'
 import { OrgEventDetail } from './pages/organizer/events/EventDetail'
 import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
-import { OrgQRScanner } from './pages/organizer/scan/QRScanner'
 import { OrgRewardsManagement } from './pages/organizer/rewards/RewardsManagement'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
+
+// OrgQRScanner is lazy-loaded: it pulls in @zxing (large barcode library)
+// which is only needed when an officer scans tickets at the door.
+// Admin pages are lazy-loaded: they're only ever accessed by super_admin.
 
 export const router = createBrowserRouter([
   // Root — always start at onboarding
@@ -89,17 +83,38 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Admin routes — wrapped in AdminLayout (guards on super_admin role only)
+  // Admin routes — all lazy-loaded, only super_admin users ever land here
   {
     element: <AdminLayout />,
     children: [
-      { path: '/admin',              element: <AdminDashboard /> },
-      { path: '/admin/users',        element: <AdminUsers /> },
-      { path: '/admin/org-codes',    element: <AdminOrgCodes /> },
-      { path: '/admin/events',       element: <AdminEvents /> },
-      { path: '/admin/chapters',     element: <AdminChapters /> },
-      { path: '/admin/upgrades',     element: <AdminCMS /> },
-      { path: '/admin/kiosk',        element: <AdminKiosk /> },
+      {
+        path: '/admin',
+        lazy: () => import('./pages/admin/AdminDashboard').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/users',
+        lazy: () => import('./pages/admin/AdminUsers').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/org-codes',
+        lazy: () => import('./pages/admin/AdminOrgCodes').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/events',
+        lazy: () => import('./pages/admin/AdminEvents').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/chapters',
+        lazy: () => import('./pages/admin/AdminChapters').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/upgrades',
+        lazy: () => import('./pages/admin/AdminCMS').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/kiosk',
+        lazy: () => import('./pages/admin/AdminKiosk').then((m) => ({ Component: m.default })),
+      },
     ],
   },
 
@@ -112,7 +127,14 @@ export const router = createBrowserRouter([
       { path: '/organizer/events/create',                element: <OrgEventCreate /> },
       { path: '/organizer/events/:id',                   element: <OrgEventDetail /> },
       { path: '/organizer/events/:id/registrants',       element: <OrgEventRegistrants /> },
-      { path: '/organizer/scan',                         element: <OrgQRScanner /> },
+      // Lazy-loaded: pulls in @zxing which is only needed for live door scanning
+      {
+        path: '/organizer/scan',
+        lazy: async () => {
+          const { OrgQRScanner } = await import('./pages/organizer/scan/QRScanner')
+          return { Component: OrgQRScanner }
+        },
+      },
       { path: '/organizer/rewards',                      element: <OrgRewardsManagement /> },
       { path: '/organizer/profile',                      element: <OrgProfile /> },
       { path: '/organizer/profile/edit',                 element: <OrgProfileEdit /> },
