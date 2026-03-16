@@ -35,6 +35,13 @@ function formatEventDate(iso: string): { month: string; day: string } {
 
 type TicketEntry = { reg: EventRegistration; event: Event }
 
+function getEventLifecycleState(ev: Event): 'in_progress' | 'done' | 'normal' {
+  const now = new Date()
+  if (isEventArchived(ev, now)) return 'done'
+  if (ev.event_date && new Date(ev.event_date) <= now) return 'in_progress'
+  return 'normal'
+}
+
 export default function EventsList() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -327,21 +334,29 @@ export default function EventsList() {
                   const destination = isApproved
                     ? `/events/${ev.id}/ticket`
                     : `/events/${ev.id}/pending`
+                  // Checked-in ticket is always "Done" regardless of event date
+                  const lifecycle = reg.checked_in ? 'done' : getEventLifecycleState(ev)
+
+                  const isExpired = lifecycle === 'done'
 
                   return (
                     <motion.button
                       key={reg.id}
                       variants={cardItem}
-                      onClick={() => navigate(destination)}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3"
+                      onClick={isExpired ? undefined : () => navigate(destination)}
+                      whileTap={isExpired ? undefined : { scale: 0.98 }}
+                      className={`w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3 ${
+                        isExpired ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
                       {dateParts ? (
-                        <div className="w-12 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold text-primary leading-none">
+                        <div className="w-12 h-14 rounded-xl bg-slate-100 flex flex-col items-center justify-center shrink-0">
+                          <span className="text-[10px] font-bold leading-none text-slate-400">
                             {dateParts.month}
                           </span>
-                          <span className="text-xl font-black text-navy leading-tight">
+                          <span className={`text-xl font-black leading-tight ${
+                            isExpired ? 'text-slate-400' : 'text-navy'
+                          }`}>
                             {dateParts.day}
                           </span>
                         </div>
@@ -350,10 +365,23 @@ export default function EventsList() {
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-bold text-slate-900 leading-tight flex-1 truncate">
+                          <p className={`text-sm font-bold leading-tight flex-1 truncate ${
+                            isExpired ? 'text-slate-400' : 'text-slate-900'
+                          }`}>
                             {ev.title}
                           </p>
-                          <StatusPill status={reg.status as 'approved' | 'pending'} />
+                          {lifecycle === 'in_progress' ? (
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-green bg-green/10 px-2 py-0.5 rounded-full shrink-0">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green animate-ping" />
+                              In Progress
+                            </span>
+                          ) : isExpired ? (
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                              Expired
+                            </span>
+                          ) : (
+                            <StatusPill status={reg.status as 'approved' | 'pending'} />
+                          )}
                         </div>
                         {ev.location && (
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
@@ -361,10 +389,18 @@ export default function EventsList() {
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                            isExpired
+                              ? 'bg-slate-100 text-slate-400 line-through'
+                              : 'bg-primary/10 text-primary'
+                          }`}>
                             +{ev.points_value} pts
                           </span>
-                          {isApproved ? (
+                          {isExpired ? (
+                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                              <Ticket className="w-3 h-3" /> Ticket expired
+                            </span>
+                          ) : lifecycle === 'normal' && (isApproved ? (
                             <span className="text-[10px] text-slate-400 flex items-center gap-1">
                               <QrCode className="w-3 h-3" /> View Ticket
                             </span>
@@ -372,10 +408,10 @@ export default function EventsList() {
                             <span className="text-[10px] text-yellow-600 flex items-center gap-1">
                               <Clock className="w-3 h-3" /> Awaiting approval
                             </span>
-                          )}
+                          ))}
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
+                      {!isExpired && <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />}
                     </motion.button>
                   )
                 })}
