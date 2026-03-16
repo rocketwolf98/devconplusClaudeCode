@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-03-16 (Sprint 2 QA — adds manual_checkin RPC)
+// Last generated: 2026-03-16 (adds event_announcements table)
 
 export type Json =
   | string
@@ -38,6 +38,45 @@ export type Database = {
           region?: string | null
         }
         Relationships: []
+      }
+      event_announcements: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          message: string
+          organizer_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          message: string
+          organizer_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          message?: string
+          organizer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_announcements_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_announcements_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_registrations: {
         Row: {
