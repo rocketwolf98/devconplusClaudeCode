@@ -39,8 +39,8 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
     }
     toast.success('Announcement sent')
     setMessage('')
-    onClose()
     setIsSending(false)
+    onClose()
   }
 
   return (
@@ -101,7 +101,7 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
                 Cancel
               </button>
               <motion.button
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSend}
                 disabled={message.trim().length === 0 || isSending}
                 className="flex-1 py-3 rounded-xl bg-blue text-white text-sm font-bold
