@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, MapPin, Ticket } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
+import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
 
 export default function EventDetail() {
@@ -20,6 +21,7 @@ export default function EventDetail() {
   return (
     <motion.div
       className="min-h-screen bg-slate-50"
+      style={getEventThemeStyle(event.devcon_category)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
