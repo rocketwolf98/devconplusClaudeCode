@@ -20,10 +20,12 @@ Two gaps:
 
 ### Part 1: Data model
 
-Add `devcon_category: 'devcon' | 'she' | 'kids' | 'campus' | null` to:
-- `Event` interface in `packages/supabase/src/types.ts`
+Add `devcon_category: DevconCategory | null` (where `DevconCategory = 'devcon' | 'she' | 'kids' | 'campus'`) to:
+- `packages/supabase/src/types.ts` — export `DevconCategory` type + add field to `Event` interface
 - `CreateEventPayload` type in `apps/member/src/stores/useEventsStore.ts`
-- A handful of mock events in the mock data (`packages/supabase/src/mock/`)
+- A handful of mock events in the mock data (`packages/supabase/src/mock/`) — seed at least one event per program category so the visual theming is testable
+
+> **Note:** `createEvent` sends this field to Supabase on insert. It will fail with a `42703` column-not-found error against a live DB until a migration adds the column. This is acceptable in the mock-data phase — add a `// TODO: add devcon_category column to events table` comment in the store.
 
 The values match the existing `PROGRAM_THEMES` IDs exactly (`useThemeStore` already defines these four IDs), so no new mapping table is needed.
 
@@ -56,8 +58,10 @@ Add a **"DEVCON Program"** field to the CATEGORIZATION section of `OrgEventCreat
 A pure utility function `getEventThemeStyle` in `apps/member/src/lib/eventTheme.ts`:
 
 ```ts
+export type DevconCategory = 'devcon' | 'she' | 'kids' | 'campus'
+
 export function getEventThemeStyle(
-  devcon_category: string | null | undefined
+  devcon_category: DevconCategory | null | undefined
 ): React.CSSProperties {
   // returns CSS var overrides as inline style, or {} if no program set
 }
