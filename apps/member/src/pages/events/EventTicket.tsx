@@ -85,7 +85,7 @@ export default function EventTicket() {
 
   // Token rotation — fetch on mount and 6s before each expiry
   useEffect(() => {
-    if (!reg) return
+    if (!reg || event?.status === 'past') return
     let cancelled = false
     let inErrorState = false
 
