@@ -147,7 +147,7 @@ export function OrgEventSummary() {
           {/* Row 2: Approved + Pending + Rejected */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: 'Approved', value: funnel.approved, color: 'text-blue/70' },
+              { label: 'Approved', value: funnel.approved, color: 'text-blue' },
               { label: 'Pending',  value: funnel.pending,  color: 'text-yellow-500' },
               { label: 'Rejected', value: funnel.rejected, color: 'text-red' },
             ].map(({ label, value, color }) => (
@@ -161,7 +161,7 @@ export function OrgEventSummary() {
 
         {/* ── Filter tabs ── */}
         <motion.div variants={fadeUp} className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit mb-5">
-          {(['all', 'approved', 'pending', 'rejected'] as FilterStatus[]).map((f) => (
+          {(['all', 'pending', 'approved', 'rejected'] as FilterStatus[]).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -292,7 +292,7 @@ export function OrgEventSummary() {
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
                     <AlertTriangle className="w-7 h-7 text-red" />
                   </div>
-                  <h2 className="text-base font-bold text-slate-900 mb-1">Are you Sure?</h2>
+                  <h2 className="text-base font-bold text-slate-900 mb-1">Are you sure?</h2>
                   <p className="text-sm text-slate-500">
                     All registrations for this event will be permanently deleted along with the event itself.{' '}
                     <span className="font-semibold text-red">This cannot be undone.</span>
