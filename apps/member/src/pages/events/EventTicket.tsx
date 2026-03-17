@@ -64,12 +64,16 @@ export default function EventTicket() {
   const { activeTheme } = useThemeStore()
   const theme = activeTheme()
 
+  // Derived early so they can seed useState initial values
+  const event = events.find((e) => e.id === id)
+  const reg = registrations.find((r) => r.event_id === id)
+
   const [token, setToken] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(30)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [fetchError, setFetchError] = useState(false)
   const [retryKey, setRetryKey] = useState(0)
-  const [checkedIn, setCheckedIn] = useState(false)
+  const [checkedIn, setCheckedIn] = useState(() => reg?.checked_in === true)
 
   const [showCalSheet, setShowCalSheet] = useState(false)
 
@@ -77,8 +81,7 @@ export default function EventTicket() {
   const [isCancelling, setIsCancelling]     = useState(false)
   const [cancelError, setCancelError]       = useState<string | null>(null)
 
-  const event = events.find((e) => e.id === id)
-  const reg = registrations.find((r) => r.event_id === id)
+  const eventEnded = event?.status === 'past' && !checkedIn
 
   // Token rotation — fetch on mount and 6s before each expiry
   useEffect(() => {
