@@ -9,12 +9,11 @@ export default function SplashScreen() {
 
   useEffect(() => {
     const t = setTimeout(() => {
-      const { user, isOrganizerSession, isInitialized } = useAuthStore.getState()
+      const { user, isInitialized } = useAuthStore.getState()
       // App.tsx gates the RouterProvider on isInitialized, so this is always true here.
       // Guard is kept as a safety net in case that render gate is later removed.
-      const dest = (isInitialized && user)
-        ? isOrganizerSession ? '/organizer' : '/home'
-        : '/onboarding'
+      // Organizers are also members — always land on /home by default.
+      const dest = (isInitialized && user) ? '/home' : '/onboarding'
       navigate(dest, { replace: true })
     }, 2600)
     return () => clearTimeout(t)
