@@ -12,6 +12,7 @@ import OrganizerCodeGate from './pages/auth/OrganizerCodeGate'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import EmailSent from './pages/auth/EmailSent'
 import ResetPassword from './pages/auth/ResetPassword'
+import NotFound from './pages/NotFound'
 
 // Member tab pages
 import Dashboard from './pages/dashboard/Dashboard'
@@ -145,4 +146,7 @@ export const router = createBrowserRouter([
       { path: '/organizer/profile/privacy',              element: <Privacy /> },
     ],
   },
+
+  // Catch-all — must be last, outside all layout groups
+  { path: '*', element: <NotFound /> },
 ])
