@@ -497,7 +497,9 @@ export default function EventTicket() {
         >
           {checkedIn
             ? 'You\'re all set — enjoy the event!'
-            : 'Show this QR code at the venue entrance.\nKeep this screen open — QR refreshes automatically.'}
+            : eventEnded
+              ? 'This event has already ended.'
+              : 'Show this QR code at the venue entrance.\nKeep this screen open — QR refreshes automatically.'}
         </motion.p>
 
       </div>
