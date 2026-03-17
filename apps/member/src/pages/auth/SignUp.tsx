@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -17,7 +17,7 @@ const schema = z.object({
   full_name:         z.string().min(2, 'Name required'),
   username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
   email:             z.string().email('Invalid email'),
-  password:          z.string().min(6, 'At least 6 characters'),
+  password:          z.string().min(8, 'At least 8 characters'),
   school_or_company: z.string().optional(),
   chapter_id:        z.string().optional(),
 })
@@ -49,7 +49,7 @@ export default function SignUp() {
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
-  const [usernameTimer, setUsernameTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
+  const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [chapters, setChapters] = useState<Chapter[]>([])
 
   useEffect(() => {
@@ -63,22 +63,27 @@ export default function SignUp() {
   })
 
   const handleUsernameChange = useCallback((value: string) => {
-    if (usernameTimer) clearTimeout(usernameTimer)
+    if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
     if (!value || value.length < 3 || !USERNAME_RE.test(value)) {
       setUsernameStatus('idle')
       return
     }
     setUsernameStatus('checking')
-    const t = setTimeout(async () => {
+    usernameTimerRef.current = setTimeout(async () => {
       const available = await checkUsernameAvailable(value)
       setUsernameStatus(available ? 'available' : 'taken')
     }, 400)
-    setUsernameTimer(t)
-  }, [usernameTimer, checkUsernameAvailable])
+  }, [checkUsernameAvailable])
+  // setUsernameStatus is a stable React state setter — intentionally omitted from deps.
+  // usernameTimerRef is a ref — refs are never listed in deps.
 
   const onSubmit = async (data: FormData) => {
-    if (usernameStatus === 'taken') {
-      setFormError('Username is already taken.')
+    if (usernameStatus === 'taken' || usernameStatus === 'checking') {
+      setFormError(
+        usernameStatus === 'checking'
+          ? 'Please wait for username check to complete.'
+          : 'Username is already taken.'
+      )
       return
     }
     setFormError(null)
