@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useLocation } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
+import ComingSoonModal from '../../components/ComingSoonModal'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const schema = z.object({
@@ -24,36 +27,50 @@ function GoogleIcon() {
 
 export default function SignIn() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signIn } = useAuthStore()
+  const [showGoogleModal, setShowGoogleModal] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const passwordReset = (location.state as { passwordReset?: boolean } | null)?.passwordReset
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
   const onSubmit = async (data: FormData) => {
-    await signIn(data.email, data.password)
-    navigate('/organizer-code-gate')
-  }
-
-  const handleGoogleSignIn = async () => {
-    // TODO: Supabase Google OAuth
-    await signIn('marie.santos@email.com', 'password')
-    navigate('/organizer-code-gate')
+    setFormError(null)
+    try {
+      await signIn(data.email, data.password)
+      navigate('/home')
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
+    }
   }
 
   return (
     <div className="min-h-screen bg-blue flex flex-col">
-      {/* Gradient header */}
+      {/* Header */}
       <div className="bg-blue px-6 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         <p className="text-white/60 mt-3 text-sm">Sign in to your account</p>
       </div>
 
-      {/* Floating card */}
+      {/* Card */}
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 overflow-y-auto">
+
+        {/* Password reset success banner */}
+        {passwordReset && (
+          <div className="bg-green/10 border border-green/20 rounded-xl px-4 py-3 mb-5">
+            <p className="text-green text-sm font-semibold">Password updated successfully!</p>
+            <p className="text-green/80 text-xs mt-0.5">Sign in with your new password.</p>
+          </div>
+        )}
+
         <button
           type="button"
-          onClick={handleGoogleSignIn}
+          onClick={() => setShowGoogleModal(true)}
           className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card"
         >
           <GoogleIcon />
@@ -79,15 +96,36 @@ export default function SignIn() {
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Password</label>
-            <input
-              {...register('password')}
-              type="password"
-              placeholder="••••••••"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-sm font-medium text-slate-700">Password</label>
+              <Link to="/forgot-password" className="text-xs text-blue font-semibold">
+                Forgot password?
+              </Link>
+            </div>
+            <div className="relative">
+              <input
+                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
           </div>
+
+          {formError && (
+            <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+              {formError}
+            </p>
+          )}
 
           <button
             type="submit"
@@ -103,6 +141,13 @@ export default function SignIn() {
           <Link to="/sign-up" className="text-blue font-semibold">Sign Up</Link>
         </p>
       </div>
+
+      {showGoogleModal && (
+        <ComingSoonModal
+          feature="Google Sign-In"
+          onClose={() => setShowGoogleModal(false)}
+        />
+      )}
     </div>
   )
 }

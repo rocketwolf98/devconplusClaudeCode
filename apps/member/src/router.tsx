@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 import MemberLayout from './components/MemberLayout'
 import OrganizerLayout from './components/OrganizerLayout'
+import AdminLayout from './components/AdminLayout'
 
 // Auth pages (no tab nav)
 import SplashScreen from './pages/auth/SplashScreen'
@@ -8,6 +9,9 @@ import Onboarding from './pages/auth/Onboarding'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
 import OrganizerCodeGate from './pages/auth/OrganizerCodeGate'
+import ForgotPassword from './pages/auth/ForgotPassword'
+import EmailSent from './pages/auth/EmailSent'
+import ResetPassword from './pages/auth/ResetPassword'
 
 // Member tab pages
 import Dashboard from './pages/dashboard/Dashboard'
@@ -28,16 +32,20 @@ import Notifications from './pages/profile/Notifications'
 import Privacy from './pages/profile/Privacy'
 import NotificationsInbox from './pages/notifications/NotificationsInbox'
 
-// Organizer pages
+// Organizer pages (eagerly loaded — used by chapter officers on every session)
 import { OrgDashboard } from './pages/organizer/Dashboard'
 import { OrgEventManagement } from './pages/organizer/events/EventManagement'
 import { OrgEventCreate } from './pages/organizer/events/EventCreate'
 import { OrgEventDetail } from './pages/organizer/events/EventDetail'
 import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
-import { OrgQRScanner } from './pages/organizer/scan/QRScanner'
+import { OrgEventSummary } from './pages/organizer/events/EventSummary'
 import { OrgRewardsManagement } from './pages/organizer/rewards/RewardsManagement'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
+
+// OrgQRScanner is lazy-loaded: it pulls in @zxing (large barcode library)
+// which is only needed when an officer scans tickets at the door.
+// Admin pages are lazy-loaded: they're only ever accessed by super_admin.
 
 export const router = createBrowserRouter([
   // Root — always start at onboarding
@@ -48,6 +56,9 @@ export const router = createBrowserRouter([
   { path: '/sign-in',              element: <SignIn /> },
   { path: '/sign-up',              element: <SignUp /> },
   { path: '/organizer-code-gate',  element: <OrganizerCodeGate /> },
+  { path: '/forgot-password',      element: <ForgotPassword /> },
+  { path: '/email-sent',           element: <EmailSent /> },
+  { path: '/reset-password',       element: <ResetPassword /> },
 
   // Member routes — wrapped in MemberLayout with bottom tab nav
   {
@@ -73,6 +84,41 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // Admin routes — all lazy-loaded, only super_admin users ever land here
+  {
+    element: <AdminLayout />,
+    children: [
+      {
+        path: '/admin',
+        lazy: () => import('./pages/admin/AdminDashboard').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/users',
+        lazy: () => import('./pages/admin/AdminUsers').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/org-codes',
+        lazy: () => import('./pages/admin/AdminOrgCodes').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/events',
+        lazy: () => import('./pages/admin/AdminEvents').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/chapters',
+        lazy: () => import('./pages/admin/AdminChapters').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/upgrades',
+        lazy: () => import('./pages/admin/AdminCMS').then((m) => ({ Component: m.default })),
+      },
+      {
+        path: '/admin/kiosk',
+        lazy: () => import('./pages/admin/AdminKiosk').then((m) => ({ Component: m.default })),
+      },
+    ],
+  },
+
   // Organizer routes — wrapped in OrganizerLayout (guards on isOrganizerSession)
   {
     element: <OrganizerLayout />,
@@ -82,7 +128,15 @@ export const router = createBrowserRouter([
       { path: '/organizer/events/create',                element: <OrgEventCreate /> },
       { path: '/organizer/events/:id',                   element: <OrgEventDetail /> },
       { path: '/organizer/events/:id/registrants',       element: <OrgEventRegistrants /> },
-      { path: '/organizer/scan',                         element: <OrgQRScanner /> },
+      { path: '/organizer/events/:id/summary',           element: <OrgEventSummary /> },
+      // Lazy-loaded: pulls in @zxing which is only needed for live door scanning
+      {
+        path: '/organizer/scan',
+        lazy: async () => {
+          const { OrgQRScanner } = await import('./pages/organizer/scan/QRScanner')
+          return { Component: OrgQRScanner }
+        },
+      },
       { path: '/organizer/rewards',                      element: <OrgRewardsManagement /> },
       { path: '/organizer/profile',                      element: <OrgProfile /> },
       { path: '/organizer/profile/edit',                 element: <OrgProfileEdit /> },

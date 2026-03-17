@@ -2,12 +2,20 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import logoVertical from '../../assets/logos/logo-vertical.svg'
+import { useAuthStore } from '../../stores/useAuthStore'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const t = setTimeout(() => navigate('/onboarding', { replace: true }), 2600)
+    const t = setTimeout(() => {
+      const { user, isInitialized } = useAuthStore.getState()
+      // App.tsx gates the RouterProvider on isInitialized, so this is always true here.
+      // Guard is kept as a safety net in case that render gate is later removed.
+      // Organizers are also members — always land on /home by default.
+      const dest = (isInitialized && user) ? '/home' : '/onboarding'
+      navigate(dest, { replace: true })
+    }, 2600)
     return () => clearTimeout(t)
   }, [navigate])
 

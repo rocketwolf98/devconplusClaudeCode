@@ -4,7 +4,7 @@
       "c:\\Users\\LENOVO\\Documents\\DEVCON+ with Claude Code\\apps\\member\\src\\assets"
     ],
     "allow": [
-      "Bash(npm run typecheck)"
+      "Bash(npm run:*)"
     ]
   }
 }

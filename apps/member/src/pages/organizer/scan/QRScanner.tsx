@@ -3,6 +3,8 @@ import { Camera, CheckCircle2, XCircle, Zap, Info, SwitchCamera } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion'
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser'
 import { fadeUp } from '../../../lib/animation'
+import { supabase } from '../../../lib/supabase'
+import { useAuthStore } from '../../../stores/useAuthStore'
 
 interface ScanResult {
   memberName: string
@@ -10,25 +12,54 @@ interface ScanResult {
   eventTitle: string
 }
 
-type ScanState = 'idle' | 'scanning' | 'success' | 'error'
+interface AlreadyCheckedInResult {
+  memberName: string
+}
+
+type ScanState = 'idle' | 'scanning' | 'success' | 'already_checked_in' | 'error'
 
 export function OrgQRScanner() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const controlsRef = useRef<IScannerControls | null>(null)
   const [scanState, setScanState] = useState<ScanState>('idle')
   const [result, setResult] = useState<ScanResult | null>(null)
+  const [alreadyCheckedIn, setAlreadyCheckedIn] = useState<AlreadyCheckedInResult | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [manualToken, setManualToken] = useState('')
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
-  const [deviceIndex, setDeviceIndex] = useState(0)
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>('')
   const [isSwitching, setIsSwitching] = useState(false)
+  const { user } = useAuthStore()
+
+  // Pre-enumerate cameras on mount so the dropdown is ready before scanning starts.
+  // This may silently fail if permissions aren't granted yet — that's fine, we
+  // enumerate again inside startCamera once the user triggers camera access.
+  useEffect(() => {
+    BrowserQRCodeReader.listVideoInputDevices()
+      .then((list) => {
+        setDevices(list)
+        if (list.length > 0 && !selectedDeviceId) setSelectedDeviceId(list[0].deviceId)
+      })
+      .catch(() => undefined)
+
+    return () => { stopScanning() }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const stopScanning = () => {
     controlsRef.current?.stop()
     controlsRef.current = null
+
+    // Explicitly release the MediaStream so the camera hardware is fully freed.
+    // zxing's stop() is inconsistent across browsers about releasing tracks.
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach((t) => t.stop())
+      videoRef.current.srcObject = null
+    }
   }
 
-  const startCamera = async (index?: number) => {
+  const startCamera = async (deviceId?: string) => {
     setScanState('scanning')
     setResult(null)
     setErrorMsg('')
@@ -38,19 +69,19 @@ export function OrgQRScanner() {
       const allDevices = await BrowserQRCodeReader.listVideoInputDevices()
       if (allDevices.length === 0) throw new Error('No camera devices found.')
 
-      // Persist device list on first load
-      if (devices.length === 0) setDevices(allDevices)
+      // Update device list now that we have camera permission
+      setDevices(allDevices)
 
-      const activeIndex = index ?? deviceIndex
-      const deviceId = allDevices[activeIndex]?.deviceId ?? allDevices[allDevices.length - 1].deviceId
+      const activeId = deviceId ?? selectedDeviceId ?? allDevices[0].deviceId
+      if (!selectedDeviceId) setSelectedDeviceId(allDevices[0].deviceId)
 
       const controls = await reader.decodeFromVideoDevice(
-        deviceId,
+        activeId || allDevices[0].deviceId,
         videoRef.current!,
         (res, err) => {
           if (res) {
             stopScanning()
-            handleScannedToken(res.getText())
+            void handleScannedToken(res.getText())
           } else if (err && err.name !== 'NotFoundException') {
             console.error(err)
           }
@@ -63,34 +94,82 @@ export function OrgQRScanner() {
     }
   }
 
-  const switchCamera = async () => {
-    if (devices.length < 2 || isSwitching) return
+  const switchCamera = async (newDeviceId: string) => {
+    if (isSwitching || newDeviceId === selectedDeviceId) return
     setIsSwitching(true)
+    setSelectedDeviceId(newDeviceId)
     stopScanning()
-    const nextIndex = (deviceIndex + 1) % devices.length
-    setDeviceIndex(nextIndex)
-    await startCamera(nextIndex)
+    await startCamera(newDeviceId)
     setIsSwitching(false)
   }
 
-  const handleScannedToken = (token: string) => {
-    if (token.startsWith('DCN-') || token.length > 4) {
+  const handleScannedToken = async (token: string) => {
+    if (!user) {
+      setScanState('error')
+      setErrorMsg('Session expired. Please sign in again.')
+      return
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke<{
+        success: boolean
+        member_name?: string
+        points_awarded?: number
+        event_title?: string
+        already_checked_in?: boolean
+        error?: string
+      }>('award-points-on-scan', {
+        body: { token },
+      })
+
+      if (error) {
+        setScanState('error')
+        setErrorMsg(error.message ?? 'Scan failed. Please try again.')
+        return
+      }
+
+      if (data?.already_checked_in) {
+        setAlreadyCheckedIn({ memberName: data.member_name ?? 'Member' })
+        setScanState('already_checked_in')
+        return
+      }
+
+      if (data?.error === 'token_expired') {
+        setScanState('error')
+        setErrorMsg('QR expired — ask member to refresh their screen.')
+        return
+      }
+
+      if (data?.error === 'invalid_token') {
+        setScanState('error')
+        setErrorMsg('Invalid QR code.')
+        return
+      }
+
+      if (!data?.success) {
+        setScanState('error')
+        setErrorMsg(data?.error ?? 'Scan failed. Please try again.')
+        return
+      }
+
       setResult({
-        memberName: 'Marie Santos',
-        pointsAwarded: 200,
-        eventTitle: 'DEVCON Summit Manila 2026',
+        memberName:    data.member_name ?? 'Member',
+        pointsAwarded: data.points_awarded ?? 0,
+        eventTitle:    data.event_title ?? '',
       })
       setScanState('success')
-    } else {
+    } catch (e) {
+      // supabase.functions.invoke can throw on network errors (e.g. no URL configured).
+      // Catch here so the promise rejection is never silently swallowed.
       setScanState('error')
-      setErrorMsg('Invalid QR code. Please try again.')
+      setErrorMsg(e instanceof Error ? e.message : 'Scan failed. Please try again.')
     }
   }
 
   const handleManualSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (manualToken.trim()) {
-      handleScannedToken(manualToken.trim())
+      void handleScannedToken(manualToken.trim())
       setManualToken('')
     }
   }
@@ -99,12 +178,9 @@ export function OrgQRScanner() {
     stopScanning()
     setScanState('idle')
     setResult(null)
+    setAlreadyCheckedIn(null)
     setErrorMsg('')
   }
-
-  useEffect(() => {
-    return () => { stopScanning() }
-  }, [])
 
   return (
     <div>
@@ -128,7 +204,7 @@ export function OrgQRScanner() {
             >
               <motion.div
                 className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center cursor-pointer hover:border-blue transition-colors"
-                onClick={() => startCamera()}
+                onClick={() => void startCamera()}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mx-auto mb-4">
@@ -148,7 +224,7 @@ export function OrgQRScanner() {
                   <input
                     value={manualToken}
                     onChange={(e) => setManualToken(e.target.value)}
-                    placeholder="Paste QR token (e.g. DCN-ABC123)"
+                    placeholder="Paste JWT token from member's screen"
                     className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue"
                   />
                   <button
@@ -171,25 +247,34 @@ export function OrgQRScanner() {
               exit="exit"
               className="space-y-4"
             >
-              {/* Viewfinder */}
+              {/* Camera selector dropdown — shown whenever multiple cameras are detected */}
+              {devices.length > 1 && (
+                <div className="bg-white rounded-xl border border-slate-200 px-3 py-2.5 flex items-center gap-2">
+                  <SwitchCamera className="w-4 h-4 text-slate-400 shrink-0" />
+                  <select
+                    value={selectedDeviceId}
+                    onChange={(e) => void switchCamera(e.target.value)}
+                    disabled={isSwitching}
+                    className="flex-1 text-sm text-slate-700 bg-transparent focus:outline-none disabled:opacity-50 cursor-pointer"
+                  >
+                    {devices.map((device, i) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.label || `Camera ${i + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div className="bg-black rounded-2xl overflow-hidden aspect-square relative">
                 <video ref={videoRef} className="w-full h-full object-cover" />
-
-                {/* Targeting frame */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-48 h-48 border-2 border-white/80 rounded-2xl" />
                 </div>
-
-                {/* Swap camera button — only shown when multiple cameras available */}
-                {devices.length > 1 && (
-                  <button
-                    onClick={switchCamera}
-                    disabled={isSwitching}
-                    className="absolute top-3 right-3 w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center border border-white/20 transition-opacity disabled:opacity-40"
-                    aria-label="Switch camera"
-                  >
-                    <SwitchCamera className={`w-5 h-5 text-white ${isSwitching ? 'animate-spin' : ''}`} />
-                  </button>
+                {isSwitching && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-2xl">
+                    <p className="text-white text-sm font-semibold">Switching camera…</p>
+                  </div>
                 )}
               </div>
 
@@ -221,6 +306,32 @@ export function OrgQRScanner() {
                   <Zap className="w-4 h-4 text-green" />
                   <span className="text-lg font-black text-green">+{result.pointsAwarded} XP awarded!</span>
                 </div>
+              </div>
+              <motion.button
+                onClick={reset}
+                className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+                whileTap={{ scale: 0.98 }}
+              >
+                Scan Next Member
+              </motion.button>
+            </motion.div>
+          )}
+
+          {scanState === 'already_checked_in' && alreadyCheckedIn && (
+            <motion.div
+              key="already_checked_in"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="space-y-4"
+            >
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                  <Info className="w-8 h-8 text-amber-500" />
+                </div>
+                <p className="text-xl font-black text-slate-900 mb-1">{alreadyCheckedIn.memberName}</p>
+                <p className="text-sm text-amber-600 font-medium">Already checked in</p>
               </div>
               <motion.button
                 onClick={reset}

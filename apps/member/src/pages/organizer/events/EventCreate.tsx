@@ -1,42 +1,229 @@
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ImagePlus, X } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { fadeUp, staggerContainer } from '../../../lib/animation'
+import { useEventsStore } from '../../../stores/useEventsStore'
+import { useAuthStore } from '../../../stores/useAuthStore'
+import { supabase } from '../../../lib/supabase'
 
-const schema = z.object({
-  title:             z.string().min(3, 'Title must be at least 3 characters'),
-  description:       z.string().min(10, 'Description must be at least 10 characters'),
-  location:          z.string().min(2, 'Location is required'),
-  event_date:        z.string().min(1, 'Date is required'),
-  points_value:      z.number({ coerce: true }).min(50, 'Minimum 50 XP').max(1000, 'Maximum 1000 XP'),
-  requires_approval: z.boolean(),
-})
+// ── Zod schema ────────────────────────────────────────────────────────────────
+
+const schema = z
+  .object({
+    title: z.string().min(3, 'Title must be at least 3 characters'),
+    description: z.string().min(10, 'Description must be at least 10 characters'),
+    location: z.string().min(2, 'Location is required'),
+    event_date: z.string().min(1, 'Start date is required'),
+    end_date: z.string().optional(),
+    category: z.enum([
+      'tech_talk',
+      'hackathon',
+      'workshop',
+      'brown_bag',
+      'summit',
+      'social',
+      'networking',
+    ], { required_error: 'Category is required' }),
+    tags: z.array(z.string()).default([]),
+    visibility: z.enum(['public', 'unlisted', 'draft']).default('public'),
+    is_free: z.boolean().default(true),
+    ticket_price_php: z.number({ coerce: true }).int().min(0).default(0),
+    capacity: z.preprocess(
+      (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
+      z.number().int().positive().optional()
+    ),
+    points_value: z
+      .number({ coerce: true })
+      .min(50, 'Minimum 50 XP')
+      .max(1000, 'Maximum 1000 XP'),
+    requires_approval: z.boolean(),
+    cover_image_url: z.string().url().optional().or(z.literal('')),
+  })
+  .superRefine((data, ctx) => {
+    if (data.end_date && data.event_date && data.end_date <= data.event_date) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['end_date'],
+        message: 'End time must be after start time',
+      })
+    }
+  })
 
 type FormData = z.infer<typeof schema>
 
-const inputClass = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const inputClass =
+  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
 const labelClass = 'block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5'
+
+const CATEGORY_OPTIONS: {
+  value: FormData['category']
+  label: string
+}[] = [
+  { value: 'tech_talk',   label: 'Tech Talk'   },
+  { value: 'hackathon',   label: 'Hackathon'   },
+  { value: 'workshop',    label: 'Workshop'    },
+  { value: 'brown_bag',   label: 'Brown Bag'   },
+  { value: 'summit',      label: 'Summit'      },
+  { value: 'social',      label: 'Social'      },
+  { value: 'networking',  label: 'Networking'  },
+]
+
+const VISIBILITY_OPTIONS: { value: FormData['visibility']; label: string }[] = [
+  { value: 'public',   label: 'Public'    },
+  { value: 'unlisted', label: 'Unlisted'  },
+  { value: 'draft',    label: 'Draft'     },
+]
+
+// ── SectionHeader ──────────────────────────────────────────────────────────────
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="border-t border-slate-100 pt-5">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">{title}</p>
+    </div>
+  )
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export function OrgEventCreate() {
   const navigate = useNavigate()
+  const { createEvent } = useEventsStore()
+  const { user } = useAuthStore()
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  // Cover image (managed outside RHF)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const [coverUploadError, setCoverUploadError] = useState<string | null>(null)
+
+  // Tags (managed outside RHF)
+  const [tags, setTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
+
+  // Visibility (managed outside RHF for segmented control feel)
+  const [visibility, setVisibility] = useState<'public' | 'unlisted' | 'draft'>('public')
+
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       points_value:      200,
       requires_approval: false,
+      is_free:           true,
+      ticket_price_php:  0,
+      visibility:        'public',
+      tags:              [],
     },
   })
 
-  const onSubmit = (_data: FormData) => {
-    navigate('/organizer/events')
+  const isFree = watch('is_free')
+
+  // ── Cover image handlers ─────────────────────────────────────────────────
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCoverFile(file)
+    setCoverUploadError(null)
+    const url = URL.createObjectURL(file)
+    setCoverPreview(url)
   }
 
+  const removeCover = () => {
+    setCoverFile(null)
+    setCoverPreview(null)
+    setCoverUploadError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  // ── Tag handlers ──────────────────────────────────────────────────────────
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const val = tagInput.trim()
+      if (val && val.length <= 20 && !tags.includes(val)) {
+        setTags((prev) => [...prev, val])
+      }
+      setTagInput('')
+    }
+  }
+
+  const removeTag = (tag: string) => {
+    setTags((prev) => prev.filter((t) => t !== tag))
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+
+  const onSubmit = async (data: FormData) => {
+    if (!user?.chapter_id) {
+      setSubmitError('Your account is not linked to a chapter. Contact an admin.')
+      return
+    }
+    setSubmitError(null)
+    setCoverUploadError(null)
+
+    // Upload cover image (non-blocking on failure)
+    let cover_image_url: string | null = null
+    if (coverFile) {
+      const path = `${user.id}/${Date.now()}-${coverFile.name}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('event-covers')
+        .upload(path, coverFile)
+      if (uploadError) {
+        setCoverUploadError('Cover image upload failed — event will be saved without image.')
+      } else {
+        const { data: urlData } = supabase.storage
+          .from('event-covers')
+          .getPublicUrl(uploadData.path)
+        cover_image_url = urlData.publicUrl
+      }
+    }
+
+    try {
+      await createEvent({
+        title:             data.title,
+        description:       data.description,
+        location:          data.location,
+        event_date:        data.event_date,
+        end_date:          data.end_date ?? null,
+        category:          data.category,
+        tags,
+        visibility,
+        is_free:           data.is_free,
+        ticket_price_php:  data.is_free ? 0 : data.ticket_price_php,
+        capacity:          data.capacity ?? null,
+        points_value:      data.points_value,
+        requires_approval: data.requires_approval,
+        cover_image_url,
+        chapter_id:        user.chapter_id,
+        created_by:        user.id,
+      })
+      navigate('/organizer/events')
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to create event. Please try again.')
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
-    <div>
+    <div className="pb-10">
+      {/* Header */}
       <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
         <button
           onClick={() => navigate(-1)}
@@ -55,83 +242,353 @@ export function OrgEventCreate() {
         initial="hidden"
         animate="visible"
       >
+        {/* ── EVENT DETAILS ── */}
         <motion.div variants={fadeUp}>
-          <label className={labelClass}>Event Title</label>
-          <input
-            {...register('title')}
-            className={inputClass}
-            placeholder="e.g. DEVCON Summit Manila 2026"
-          />
-          {errors.title && <p className="text-xs text-red mt-1">{errors.title.message}</p>}
-        </motion.div>
+          <SectionHeader title="Event Details" />
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Event Title</label>
+              <input
+                {...register('title')}
+                className={inputClass}
+                placeholder="e.g. DEVCON Summit Manila 2026"
+              />
+              {errors.title && (
+                <p className="text-xs text-red mt-1">{errors.title.message}</p>
+              )}
+            </div>
 
-        <motion.div variants={fadeUp}>
-          <label className={labelClass}>Description</label>
-          <textarea
-            {...register('description')}
-            rows={4}
-            className={`${inputClass} resize-none`}
-            placeholder="What is this event about?"
-          />
-          {errors.description && <p className="text-xs text-red mt-1">{errors.description.message}</p>}
-        </motion.div>
-
-        <motion.div variants={fadeUp} className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={labelClass}>Location</label>
-            <input
-              {...register('location')}
-              className={inputClass}
-              placeholder="Venue or Online"
-            />
-            {errors.location && <p className="text-xs text-red mt-1">{errors.location.message}</p>}
-          </div>
-
-          <div>
-            <label className={labelClass}>Date & Time</label>
-            <input
-              {...register('event_date')}
-              type="datetime-local"
-              className={inputClass}
-            />
-            {errors.event_date && <p className="text-xs text-red mt-1">{errors.event_date.message}</p>}
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea
+                {...register('description')}
+                rows={4}
+                className={`${inputClass} resize-none`}
+                placeholder="What is this event about?"
+              />
+              {errors.description && (
+                <p className="text-xs text-red mt-1">{errors.description.message}</p>
+              )}
+            </div>
           </div>
         </motion.div>
 
+        {/* ── MEDIA ── */}
         <motion.div variants={fadeUp}>
-          <label className={labelClass}>XP Points Value</label>
+          <SectionHeader title="Media" />
+
+          {/* Cover image preview */}
+          {coverPreview ? (
+            <div className="relative rounded-xl overflow-hidden mb-3 border border-slate-200">
+              <img
+                src={coverPreview}
+                alt="Cover preview"
+                className="w-full h-44 object-cover"
+              />
+              <button
+                type="button"
+                onClick={removeCover}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue hover:text-blue transition-colors mb-3"
+            >
+              <ImagePlus className="w-6 h-6" />
+              <span className="text-xs font-medium">Tap to upload cover image</span>
+              <span className="text-[10px] text-slate-300">JPG, PNG, WebP — optional</span>
+            </button>
+          )}
+
           <input
-            {...register('points_value')}
-            type="number"
-            className={inputClass}
-            min={50}
-            max={1000}
-            step={50}
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
           />
-          {errors.points_value && <p className="text-xs text-red mt-1">{errors.points_value.message}</p>}
-          <p className="text-xs text-slate-400 mt-1">Members earn this many XP when checked in at the event.</p>
+
+          {coverUploadError && (
+            <p className="text-xs text-red mt-1">{coverUploadError}</p>
+          )}
         </motion.div>
 
-        <motion.div
-          variants={fadeUp}
-          className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4"
-        >
-          <input
-            {...register('requires_approval')}
-            type="checkbox"
-            id="requires_approval"
-            className="w-4 h-4 accent-blue rounded"
-          />
+        {/* ── CATEGORIZATION ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Categorization" />
+          <div className="space-y-4">
+            {/* Category radio pills */}
+            <div>
+              <label className={labelClass}>Category <span className="text-red normal-case">*</span></label>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-2">
+                    {CATEGORY_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => field.onChange(opt.value)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                          field.value === opt.value
+                            ? 'bg-blue text-white border-blue'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
+              {errors.category && (
+                <p className="text-xs text-red mt-1">{errors.category.message}</p>
+              )}
+            </div>
+
+            {/* Tags chip input */}
+            <div>
+              <label className={labelClass}>Tags <span className="text-slate-300 normal-case font-normal">optional</span></label>
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a tag, press Enter"
+                className={inputClass}
+                maxLength={20}
+              />
+              <p className="text-[10px] text-slate-400 mt-1">Max 20 chars per tag.</p>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {tags.map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-blue/10 text-blue text-xs rounded-full"
+                    >
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(t)}
+                        className="leading-none hover:text-blue-dark"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── SCHEDULE ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Schedule" />
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Location</label>
+              <input
+                {...register('location')}
+                className={inputClass}
+                placeholder="Venue or Online"
+              />
+              {errors.location && (
+                <p className="text-xs text-red mt-1">{errors.location.message}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>Start Date & Time</label>
+                <input
+                  {...register('event_date')}
+                  type="datetime-local"
+                  className={inputClass}
+                />
+                {errors.event_date && (
+                  <p className="text-xs text-red mt-1">{errors.event_date.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className={labelClass}>End Date & Time</label>
+                <input
+                  {...register('end_date')}
+                  type="datetime-local"
+                  className={inputClass}
+                />
+                {errors.end_date && (
+                  <p className="text-xs text-red mt-1">{errors.end_date.message}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── ACCESS SETTINGS ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Access Settings" />
+          <div className="space-y-4">
+            {/* Visibility segmented control */}
+            <div>
+              <label className={labelClass}>Visibility</label>
+              <div className="flex rounded-xl border border-slate-200 overflow-hidden">
+                {VISIBILITY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setVisibility(opt.value)}
+                    className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+                      visibility === opt.value
+                        ? 'bg-blue text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Requires approval toggle */}
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4">
+              <input
+                {...register('requires_approval')}
+                type="checkbox"
+                id="requires_approval"
+                className="w-4 h-4 accent-blue rounded"
+              />
+              <div>
+                <label
+                  htmlFor="requires_approval"
+                  className="text-sm font-semibold text-slate-900 cursor-pointer"
+                >
+                  Require Registration Approval
+                </label>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Manually approve each registration before members receive their QR ticket.
+                </p>
+              </div>
+            </div>
+
+            {/* Ticket price toggle */}
+            <div>
+              <label className={labelClass}>Ticket Price</label>
+              <div className="flex gap-3">
+                <Controller
+                  control={control}
+                  name="is_free"
+                  render={({ field }) => (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(true)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                          field.value
+                            ? 'bg-blue text-white border-blue'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
+                        }`}
+                      >
+                        Free
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(false)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                          !field.value
+                            ? 'bg-blue text-white border-blue'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
+                        }`}
+                      >
+                        Paid
+                      </button>
+                    </>
+                  )}
+                />
+              </div>
+
+              {!isFree && (
+                <div className="mt-3">
+                  <label className={labelClass}>Price (PHP)</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">
+                      ₱
+                    </span>
+                    <input
+                      {...register('ticket_price_php')}
+                      type="number"
+                      min={1}
+                      step={1}
+                      className={`${inputClass} pl-8`}
+                      placeholder="0"
+                    />
+                  </div>
+                  {errors.ticket_price_php && (
+                    <p className="text-xs text-red mt-1">{errors.ticket_price_php.message}</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Capacity */}
+            <div>
+              <label className={labelClass}>
+                Capacity <span className="text-slate-300 normal-case font-normal">optional</span>
+              </label>
+              <input
+                {...register('capacity')}
+                type="number"
+                min={1}
+                step={1}
+                className={inputClass}
+                placeholder="Unlimited"
+              />
+              {errors.capacity && (
+                <p className="text-xs text-red mt-1">{errors.capacity.message}</p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── ENGAGEMENT ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Engagement" />
           <div>
-            <label htmlFor="requires_approval" className="text-sm font-semibold text-slate-900 cursor-pointer">
-              Require Registration Approval
-            </label>
-            <p className="text-xs text-slate-400 mt-0.5">
-              If checked, you must manually approve each registration before members receive their QR ticket.
+            <label className={labelClass}>XP Points Value</label>
+            <input
+              {...register('points_value')}
+              type="number"
+              className={inputClass}
+              min={50}
+              max={1000}
+              step={50}
+            />
+            {errors.points_value && (
+              <p className="text-xs text-red mt-1">{errors.points_value.message}</p>
+            )}
+            <p className="text-xs text-slate-400 mt-1">
+              Members earn this many XP when checked in at the event.
             </p>
           </div>
         </motion.div>
 
+        {/* Submit error */}
+        {submitError && (
+          <motion.p
+            variants={fadeUp}
+            className="text-xs text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2"
+          >
+            {submitError}
+          </motion.p>
+        )}
+
+        {/* Actions */}
         <motion.div variants={fadeUp} className="flex gap-3 pt-2">
           <button
             type="button"
@@ -142,9 +599,10 @@ export function OrgEventCreate() {
           </button>
           <button
             type="submit"
-            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+            disabled={isSubmitting}
+            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
           >
-            Create Event
+            {isSubmitting ? 'Creating…' : 'Create Event'}
           </button>
         </motion.div>
       </motion.form>

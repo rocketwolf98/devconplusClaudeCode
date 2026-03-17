@@ -1,25 +1,110 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, Tag, Newspaper } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { NEWS_POSTS } from '@devcon-plus/supabase'
+import { useNewsStore } from '../../stores/useNewsStore'
 import PromotedBadge from '../../components/PromotedBadge'
 import { fadeUp } from '../../lib/animation'
 import { CATEGORY_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
 
-const MOCK_BODY_PARAGRAPHS = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
-  'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
-  'Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis.',
-  'Cras mattis consectetur purus sit amet fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.',
-]
+const WELCOME_POST = {
+  id: 'welcome',
+  title: 'Welcome to DEVCON+ — Your Tech Community Hub',
+  body: `DEVCON+ is the unified platform for DEVCON Philippines — the country's largest volunteer tech community with 11 nationwide chapters, 60,000+ members, and 14,000+ annual attendees.
 
+## What you can do with DEVCON+
+
+### Register for Events
+Browse and register for 100+ annual chapter events across all 11 chapters. Get your QR ticket instantly or track your pending approval from chapter officers.
+
+### Earn Points+
+Every activity earns you points. Attend events, volunteer at chapters, share content, and more. Watch your score grow and unlock reward tiers.
+
+### Redeem Rewards
+Spend your Points+ on exclusive DEVCON merchandise, vouchers, and more. The Rewards catalog is launching soon — keep earning in the meantime.
+
+### Jobs Board
+Access global tech career opportunities curated for Filipino developers. Coming soon with the full MVP.
+
+---
+
+We're excited to have you in the community. Keep attending events, keep earning, and keep leveling up!
+
+— The DEVCON+ Team`,
+  category: 'devcon' as const,
+  is_featured: true,
+  is_promoted: false,
+  cover_image_url: '/photos/devcon-summit-group.jpg',
+  author_id: null,
+  created_at: '2026-03-01T09:00:00Z',
+}
+
+/** Renders a body string with basic markdown-like formatting:
+ *  ## Heading 2, ### Heading 3, --- divider, plain paragraphs.
+ *  Splits on double newlines for paragraph breaks. */
+function ArticleBody({ body }: { body: string }) {
+  const blocks = body.split(/\n\n+/)
+
+  return (
+    <div className="space-y-4">
+      {blocks.map((block, i) => {
+        const trimmed = block.trim()
+
+        if (trimmed.startsWith('## ')) {
+          return (
+            <h2 key={i} className="text-base font-bold text-slate-900 pt-2">
+              {trimmed.slice(3)}
+            </h2>
+          )
+        }
+
+        if (trimmed.startsWith('### ')) {
+          return (
+            <h3 key={i} className="text-sm font-bold text-primary">
+              {trimmed.slice(4)}
+            </h3>
+          )
+        }
+
+        if (trimmed === '---') {
+          return <hr key={i} className="border-slate-200" />
+        }
+
+        // Lines starting with "-" → bullet list
+        if (trimmed.startsWith('- ')) {
+          const items = trimmed.split('\n').filter((l) => l.startsWith('- '))
+          return (
+            <ul key={i} className="space-y-1 pl-4">
+              {items.map((item, j) => (
+                <li key={j} className="text-sm text-slate-700 leading-relaxed list-disc">
+                  {item.slice(2)}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+
+        return (
+          <p key={i} className="text-sm text-slate-700 leading-relaxed">
+            {trimmed}
+          </p>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { posts, fetchNews } = useNewsStore()
 
-  const post = NEWS_POSTS.find((p) => p.id === id)
+  useEffect(() => {
+    if (id !== 'welcome' && posts.length === 0) void fetchNews()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const post = id === 'welcome' ? WELCOME_POST : posts.find((p) => p.id === id)
 
   if (!post) {
     return (
@@ -99,19 +184,10 @@ export default function NewsDetail() {
         {/* Divider */}
         <hr className="border-slate-200" />
 
-        {/* Lead paragraph (real body from mock data) */}
-        {post.body && (
-          <p className="text-sm text-slate-700 leading-relaxed font-medium">{post.body}</p>
-        )}
+        {/* Article body */}
+        {post.body && <ArticleBody body={post.body} />}
 
-        {/* Full article body (mock lorem ipsum) */}
-        {MOCK_BODY_PARAGRAPHS.map((para, i) => (
-          <p key={i} className="text-sm text-slate-600 leading-relaxed">
-            {para}
-          </p>
-        ))}
-
-        {/* Footer tag */}
+        {/* Footer */}
         <div className="pt-4 border-t border-slate-200">
           <p className="text-[11px] text-slate-400 text-center">
             Published by DEVCON Philippines · {dateStr}

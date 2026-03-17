@@ -9,3 +9,4 @@ dist/
 remix-of-devcon-connect/
 
 .vercel
+.mcp.json

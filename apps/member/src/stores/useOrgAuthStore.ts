@@ -1,4 +1,10 @@
+// Organizer auth delegates to useAuthStore for real Supabase auth.
+// An organizer is a Profile with role = 'chapter_officer' | 'hq_admin'.
+// This store is kept for backwards-compatibility with organizer pages;
+// full consolidation is a follow-up cleanup task.
+
 import { create } from 'zustand'
+import { useAuthStore } from './useAuthStore'
 
 export interface OrganizerUser {
   id: string
@@ -11,57 +17,42 @@ export interface OrganizerUser {
 }
 
 interface OrgAuthState {
-  user: OrganizerUser | null
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  updateProfile: (patch: Partial<Pick<OrganizerUser, 'full_name' | 'avatar_url'>>) => void
+  logout: () => Promise<void>
+  updateProfile: (patch: Partial<Pick<OrganizerUser, 'full_name' | 'avatar_url'>>) => Promise<void>
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('')
-}
-
-const MOCK_ORGANIZER: OrganizerUser = {
-  id: 'org-juan-dela-cruz',
-  full_name: 'Juan dela Cruz',
-  email: 'juan.delacruz@devcon.ph',
-  chapter: 'Manila',
-  role: 'hq_admin',
-  initials: 'JC',
-  avatar_url: null,
-}
-
-export const useOrgAuthStore = create<OrgAuthState>((set, get) => ({
-  user: null, // starts logged out — set on valid organizer code entry
-
+export const useOrgAuthStore = create<OrgAuthState>(() => ({
   isLoading: false,
 
-  login: async (_email: string, _password: string) => {
-    set({ isLoading: true })
-    // TODO: replace with Supabase auth + role validation
-    await new Promise((r) => setTimeout(r, 400))
-    set({ user: MOCK_ORGANIZER, isLoading: false })
+  // Delegates to useAuthStore — shares the single Supabase session
+  login: async (email, password) => {
+    await useAuthStore.getState().signIn(email, password)
   },
 
-  logout: () => {
-    set({ user: null })
+  logout: async () => {
+    await useAuthStore.getState().signOut()
   },
 
-  updateProfile: (patch) => {
-    const current = get().user
-    if (!current) return
-    set({
-      user: {
-        ...current,
-        ...patch,
-        initials: patch.full_name ? getInitials(patch.full_name) : current.initials,
-      },
-    })
+  updateProfile: async (patch) => {
+    await useAuthStore.getState().updateProfile(patch)
   },
 }))
+
+// Derived selector: reads organizer user shape from the shared auth profile.
+// Use this in organizer pages instead of useOrgAuthStore().user.
+export function useOrganizerUser(): OrganizerUser | null {
+  const { user, initials, chapterName } = useAuthStore()
+  if (!user) return null
+  if (!['chapter_officer', 'hq_admin', 'super_admin'].includes(user.role)) return null
+  return {
+    id:         user.id,
+    full_name:  user.full_name,
+    email:      user.email,
+    chapter:    chapterName ?? '',
+    role:       user.role as OrganizerUser['role'],
+    initials,
+    avatar_url: user.avatar_url,
+  }
+}

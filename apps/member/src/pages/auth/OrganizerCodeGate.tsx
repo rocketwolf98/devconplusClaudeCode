@@ -1,15 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { useOrgAuthStore } from '../../stores/useOrgAuthStore'
+import { supabase } from '../../lib/supabase'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
-
-const MOCK_ORG_CODES = new Set(['ORG-MANILA', 'ORG-CEBU', 'ORG-DAVAO', 'ORG-LAGUNA', 'DCN-ADMIN'])
 
 export default function OrganizerCodeGate() {
   const navigate = useNavigate()
-  const { user, setOrganizerSession } = useAuthStore()
-  const { login: orgLogin } = useOrgAuthStore()
+  const { user, initialize, setOrganizerSession } = useAuthStore()
   const [code, setCode]       = useState('')
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,14 +16,42 @@ export default function OrganizerCodeGate() {
   const handleAccessPortal = async () => {
     const trimmed = code.trim().toUpperCase()
     if (!trimmed) { setError('Please enter your organizer code.'); return }
-    if (!MOCK_ORG_CODES.has(trimmed)) {
+    if (!user) { setError('Session expired. Please sign in again.'); return }
+
+    setLoading(true)
+    setError('')
+
+    const { data, error: dbError } = await supabase
+      .from('organizer_codes')
+      .select('chapter_id, assigned_role')
+      .eq('code', trimmed)
+      .eq('is_active', true)
+      .single()
+
+    if (dbError || !data) {
       setError('Invalid organizer code. Please check and try again.')
+      setLoading(false)
       return
     }
-    setLoading(true)
-    await orgLogin('', '')            // loads mock organizer user
-    setOrganizerSession(true)
-    navigate('/organizer')
+
+    // Update profile role + chapter assignment in DB
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        role:       data.assigned_role,
+        chapter_id: data.chapter_id,
+      })
+      .eq('id', user.id)
+
+    if (updateError) {
+      setError('Could not update profile. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    // Re-fetch updated profile then send to member home
+    await initialize()
+    navigate('/home')
   }
 
   const handleContinueAsMember = () => {
@@ -39,7 +64,7 @@ export default function OrganizerCodeGate() {
       {/* Gradient header */}
       <div className="bg-blue px-6 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
-        <p className="text-white/70 mt-3 text-sm">Welcome back, {firstName}!</p>
+        <p className="text-white/70 mt-3 text-sm">Welcome, {firstName}!</p>
       </div>
 
       {/* Card */}
@@ -54,7 +79,7 @@ export default function OrganizerCodeGate() {
             value={code}
             onChange={(e) => { setCode(e.target.value); setError('') }}
             onKeyDown={(e) => e.key === 'Enter' && handleAccessPortal()}
-            placeholder="e.g. ORG-MANILA"
+            placeholder="e.g. DCN-ABC-1234"
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
           />
           {error && <p className="text-red text-xs">{error}</p>}

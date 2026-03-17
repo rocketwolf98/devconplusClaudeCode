@@ -1,90 +1,136 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, Bell, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
-import { useOrgAuthStore } from '../../stores/useOrgAuthStore'
+import { useOrganizerUser } from '../../stores/useOrgAuthStore'
+import { useAuthStore } from '../../stores/useAuthStore'
+import { useEventsStore } from '../../stores/useEventsStore'
+import { supabase } from '../../lib/supabase'
 import { fadeUp, staggerContainer, cardItem } from '../../lib/animation'
-
-const MOCK_REGISTRATIONS: Registration[] = [
-  {
-    id: 'reg-1',
-    member_name: 'Ana Reyes',
-    member_email: 'ana.reyes@email.com',
-    school_or_company: 'Ateneo de Manila University',
-    event_title: 'DEVCON Summit Manila 2026',
-    registered_at: '2026-02-24T09:15:00Z',
-    status: 'pending',
-  },
-  {
-    id: 'reg-2',
-    member_name: 'Carlo Bautista',
-    member_email: 'carlo.bautista@company.com',
-    school_or_company: 'Accenture Philippines',
-    event_title: 'DEVCON Summit Manila 2026',
-    registered_at: '2026-02-24T10:30:00Z',
-    status: 'pending',
-  },
-  {
-    id: 'reg-3',
-    member_name: 'Pia Gonzales',
-    member_email: 'pia.gonzales@email.com',
-    school_or_company: 'De La Salle University',
-    event_title: 'Kids Hour of AI — Manila',
-    registered_at: '2026-02-23T14:00:00Z',
-    status: 'approved',
-  },
-  {
-    id: 'reg-4',
-    member_name: 'Reymar Santos',
-    member_email: 'reymar@startup.ph',
-    school_or_company: 'PayMongo',
-    event_title: 'DEVCON Summit Manila 2026',
-    registered_at: '2026-02-23T16:45:00Z',
-    status: 'pending',
-  },
-]
 
 type TabId = 'approvals' | 'events'
 
 export function OrgDashboard() {
-  const { user } = useOrgAuthStore()
+  const user = useOrganizerUser()
+  const { user: profile } = useAuthStore()
+  const { events, fetchEvents } = useEventsStore()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('approvals')
-  const [registrations, setRegistrations] = useState<Registration[]>(MOCK_REGISTRATIONS)
+  const [registrations, setRegistrations] = useState<Registration[]>([])
+  const [membersCount, setMembersCount] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const chapterId = profile?.chapter_id ?? null
+
+  useEffect(() => {
+    void fetchEvents()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!chapterId) {
+      setIsLoading(false)
+      return
+    }
+
+    const loadData = async () => {
+      setIsLoading(true)
+
+      // Fetch pending registrations for this chapter's events
+      const { data: regData } = await supabase
+        .from('event_registrations')
+        .select(`
+          id,
+          status,
+          registered_at,
+          events!inner(id, title, chapter_id),
+          profiles(full_name, email, school_or_company)
+        `)
+        .eq('status', 'pending')
+        .eq('events.chapter_id', chapterId)
+
+      const mapped: Registration[] = (regData ?? []).map((row) => {
+        const ev = Array.isArray(row.events) ? row.events[0] : row.events
+        const p  = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+        const evObj = ev as { id?: string; title?: string } | null
+        const pObj  = p  as { full_name?: string; email?: string; school_or_company?: string } | null
+        return {
+          id:                row.id,
+          member_name:       pObj?.full_name ?? 'Unknown',
+          member_email:      pObj?.email ?? '',
+          school_or_company: pObj?.school_or_company ?? '',
+          event_title:       evObj?.title ?? '',
+          registered_at:     row.registered_at ?? '',
+          status:            row.status as Registration['status'],
+        }
+      })
+      setRegistrations(mapped)
+
+      // Fetch count of members in this chapter
+      const { count } = await supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('chapter_id', chapterId)
+      setMembersCount(count ?? 0)
+
+      setIsLoading(false)
+    }
+
+    void loadData()
+  }, [chapterId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return null
 
+  const chapterEvents = events.filter((e) => e.chapter_id === chapterId)
   const pending = registrations.filter((r) => r.status === 'pending')
+
   const stats = [
-    { label: 'Events',  value: 5    },
-    { label: 'Members', value: 1243 },
+    { label: 'Events',  value: chapterEvents.length },
+    { label: 'Members', value: membersCount },
     { label: 'Pending', value: pending.length },
   ]
 
-  const handleApprove = (id: string) => {
-    setRegistrations((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: 'approved' as const } : r))
-    )
+  const handleApprove = async (id: string) => {
+    const qrToken = 'DCN-' + crypto.randomUUID().slice(0, 8).toUpperCase()
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'approved', approved_at: new Date().toISOString(), qr_code_token: qrToken })
+      .eq('id', id)
+    if (!error) {
+      setRegistrations((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: 'approved' as const } : r))
+      )
+    }
   }
 
-  const handleReject = (id: string) => {
-    setRegistrations((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: 'rejected' as const } : r))
-    )
+  const handleReject = async (id: string) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'rejected' })
+      .eq('id', id)
+    if (!error) {
+      setRegistrations((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: 'rejected' as const } : r))
+      )
+    }
   }
 
-  const handleRevert = (id: string) => {
-    setRegistrations((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: 'pending' as const } : r))
-    )
+  const handleRevert = async (id: string) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'pending', approved_at: null, qr_code_token: null })
+      .eq('id', id)
+    if (!error) {
+      setRegistrations((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status: 'pending' as const } : r))
+      )
+    }
   }
 
   return (
     <div>
       <div className="bg-blue px-4 pt-12 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        {/* Bell icon — top right */}
         <div className="flex justify-end mb-3">
           <button
             onClick={() => navigate('/organizer/notifications')}
@@ -100,7 +146,6 @@ export function OrgDashboard() {
           stats={stats}
         />
 
-        {/* Add Event — below stat chips */}
         <button
           onClick={() => navigate('/organizer/events/create')}
           className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors"
@@ -116,7 +161,6 @@ export function OrgDashboard() {
         initial="hidden"
         animate="visible"
       >
-        {/* Tab switcher */}
         <motion.div variants={fadeUp} className="flex gap-1 mt-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
           {(['approvals', 'events'] as const).map((tab) => (
             <button
@@ -144,7 +188,21 @@ export function OrgDashboard() {
               animate="visible"
               exit="exit"
             >
-              {pending.length === 0 ? (
+              {isLoading ? (
+                <div className="space-y-3">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="bg-white rounded-2xl border border-slate-200 p-4 animate-pulse">
+                      <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-100" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-slate-100 rounded w-32" />
+                          <div className="h-3 bg-slate-100 rounded w-48" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : pending.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                   <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
                     <CheckCircle2 className="w-7 h-7 text-green" />

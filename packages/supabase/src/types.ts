@@ -8,7 +8,18 @@ export type UserRole = 'member' | 'chapter_officer' | 'hq_admin' | 'super_admin'
 
 export type EventStatus = 'upcoming' | 'ongoing' | 'past'
 
-export type RegistrationStatus = 'pending' | 'approved' | 'rejected'
+export type EventCategory =
+  | 'tech_talk'
+  | 'hackathon'
+  | 'workshop'
+  | 'brown_bag'
+  | 'summit'
+  | 'social'
+  | 'networking'
+
+export type EventVisibility = 'public' | 'unlisted' | 'draft'
+
+export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 
 export type PointSource =
   | 'signup'
@@ -43,21 +54,43 @@ export interface Chapter {
 export interface Profile {
   id: string
   full_name: string
+  username: string | null
   email: string
   school_or_company: string | null
   chapter_id: string | null
   role: UserRole
   avatar_url: string | null
   total_points: number
+  pending_role: string | null
+  pending_chapter_id: string | null
   created_at: string
+}
+
+export type UpgradeRequestStatus = 'pending' | 'approved' | 'rejected'
+
+export interface OrganizerUpgradeRequest {
+  id: string
+  user_id: string
+  organizer_code: string
+  chapter_id: string | null
+  requested_role: 'chapter_officer' | 'hq_admin'
+  status: UpgradeRequestStatus
+  reviewed_by: string | null
+  created_at: string
+  reviewed_at: string | null
 }
 
 export interface OrganizerCode {
   id: string
   code: string
-  chapter_id: string
+  chapter_id: string | null
+  program_id: string | null
+  scope_type: 'chapter' | 'program'
   assigned_role: 'chapter_officer' | 'hq_admin'
   is_active: boolean
+  usage_limit: number | null
+  usage_count: number
+  expires_at: string | null
   created_at: string
 }
 
@@ -68,6 +101,13 @@ export interface Event {
   description: string | null
   location: string | null
   event_date: string | null
+  end_date: string | null
+  category: EventCategory | null
+  tags: string[]
+  visibility: EventVisibility
+  is_free: boolean
+  ticket_price_php: number
+  capacity: number | null
   points_value: number
   requires_approval: boolean
   status: EventStatus
@@ -84,6 +124,7 @@ export interface EventRegistration {
   user_id: string
   status: RegistrationStatus
   qr_code_token: string | null
+  checked_in: boolean | null
   registered_at: string
   approved_at: string | null
 }
@@ -142,5 +183,24 @@ export interface NewsPost {
   is_promoted: boolean
   cover_image_url: string | null
   author_id: string | null
+  created_at: string
+}
+
+export interface Program {
+  id: string
+  name: string
+  theme_id: string | null
+  description: string | null
+  is_active: boolean
+  created_at: string
+}
+
+export interface XpTier {
+  id: string
+  name: string
+  label: string
+  min_points: number
+  max_points: number | null
+  badge_color: string | null
   created_at: string
 }

@@ -40,7 +40,22 @@ npm install --legacy-peer-deps
 
 ---
 
-## 2. Running the App
+## 2. Environment Setup
+
+The app connects to a live Supabase project. You need the `.env.local` file — **ask the team lead** to share it with you.
+
+Place it at `apps/member/.env.local`:
+
+```env
+VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<your-anon-key>
+```
+
+> `.env.local` is gitignored — never commit it. Without it, all Supabase calls (auth, data) will fail.
+
+---
+
+## 3. Running the App
 
 ```bash
 npm run dev:member
@@ -58,26 +73,29 @@ npm run dev
 
 ---
 
-## 3. Login (Mock Data — No Backend Yet)
+## 4. Login
 
-All data is mocked. Use these to log in:
+The app uses real Supabase auth. Create an account via the sign-up screen, or ask the team lead for a test account.
 
-**Member flow**
+### Member flow
 
-| Field | Value |
-|-------|-------|
-| Email | `juan@example.com` |
-| Password | any value (not validated) |
+Sign up at `/sign-up` with any email and password. This creates a real Supabase account with `member` role.
 
-**Organizer flow**
+### Organizer flow
 
-From the sign-up screen, enter any organizer code (e.g. `DEVCON2025`) to be routed to `/organizer`.
+From sign-up, enter an organizer code when prompted. Ask the team lead for a valid code from the `organizer_codes` table. This routes you to `/organizer`.
 
-> Auth is fully mocked — any email/password works. Real Supabase integration is the next sprint.
+### Admin flow (`/admin`)
+
+Admin access requires `hq_admin` or `super_admin` role. Ask the team lead to either:
+- Share an existing admin test account, or
+- Promote your account role via the Supabase dashboard (`profiles` table → set `role = 'hq_admin'`)
+
+> The **Kiosk** page (`/admin/kiosk`) is only visible to `super_admin` accounts.
 
 ---
 
-## 4. App Structure — What's Built
+## 5. App Structure — What's Built
 
 ### Member Screens
 
@@ -118,9 +136,21 @@ From the sign-up screen, enter any organizer code (e.g. `DEVCON2025`) to be rout
 | `/organizer/profile` | Officer profile |
 | `/organizer/profile/edit` | Edit officer profile |
 
+### Admin Screens (`/admin/*` — requires `hq_admin` or `super_admin` role)
+
+| Route | Screen | Roles |
+|-------|--------|-------|
+| `/admin` | Dashboard — stats overview | hq_admin, super_admin |
+| `/admin/users` | User management — search, role assignment | hq_admin, super_admin |
+| `/admin/org-codes` | Organizer code generation + management | hq_admin, super_admin |
+| `/admin/events` | All events across chapters | hq_admin, super_admin |
+| `/admin/chapters` | Chapter management | hq_admin, super_admin |
+| `/admin/upgrades` | CMS / upgrade requests | hq_admin, super_admin |
+| `/admin/kiosk` | On-site check-in kiosk mode | **super_admin only** |
+
 ---
 
-## 5. Program Themes
+## 6. Program Themes
 
 Users can switch their app theme from the Profile screen. The primary color drives all `bg-primary`, `text-primary`, and shadow tokens via CSS custom properties.
 
@@ -133,7 +163,7 @@ Users can switch their app theme from the Profile screen. The primary color driv
 
 ---
 
-## 6. Key Design Rules
+## 7. Key Design Rules
 
 1. **No Apple Sign-In** — auth is Google OAuth + Email/Password only
 2. **2nd job listing + 2nd news post** always get an orange `PROMOTED` badge
@@ -158,7 +188,7 @@ Users can switch their app theme from the Profile screen. The primary color driv
 
 ---
 
-## 7. Build + Typecheck
+## 8. Build + Typecheck
 
 ```bash
 # Production build
@@ -172,7 +202,7 @@ Output: `apps/member/dist/`
 
 ---
 
-## 8. Folder Structure
+## 9. Folder Structure
 
 ```
 devcon-plus/
@@ -185,6 +215,7 @@ devcon-plus/
 │   │       ├── components/      # Shared UI components
 │   │       ├── lib/             # animation.ts, constants.ts, dates.ts
 │   │       ├── pages/
+│   │       │   ├── admin/       # Admin panel pages (hq_admin / super_admin)
 │   │       │   ├── auth/        # Onboarding, SignIn, SignUp, etc.
 │   │       │   ├── dashboard/
 │   │       │   ├── events/
@@ -206,7 +237,7 @@ devcon-plus/
 
 ---
 
-## 9. Common Issues
+## 10. Common Issues
 
 **`npm install` fails**
 → Always use `npm install --legacy-peer-deps`
@@ -214,8 +245,14 @@ devcon-plus/
 **App shows "Please open on mobile"**
 → Open DevTools → Toggle Device Toolbar → set width to 390px
 
+**Blank screen or auth errors after clone**
+→ You're missing `apps/member/.env.local` — ask the team lead for the Supabase credentials
+
 **Organizer pages redirect to sign-in**
-→ From sign-up, enter an organizer code to set the organizer session flag
+→ Your account needs `chapter_officer`, `hq_admin`, or `super_admin` role. Enter a valid organizer code during sign-up, or ask the team lead to update your role in Supabase.
+
+**Admin pages redirect away**
+→ Your account needs `hq_admin` or `super_admin` role. Ask the team lead to update your role in the `profiles` table.
 
 **TypeScript errors after pulling**
 → Run `npm install --legacy-peer-deps` — a new package may have been added
@@ -225,7 +262,7 @@ devcon-plus/
 
 ---
 
-## 10. Deployment (Vercel)
+## 11. Deployment (Vercel)
 
 | Project | Root Directory | Build Command | Output |
 |---------|---------------|---------------|--------|

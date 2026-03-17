@@ -4,105 +4,174 @@ import { Home, CalendarDays, ScanLine, Gift, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
+import DesktopGuard from './DesktopGuard'
+import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer',        label: 'Home',   Icon: Home,         end: true  },
-  { path: '/organizer/events', label: 'Events', Icon: CalendarDays, end: false },
+  { path: '/organizer',         label: 'Home',    Icon: Home, end: true  },
+  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
 ]
 
 const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
-  { path: '/organizer/profile', label: 'Profile', Icon: User, end: false },
+  { path: '/organizer/events',  label: 'Events',  Icon: CalendarDays, end: false },
+  { path: '/organizer/profile', label: 'Profile', Icon: User,         end: false },
 ]
 
+const ALL_TABS = [
+  ...LEFT_TABS,
+  { path: '/organizer/scan', label: 'Scan', Icon: ScanLine, end: false },
+  ...RIGHT_TABS,
+]
+
+const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin'] as const
+
 export default function OrganizerLayout() {
-  const { isOrganizerSession } = useAuthStore()
+  const { user } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
-  const scrollRef = useRef<HTMLElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!isOrganizerSession) {
+    if (!user) {
       navigate('/sign-in', { replace: true })
+    } else if (!ORGANIZER_ROLES.includes(user.role as typeof ORGANIZER_ROLES[number])) {
+      navigate('/home', { replace: true })
     }
-  }, [isOrganizerSession, navigate])
+  }, [user, navigate])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
   }, [location.pathname])
 
-  if (!isOrganizerSession) return null
+  if (!user || !ORGANIZER_ROLES.includes(user.role as typeof ORGANIZER_ROLES[number])) return null
 
   return (
-    <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden">
-      <main ref={scrollRef} className="flex-1 overflow-y-auto pb-24">
-        <Outlet />
-      </main>
+    <DesktopGuard>
+      {/* ── MOBILE layout (< md) ── */}
+      <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden md:hidden">
+        <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24">
+          <Outlet />
+        </div>
 
-      {/* Floating pill bottom nav — Home | Events | ●Scan● | Rewards | Profile */}
-      <div className="fixed bottom-4 left-4 right-4 z-50">
-        <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-card border border-slate-100 px-2 py-2">
+        {/* Floating pill bottom nav — Home | Rewards | ●Scan● | Events | Profile */}
+        <div className="fixed bottom-4 left-4 right-4 z-50">
+          <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-card border border-slate-100 px-2 py-2">
 
-          {/* Left: Home, Events */}
-          {LEFT_TABS.map(({ path, label, Icon, end }) => (
-            <NavLink
-              key={path}
-              to={path}
-              end={end}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-blue' : 'text-slate-400'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-
-          {/* Center hero — Scanner */}
-          <NavLink to="/organizer/scan" className="-mt-6" title="Scan">
-            {({ isActive }) => (
-              <motion.div
-                className={`w-14 h-14 rounded-full flex items-center justify-center shadow-card transition-colors ${
-                  isActive ? 'bg-navy' : 'bg-blue'
-                }`}
-                style={{ border: '3px solid white' }}
-                whileTap={{ scale: 0.92 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            {LEFT_TABS.map(({ path, label, Icon, end }) => (
+              <NavLink
+                key={path}
+                to={path}
+                end={end}
+                className={({ isActive }) =>
+                  `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+                    isActive ? 'text-blue' : 'text-slate-400'
+                  }`
+                }
               >
-                <ScanLine className="w-6 h-6 text-white" />
-              </motion.div>
-            )}
-          </NavLink>
+                {({ isActive }) => (
+                  <>
+                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                    <span className="text-[10px] font-medium">{label}</span>
+                  </>
+                )}
+              </NavLink>
+            ))}
 
-          {/* Right: Rewards, Profile */}
-          {RIGHT_TABS.map(({ path, label, Icon, end }) => (
-            <NavLink
-              key={path}
-              to={path}
-              end={end}
-              className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-blue' : 'text-slate-400'
-                }`
-              }
-            >
+            {/* Center hero — Scanner */}
+            <NavLink to="/organizer/scan" className="-mt-6" title="Scan">
               {({ isActive }) => (
-                <>
-                  <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
+                <motion.div
+                  className={`w-14 h-14 rounded-full flex items-center justify-center shadow-card transition-colors ${
+                    isActive ? 'bg-navy' : 'bg-blue'
+                  }`}
+                  style={{ border: '3px solid white' }}
+                  whileTap={{ scale: 0.92 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  <ScanLine className="w-6 h-6 text-white" />
+                </motion.div>
               )}
             </NavLink>
-          ))}
 
+            {RIGHT_TABS.map(({ path, label, Icon, end }) => (
+              <NavLink
+                key={path}
+                to={path}
+                end={end}
+                className={({ isActive }) =>
+                  `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+                    isActive ? 'text-blue' : 'text-slate-400'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                    <span className="text-[10px] font-medium">{label}</span>
+                  </>
+                )}
+              </NavLink>
+            ))}
+
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* ── TABLET / DESKTOP layout (md+) ── */}
+      <div className="hidden md:flex h-screen bg-slate-100 p-4 gap-4 overflow-hidden">
+
+        {/* Floating sidebar */}
+        <aside className="w-48 lg:w-56 shrink-0 bg-blue rounded-2xl shadow-card flex flex-col overflow-hidden">
+          {/* Logo */}
+          <div className="px-5 py-5 border-b border-white/10">
+            <img src={logoHorizontal} alt="DEVCON+" className="h-5 w-auto" />
+            <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-white/50">
+              Organizer
+            </span>
+          </div>
+
+          {/* Nav items */}
+          <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+            {ALL_TABS.map(({ path, label, Icon, end }) => {
+              const isScan = path === '/organizer/scan'
+              return (
+                <NavLink
+                  key={path}
+                  to={path}
+                  end={end}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                      isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      {isScan ? (
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                          isActive ? 'bg-white/30' : 'bg-white/15'
+                        }`}>
+                          <Icon className="w-3.5 h-3.5 text-white" />
+                        </div>
+                      ) : (
+                        <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                      )}
+                      {label}
+                    </>
+                  )}
+                </NavLink>
+              )
+            })}
+          </nav>
+        </aside>
+
+        {/* Main content card */}
+        <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden flex flex-col">
+          <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </DesktopGuard>
   )
 }

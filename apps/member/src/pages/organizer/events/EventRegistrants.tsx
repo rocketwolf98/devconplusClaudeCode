@@ -1,69 +1,116 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, ClipboardList } from 'lucide-react'
+import { ArrowLeft, Check, ClipboardList, Megaphone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { EVENTS } from '@devcon-plus/supabase'
+import { supabase } from '../../../lib/supabase'
+import { useEventsStore } from '../../../stores/useEventsStore'
+import { useOrganizerUser } from '../../../stores/useOrgAuthStore'
+import { toast } from 'sonner'
 import { ApprovalCard, type Registration } from '../../../components/ApprovalCard'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
-
-const MOCK_REGISTRANTS: Registration[] = [
-  {
-    id: 'r1',
-    member_name: 'Ana Reyes',
-    member_email: 'ana.reyes@email.com',
-    school_or_company: 'Ateneo de Manila University',
-    event_title: 'DEVCON Summit Manila 2026',
-    registered_at: '2026-02-24T09:15:00Z',
-    status: 'pending',
-  },
-  {
-    id: 'r2',
-    member_name: 'Carlo Bautista',
-    member_email: 'carlo.bautista@company.com',
-    school_or_company: 'Accenture Philippines',
-    event_title: 'DEVCON Summit Manila 2026',
-    registered_at: '2026-02-24T10:30:00Z',
-    status: 'pending',
-  },
-  {
-    id: 'r3',
-    member_name: 'Pia Gonzales',
-    member_email: 'pia.gonzales@email.com',
-    school_or_company: 'De La Salle University',
-    event_title: 'DEVCON Summit Manila 2026',
-    registered_at: '2026-02-23T14:00:00Z',
-    status: 'approved',
-  },
-]
+import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
 
 export function OrgEventRegistrants() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { events } = useEventsStore()
 
-  const event = EVENTS.find((e) => e.id === id)
-  const [registrants, setRegistrants] = useState<Registration[]>(
-    MOCK_REGISTRANTS.map((r) => ({ ...r, event_title: event?.title ?? r.event_title }))
-  )
-  const [filter, setFilter] = useState<FilterStatus>('all')
+  const event = events.find((e) => e.id === id)
+  const organizerUser = useOrganizerUser()
+  const [registrants, setRegistrants] = useState<Registration[]>([])
+  const [isLoading, setIsLoading]     = useState(true)
+  const [filter, setFilter]           = useState<FilterStatus>('all')
+  const [showAnnounce, setShowAnnounce] = useState(false)
 
-  const handleApprove = (regId: string) => {
-    setRegistrants((prev) =>
-      prev.map((r) => (r.id === regId ? { ...r, status: 'approved' as const } : r))
-    )
+  // Fetch registrations with joined member profile data
+  useEffect(() => {
+    if (!id) return
+    setIsLoading(true)
+    supabase
+      .from('event_registrations')
+      .select('id, status, registered_at, checked_in, profiles(full_name, email, school_or_company)')
+      .eq('event_id', id)
+      .neq('status', 'cancelled')
+      .then(({ data }) => {
+        const mapped: Registration[] = (data ?? []).map((row) => {
+          const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+          const p = profile as { full_name?: string; email?: string; school_or_company?: string } | null
+          return {
+            id:                row.id,
+            member_name:       p?.full_name ?? 'Unknown',
+            member_email:      p?.email ?? '',
+            school_or_company: p?.school_or_company ?? '',
+            event_title:       event?.title ?? '',
+            registered_at:     row.registered_at ?? '',
+            status:            row.status as Registration['status'],
+            checked_in:        (row.checked_in as boolean | null) ?? false,
+          }
+        })
+        setRegistrants(mapped)
+        setIsLoading(false)
+      })
+  }, [id, event?.title])
+
+  const handleApprove = async (regId: string) => {
+    const qrToken = 'DCN-' + crypto.randomUUID().slice(0, 8).toUpperCase()
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({
+        status:        'approved',
+        approved_at:   new Date().toISOString(),
+        qr_code_token: qrToken,
+      })
+      .eq('id', regId)
+    if (!error) {
+      setRegistrants((prev) =>
+        prev.map((r) => (r.id === regId ? { ...r, status: 'approved' as const } : r))
+      )
+    }
   }
 
-  const handleReject = (regId: string) => {
-    setRegistrants((prev) =>
-      prev.map((r) => (r.id === regId ? { ...r, status: 'rejected' as const } : r))
-    )
+  const handleReject = async (regId: string) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'rejected' })
+      .eq('id', regId)
+    if (!error) {
+      setRegistrants((prev) =>
+        prev.map((r) => (r.id === regId ? { ...r, status: 'rejected' as const } : r))
+      )
+    }
   }
 
-  const handleRevert = (regId: string) => {
+  const handleRevert = async (regId: string) => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'pending', approved_at: null, qr_code_token: null })
+      .eq('id', regId)
+    if (!error) {
+      setRegistrants((prev) =>
+        prev.map((r) => (r.id === regId ? { ...r, status: 'pending' as const } : r))
+      )
+    }
+  }
+
+  const handleCheckIn = async (regId: string) => {
+    if (!organizerUser?.id) return
+    const { data, error } = await supabase.rpc('manual_checkin', {
+      p_registration_id: regId,
+      p_organizer_id:    organizerUser.id,
+    })
+    if (error || !(data as unknown as { success?: boolean })?.success) return
+    const result = data as unknown as { success: boolean; member_name: string; points_awarded: number }
     setRegistrants((prev) =>
-      prev.map((r) => (r.id === regId ? { ...r, status: 'pending' as const } : r))
+      prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
     )
+    toast.success(`${result.member_name} checked in — +${result.points_awarded} pts`)
+  }
+
+  const handleApproveAll = async () => {
+    const pending = registrants.filter((r) => r.status === 'pending')
+    await Promise.all(pending.map((r) => handleApprove(r.id)))
   }
 
   const filtered = filter === 'all' ? registrants : registrants.filter((r) => r.status === filter)
@@ -77,13 +124,25 @@ export function OrgEventRegistrants() {
 
   return (
     <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl relative">
+        <div className="flex items-center justify-between mb-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </button>
+          {event && (
+            <button
+              onClick={() => setShowAnnounce(true)}
+              className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
+                         text-white text-xs font-bold"
+            >
+              <Megaphone className="w-3.5 h-3.5" />
+              Announce
+            </button>
+          )}
+        </div>
         <h1 className="text-xl font-bold text-white">Registrants</h1>
         <p className="text-white/60 text-sm mt-0.5">{event?.title ?? 'Event'}</p>
       </div>
@@ -118,11 +177,7 @@ export function OrgEventRegistrants() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={() => {
-                setRegistrants((prev) =>
-                  prev.map((r) => (r.status === 'pending' ? { ...r, status: 'approved' as const } : r))
-                )
-              }}
+              onClick={handleApproveAll}
               className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
               whileTap={{ scale: 0.97 }}
             >
@@ -132,47 +187,73 @@ export function OrgEventRegistrants() {
           )}
         </AnimatePresence>
 
-        <AnimatePresence mode="wait">
-          {filtered.length === 0 ? (
-            <motion.div
-              key="empty"
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
-            >
-              <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                <ClipboardList className="w-7 h-7 text-slate-400" />
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-2xl border border-slate-200 p-4 animate-pulse">
+                <div className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-100" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 bg-slate-100 rounded w-32" />
+                    <div className="h-3 bg-slate-100 rounded w-48" />
+                  </div>
+                </div>
               </div>
-              <p className="text-base font-bold text-slate-700">No registrants found</p>
-              <p className="text-sm text-slate-400 mt-1">
-                {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div
-              key={filter}
-              className="space-y-3"
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              {filtered.map((reg) => (
-                <motion.div key={reg.id} variants={cardItem}>
-                  <ApprovalCard
-                    registration={reg}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                    onRevert={handleRevert}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ))}
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            {filtered.length === 0 ? (
+              <motion.div
+                key="empty"
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                  <ClipboardList className="w-7 h-7 text-slate-400" />
+                </div>
+                <p className="text-base font-bold text-slate-700">No registrants found</p>
+                <p className="text-sm text-slate-400 mt-1">
+                  {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={filter}
+                className="space-y-3"
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                {filtered.map((reg) => (
+                  <motion.div key={reg.id} variants={cardItem}>
+                    <ApprovalCard
+                      registration={reg}
+                      onApprove={handleApprove}
+                      onReject={handleReject}
+                      onRevert={handleRevert}
+                      onCheckIn={handleCheckIn}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </motion.div>
+
+      {event && (
+        <SendAnnouncementSheet
+          eventId={event.id}
+          eventTitle={event.title}
+          isOpen={showAnnounce}
+          onClose={() => setShowAnnounce(false)}
+        />
+      )}
     </div>
   )
 }

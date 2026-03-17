@@ -1,12 +1,22 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap } from 'lucide-react'
+import { MapPin, Zap, Archive } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { EVENTS } from '@devcon-plus/supabase'
+import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem } from '../../../lib/animation'
+import { isEventArchived } from '../../../lib/dates'
 
 export function OrgEventsList() {
   const navigate = useNavigate()
+  const { events, fetchEvents } = useEventsStore()
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
+
+  const upcomingEvents = events.filter((e) => !isEventArchived(e))
+  const pastEvents     = events.filter((e) => isEventArchived(e))
+  const displayEvents  = activeTab === 'upcoming' ? upcomingEvents : pastEvents
+
+  useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -23,15 +33,33 @@ export function OrgEventsList() {
             + New Event
           </button>
         </div>
+
+        {/* Upcoming / Past tabs */}
+        <div className="flex gap-1 bg-white/20 p-1 rounded-xl w-fit mt-3">
+          {(['upcoming', 'past'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-colors ${
+                activeTab === tab
+                  ? 'bg-white text-blue'
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              {tab} ({tab === 'upcoming' ? upcomingEvents.length : pastEvents.length})
+            </button>
+          ))}
+        </div>
       </div>
 
       <motion.div
+        key={activeTab}
         className="p-4 space-y-3"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
-        {EVENTS.map((event) => {
+        {displayEvents.map((event) => {
           const formattedDate = event.event_date
             ? new Date(event.event_date).toLocaleDateString('en-US', {
                 weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
@@ -43,7 +71,11 @@ export function OrgEventsList() {
               key={event.id}
               variants={cardItem}
               className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
-              onClick={() => navigate(`/organizer/events/${event.id}`)}
+              onClick={() => navigate(
+                isEventArchived(event)
+                  ? `/organizer/events/${event.id}/summary`
+                  : `/organizer/events/${event.id}`
+              )}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-start gap-4">
@@ -61,7 +93,15 @@ export function OrgEventsList() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-base font-bold text-slate-900 truncate">{event.title}</p>
-                    <StatusBadge status={event.status === 'upcoming' ? 'pending' : event.status === 'ongoing' ? 'approved' : 'rejected'} />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isEventArchived(event) && (
+                        <span className="flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                          <Archive className="w-3 h-3" />
+                          Past
+                        </span>
+                      )}
+                      <StatusBadge status={event.status === 'upcoming' ? 'pending' : event.status === 'ongoing' ? 'approved' : 'rejected'} />
+                    </div>
                   </div>
                   <p className="text-sm text-slate-400 mt-1">{formattedDate}</p>
                   {event.location && (

@@ -1,7 +1,10 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
+import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import TransactionRow from '../../components/TransactionRow'
+import { SkeletonTransactionGroup } from '../../components/Skeleton'
 import type { PointTransaction } from '@devcon-plus/supabase'
 
 function groupByDate(txs: PointTransaction[]): Array<[string, PointTransaction[]]> {
@@ -18,7 +21,12 @@ function groupByDate(txs: PointTransaction[]): Array<[string, PointTransaction[]
 
 export default function PointsHistory() {
   const navigate = useNavigate()
-  const { transactions, totalPoints } = usePointsStore()
+  const { user } = useAuthStore()
+  const { transactions, totalPoints, fetchPoints, isLoading } = usePointsStore()
+
+  useEffect(() => {
+    if (user?.id) void fetchPoints(user.id)
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const sorted = [...transactions].sort(
     (a, b) => new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
@@ -38,8 +46,13 @@ export default function PointsHistory() {
         <p className="text-gold font-bold text-2xl mt-1">{totalPoints.toLocaleString()} pts</p>
       </div>
 
-      <div className="bg-slate-50 min-h-screen p-4">
-        {groups.length === 0 ? (
+      <div className="bg-slate-50 min-h-screen p-4 md:max-w-2xl md:mx-auto">
+        {isLoading ? (
+          <>
+            <SkeletonTransactionGroup rows={3} />
+            <SkeletonTransactionGroup rows={2} />
+          </>
+        ) : groups.length === 0 ? (
           <div className="text-center py-12 text-slate-400 text-sm">No transactions yet</div>
         ) : (
           groups.map(([date, txs]) => (
