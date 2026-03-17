@@ -132,12 +132,13 @@ export default function NewsDetail() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
 
         {/* Back button */}
-        <button
+        <motion.button
           onClick={() => navigate(-1)}
+          whileTap={{ scale: 0.95 }}
           className="absolute top-12 left-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
-        </button>
+        </motion.button>
 
         {post.is_promoted && (
           <div className="absolute top-12 right-4">
