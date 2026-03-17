@@ -17,6 +17,8 @@ export type EventCategory =
   | 'social'
   | 'networking'
 
+export type DevconCategory = 'devcon' | 'she' | 'kids' | 'campus'
+
 export type EventVisibility = 'public' | 'unlisted' | 'draft'
 
 export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
@@ -103,6 +105,7 @@ export interface Event {
   event_date: string | null
   end_date: string | null
   category: EventCategory | null
+  devcon_category: DevconCategory | null
   tags: string[]
   visibility: EventVisibility
   is_free: boolean
