@@ -202,6 +202,7 @@ export function OrgEventCreate() {
         event_date:        data.event_date,
         end_date:          data.end_date ?? null,
         category:          data.category,
+        devcon_category:   null,
         tags,
         visibility,
         is_free:           data.is_free,
