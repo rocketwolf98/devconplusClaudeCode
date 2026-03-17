@@ -8,6 +8,7 @@ import AddToCalendarSheet from '../../components/AddToCalendarSheet'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useThemeStore } from '../../stores/useThemeStore'
+import { resolveEventTheme } from '../../lib/eventTheme'
 import { supabase } from '../../lib/supabase'
 
 // Animation variants
@@ -63,6 +64,7 @@ export default function EventTicket() {
   const { user } = useAuthStore()
   const { activeTheme } = useThemeStore()
   const theme = activeTheme()
+  const effectiveTheme = resolveEventTheme(event?.devcon_category, theme)
 
   // Derived early so they can seed useState initial values
   const event = events.find((e) => e.id === id)
@@ -201,7 +203,7 @@ export default function EventTicket() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: `linear-gradient(160deg, ${theme.darkHex} 0%, ${theme.hex} 100%)` }}
+      style={{ background: `linear-gradient(160deg, ${effectiveTheme.darkHex} 0%, ${effectiveTheme.hex} 100%)` }}
     >
 
       {/* Floating back button */}
@@ -231,7 +233,7 @@ export default function EventTicket() {
           {/* ── Primary header strip ── */}
           <div
             className="px-6 pt-6 pb-5 text-center"
-            style={{ backgroundColor: checkedIn ? '#21C45D' : theme.hex, transition: 'background-color 0.6s ease' }}
+            style={{ backgroundColor: checkedIn ? '#21C45D' : effectiveTheme.hex, transition: 'background-color 0.6s ease' }}
           >
             <motion.div
               initial={{ opacity: 0, y: 6 }}
