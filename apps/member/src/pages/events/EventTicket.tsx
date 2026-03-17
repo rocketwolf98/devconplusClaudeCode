@@ -481,7 +481,7 @@ export default function EventTicket() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full bg-white rounded-t-3xl p-6"
+              className="w-full bg-white rounded-t-3xl px-5 pt-4 pb-10"
               onClick={(e) => e.stopPropagation()}
             >
               {cancelStep === 'first' ? (
