@@ -7,6 +7,7 @@ import PromotedBadge from '../../components/PromotedBadge'
 import { fadeUp } from '../../lib/animation'
 import { CATEGORY_LABELS } from '../../lib/constants'
 import { formatDate } from '../../lib/dates'
+import NotFound from '../NotFound'
 
 const WELCOME_POST = {
   id: 'welcome',
@@ -98,7 +99,7 @@ function ArticleBody({ body }: { body: string }) {
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { posts, fetchNews } = useNewsStore()
+  const { posts, fetchNews, isLoading } = useNewsStore()
 
   useEffect(() => {
     if (id !== 'welcome' && posts.length === 0) void fetchNews()
@@ -106,20 +107,8 @@ export default function NewsDetail() {
 
   const post = id === 'welcome' ? WELCOME_POST : posts.find((p) => p.id === id)
 
-  if (!post) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center">
-        <Newspaper className="w-12 h-12 text-slate-300 mb-4" />
-        <p className="font-semibold text-slate-700">Article not found</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 text-primary text-sm font-semibold"
-        >
-          Go back
-        </button>
-      </div>
-    )
-  }
+  if (!post && isLoading) return null
+  if (!post) return <NotFound />
 
   const dateStr = post.created_at ? formatDate.long(post.created_at) : ''
 
