@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap, AlertTriangle, CalendarPlus } from 'lucide-react'
+import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap, AlertTriangle, CalendarOff, CalendarPlus } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Variants } from 'framer-motion'
