@@ -41,7 +41,14 @@ The Supabase fetch already exists in `useEffect` (lines 61–69). The only chang
     .select('event_id')
     .eq('status', 'approved')
   ```
-- Reduce results client-side into `{ [event_id]: count }` and call `setAttendeeCounts`
+- Reduce results client-side — each row is one approved registration, so increment per `event_id`:
+  ```ts
+  const counts: Record<string, number> = {}
+  data?.forEach((row) => {
+    counts[row.event_id] = (counts[row.event_id] ?? 0) + 1
+  })
+  setAttendeeCounts(counts)
+  ```
 - Replace all three `MOCK_ATTENDEES[x]` references with `attendeeCounts[x]`
 
 **Display behaviour preserved:**
