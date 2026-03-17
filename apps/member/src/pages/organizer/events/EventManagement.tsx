@@ -7,6 +7,7 @@ import { useEventsStore } from '../../../stores/useEventsStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
+import { isEventArchived } from '../../../lib/dates'
 
 export function OrgEventManagement() {
   const navigate = useNavigate()
@@ -19,9 +20,9 @@ export function OrgEventManagement() {
   useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const chapterEvents = events.filter((e) => e.chapter_id === (user?.chapter_id ?? null))
-  const currentEvent = chapterEvents.find((e) => e.status === 'upcoming' && e.is_featured) ?? chapterEvents[0]
-  const upcomingEvents = chapterEvents.filter((e) => e.status === 'upcoming')
-  const pastEvents = chapterEvents.filter((e) => e.status === 'past')
+  const pastEvents     = chapterEvents.filter((e) => isEventArchived(e))
+  const upcomingEvents = chapterEvents.filter((e) => !isEventArchived(e))
+  const currentEvent   = upcomingEvents.find((e) => e.is_featured) ?? upcomingEvents[0]
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
