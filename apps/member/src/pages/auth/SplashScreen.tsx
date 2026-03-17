@@ -6,12 +6,11 @@ import { useAuthStore } from '../../stores/useAuthStore'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
-  const authStore = useAuthStore
 
   useEffect(() => {
     const t = setTimeout(() => {
-      const { user, isOrganizerSession } = authStore.getState()
-      const dest = user
+      const { user, isOrganizerSession, isInitialized } = useAuthStore.getState()
+      const dest = (isInitialized && user)
         ? isOrganizerSession ? '/organizer' : '/home'
         : '/onboarding'
       navigate(dest, { replace: true })
