@@ -43,12 +43,25 @@ export default function EventsList() {
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null)
   const [showChapterSheet, setShowChapterSheet] = useState(false)
+  const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({})
 
   useEffect(() => {
     void fetchEvents()
     if (user?.id) void fetchRegistrations(user.id)
 
-    // Try to fetch real chapters; fall back to mock on error
+    supabase
+      .from('event_registrations')
+      .select('event_id')
+      .eq('status', 'approved')
+      .then(({ data }) => {
+        const counts: Record<string, number> = {}
+        data?.forEach((row) => {
+          counts[row.event_id] = (counts[row.event_id] ?? 0) + 1
+        })
+        setAttendeeCounts(counts)
+      })
+
+    // Try to fetch real chapters; fall back silently on error
     supabase
       .from('chapters')
       .select('*')
@@ -214,7 +227,7 @@ export default function EventsList() {
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center gap-1.5 text-white/50 text-xs">
                       <Users className="w-3.5 h-3.5" />
-                      <span>{(MOCK_ATTENDEES[featuredEvent.id] ?? 0).toLocaleString()} attending</span>
+                      <span>{(attendeeCounts[featuredEvent.id] ?? 0).toLocaleString()} attending</span>
                     </div>
                     <span className="text-gold text-xs font-bold">
                       +{featuredEvent.points_value} pts
@@ -268,10 +281,10 @@ export default function EventsList() {
                           <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                             +{event.points_value} pts
                           </span>
-                          {MOCK_ATTENDEES[event.id] && (
+                          {attendeeCounts[event.id] && (
                             <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
                               <Users className="w-3 h-3" />
-                              {MOCK_ATTENDEES[event.id]}
+                              {attendeeCounts[event.id]}
                             </span>
                           )}
                         </div>
