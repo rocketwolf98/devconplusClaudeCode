@@ -2,12 +2,20 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import logoVertical from '../../assets/logos/logo-vertical.svg'
+import { useAuthStore } from '../../stores/useAuthStore'
 
 export default function SplashScreen() {
   const navigate = useNavigate()
+  const authStore = useAuthStore
 
   useEffect(() => {
-    const t = setTimeout(() => navigate('/onboarding', { replace: true }), 2600)
+    const t = setTimeout(() => {
+      const { user, isOrganizerSession } = authStore.getState()
+      const dest = user
+        ? isOrganizerSession ? '/organizer' : '/home'
+        : '/onboarding'
+      navigate(dest, { replace: true })
+    }, 2600)
     return () => clearTimeout(t)
   }, [navigate])
 
