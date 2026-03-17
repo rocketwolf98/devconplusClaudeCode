@@ -319,6 +319,40 @@ export default function EventTicket() {
                         <span className="text-xs font-bold text-green">+{event.points_value} XP earned!</span>
                       </motion.div>
                     </motion.div>
+                  ) : eventEnded ? (
+                    <motion.div
+                      key="event-ended"
+                      initial={{ opacity: 0, scale: 0.82 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="w-[204px] h-[204px] bg-white rounded-2xl shadow-card border border-slate-100 flex flex-col items-center justify-center gap-2"
+                    >
+                      <motion.div
+                        initial={{ scale: 0, rotate: -20 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
+                        className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center"
+                      >
+                        <CalendarOff className="w-9 h-9 text-slate-400" />
+                      </motion.div>
+                      <motion.p
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.26, duration: 0.22 }}
+                        className="text-base font-black text-slate-900"
+                      >
+                        Event Ended
+                      </motion.p>
+                      <motion.p
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.32, duration: 0.2 }}
+                        className="text-[11px] text-slate-400 text-center px-4"
+                      >
+                        This ticket is no longer valid.
+                      </motion.p>
+                    </motion.div>
                   ) : (
                     <motion.div
                       key="qr-code"
@@ -380,8 +414,8 @@ export default function EventTicket() {
                 </AnimatePresence>
               </div>
 
-              {/* Countdown label / retry — hidden after check-in */}
-              {!checkedIn && (
+              {/* Countdown label / retry — hidden after check-in or when event has ended */}
+              {!checkedIn && !eventEnded && (
                 fetchError ? (
                   <motion.button
                     whileTap={{ scale: 0.95 }}
