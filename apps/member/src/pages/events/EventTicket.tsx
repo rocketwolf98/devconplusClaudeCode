@@ -128,7 +128,7 @@ export default function EventTicket() {
 
   // Check-in detection — initial fetch + Realtime subscription
   useEffect(() => {
-    if (!reg) return
+    if (!reg || event?.status === 'past') return
 
     // Live: organizer scans → checked_in flips to true
     const regId = reg.id
@@ -456,7 +456,7 @@ export default function EventTicket() {
             </motion.div>
 
             {/* Cancel registration — only shown when not yet checked in */}
-            {!reg.checked_in && !checkedIn && (
+            {!reg.checked_in && !checkedIn && !eventEnded && (
               <div className="px-6 pb-5">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
