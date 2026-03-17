@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, MapPin, Ticket } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
+import NotFound from '../NotFound'
 
 export default function EventDetail() {
   const { id } = useParams<{ id: string }>()
@@ -10,7 +11,7 @@ export default function EventDetail() {
   const event = events.find((e) => e.id === id)
   const reg = registrations.find((r) => r.event_id === id)
 
-  if (!event) return <div className="p-4 text-center text-slate-400 pt-20">Event not found</div>
+  if (!event) return <NotFound />
 
   const dateStr = event.event_date
     ? new Date(event.event_date).toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
