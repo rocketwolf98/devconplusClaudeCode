@@ -45,6 +45,12 @@ export default function Dashboard() {
   const cradleHeight   = useTransform(scrollYMV, [60, 180], [280, 0])
   const gradientOpacity = useTransform(scrollYMV, [30, 140], [0, 1])
 
+  const headerPaddingTop    = useTransform(scrollYMV, [0, 80], [56, 16])
+  const headerPaddingBottom = useTransform(scrollYMV, [0, 80], [16, 8])
+  const greetingFontSize    = useTransform(scrollYMV, [0, 80], [30, 18])
+  const logoHeight          = useTransform(scrollYMV, [0, 80], [32, 22])
+  const bellSize            = useTransform(scrollYMV, [0, 80], [36, 28])
+
   useEffect(() => {
     void fetchEvents()
     if (user?.id) void fetchPoints(user.id)
@@ -91,17 +97,23 @@ export default function Dashboard() {
     <div>
       {/* ── Sticky greeting bar + gradient tail ── */}
       <div className="sticky top-0 z-40 relative">
-        <div className="bg-primary px-6 pt-14 pb-4">
+        <motion.div className="bg-primary px-6" style={{ paddingTop: headerPaddingTop, paddingBottom: headerPaddingBottom }}>
           <div className="flex items-center justify-between">
             {/* Logomark + greeting */}
             <div className="flex items-center gap-2.5">
-              <img src={logoMark} alt="DEVCON+" className="h-8 w-auto" />
-              <h1 className="text-white text-3xl font-black">Hi, {firstName}!</h1>
+              <motion.img src={logoMark} alt="DEVCON+" className="w-auto" style={{ height: logoHeight }} />
+              <motion.h1
+                className="text-white font-black"
+                style={{ fontSize: greetingFontSize, lineHeight: 1.1 }}
+              >
+                Hi, {firstName}!
+              </motion.h1>
             </div>
             {/* Notification bell */}
-            <button
+            <motion.button
               onClick={() => navigate('/notifications')}
-              className="relative w-9 h-9 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
+              className="relative bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
+              style={{ width: bellSize, height: bellSize }}
             >
               <Bell className="w-[18px] h-[18px] text-white" />
               {unreadCount > 0 && (
@@ -111,9 +123,9 @@ export default function Dashboard() {
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
         {/* Gradient: absolutely positioned — no layout impact, overlaps cradle top */}
         <motion.div
           className="absolute left-0 right-0 h-10 pointer-events-none"
