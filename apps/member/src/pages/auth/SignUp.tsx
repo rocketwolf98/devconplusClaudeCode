@@ -6,6 +6,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
+import PasswordStrengthMeter from '../../components/PasswordStrengthMeter'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 import { supabase } from '../../lib/supabase'
 
@@ -58,9 +59,10 @@ export default function SignUp() {
     })
   }, [])
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+  const watchedPassword = watch('password') ?? ''
 
   const handleUsernameChange = useCallback((value: string) => {
     if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
@@ -188,6 +190,7 @@ export default function SignUp() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            <PasswordStrengthMeter password={watchedPassword} />
             {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
           </div>
 
