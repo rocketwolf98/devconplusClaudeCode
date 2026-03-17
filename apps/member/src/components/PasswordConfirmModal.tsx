@@ -50,7 +50,7 @@ export default function PasswordConfirmModal({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/50 z-40"
+            className="fixed inset-0 bg-black/50 z-[60]"
             variants={backdrop}
             initial="hidden"
             animate="visible"
@@ -60,7 +60,7 @@ export default function PasswordConfirmModal({
 
           {/* Sheet */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-40 bg-white rounded-t-2xl px-6 pt-6 pb-32"
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl px-6 pt-6 pb-32"
             variants={slideUp}
             initial="hidden"
             animate="visible"

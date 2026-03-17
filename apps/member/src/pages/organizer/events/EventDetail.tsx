@@ -172,7 +172,7 @@ export function OrgEventDetail() {
         {deleteStep > 0 && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/40 z-40"
+              className="fixed inset-0 bg-black/40 z-[60]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -182,7 +182,7 @@ export function OrgEventDetail() {
             {/* Step 1 — confirm intent */}
             {deleteStep === 1 && (
               <motion.div
-                className="fixed bottom-0 left-0 right-0 z-[45] bg-white rounded-t-3xl px-5 pt-4 pb-28"
+                className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-28"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
@@ -220,7 +220,7 @@ export function OrgEventDetail() {
             {/* Step 2 — final confirmation */}
             {deleteStep === 2 && (
               <motion.div
-                className="fixed bottom-0 left-0 right-0 z-[45] bg-white rounded-t-3xl px-5 pt-4 pb-28"
+                className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-28"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
