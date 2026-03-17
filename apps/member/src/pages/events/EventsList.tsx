@@ -12,16 +12,7 @@ import { SkeletonEventCard, SkeletonFeaturedEvent } from '../../components/Skele
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { isEventArchived } from '../../lib/dates'
 import { supabase } from '../../lib/supabase'
-import { CHAPTERS as MOCK_CHAPTERS } from '@devcon-plus/supabase'
 import type { Event, EventRegistration, Chapter } from '@devcon-plus/supabase'
-
-const MOCK_ATTENDEES: Record<string, number> = {
-  'ev-1': 342,
-  'ev-2': 118,
-  'ev-3': 87,
-  'ev-4': 204,
-  'ev-5': 53,
-}
 
 const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const
 
@@ -49,7 +40,7 @@ export default function EventsList() {
   const [tab, setTab] = useState<'discover' | 'tickets'>('discover')
 
   // Chapter filter state
-  const [chapters, setChapters] = useState<Chapter[]>(MOCK_CHAPTERS)
+  const [chapters, setChapters] = useState<Chapter[]>([])
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null)
   const [showChapterSheet, setShowChapterSheet] = useState(false)
 
@@ -63,7 +54,7 @@ export default function EventsList() {
       .select('*')
       .order('name')
       .then(({ data, error }) => {
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           setChapters(data as Chapter[])
         }
       })
