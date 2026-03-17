@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap } from 'lucide-react'
+import { MapPin, Zap, Archive } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
@@ -71,7 +71,11 @@ export function OrgEventsList() {
               key={event.id}
               variants={cardItem}
               className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
-              onClick={() => navigate(`/organizer/events/${event.id}`)}
+              onClick={() => navigate(
+                isEventArchived(event)
+                  ? `/organizer/events/${event.id}/summary`
+                  : `/organizer/events/${event.id}`
+              )}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-start gap-4">
@@ -89,7 +93,15 @@ export function OrgEventsList() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-base font-bold text-slate-900 truncate">{event.title}</p>
-                    <StatusBadge status={event.status === 'upcoming' ? 'pending' : event.status === 'ongoing' ? 'approved' : 'rejected'} />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isEventArchived(event) && (
+                        <span className="flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                          <Archive className="w-3 h-3" />
+                          Past
+                        </span>
+                      )}
+                      <StatusBadge status={event.status === 'upcoming' ? 'pending' : event.status === 'ongoing' ? 'approved' : 'rejected'} />
+                    </div>
                   </div>
                   <p className="text-sm text-slate-400 mt-1">{formattedDate}</p>
                   {event.location && (
