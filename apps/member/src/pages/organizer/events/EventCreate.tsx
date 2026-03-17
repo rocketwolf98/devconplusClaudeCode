@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { fadeUp, staggerContainer } from '../../../lib/animation'
+import type { DevconCategory } from '@devcon-plus/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { supabase } from '../../../lib/supabase'
@@ -28,6 +29,7 @@ const schema = z
       'social',
       'networking',
     ], { required_error: 'Category is required' }),
+    devcon_category: z.enum(['devcon', 'she', 'kids', 'campus']).optional(),
     tags: z.array(z.string()).default([]),
     visibility: z.enum(['public', 'unlisted', 'draft']).default('public'),
     is_free: z.boolean().default(true),
@@ -72,6 +74,18 @@ const CATEGORY_OPTIONS: {
   { value: 'summit',      label: 'Summit'      },
   { value: 'social',      label: 'Social'      },
   { value: 'networking',  label: 'Networking'  },
+]
+
+const DEVCON_PROGRAM_OPTIONS: {
+  value: DevconCategory
+  label: string
+  hex: string
+  darkText?: boolean
+}[] = [
+  { value: 'devcon',  label: 'DEVCON',         hex: '#367BDD' },
+  { value: 'she',     label: '#SheIsDEVCON',   hex: '#EC4899' },
+  { value: 'kids',    label: 'DEVCON Kids',     hex: '#21C45D' },
+  { value: 'campus',  label: 'Campus DEVCON',   hex: '#F8C630', darkText: true },
 ]
 
 const VISIBILITY_OPTIONS: { value: FormData['visibility']; label: string }[] = [
@@ -202,7 +216,7 @@ export function OrgEventCreate() {
         event_date:        data.event_date,
         end_date:          data.end_date ?? null,
         category:          data.category,
-        devcon_category:   null,
+        devcon_category:   data.devcon_category ?? null,
         tags,
         visibility,
         is_free:           data.is_free,
@@ -323,6 +337,40 @@ export function OrgEventCreate() {
         <motion.div variants={fadeUp}>
           <SectionHeader title="Categorization" />
           <div className="space-y-4">
+            {/* DEVCON Program (optional) */}
+            <div>
+              <label className={labelClass}>
+                DEVCON Program{' '}
+                <span className="text-slate-300 normal-case font-normal">optional</span>
+              </label>
+              <Controller
+                control={control}
+                name="devcon_category"
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-2">
+                    {DEVCON_PROGRAM_OPTIONS.map((opt) => {
+                      const isSelected = field.value === opt.value
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => field.onChange(isSelected ? undefined : opt.value)}
+                          style={isSelected ? { backgroundColor: opt.hex, borderColor: opt.hex } : undefined}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                            isSelected
+                              ? opt.darkText ? 'text-slate-900' : 'text-white'
+                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              />
+            </div>
+
             {/* Category radio pills */}
             <div>
               <label className={labelClass}>Category <span className="text-red normal-case">*</span></label>
