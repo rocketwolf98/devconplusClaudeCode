@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, Heart, User, CalendarDays, MapPin } from 'lucide-react'
+import { ChevronRight, LogOut, User, CalendarDays, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -156,15 +156,6 @@ export function OrgProfile() {
               <ChevronRight className="w-4 h-4 text-slate-300" />
             </button>
           ))}
-        </div>
-
-        {/* Platform info */}
-        <div className="bg-white rounded-2xl border border-slate-200 px-5 py-4">
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-1">Platform</p>
-          <p className="text-sm font-semibold text-slate-900">DEVCON+ Organizer Portal v1.0.0</p>
-          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-            Made with <Heart className="w-3 h-3 text-red inline" /> for DEVCON Philippines
-          </p>
         </div>
 
         {/* Switch to Member View */}

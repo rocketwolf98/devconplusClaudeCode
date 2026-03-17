@@ -15,7 +15,7 @@ const MENU_ITEMS: { label: string; path: string }[] = [
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { user, initials, signOut } = useAuthStore()
+  const { user, initials, signOut, chapterName } = useAuthStore()
   const { totalPoints } = usePointsStore()
   const { themeId, setTheme } = useThemeStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
@@ -44,10 +44,19 @@ export default function Profile() {
           )}
         </div>
         <h1 className="text-xl font-black text-white">{user?.full_name}</h1>
-        {user?.school_or_company && (
-          <p className="text-white/60 text-sm mt-0.5">{user.school_or_company}</p>
-        )}
-        <div className="flex items-center justify-center mt-3">
+        <p className="text-white/60 text-sm mt-0.5">{user?.email}</p>
+        <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
+          {chapterName && (
+            <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
+              {chapterName} Chapter
+            </span>
+          )}
+          <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
+            {user?.role === 'hq_admin' ? 'HQ Admin'
+              : user?.role === 'super_admin' ? 'Super Admin'
+              : user?.role === 'chapter_officer' ? 'Chapter Officer'
+              : 'Member'}
+          </span>
           <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1 text-white text-xs font-semibold">
             <Star className="w-3 h-3 fill-gold text-gold" />
             {totalPoints.toLocaleString()} XP

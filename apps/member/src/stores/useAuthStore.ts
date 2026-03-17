@@ -109,7 +109,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: true })
 
     // Restore existing session on page load
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) {
+      // Stale / corrupt token in storage — clear it and bail to sign-in
+      await supabase.auth.signOut()
+      set({ isLoading: false, isInitialized: true })
+      return
+    }
     if (session?.user) {
       const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
       const profile = await ensureProfile(session.user.id, meta)
@@ -128,6 +134,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Subscribe to future auth state changes
     supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event as string) === 'TOKEN_REFRESH_FAILED') {
+        // Refresh token is invalid / revoked — clear stale session and redirect
+        await supabase.auth.signOut()
+        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
+        window.location.replace('/sign-in')
+        return
+      }
       if (event === 'SIGNED_OUT' || !session) {
         set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
         return
