@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import type { Profile } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
 
-const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin'] as const
-type OrganizerRole = typeof ORGANIZER_ROLES[number]
+export const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin'] as const
+export type OrganizerRole = typeof ORGANIZER_ROLES[number]
 
 function getInitials(name: string): string {
   return name
@@ -62,10 +62,8 @@ async function fetchProfileById(userId: string): Promise<Profile | null> {
 }
 
 async function ensureProfile(userId: string, meta: Record<string, string | null>): Promise<Profile | null> {
-  const existing = await fetchProfileById(userId)
-  if (existing) return existing
-
-  // Profile row missing — create it now (handles cases before DB trigger is deployed)
+  // Insert first; on unique_violation (profile already exists) fall back to fetch.
+  // Saves one round-trip vs SELECT-then-INSERT on the common re-login path.
   const { data, error } = await supabase
     .from('profiles')
     .insert({
@@ -80,10 +78,10 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
     })
     .select()
     .single()
-  if (error) {
-    console.error('[ensureProfile] insert error:', error.code, error.message)
-  }
-  return (data ?? null) as unknown as Profile | null
+  if (!error) return (data ?? null) as unknown as Profile | null
+  if (error.code === '23505') return fetchProfileById(userId) // already exists
+  console.error('[ensureProfile] error:', error.code, error.message)
+  return null
 }
 
 async function fetchChapterName(chapterId: string | null): Promise<string | null> {
@@ -94,6 +92,28 @@ async function fetchChapterName(chapterId: string | null): Promise<string | null
     .eq('id', chapterId)
     .single()
   return data?.name ?? null
+}
+
+// Applies a fetched profile to the store; shared by initialize, signIn, signUp, and onAuthStateChange.
+async function applyProfile(profile: Profile, set: (partial: Partial<AuthState>) => void): Promise<void> {
+  const chapterName = await fetchChapterName(profile.chapter_id)
+  set({
+    user: profile,
+    initials: getInitials(profile.full_name),
+    chapterName,
+    isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
+  })
+}
+
+// Holds the auth listener cleanup so initialize() can safely re-register without leaking.
+let authUnsubscribe: (() => void) | null = null
+
+const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png':  'png',
+  'image/webp': 'webp',
+  'image/gif':  'gif',
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -119,21 +139,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (session?.user) {
       const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
       const profile = await ensureProfile(session.user.id, meta)
-      if (profile) {
-        const chapterName = await fetchChapterName(profile.chapter_id)
-        set({
-          user: profile,
-          initials: getInitials(profile.full_name),
-          chapterName,
-          isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
-        })
-      }
+      if (profile) await applyProfile(profile, set)
     }
 
     set({ isLoading: false, isInitialized: true })
 
-    // Subscribe to future auth state changes
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    // Subscribe to future auth state changes; clean up any prior subscription first.
+    if (authUnsubscribe) authUnsubscribe()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event as string) === 'TOKEN_REFRESH_FAILED') {
         // Refresh token is invalid / revoked — clear stale session and redirect
         await supabase.auth.signOut()
@@ -148,17 +161,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
         const profile = await ensureProfile(session.user.id, meta)
-        if (profile) {
-          const chapterName = await fetchChapterName(profile.chapter_id)
-          set({
-            user: profile,
-            initials: getInitials(profile.full_name),
-            chapterName,
-            isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
-          })
-        }
+        if (profile) await applyProfile(profile, set)
       }
     })
+    authUnsubscribe = () => subscription.unsubscribe()
   },
 
   signUp: async (email, password, full_name, username, school_or_company, chapter_id) => {
@@ -191,15 +197,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         chapter_id: chapter_id ?? null,
       }
       const profile = await ensureProfile(data.session.user.id, meta)
-      if (profile) {
-        const chapterName = await fetchChapterName(profile.chapter_id)
-        set({
-          user: profile,
-          initials: getInitials(profile.full_name),
-          chapterName,
-          isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
-        })
-      }
+      if (profile) await applyProfile(profile, set)
     }
     set({ isLoading: false })
     return { emailConfirmationPending: !data.session }
@@ -216,15 +214,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (data.session?.user) {
       const meta = { ...data.session.user.user_metadata, email: data.session.user.email ?? null } as Record<string, string | null>
       const profile = await ensureProfile(data.session.user.id, meta)
-      if (profile) {
-        const chapterName = await fetchChapterName(profile.chapter_id)
-        set({
-          user: profile,
-          initials: getInitials(profile.full_name),
-          chapterName,
-          isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
-        })
-      }
+      if (profile) await applyProfile(profile, set)
     }
     set({ isLoading: false })
   },
@@ -273,7 +263,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   uploadAvatar: async (file) => {
     const current = get().user
     if (!current) throw new Error('Not authenticated')
-    const ext = file.name.split('.').pop() ?? 'jpg'
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) throw new Error('Only image files are allowed')
+    const ext = MIME_TO_EXT[file.type] ?? 'jpg'
     const path = `${current.id}/${Date.now()}.${ext}`
     const { error } = await supabase.storage
       .from('avatars')
@@ -354,13 +345,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (error) throw error
 
     // Store pending state on profile so it's visible elsewhere
-    await supabase
+    const { error: updateErr } = await supabase
       .from('profiles')
       .update({
         pending_role: codeRow.assigned_role,
         pending_chapter_id: codeRow.chapter_id,
       })
       .eq('id', current.id)
+    if (updateErr) throw updateErr
 
     set({ user: { ...current, pending_role: codeRow.assigned_role, pending_chapter_id: codeRow.chapter_id } })
     return 'submitted'

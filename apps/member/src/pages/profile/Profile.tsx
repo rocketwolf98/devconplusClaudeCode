@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, ChevronRight, LogOut, Shield, Star } from 'lucide-react'
-import { useAuthStore } from '../../stores/useAuthStore'
+import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
+import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useThemeStore, PROGRAM_THEMES } from '../../stores/useThemeStore'
+import { ROLE_DISPLAY_NAMES } from '../../lib/constants'
 import ComingSoonModal from '../../components/ComingSoonModal'
 
 const MENU_ITEMS: { label: string; path: string }[] = [
@@ -52,10 +54,7 @@ export default function Profile() {
             </span>
           )}
           <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {user?.role === 'hq_admin' ? 'HQ Admin'
-              : user?.role === 'super_admin' ? 'Super Admin'
-              : user?.role === 'chapter_officer' ? 'Chapter Officer'
-              : 'Member'}
+            {ROLE_DISPLAY_NAMES[user?.role ?? 'member']}
           </span>
           <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1 text-white text-xs font-semibold">
             <Star className="w-3 h-3 fill-gold text-gold" />
@@ -118,7 +117,7 @@ export default function Profile() {
         </div>
 
         {/* Officer Portal — only visible to organizer-role users */}
-        {user?.role && ['chapter_officer', 'hq_admin', 'super_admin'].includes(user.role) && (
+        {user?.role && ORGANIZER_ROLES.includes(user.role as OrganizerRole) && (
           <button
             onClick={() => navigate('/organizer')}
             className="w-full py-3.5 bg-blue/10 text-blue text-sm font-bold rounded-2xl hover:bg-blue/20 transition-colors flex items-center justify-center gap-2"

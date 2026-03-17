@@ -4,6 +4,7 @@ import { ChevronRight, LogOut, User, CalendarDays, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
+import { ROLE_DISPLAY_NAMES } from '../../../lib/constants'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import ComingSoonModal from '../../../components/ComingSoonModal'
 import { staggerContainer, cardItem } from '../../../lib/animation'
@@ -65,7 +66,7 @@ export function OrgProfile() {
             {user.chapter} Chapter
           </span>
           <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
+            {ROLE_DISPLAY_NAMES[user.role] ?? 'Chapter Officer'}
           </span>
         </div>
       </div>
