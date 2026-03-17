@@ -156,7 +156,7 @@ export function OrgEventManagement() {
                 <EventRow
                   key={event.id}
                   event={event}
-                  onTap={() => navigate(`/organizer/events/${event.id}`)}
+                  onTap={() => navigate(`/organizer/events/${event.id}/summary`)}
                   confirmingDelete={deleteConfirmId === event.id}
                   onDelete={() => setDeleteConfirmId(event.id)}
                   onCancelDelete={() => setDeleteConfirmId(null)}
