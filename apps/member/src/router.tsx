@@ -38,6 +38,7 @@ import { OrgEventManagement } from './pages/organizer/events/EventManagement'
 import { OrgEventCreate } from './pages/organizer/events/EventCreate'
 import { OrgEventDetail } from './pages/organizer/events/EventDetail'
 import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
+import { OrgEventSummary } from './pages/organizer/events/EventSummary'
 import { OrgRewardsManagement } from './pages/organizer/rewards/RewardsManagement'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
@@ -127,6 +128,7 @@ export const router = createBrowserRouter([
       { path: '/organizer/events/create',                element: <OrgEventCreate /> },
       { path: '/organizer/events/:id',                   element: <OrgEventDetail /> },
       { path: '/organizer/events/:id/registrants',       element: <OrgEventRegistrants /> },
+      { path: '/organizer/events/:id/summary',           element: <OrgEventSummary /> },
       // Lazy-loaded: pulls in @zxing which is only needed for live door scanning
       {
         path: '/organizer/scan',
