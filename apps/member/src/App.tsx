@@ -6,6 +6,7 @@ import { router } from './router'
 import { useThemeStore, PROGRAM_THEMES } from './stores/useThemeStore'
 import { useAuthStore } from './stores/useAuthStore'
 import logoHorizontal from './assets/logos/logo-horizontal.svg'
+import KonamiCodeWrapper from './components/KonamiCodeWrapper'
 
 export default function App() {
   const { themeId } = useThemeStore()
@@ -35,7 +36,14 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <RouterProvider router={router} />
-      <Toaster position="top-center" richColors closeButton />
+      <KonamiCodeWrapper />
+      <Toaster
+        position="bottom-center"
+        richColors
+        closeButton
+        offset={96}
+        toastOptions={{ style: { borderRadius: '9999px' } }}
+      />
     </MotionConfig>
   )
 }
