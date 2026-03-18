@@ -88,6 +88,7 @@ export function OrgEventEdit() {
           is_free:           event.is_free ?? true,
           ticket_price_php:  event.ticket_price_php ?? 0,
           capacity:          event.capacity ?? undefined,
+          visibility:        (event.visibility ?? 'public') as 'public' | 'unlisted' | 'draft',
         }
       : {
           points_value:      200,
@@ -155,6 +156,11 @@ export function OrgEventEdit() {
     let cover_image_url: string | null = coverPreview
       ? (coverFile ? null : (event.cover_image_url ?? null))
       : null
+
+    if (coverFile && !user?.id) {
+      setSubmitError('Session expired. Please sign in again.')
+      return
+    }
 
     if (coverFile) {
       const userId = user?.id ?? 'unknown'
@@ -551,20 +557,22 @@ export function OrgEventEdit() {
 
         {/* ── ACTIONS ── */}
         <motion.div variants={fadeUp} className="flex gap-3 pt-2">
-          <button
+          <motion.button
             type="button"
             onClick={() => navigate(-1)}
+            whileTap={{ scale: 0.95 }}
             className="flex-1 py-3 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
           >
             Cancel
-          </button>
-          <button
+          </motion.button>
+          <motion.button
             type="submit"
             disabled={isSubmitting}
+            whileTap={{ scale: 0.95 }}
             className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
           >
             {isSubmitting ? 'Saving…' : 'Save Changes'}
-          </button>
+          </motion.button>
         </motion.div>
 
         {/* ── DANGER ZONE ── */}
@@ -572,13 +580,14 @@ export function OrgEventEdit() {
           <p className="text-[10px] font-bold uppercase tracking-wider text-red/60 mb-3">
             Danger Zone
           </p>
-          <button
+          <motion.button
             type="button"
             onClick={() => setDeleteStep(1)}
+            whileTap={{ scale: 0.95 }}
             className="w-full py-3 rounded-xl border border-red/30 text-red text-sm font-bold hover:bg-red/5 transition-colors"
           >
             Delete Event
-          </button>
+          </motion.button>
         </motion.div>
       </motion.form>
 
@@ -596,6 +605,7 @@ export function OrgEventEdit() {
 
             {deleteStep === 1 && (
               <motion.div
+                key={1}
                 className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-10"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
@@ -623,6 +633,7 @@ export function OrgEventEdit() {
 
             {deleteStep === 2 && (
               <motion.div
+                key={2}
                 className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-10"
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
