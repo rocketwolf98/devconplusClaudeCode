@@ -10,3 +10,6 @@ remix-of-devcon-connect/
 
 .vercel
 .mcp.json
+
+# Git worktrees
+.worktrees/
