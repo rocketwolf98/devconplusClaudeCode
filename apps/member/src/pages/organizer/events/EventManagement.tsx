@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap, Clock, Plus, Trash2 } from 'lucide-react'
+import { MapPin, Zap, Clock, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Event } from '@devcon-plus/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -11,11 +11,8 @@ import { isEventArchived } from '../../../lib/dates'
 
 export function OrgEventManagement() {
   const navigate = useNavigate()
-  const { events, fetchEvents, deleteEvent } = useEventsStore()
+  const { events, fetchEvents } = useEventsStore()
   const { user } = useAuthStore()
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -23,19 +20,6 @@ export function OrgEventManagement() {
   const pastEvents     = chapterEvents.filter((e) => isEventArchived(e))
   const upcomingEvents = chapterEvents.filter((e) => !isEventArchived(e))
   const currentEvent   = upcomingEvents.find((e) => e.is_featured) ?? upcomingEvents[0]
-
-  const handleDelete = async (id: string) => {
-    setIsDeleting(true)
-    setDeleteError(null)
-    try {
-      await deleteEvent(id)
-      setDeleteConfirmId(null)
-    } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Delete failed.')
-    } finally {
-      setIsDeleting(false)
-    }
-  }
 
   return (
     <div>
@@ -62,12 +46,6 @@ export function OrgEventManagement() {
         initial="hidden"
         animate="visible"
       >
-        {deleteError && (
-          <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
-            {deleteError}
-          </p>
-        )}
-
         {/* Upcoming events */}
         {upcomingEvents.length > 0 && (
           <motion.div variants={fadeUp}>
@@ -135,11 +113,6 @@ export function OrgEventManagement() {
                     key={event.id}
                     event={event}
                     onTap={() => navigate(`/organizer/events/${event.id}`)}
-                    confirmingDelete={deleteConfirmId === event.id}
-                    onDelete={() => setDeleteConfirmId(event.id)}
-                    onCancelDelete={() => setDeleteConfirmId(null)}
-                    onConfirmDelete={() => void handleDelete(event.id)}
-                    isDeleting={isDeleting && deleteConfirmId === event.id}
                   />
                 ))}
             </motion.div>
@@ -158,11 +131,6 @@ export function OrgEventManagement() {
                   key={event.id}
                   event={event}
                   onTap={() => navigate(`/organizer/events/${event.id}/summary`)}
-                  confirmingDelete={deleteConfirmId === event.id}
-                  onDelete={() => setDeleteConfirmId(event.id)}
-                  onCancelDelete={() => setDeleteConfirmId(null)}
-                  onConfirmDelete={() => void handleDelete(event.id)}
-                  isDeleting={isDeleting && deleteConfirmId === event.id}
                 />
               ))}
             </motion.div>
@@ -185,14 +153,9 @@ export function OrgEventManagement() {
 interface EventRowProps {
   event: Event
   onTap: () => void
-  confirmingDelete: boolean
-  onDelete: () => void
-  onCancelDelete: () => void
-  onConfirmDelete: () => void
-  isDeleting: boolean
 }
 
-function EventRow({ event, onTap, confirmingDelete, onDelete, onCancelDelete, onConfirmDelete, isDeleting }: EventRowProps) {
+function EventRow({ event, onTap }: EventRowProps) {
   return (
     <motion.div
       variants={cardItem}
@@ -200,7 +163,7 @@ function EventRow({ event, onTap, confirmingDelete, onDelete, onCancelDelete, on
     >
       <div
         className="flex items-start gap-3 cursor-pointer"
-        onClick={!confirmingDelete ? onTap : undefined}
+        onClick={onTap}
       >
         <div className="w-11 shrink-0 bg-blue/10 rounded-xl px-2 py-2 text-center">
           <p className="text-[10px] font-bold text-blue uppercase leading-none">
@@ -226,14 +189,6 @@ function EventRow({ event, onTap, confirmingDelete, onDelete, onCancelDelete, on
                     : 'rejected'
                 }
               />
-              {!confirmingDelete && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onDelete() }}
-                  className="w-7 h-7 rounded-lg bg-red/10 flex items-center justify-center active:bg-red/20 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-red" />
-                </button>
-              )}
             </div>
           </div>
           {event.location && (
@@ -248,29 +203,6 @@ function EventRow({ event, onTap, confirmingDelete, onDelete, onCancelDelete, on
           </span>
         </div>
       </div>
-
-      {/* Inline delete confirm */}
-      {confirmingDelete && (
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-          <p className="text-xs text-slate-500">Delete this event?</p>
-          <div className="flex gap-2">
-            <button
-              onClick={onCancelDelete}
-              disabled={isDeleting}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold disabled:opacity-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirmDelete}
-              disabled={isDeleting}
-              className="px-3 py-1.5 rounded-lg bg-red text-white text-xs font-semibold disabled:opacity-50"
-            >
-              {isDeleting ? 'Deleting…' : 'Delete'}
-            </button>
-          </div>
-        </div>
-      )}
     </motion.div>
   )
 }
