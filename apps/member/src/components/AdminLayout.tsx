@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck, ScanLine } from 'lucide-react'
+import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck, ScanLine, ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -65,8 +65,15 @@ export default function AdminLayout() {
           <p className="text-[11px] text-white/90 font-semibold truncate">{user.full_name}</p>
           <p className="text-[10px] text-white/50 truncate">{user.email}</p>
           <button
-            onClick={() => { void signOut(); navigate('/sign-in') }}
+            onClick={() => navigate('/home')}
             className="mt-3 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back to App
+          </button>
+          <button
+            onClick={() => { void signOut(); navigate('/sign-in') }}
+            className="mt-2 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
             Sign Out
