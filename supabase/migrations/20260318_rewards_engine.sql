@@ -264,6 +264,8 @@ $$;
 
 
 -- ============================================================
+GRANT EXECUTE ON FUNCTION manual_checkin(uuid, uuid) TO authenticated;
+
 -- 3h. New redeem_reward RPC
 -- ============================================================
 
@@ -282,7 +284,10 @@ BEGIN
     RETURN json_build_object('success', false, 'error', 'Out of stock');
   END IF;
   SELECT spendable_points INTO v_user_balance FROM profiles WHERE id = p_user_id FOR UPDATE;
-  IF v_user_balance < v_reward.points_cost THEN
+  IF NOT FOUND THEN
+    RETURN json_build_object('success', false, 'error', 'User not found');
+  END IF;
+  IF COALESCE(v_user_balance, 0) < v_reward.points_cost THEN
     RETURN json_build_object('success', false, 'error', 'Insufficient points');
   END IF;
   IF v_reward.max_per_user IS NOT NULL THEN
