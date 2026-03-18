@@ -4,105 +4,20 @@ import { ArrowLeft, ImagePlus, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { fadeUp, staggerContainer } from '../../../lib/animation'
-import type { DevconCategory } from '@devcon-plus/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { supabase } from '../../../lib/supabase'
-
-// ── Zod schema ────────────────────────────────────────────────────────────────
-
-const schema = z
-  .object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
-    description: z.string().min(10, 'Description must be at least 10 characters'),
-    location: z.string().min(2, 'Location is required'),
-    event_date: z.string().min(1, 'Start date is required'),
-    end_date: z.string().optional(),
-    category: z.enum([
-      'tech_talk',
-      'hackathon',
-      'workshop',
-      'brown_bag',
-      'summit',
-      'social',
-      'networking',
-    ], { required_error: 'Category is required' }),
-    devcon_category: z.enum(['devcon', 'she', 'kids', 'campus']).optional(),
-    tags: z.array(z.string()).default([]),
-    visibility: z.enum(['public', 'unlisted', 'draft']).default('public'),
-    is_free: z.boolean().default(true),
-    ticket_price_php: z.number({ coerce: true }).int().min(0).default(0),
-    capacity: z.preprocess(
-      (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
-      z.number().int().positive().optional()
-    ),
-    points_value: z
-      .number({ coerce: true })
-      .min(50, 'Minimum 50 XP')
-      .max(1000, 'Maximum 1000 XP'),
-    requires_approval: z.boolean(),
-    cover_image_url: z.string().url().optional().or(z.literal('')),
-  })
-  .superRefine((data, ctx) => {
-    if (data.end_date && data.event_date && data.end_date <= data.event_date) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['end_date'],
-        message: 'End time must be after start time',
-      })
-    }
-  })
-
-type FormData = z.infer<typeof schema>
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
-const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
-const labelClass = 'block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5'
-
-const CATEGORY_OPTIONS: {
-  value: FormData['category']
-  label: string
-}[] = [
-  { value: 'tech_talk',   label: 'Tech Talk'   },
-  { value: 'hackathon',   label: 'Hackathon'   },
-  { value: 'workshop',    label: 'Workshop'    },
-  { value: 'brown_bag',   label: 'Brown Bag'   },
-  { value: 'summit',      label: 'Summit'      },
-  { value: 'social',      label: 'Social'      },
-  { value: 'networking',  label: 'Networking'  },
-]
-
-const DEVCON_PROGRAM_OPTIONS: {
-  value: DevconCategory
-  label: string
-  hex: string
-  darkText?: boolean
-}[] = [
-  { value: 'devcon',  label: 'DEVCON',         hex: '#367BDD' },
-  { value: 'she',     label: '#SheIsDEVCON',   hex: '#EC4899' },
-  { value: 'kids',    label: 'DEVCON Kids',     hex: '#21C45D' },
-  { value: 'campus',  label: 'Campus DEVCON',   hex: '#F8C630', darkText: true },
-]
-
-const VISIBILITY_OPTIONS: { value: FormData['visibility']; label: string }[] = [
-  { value: 'public',   label: 'Public'    },
-  { value: 'unlisted', label: 'Unlisted'  },
-  { value: 'draft',    label: 'Draft'     },
-]
-
-// ── SectionHeader ──────────────────────────────────────────────────────────────
-
-function SectionHeader({ title }: { title: string }) {
-  return (
-    <div className="border-t border-slate-100 pt-5">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">{title}</p>
-    </div>
-  )
-}
+import {
+  schema,
+  type FormData,
+  inputClass,
+  labelClass,
+  CATEGORY_OPTIONS,
+  DEVCON_PROGRAM_OPTIONS,
+  VISIBILITY_OPTIONS,
+  SectionHeader,
+} from './eventFormConstants'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -184,6 +99,10 @@ export function OrgEventCreate() {
   // ── Submit ────────────────────────────────────────────────────────────────
 
   const onSubmit = async (data: FormData) => {
+    if (!data.devcon_category) {
+      setSubmitError('Please select a DEVCON Program.')
+      return
+    }
     if (!user?.chapter_id) {
       setSubmitError('Your account is not linked to a chapter. Contact an admin.')
       return
@@ -216,7 +135,7 @@ export function OrgEventCreate() {
         event_date:        data.event_date,
         end_date:          data.end_date ?? null,
         category:          data.category,
-        devcon_category:   data.devcon_category ?? null,
+        devcon_category:   data.devcon_category,
         tags,
         visibility,
         is_free:           data.is_free,
@@ -337,11 +256,10 @@ export function OrgEventCreate() {
         <motion.div variants={fadeUp}>
           <SectionHeader title="Categorization" />
           <div className="space-y-4">
-            {/* DEVCON Program (optional) */}
+            {/* DEVCON Program */}
             <div>
               <label className={labelClass}>
-                DEVCON Program{' '}
-                <span className="text-slate-300 normal-case font-normal">optional</span>
+                DEVCON Program <span className="text-red normal-case">*</span>
               </label>
               <Controller
                 control={control}
@@ -354,7 +272,7 @@ export function OrgEventCreate() {
                         <button
                           key={opt.value}
                           type="button"
-                          onClick={() => field.onChange(isSelected ? undefined : opt.value)}
+                          onClick={() => field.onChange(opt.value)}
                           style={isSelected ? { backgroundColor: opt.hex, borderColor: opt.hex } : undefined}
                           className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                             isSelected
@@ -369,6 +287,9 @@ export function OrgEventCreate() {
                   </div>
                 )}
               />
+              {errors.devcon_category && (
+                <p className="text-xs text-red mt-1">{errors.devcon_category.message}</p>
+              )}
             </div>
 
             {/* Category radio pills */}
