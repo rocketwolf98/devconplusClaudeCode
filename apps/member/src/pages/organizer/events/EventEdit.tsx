@@ -1,0 +1,657 @@
+import { useRef, useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, ImagePlus, X, Pencil, AlertTriangle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { fadeUp, staggerContainer } from '../../../lib/animation'
+import { useEventsStore } from '../../../stores/useEventsStore'
+import { useAuthStore } from '../../../stores/useAuthStore'
+import { supabase } from '../../../lib/supabase'
+import { NotFound } from '../../NotFound'
+import {
+  schema,
+  type FormData,
+  inputClass,
+  labelClass,
+  CATEGORY_OPTIONS,
+  DEVCON_PROGRAM_OPTIONS,
+  VISIBILITY_OPTIONS,
+  SectionHeader,
+} from './eventFormConstants'
+
+export function OrgEventEdit() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { events, fetchEvents, isLoading, updateEvent, deleteEvent } = useEventsStore()
+  const { user } = useAuthStore()
+
+  // ── Load events if store is empty ────────────────────────────────────────
+  useEffect(() => {
+    if (events.length === 0) void fetchEvents()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const event = events.find((e) => e.id === id)
+
+  // ── Cover image ──────────────────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(
+    event?.cover_image_url ?? null
+  )
+  const [coverUploadError, setCoverUploadError] = useState<string | null>(null)
+
+  // ── Tags ─────────────────────────────────────────────────────────────────
+  const [tags, setTags] = useState<string[]>(event?.tags ?? [])
+  const [tagInput, setTagInput] = useState('')
+
+  // ── Visibility ───────────────────────────────────────────────────────────
+  const [visibility, setVisibility] = useState<'public' | 'unlisted' | 'draft'>(
+    (event?.visibility as 'public' | 'unlisted' | 'draft') ?? 'public'
+  )
+
+  // ── Delete flow ──────────────────────────────────────────────────────────
+  const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  // ── Submit state ─────────────────────────────────────────────────────────
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  // ── Status locking ───────────────────────────────────────────────────────
+  const isLocked = event?.status === 'ongoing' || event?.status === 'past'
+
+  // ── Form ─────────────────────────────────────────────────────────────────
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: event
+      ? {
+          title:             event.title,
+          description:       event.description ?? '',
+          location:          event.location ?? '',
+          event_date:        event.event_date
+            ? new Date(event.event_date).toISOString().slice(0, 16)
+            : '',
+          end_date:          event.end_date
+            ? new Date(event.end_date).toISOString().slice(0, 16)
+            : '',
+          category:          event.category as FormData['category'],
+          devcon_category:   (event.devcon_category ?? null) as FormData['devcon_category'],
+          points_value:      event.points_value ?? 200,
+          requires_approval: event.requires_approval ?? false,
+          is_free:           event.is_free ?? true,
+          ticket_price_php:  event.ticket_price_php ?? 0,
+          capacity:          event.capacity ?? undefined,
+        }
+      : {
+          points_value:      200,
+          requires_approval: false,
+          is_free:           true,
+          ticket_price_php:  0,
+          visibility:        'public',
+          tags:              [],
+        },
+  })
+
+  const isFree = watch('is_free')
+
+  // ── Cover image handlers ────────────────────────────────────────────────
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCoverFile(file)
+    setCoverUploadError(null)
+    setCoverPreview(URL.createObjectURL(file))
+  }
+
+  const removeCover = () => {
+    setCoverFile(null)
+    setCoverPreview(null)
+    setCoverUploadError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  // ── Tag handlers ────────────────────────────────────────────────────────
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const val = tagInput.trim()
+      if (val && val.length <= 20 && !tags.includes(val)) {
+        setTags((prev) => [...prev, val])
+      }
+      setTagInput('')
+    }
+  }
+
+  const removeTag = (tag: string) => setTags((prev) => prev.filter((t) => t !== tag))
+
+  // ── Delete handler ──────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    if (!event) return
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteEvent(event.id)
+      navigate('/organizer/events', { replace: true })
+    } catch {
+      setDeleteError('Failed to delete event. Please try again.')
+      setIsDeleting(false)
+    }
+  }
+
+  // ── Submit handler ──────────────────────────────────────────────────────
+  const onSubmit = async (data: FormData) => {
+    if (!event) return
+    setSubmitError(null)
+    setCoverUploadError(null)
+
+    // Determine cover image URL
+    let cover_image_url: string | null = coverPreview
+      ? (coverFile ? null : (event.cover_image_url ?? null))
+      : null
+
+    if (coverFile) {
+      const userId = user?.id ?? 'unknown'
+      const path = `${userId}/${Date.now()}-${coverFile.name}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('event-covers')
+        .upload(path, coverFile)
+      if (uploadError) {
+        setCoverUploadError('Cover image upload failed — saving without image change.')
+        cover_image_url = event.cover_image_url ?? null
+      } else {
+        const { data: urlData } = supabase.storage
+          .from('event-covers')
+          .getPublicUrl(uploadData.path)
+        cover_image_url = urlData.publicUrl
+      }
+    }
+
+    try {
+      await updateEvent(event.id, {
+        title:             data.title,
+        description:       data.description,
+        location:          data.location,
+        event_date:        isLocked ? (event.event_date ?? undefined) : data.event_date,
+        end_date:          isLocked ? (event.end_date ?? null)        : (data.end_date ?? null),
+        points_value:      isLocked ? (event.points_value ?? 200)     : data.points_value,
+        requires_approval: isLocked ? (event.requires_approval ?? false) : data.requires_approval,
+        category:          data.category,
+        devcon_category:   data.devcon_category ?? null,
+        tags,
+        visibility,
+        is_free:           data.is_free,
+        ticket_price_php:  data.is_free ? 0 : data.ticket_price_php,
+        capacity:          data.capacity ?? null,
+        cover_image_url,
+      })
+      navigate(`/organizer/events/${event.id}`)
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to save event. Please try again.')
+    }
+  }
+
+  // ── Loading / not-found guards ───────────────────────────────────────────
+  if (isLoading && events.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 rounded-full border-2 border-blue border-t-transparent animate-spin" />
+      </div>
+    )
+  }
+
+  if (!event) return <NotFound />
+
+  // ── Render ───────────────────────────────────────────────────────────────
+  return (
+    <div className="pb-10">
+      {/* Header */}
+      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <div className="flex items-center gap-2">
+          <Pencil className="w-4 h-4 text-white/60" />
+          <h1 className="text-xl font-bold text-white">Edit Event</h1>
+        </div>
+        <p className="text-white/60 text-sm mt-0.5">Update your event details.</p>
+      </div>
+
+      {isLocked && (
+        <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <p className="text-xs font-semibold text-amber-700">
+            This event is <span className="capitalize">{event.status}</span>. Schedule and engagement fields are locked.
+          </p>
+        </div>
+      )}
+
+      <motion.form
+        onSubmit={handleSubmit(onSubmit)}
+        className="p-4 space-y-5"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {/* ── EVENT DETAILS ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Event Details" />
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Event Title</label>
+              <input {...register('title')} className={inputClass} placeholder="e.g. DEVCON Summit Manila 2026" />
+              {errors.title && <p className="text-xs text-red mt-1">{errors.title.message}</p>}
+            </div>
+            <div>
+              <label className={labelClass}>Description</label>
+              <textarea {...register('description')} rows={4} className={`${inputClass} resize-none`} placeholder="What is this event about?" />
+              {errors.description && <p className="text-xs text-red mt-1">{errors.description.message}</p>}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── MEDIA ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Media" />
+          {coverPreview ? (
+            <div className="relative rounded-xl overflow-hidden mb-3 border border-slate-200">
+              <img src={coverPreview} alt="Cover preview" className="w-full h-44 object-cover" />
+              <button
+                type="button"
+                onClick={removeCover}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-white" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue hover:text-blue transition-colors mb-3"
+            >
+              <ImagePlus className="w-6 h-6" />
+              <span className="text-xs font-medium">Tap to upload cover image</span>
+              <span className="text-[10px] text-slate-300">JPG, PNG, WebP — optional</span>
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          {coverUploadError && <p className="text-xs text-red mt-1">{coverUploadError}</p>}
+        </motion.div>
+
+        {/* ── CATEGORIZATION ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Categorization" />
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>DEVCON Program <span className="text-red normal-case">*</span></label>
+              <Controller
+                control={control}
+                name="devcon_category"
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-2">
+                    {DEVCON_PROGRAM_OPTIONS.map((opt) => {
+                      const isSelected = field.value === opt.value
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => field.onChange(opt.value)}
+                          style={isSelected ? { backgroundColor: opt.hex, borderColor: opt.hex } : undefined}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                            isSelected
+                              ? opt.darkText ? 'text-slate-900' : 'text-white'
+                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              />
+              {errors.devcon_category && <p className="text-xs text-red mt-1">{errors.devcon_category.message}</p>}
+            </div>
+
+            <div>
+              <label className={labelClass}>Category <span className="text-red normal-case">*</span></label>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <div className="flex flex-wrap gap-2">
+                    {CATEGORY_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => field.onChange(opt.value)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                          field.value === opt.value
+                            ? 'bg-blue text-white border-blue'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              />
+              {errors.category && <p className="text-xs text-red mt-1">{errors.category.message}</p>}
+            </div>
+
+            <div>
+              <label className={labelClass}>Tags <span className="text-slate-300 normal-case font-normal">optional</span></label>
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a tag, press Enter"
+                className={inputClass}
+                maxLength={20}
+              />
+              <p className="text-[10px] text-slate-400 mt-1">Max 20 chars per tag.</p>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {tags.map((t) => (
+                    <span key={t} className="inline-flex items-center gap-1 px-2 py-1 bg-blue/10 text-blue text-xs rounded-full">
+                      {t}
+                      <button type="button" onClick={() => removeTag(t)} className="leading-none hover:text-blue-dark">×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── SCHEDULE ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Schedule" />
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Location</label>
+              <input {...register('location')} className={inputClass} placeholder="Venue or Online" />
+              {errors.location && <p className="text-xs text-red mt-1">{errors.location.message}</p>}
+            </div>
+
+            {isLocked ? (
+              <div className="space-y-3">
+                {[
+                  { label: 'Start Date & Time', value: event.event_date ? new Date(event.event_date).toLocaleString() : 'TBA' },
+                  { label: 'End Date & Time',   value: event.end_date   ? new Date(event.end_date).toLocaleString()   : 'TBA' },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <label className={labelClass}>{label}</label>
+                    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
+                      <span className="text-sm text-slate-700">{value}</span>
+                      <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
+                        Locked — event is {event.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Start Date & Time</label>
+                  <input {...register('event_date')} type="datetime-local" className={inputClass} />
+                  {errors.event_date && <p className="text-xs text-red mt-1">{errors.event_date.message}</p>}
+                </div>
+                <div>
+                  <label className={labelClass}>End Date & Time</label>
+                  <input {...register('end_date')} type="datetime-local" className={inputClass} />
+                  {errors.end_date && <p className="text-xs text-red mt-1">{errors.end_date.message}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* ── ACCESS SETTINGS ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Access Settings" />
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Visibility</label>
+              <div className="flex rounded-xl border border-slate-200 overflow-hidden">
+                {VISIBILITY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setVisibility(opt.value)}
+                    className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+                      visibility === opt.value
+                        ? 'bg-blue text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {isLocked ? (
+              <div>
+                <label className={labelClass}>Registration Approval</label>
+                <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
+                  <span className="text-sm text-slate-700">
+                    {event.requires_approval ? 'Approval required' : 'Auto-approved'}
+                  </span>
+                  <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
+                    Locked — event is {event.status}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4">
+                <input
+                  {...register('requires_approval')}
+                  type="checkbox"
+                  id="requires_approval"
+                  className="w-4 h-4 accent-blue rounded"
+                />
+                <div>
+                  <label htmlFor="requires_approval" className="text-sm font-semibold text-slate-900 cursor-pointer">
+                    Require Registration Approval
+                  </label>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Manually approve each registration before members receive their QR ticket.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className={labelClass}>Ticket Price</label>
+              <div className="flex gap-3">
+                <Controller
+                  control={control}
+                  name="is_free"
+                  render={({ field }) => (
+                    <>
+                      <button type="button" onClick={() => field.onChange(true)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${field.value ? 'bg-blue text-white border-blue' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'}`}>
+                        Free
+                      </button>
+                      <button type="button" onClick={() => field.onChange(false)}
+                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${!field.value ? 'bg-blue text-white border-blue' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'}`}>
+                        Paid
+                      </button>
+                    </>
+                  )}
+                />
+              </div>
+              {!isFree && (
+                <div className="mt-3">
+                  <label className={labelClass}>Price (PHP)</label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">₱</span>
+                    <input {...register('ticket_price_php')} type="number" min={1} step={1} className={`${inputClass} pl-8`} placeholder="0" />
+                  </div>
+                  {errors.ticket_price_php && <p className="text-xs text-red mt-1">{errors.ticket_price_php.message}</p>}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className={labelClass}>Capacity <span className="text-slate-300 normal-case font-normal">optional</span></label>
+              <input {...register('capacity')} type="number" min={1} step={1} className={inputClass} placeholder="Unlimited" />
+              {errors.capacity && <p className="text-xs text-red mt-1">{errors.capacity.message}</p>}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── ENGAGEMENT ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Engagement" />
+          {isLocked ? (
+            <div>
+              <label className={labelClass}>XP Points Value</label>
+              <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
+                <span className="text-sm text-slate-700">{event.points_value} XP</span>
+                <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
+                  Locked — event is {event.status}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className={labelClass}>XP Points Value</label>
+              <input {...register('points_value')} type="number" className={inputClass} min={50} max={1000} step={50} />
+              {errors.points_value && <p className="text-xs text-red mt-1">{errors.points_value.message}</p>}
+              <p className="text-xs text-slate-400 mt-1">Members earn this many XP when checked in at the event.</p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Submit error */}
+        {submitError && (
+          <motion.p variants={fadeUp} className="text-xs text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2">
+            {submitError}
+          </motion.p>
+        )}
+
+        {/* ── ACTIONS ── */}
+        <motion.div variants={fadeUp} className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="flex-1 py-3 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
+          >
+            {isSubmitting ? 'Saving…' : 'Save Changes'}
+          </button>
+        </motion.div>
+
+        {/* ── DANGER ZONE ── */}
+        <motion.div variants={fadeUp} className="mt-2 border-t-2 border-red/20 pt-5">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-red/60 mb-3">
+            Danger Zone
+          </p>
+          <button
+            type="button"
+            onClick={() => setDeleteStep(1)}
+            className="w-full py-3 rounded-xl border border-red/30 text-red text-sm font-bold hover:bg-red/5 transition-colors"
+          >
+            Delete Event
+          </button>
+        </motion.div>
+      </motion.form>
+
+      {/* ── Delete confirmation bottom sheets (2-step) ── */}
+      <AnimatePresence>
+        {deleteStep > 0 && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/40 z-[60]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isDeleting && setDeleteStep(0)}
+            />
+
+            {deleteStep === 1 && (
+              <motion.div
+                className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-10"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              >
+                <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
+                <div className="flex flex-col items-center text-center mb-6">
+                  <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-7 h-7 text-red" />
+                  </div>
+                  <h2 className="text-base font-bold text-slate-900 mb-1">Delete Event?</h2>
+                  <p className="text-sm text-slate-500">
+                    You are about to delete{' '}
+                    <span className="font-semibold text-slate-700">"{event.title}"</span>.
+                    This will also permanently remove all registrations for this event.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setDeleteStep(0)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">Cancel</button>
+                  <button onClick={() => setDeleteStep(2)} className="flex-1 py-3 rounded-xl bg-red/10 text-red text-sm font-bold">Continue</button>
+                </div>
+              </motion.div>
+            )}
+
+            {deleteStep === 2 && (
+              <motion.div
+                className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-10"
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              >
+                <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
+                <div className="flex flex-col items-center text-center mb-6">
+                  <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
+                    <AlertTriangle className="w-7 h-7 text-red" />
+                  </div>
+                  <h2 className="text-base font-bold text-slate-900 mb-1">Are you sure?</h2>
+                  <p className="text-sm text-slate-500">
+                    All registrations for this event will be permanently deleted along with the event itself.{' '}
+                    <span className="font-semibold text-red">This cannot be undone.</span>
+                  </p>
+                  {deleteError && <p className="mt-3 text-sm text-red font-semibold">{deleteError}</p>}
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setDeleteStep(0)} disabled={isDeleting} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold disabled:opacity-50">Cancel</button>
+                  <button onClick={handleDelete} disabled={isDeleting} className="flex-1 py-3 rounded-xl bg-red text-white text-sm font-bold disabled:opacity-60">
+                    {isDeleting ? 'Deleting…' : 'Delete Everything'}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
