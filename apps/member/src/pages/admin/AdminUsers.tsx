@@ -131,7 +131,7 @@ export default function AdminUsers() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-3 text-slate-700 font-semibold">{(u.total_points ?? 0).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-slate-700 font-semibold">{(u.spendable_points ?? 0).toLocaleString()}</td>
                   <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
                     {confirmDeleteId === u.id ? (
                       <div className="flex items-center justify-end gap-2">
@@ -239,7 +239,7 @@ export default function AdminUsers() {
                 <div className="flex items-center gap-3">
                   <Star className="w-4 h-4 fill-gold text-gold flex-shrink-0" />
                   <span className="text-sm font-bold text-gold">
-                    {(selectedUser.total_points ?? 0).toLocaleString()} pts
+                    {(selectedUser.spendable_points ?? 0).toLocaleString()} pts
                   </span>
                 </div>
               </div>

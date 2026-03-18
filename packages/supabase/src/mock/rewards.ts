@@ -11,6 +11,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
   {
@@ -23,6 +26,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
   {
@@ -35,6 +41,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
   {
@@ -47,6 +56,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
   {
@@ -59,6 +71,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
   {
@@ -71,6 +86,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
   {
@@ -83,6 +101,9 @@ export const REWARDS: Reward[] = [
     image_url: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&q=80&fit=crop',
     is_active: true,
     is_coming_soon: true,
+    stock_remaining: null,
+    max_per_user: null,
+    financial_cost_php: null,
     created_at: '2026-01-01T00:00:00Z',
   },
 ]

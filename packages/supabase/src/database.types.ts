@@ -466,11 +466,13 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          lifetime_points: number | null
           pending_chapter_id: string | null
           pending_role: string | null
+          referral_code: string | null
           role: string | null
           school_or_company: string | null
-          total_points: number | null
+          spendable_points: number | null
           username: string | null
         }
         Insert: {
@@ -480,11 +482,13 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          lifetime_points?: number | null
           pending_chapter_id?: string | null
           pending_role?: string | null
+          referral_code?: string | null
           role?: string | null
           school_or_company?: string | null
-          total_points?: number | null
+          spendable_points?: number | null
           username?: string | null
         }
         Update: {
@@ -494,11 +498,13 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          lifetime_points?: number | null
           pending_chapter_id?: string | null
           pending_role?: string | null
+          referral_code?: string | null
           role?: string | null
           school_or_company?: string | null
-          total_points?: number | null
+          spendable_points?: number | null
           username?: string | null
         }
         Relationships: [
@@ -592,39 +598,111 @@ export type Database = {
           claim_method: string | null
           created_at: string | null
           description: string | null
+          financial_cost_php: number | null
           id: string
           image_url: string | null
           is_active: boolean | null
           is_coming_soon: boolean | null
+          max_per_user: number | null
           name: string
           points_cost: number
+          stock_remaining: number | null
           type: string | null
         }
         Insert: {
           claim_method?: string | null
           created_at?: string | null
           description?: string | null
+          financial_cost_php?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           is_coming_soon?: boolean | null
+          max_per_user?: number | null
           name: string
           points_cost: number
+          stock_remaining?: number | null
           type?: string | null
         }
         Update: {
           claim_method?: string | null
           created_at?: string | null
           description?: string | null
+          financial_cost_php?: number | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           is_coming_soon?: boolean | null
+          max_per_user?: number | null
           name?: string
           points_cost?: number
+          stock_remaining?: number | null
           type?: string | null
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          id: string
+          referred_user_id: string
+          referrer_id: string
+          status: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_applications: {
+        Row: {
+          applied_at: string
+          event_id: string
+          id: string
+          phone_number: string | null
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          social_media_handle: string | null
+          status: string
+          user_id: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_applications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "volunteer_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       xp_tiers: {
         Row: {

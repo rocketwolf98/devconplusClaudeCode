@@ -74,7 +74,8 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
       school_or_company: meta.school_or_company ?? null,
       chapter_id: meta.chapter_id ?? null,
       role: 'member',
-      total_points: 0,
+      spendable_points: 0,
+      lifetime_points: 0,
     })
     .select()
     .single()

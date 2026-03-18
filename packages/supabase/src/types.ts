@@ -33,6 +33,7 @@ export type PointSource =
   | 'volunteering'
   | 'redemption'
   | 'bonus'
+  | 'referral'
 
 export type WorkType = 'remote' | 'onsite' | 'hybrid' | 'full_time' | 'part_time'
 
@@ -62,7 +63,9 @@ export interface Profile {
   chapter_id: string | null
   role: UserRole
   avatar_url: string | null
-  total_points: number
+  spendable_points: number
+  lifetime_points: number
+  referral_code: string | null
   pending_role: string | null
   pending_chapter_id: string | null
   created_at: string
@@ -152,6 +155,9 @@ export interface Reward {
   image_url: string | null
   is_active: boolean
   is_coming_soon: boolean
+  stock_remaining: number | null
+  max_per_user: number | null
+  financial_cost_php: number | null
   created_at: string
 }
 
@@ -206,4 +212,26 @@ export interface XpTier {
   max_points: number | null
   badge_color: string | null
   created_at: string
+}
+
+export interface VolunteerApplication {
+  id: string
+  event_id: string
+  user_id: string
+  phone_number: string | null
+  social_media_handle: string | null
+  reason: string
+  status: 'pending' | 'approved' | 'rejected'
+  applied_at: string
+  reviewed_by: string | null
+  reviewed_at: string | null
+}
+
+export interface Referral {
+  id: string
+  referrer_id: string
+  referred_user_id: string
+  status: 'pending' | 'confirmed'
+  created_at: string
+  confirmed_at: string | null
 }

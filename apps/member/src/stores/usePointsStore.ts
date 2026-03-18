@@ -27,7 +27,7 @@ export const usePointsStore = create<PointsState>((set) => ({
         .order('created_at', { ascending: false }),
       supabase
         .from('profiles')
-        .select('total_points')
+        .select('spendable_points')
         .eq('id', userId)
         .single(),
     ])
@@ -37,7 +37,7 @@ export const usePointsStore = create<PointsState>((set) => ({
     }
     set({
       transactions: (txResult.data ?? []) as PointTransaction[],
-      totalPoints:  profileResult.data?.total_points ?? 0,
+      totalPoints:  profileResult.data?.spendable_points ?? 0,
       isLoading:    false,
     })
   },
