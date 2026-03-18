@@ -18,6 +18,8 @@ interface NotificationsState {
   fetchRecent: (approvedIds: string[], eventTitles: Record<string, string>) => Promise<void>
   subscribe: (approvedIds: string[], eventTitles: Record<string, string>) => () => void
   markAllRead: () => void
+  dismiss: (id: string) => void
+  clearAll: () => void
 }
 
 export const useNotificationsStore = create<NotificationsState>((set) => ({
@@ -97,4 +99,17 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
       unreadCount: 0,
     }))
   },
+
+  dismiss: (id) =>
+    set((state) => {
+      const target = state.notifications.find((n) => n.id === id)
+      return {
+        notifications: state.notifications.filter((n) => n.id !== id),
+        unreadCount: target && !target.read
+          ? Math.max(0, state.unreadCount - 1)
+          : state.unreadCount,
+      }
+    }),
+
+  clearAll: () => set({ notifications: [], unreadCount: 0 }),
 }))
