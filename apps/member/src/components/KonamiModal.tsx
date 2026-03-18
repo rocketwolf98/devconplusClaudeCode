@@ -4,7 +4,6 @@ import { X, ShieldCheck, Monitor, Gamepad2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { backdrop, fadeUp } from '../lib/animation'
 import { useAuthStore } from '../stores/useAuthStore'
-import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 interface Props {
   open: boolean
@@ -24,10 +23,9 @@ export default function KonamiModal({ open, onClose }: Props) {
     }
   }, [open])
 
-  const isAdmin = ADMIN_ROLES.includes(user?.role as typeof ADMIN_ROLES[number])
+  const isAdmin = user !== null && (user.role === 'super_admin' || user.role === 'hq_admin')
 
   const handleEnterAdmin = () => {
-    // Navigate first, then close so the exit animation plays while the new page loads
     window.location.href = '/admin'
     onClose()
   }
@@ -66,8 +64,6 @@ export default function KonamiModal({ open, onClose }: Props) {
               </button>
 
               <div className="text-center">
-                <img src={logoHorizontal} alt="DEVCON+" className="h-6 w-auto mx-auto mb-6" />
-
                 {/* State 1: Admin on desktop */}
                 {isAdmin && isDesktop && (
                   <>
