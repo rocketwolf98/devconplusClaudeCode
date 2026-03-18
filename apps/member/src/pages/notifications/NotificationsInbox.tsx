@@ -1,8 +1,8 @@
 // apps/member/src/pages/notifications/NotificationsInbox.tsx
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, BellOff } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ArrowLeft, BellOff, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNotificationsStore } from '../../stores/useNotificationsStore'
 import { formatDate } from '../../lib/dates'
 import { staggerContainer, cardItem } from '../../lib/animation'
@@ -14,7 +14,7 @@ interface NotificationsInboxProps {
 
 export default function NotificationsInbox({ isOrganizer = false }: NotificationsInboxProps) {
   const navigate = useNavigate()
-  const { notifications, markAllRead } = useNotificationsStore()
+  const { notifications, markAllRead, dismiss, clearAll } = useNotificationsStore()
 
   // Mark all as read when inbox is opened
   useEffect(() => {
@@ -31,8 +31,21 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
-        <h1 className="text-white text-xl font-bold">Notifications</h1>
-        <p className="text-white/60 text-sm mt-0.5">Event announcements from organizers</p>
+        <div className="flex items-end justify-between">
+          <div>
+            <h1 className="text-white text-xl font-bold">Notifications</h1>
+            <p className="text-white/60 text-sm mt-0.5">Event announcements from organizers</p>
+          </div>
+          {notifications.length > 0 && (
+            <motion.button
+              onClick={clearAll}
+              whileTap={{ scale: 0.95 }}
+              className="text-xs text-white/70 active:text-white/50 pb-0.5"
+            >
+              Clear all
+            </motion.button>
+          )}
+        </div>
       </div>
 
       <div className="p-4">
@@ -53,23 +66,34 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
             initial="hidden"
             animate="visible"
           >
-            {notifications.map((n) => (
-              <motion.div
-                key={n.id}
-                variants={cardItem}
-                className="bg-white rounded-2xl border border-slate-100 p-4"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                    {n.event_title}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {formatDate.compact(n.created_at)}
-                  </span>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{n.message}</p>
-              </motion.div>
-            ))}
+            <AnimatePresence mode="popLayout">
+              {notifications.map((n) => (
+                <motion.div
+                  key={n.id}
+                  variants={cardItem}
+                  exit={{ x: 40, opacity: 0, transition: { duration: 0.2 } }}
+                  className="relative bg-white rounded-2xl border border-slate-100 p-4"
+                >
+                  <motion.button
+                    onClick={() => dismiss(n.id)}
+                    whileTap={{ scale: 0.95 }}
+                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-slate-300 active:text-slate-500"
+                    aria-label="Dismiss notification"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </motion.button>
+                  <div className="flex items-center justify-between mb-2 pr-6">
+                    <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                      {n.event_title}
+                    </span>
+                    <span className="text-[10px] text-slate-400">
+                      {formatDate.compact(n.created_at)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed">{n.message}</p>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </motion.div>
         )}
       </div>
