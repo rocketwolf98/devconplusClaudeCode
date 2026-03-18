@@ -31,6 +31,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_profile_referral_code ON profiles;
 CREATE TRIGGER trg_profile_referral_code
 BEFORE INSERT ON profiles
 FOR EACH ROW WHEN (NEW.referral_code IS NULL)
@@ -85,6 +86,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS trg_award_signup_bonus ON public.profiles;
 CREATE TRIGGER trg_award_signup_bonus
 AFTER INSERT ON public.profiles
 FOR EACH ROW EXECUTE FUNCTION award_signup_bonus();
