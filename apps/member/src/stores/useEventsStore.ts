@@ -26,6 +26,24 @@ interface CreateEventPayload {
   created_by: string
 }
 
+export interface UpdateEventPayload {
+  title?: string
+  description?: string
+  location?: string
+  event_date?: string
+  end_date?: string | null
+  category?: 'tech_talk' | 'hackathon' | 'workshop' | 'brown_bag' | 'summit' | 'social' | 'networking'
+  devcon_category?: DevconCategory | null
+  tags?: string[]
+  visibility?: 'public' | 'unlisted' | 'draft'
+  is_free?: boolean
+  ticket_price_php?: number
+  capacity?: number | null
+  points_value?: number
+  requires_approval?: boolean
+  cover_image_url?: string | null
+}
+
 interface EventsState {
   events: Event[]
   registrations: FullRegistration[]
@@ -35,6 +53,7 @@ interface EventsState {
   fetchEvents: () => Promise<void>
   createEvent: (payload: CreateEventPayload) => Promise<Event>
   deleteEvent: (id: string) => Promise<void>
+  updateEvent: (id: string, payload: UpdateEventPayload) => Promise<Event>
   subscribeToChanges: () => () => void
   fetchRegistrations: (userId: string) => Promise<void>
   register: (eventId: string, userId: string) => Promise<void>
@@ -91,6 +110,27 @@ export const useEventsStore = create<EventsState>((set) => ({
     set((s) => ({ events: s.events.filter((e) => e.id !== id) }))
   },
 
+  updateEvent: async (id, payload) => {
+    const { data, error } = await supabase
+      .from('events')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    const updated = data as Event
+    set((s) => ({
+      events: s.events
+        .map((e) => (e.id === id ? updated : e))
+        .sort(
+          (a, b) =>
+            new Date(a.event_date ?? 0).getTime() -
+            new Date(b.event_date ?? 0).getTime()
+        ),
+    }))
+    return updated
+  },
+
   subscribeToChanges: () => {
     const channel = supabase
       .channel('events-realtime')
@@ -139,15 +179,35 @@ export const useEventsStore = create<EventsState>((set) => ({
   },
 
   register: async (eventId, userId) => {
-    const { data, error } = await supabase
-      .from('event_registrations')
-      .insert({ event_id: eventId, user_id: userId })
-      .select()
-      .single()
-    if (error) throw error
-    set((s) => ({
-      registrations: [...s.registrations, data as FullRegistration],
-    }))
+    const cancelled = useEventsStore.getState().registrations.find(
+      (r) => r.event_id === eventId && r.status === 'cancelled'
+    )
+
+    if (cancelled) {
+      // Re-registration after cancellation — reset the existing record
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .update({ status: 'pending', qr_code_token: null })
+        .eq('id', cancelled.id)
+        .select()
+        .single()
+      if (error) throw error
+      set((s) => ({
+        registrations: s.registrations.map((r) =>
+          r.id === cancelled.id ? (data as FullRegistration) : r
+        ),
+      }))
+    } else {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .insert({ event_id: eventId, user_id: userId })
+        .select()
+        .single()
+      if (error) throw error
+      set((s) => ({
+        registrations: [...s.registrations, data as FullRegistration],
+      }))
+    }
   },
 
   cancelRegistration: async (regId) => {
