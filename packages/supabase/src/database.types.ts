@@ -650,6 +650,22 @@ export type Database = {
           referrer_id: string
           status: string
         }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id: string
+          referrer_id: string
+          status?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          referred_user_id?: string
+          referrer_id?: string
+          status?: string
+        }
         Relationships: [
           {
             foreignKeyName: "referrals_referred_user_id_fkey"
@@ -679,6 +695,30 @@ export type Database = {
           social_media_handle: string | null
           status: string
           user_id: string
+        }
+        Insert: {
+          applied_at?: string
+          event_id: string
+          id?: string
+          phone_number?: string | null
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_media_handle?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          applied_at?: string
+          event_id?: string
+          id?: string
+          phone_number?: string | null
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_media_handle?: string | null
+          status?: string
+          user_id?: string
         }
         Relationships: [
           {
