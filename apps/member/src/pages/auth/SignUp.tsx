@@ -35,10 +35,10 @@ function GoogleIcon() {
   )
 }
 
-const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin'] as const
+const ORGANIZER_ROLES = ['chapter_officer'] as const
 
 function getPostAuthRoute(role: string): string {
-  if (role === 'super_admin') return '/admin'
+  if (role === 'super_admin' || role === 'hq_admin') return '/admin'
   if (ORGANIZER_ROLES.includes(role as typeof ORGANIZER_ROLES[number])) return '/organizer'
   return '/organizer-code-gate'
 }

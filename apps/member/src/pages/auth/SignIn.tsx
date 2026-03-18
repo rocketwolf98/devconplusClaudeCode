@@ -43,7 +43,10 @@ export default function SignIn() {
     setFormError(null)
     try {
       await signIn(data.email, data.password)
-      navigate('/home')
+      const role = useAuthStore.getState().user?.role ?? 'member'
+      if (role === 'super_admin' || role === 'hq_admin') navigate('/admin')
+      else if (role === 'chapter_officer') navigate('/organizer')
+      else navigate('/home')
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
     }

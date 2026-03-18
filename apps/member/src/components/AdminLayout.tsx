@@ -42,7 +42,7 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.filter(item => !item.superOnly || user.role === 'super_admin').map(({ path, label, Icon, end }) => (
+          {NAV_ITEMS.filter(item => !item.superOnly || ADMIN_ROLES.includes(user.role as typeof ADMIN_ROLES[number])).map(({ path, label, Icon, end }) => (
             <NavLink
               key={path}
               to={path}

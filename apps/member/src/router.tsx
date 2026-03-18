@@ -46,7 +46,7 @@ import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
 
 // OrgQRScanner is lazy-loaded: it pulls in @zxing (large barcode library)
 // which is only needed when an officer scans tickets at the door.
-// Admin pages are lazy-loaded: they're only ever accessed by super_admin.
+// Admin pages are lazy-loaded: they're only ever accessed by super_admin or hq_admin.
 
 export const router = createBrowserRouter([
   // Root — always start at onboarding
@@ -85,7 +85,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Admin routes — all lazy-loaded, only super_admin users ever land here
+  // Admin routes — all lazy-loaded, only super_admin or hq_admin users ever land here
   {
     element: <AdminLayout />,
     children: [
