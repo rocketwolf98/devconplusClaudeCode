@@ -1,3 +1,5 @@
+export const VOLUNTEER_APPROVAL_POINTS = 35
+
 export const ROLE_DISPLAY_NAMES: Record<string, string> = {
   member:          'Member',
   chapter_officer: 'Chapter Officer',

@@ -20,4 +20,4 @@ export const MOCK_PROFILE: Profile = {
 // Derived display helpers
 export const MOCK_PROFILE_INITIALS = 'MS'
 export const MOCK_PROFILE_XP_NEXT_MILESTONE = 250 // next reward at 250 XP
-export const MOCK_PROFILE_XP_PROGRESS = MOCK_PROFILE.spendable_points / MOCK_PROFILE_XP_NEXT_MILESTONE
+export const MOCK_PROFILE_XP_PROGRESS = (MOCK_PROFILE.lifetime_points ?? 0) / MOCK_PROFILE_XP_NEXT_MILESTONE

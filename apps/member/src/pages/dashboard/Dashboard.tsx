@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, Flame, Star, Bell } from 'lucide-react'
+import { Briefcase, Heart, Gift, ChevronRight, Flame, Bell } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useNotificationsStore } from '../../stores/useNotificationsStore'
 import EventCard from '../../components/EventCard'
-import ComingSoonModal from '../../components/ComingSoonModal'
+import XPCard from '../../components/XPCard'
 import {
   SkeletonEventCard,
   SkeletonXPRow,
@@ -16,8 +16,6 @@ import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 
 import { formatDate, isEventArchived } from '../../lib/dates'
 import logoMark from '../../assets/logos/logo-mark.svg'
-
-const XP_NEXT_MILESTONE = 2500
 
 const WELCOME_BANNER = {
   title: 'Welcome to DEVCON+',
@@ -31,12 +29,9 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
-  const { transactions, totalPoints, fetchPoints, isLoading: pointsLoading } = usePointsStore()
+  const { transactions, loadTotalPoints, isLoading: pointsLoading } = usePointsStore()
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
   const [bannerIdx, setBannerIdx] = useState(0)
-  const [showVolunteerModal, setShowVolunteerModal] = useState(false)
-  const [showJobsModal, setShowJobsModal] = useState(false)
-  const [showRedeemModal, setShowRedeemModal] = useState(false)
 
   const bannersLengthRef = useRef(1)
 
@@ -53,7 +48,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     void fetchEvents()
-    if (user?.id) void fetchPoints(user.id)
+    void loadTotalPoints()
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -89,7 +84,6 @@ export default function Dashboard() {
   const safeIdx = bannerIdx % Math.max(banners.length, 1)
   const banner = banners[safeIdx] ?? banners[0]
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
-  const progressPct = Math.min((totalPoints / XP_NEXT_MILESTONE) * 100, 100)
   const forYouEvents = events.filter((e) => e.status === 'upcoming' && !isEventArchived(e)).slice(0, 3)
   const recentTxns = transactions.slice(0, 4)
 
@@ -142,31 +136,7 @@ export default function Dashboard() {
         className="bg-primary px-4 pb-10 overflow-hidden"
         style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px', opacity: cradleOpacity, maxHeight: cradleHeight }}
       >
-        <div className="bg-white rounded-3xl shadow-xl p-5">
-          <p className="text-slate-400 text-xs font-medium mb-3">Current DEVCON Points</p>
-          <div className="flex items-end gap-2 mb-3">
-            <Star className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
-            <span className="text-4xl font-black text-slate-900 leading-none">{totalPoints.toLocaleString()}</span>
-            <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
-          </div>
-          <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
-            <motion.div
-              className="h-full bg-gold rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPct}%` }}
-              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.25 }}
-            />
-          </div>
-          <p className="text-slate-400 text-xs mb-4">
-            {Math.max(XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
-          </p>
-          <button
-            onClick={() => navigate('/events')}
-            className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-sm"
-          >
-            Attend Our Events
-          </button>
-        </div>
+        <XPCard />
       </motion.div>
 
       {/* ── Scrollable feed ── */}
@@ -182,9 +152,9 @@ export default function Dashboard() {
         >
           <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: Briefcase, label: 'Find Jobs',  onClick: () => setShowJobsModal(true) },
-              { icon: Heart,     label: 'Volunteer',  onClick: () => setShowVolunteerModal(true) },
-              { icon: Gift,      label: 'Redeem',     onClick: () => setShowRedeemModal(true) },
+              { icon: Briefcase, label: 'Find Jobs',  onClick: () => navigate('/jobs') },
+              { icon: Heart,     label: 'Volunteer',  onClick: () => navigate('/events') },
+              { icon: Gift,      label: 'Redeem',     onClick: () => navigate('/rewards') },
             ].map(({ icon: Icon, label, onClick }) => (
               <motion.button
                 key={label}
@@ -296,14 +266,14 @@ export default function Dashboard() {
               Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
             </h2>
             <button
-              onClick={() => setShowJobsModal(true)}
+              onClick={() => navigate('/jobs')}
               className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
               See All <ChevronRight className="w-3 h-3" />
             </button>
           </div>
           <motion.button
-            onClick={() => setShowJobsModal(true)}
+            onClick={() => navigate('/jobs')}
             className="mx-4 w-[calc(100%-2rem)] bg-primary rounded-2xl p-5 text-left"
             whileTap={{ scale: 0.98 }}
           >
@@ -402,15 +372,6 @@ export default function Dashboard() {
       </div>
       </div>
 
-      {showVolunteerModal && (
-        <ComingSoonModal feature="Volunteering" onClose={() => setShowVolunteerModal(false)} />
-      )}
-      {showJobsModal && (
-        <ComingSoonModal feature="Jobs Board" onClose={() => setShowJobsModal(false)} />
-      )}
-      {showRedeemModal && (
-        <ComingSoonModal feature="Rewards" onClose={() => setShowRedeemModal(false)} />
-      )}
     </div>
   )
 }

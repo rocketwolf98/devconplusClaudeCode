@@ -1,7 +1,9 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, MapPin, Ticket } from 'lucide-react'
+import { ArrowLeft, CalendarDays, MapPin, Ticket, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
+import { useVolunteerStore } from '../../stores/useVolunteerStore'
 import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
 
@@ -9,8 +11,15 @@ export default function EventDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { events, registrations } = useEventsStore()
+  const { loadApplications, getApplicationByEventId } = useVolunteerStore()
   const event = events.find((e) => e.id === id)
+
+  useEffect(() => {
+    loadApplications()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const reg = registrations.find((r) => r.event_id === id)
+  const volunteerApp = id ? getApplicationByEventId(id) : undefined
 
   if (!event) return <NotFound />
 
@@ -75,7 +84,7 @@ export default function EventDetail() {
         )}
 
         {/* CTA based on registration state */}
-        <div className="pt-2">
+        <div className="pt-2 space-y-3">
           {!reg ? (
             <button
               onClick={() => navigate(`/events/${id}/register`)}
@@ -102,6 +111,38 @@ export default function EventDetail() {
             <div className="w-full bg-red/10 text-red font-semibold py-4 rounded-2xl text-center">
               Registration Rejected
             </div>
+          )}
+
+          {/* Volunteer CTA — only for upcoming events */}
+          {event.status === 'upcoming' && (
+            volunteerApp ? (
+              <div className="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
+                <Heart className="w-4 h-4 text-slate-400" />
+                <span className="text-sm font-medium text-slate-500">
+                  Volunteer Application:{' '}
+                  <span
+                    className={
+                      volunteerApp.status === 'approved'
+                        ? 'text-green font-semibold'
+                        : volunteerApp.status === 'rejected'
+                          ? 'text-red font-semibold'
+                          : 'text-yellow-500 font-semibold'
+                    }
+                  >
+                    {volunteerApp.status.charAt(0).toUpperCase() + volunteerApp.status.slice(1)}
+                  </span>
+                </span>
+              </div>
+            ) : (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(`/events/${id}/volunteer`)}
+                className="w-full border border-primary text-primary font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
+              >
+                <Heart className="w-5 h-5" />
+                Volunteer for this Event
+              </motion.button>
+            )
           )}
         </div>
       </div>

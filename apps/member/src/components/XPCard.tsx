@@ -1,36 +1,77 @@
 import { useNavigate } from 'react-router-dom'
+import { Star, Award, Zap } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { usePointsStore } from '../stores/usePointsStore'
 
-const XP_NEXT_MILESTONE = 2500
+const PRESTIGE_THRESHOLD = 3000
 
 export default function XPCard() {
   const navigate = useNavigate()
-  const { totalPoints } = usePointsStore()
-  const progressPct = Math.min((totalPoints / XP_NEXT_MILESTONE) * 100, 100)
+  const { spendablePoints, lifetimePoints, prestigeUnlocked } = usePointsStore()
+
+  const progressPct = Math.min((lifetimePoints / PRESTIGE_THRESHOLD) * 100, 100)
 
   return (
-    <div className="mx-4 bg-navy rounded-2xl p-4 shadow-primary">
-      <div className="flex justify-between items-center mb-2">
-        <div>
-          <p className="text-white/60 text-xs">Your Points</p>
-          <p className="text-white text-2xl font-bold">{totalPoints.toLocaleString()} pts</p>
+    <div className="bg-white rounded-3xl shadow-xl p-5">
+      {/* Header row: label + optional Prestige badge */}
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-slate-400 text-xs font-medium">Current DEVCON Points</p>
+        {prestigeUnlocked && (
+          <div className="flex items-center gap-1 bg-gold/10 rounded-full px-2 py-1">
+            <Award className="w-4 h-4 text-gold fill-gold" />
+            <span className="text-[11px] font-bold text-gold leading-none">Prestige Access</span>
+          </div>
+        )}
+      </div>
+
+      {/* Main points number */}
+      <div className="flex items-end gap-2 mb-1">
+        <Star className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
+        <span className="text-4xl font-black text-slate-900 leading-none">
+          {spendablePoints.toLocaleString()}
+        </span>
+        <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
+      </div>
+      <p className={`text-slate-400 text-xs ${prestigeUnlocked ? 'mb-4' : 'mb-1'}`}>Available to spend</p>
+
+      {/* Lifetime points sub-row — hidden when prestige is unlocked */}
+      {!prestigeUnlocked && (
+        <div className="flex items-center gap-1 mb-4">
+          <Zap className="w-3 h-3 text-slate-500 shrink-0" />
+          <span className="text-xs text-slate-500">
+            {lifetimePoints.toLocaleString()} lifetime pts
+          </span>
         </div>
-        <button
-          onClick={() => navigate('/rewards')}
-          className="bg-primary px-3 py-1.5 rounded-xl text-white text-xs font-semibold"
-        >
-          Redeem Now
-        </button>
-      </div>
-      <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-1.5">
-        <div
-          className="h-full bg-gold rounded-full transition-all"
-          style={{ width: `${progressPct}%` }}
-        />
-      </div>
-      <p className="text-white/50 text-xs">
-        {Math.max(XP_NEXT_MILESTONE - totalPoints, 0).toLocaleString()} pts to next reward tier
-      </p>
+      )}
+
+      {/* Progress bar or Prestige unlocked message */}
+      {prestigeUnlocked ? (
+        <p className="text-xs font-semibold text-gold mb-4">Prestige Unlocked!</p>
+      ) : (
+        <>
+          <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
+            <motion.div
+              className="h-full bg-gold rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.25 }}
+            />
+          </div>
+          <p className="text-slate-400 text-xs mb-4">
+            {lifetimePoints.toLocaleString()} / {PRESTIGE_THRESHOLD.toLocaleString()} pts
+            &nbsp;&middot;&nbsp;Earn more by attending events
+          </p>
+        </>
+      )}
+
+      {/* CTA button */}
+      <motion.button
+        onClick={() => navigate('/events')}
+        className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-sm"
+        whileTap={{ scale: 0.95 }}
+      >
+        Attend Our Events
+      </motion.button>
     </div>
   )
 }

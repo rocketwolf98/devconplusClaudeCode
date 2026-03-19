@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronRight, LogOut, Shield, Star } from 'lucide-react'
+import { Award, Check, ChevronRight, LogOut, Shield, Star } from 'lucide-react'
 import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
 import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -18,9 +18,13 @@ const MENU_ITEMS: { label: string; path: string }[] = [
 export default function Profile() {
   const navigate = useNavigate()
   const { user, initials, signOut, chapterName } = useAuthStore()
-  const { totalPoints } = usePointsStore()
+  const { spendablePoints, prestigeUnlocked, loadTotalPoints } = usePointsStore()
   const { themeId, setTheme } = useThemeStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
+
+  useEffect(() => {
+    loadTotalPoints()
+  }, [loadTotalPoints])
 
   return (
     <div>
@@ -58,8 +62,14 @@ export default function Profile() {
           </span>
           <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1 text-white text-xs font-semibold">
             <Star className="w-3 h-3 fill-gold text-gold" />
-            {totalPoints.toLocaleString()} XP
+            {spendablePoints.toLocaleString()} XP
           </span>
+          {prestigeUnlocked && (
+            <span className="inline-flex items-center gap-1 bg-gold/10 text-gold border border-gold/30 rounded-full px-2 py-0.5 text-xs font-semibold">
+              <Award className="w-4 h-4 fill-gold text-gold" />
+              Prestige Access
+            </span>
+          )}
         </div>
       </div>
 

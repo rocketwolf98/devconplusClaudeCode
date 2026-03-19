@@ -63,8 +63,8 @@ export interface Profile {
   chapter_id: string | null
   role: UserRole
   avatar_url: string | null
-  spendable_points: number
-  lifetime_points: number
+  spendable_points: number | null
+  lifetime_points: number | null
   referral_code: string | null
   pending_role: string | null
   pending_chapter_id: string | null

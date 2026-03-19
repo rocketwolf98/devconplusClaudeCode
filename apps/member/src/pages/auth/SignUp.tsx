@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
@@ -45,6 +45,8 @@ function getPostAuthRoute(role: string): string {
 
 export default function SignUp() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const refCode = searchParams.get('ref')
   const { signUp, checkUsernameAvailable } = useAuthStore()
   const [showGoogleModal, setShowGoogleModal] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -91,6 +93,22 @@ export default function SignUp() {
     setFormError(null)
     try {
       const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.school_or_company, data.chapter_id)
+
+      // Silently confirm referral if a ?ref= code was present in the URL
+      if (refCode) {
+        const newUserId = useAuthStore.getState().user?.id
+        if (newUserId) {
+          supabase
+            .rpc('confirm_referral', {
+              p_referred_user_id: newUserId,
+              p_referral_code:    refCode,
+            })
+            .then(() => {
+              // Intentionally silent — referral failures must not block signup
+            })
+        }
+      }
+
       if (emailConfirmationPending) {
         navigate('/email-sent', { state: { email: data.email, type: 'signup' } })
       } else {
