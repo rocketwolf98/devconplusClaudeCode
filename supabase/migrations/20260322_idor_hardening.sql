@@ -31,12 +31,17 @@ BEGIN
     RAISE EXCEPTION 'Unauthorized';
   END IF;
 
-  SELECT chapter_id, requested_role INTO v_req
+  SELECT * INTO v_req
   FROM organizer_upgrade_requests
   WHERE id = p_request_id AND status = 'pending';
 
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Request not found or already resolved';
+  END IF;
+
+  -- Fix 2: validate p_user_id matches the request to prevent cross-user assignment
+  IF v_req.user_id != p_user_id THEN
+    RAISE EXCEPTION 'User ID does not match request';
   END IF;
 
   UPDATE profiles
@@ -87,6 +92,7 @@ SET search_path = public
 AS $$
 DECLARE
   v_caller_role text;
+  v_req         record;
 BEGIN
   SELECT role INTO v_caller_role FROM profiles WHERE id = auth.uid();
 
@@ -94,10 +100,19 @@ BEGIN
     RAISE EXCEPTION 'Unauthorized';
   END IF;
 
+  -- Fix 1: validate request belongs to p_user_id and is still pending
+  SELECT * INTO v_req
+  FROM organizer_upgrade_requests
+  WHERE id = p_request_id AND user_id = p_user_id AND status = 'pending';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Request not found or not in pending state';
+  END IF;
+
   UPDATE profiles
   SET pending_role       = NULL,
       pending_chapter_id = NULL
-  WHERE id = p_user_id;
+  WHERE id = v_req.user_id;
 
   UPDATE organizer_upgrade_requests
   SET status      = 'rejected',
@@ -121,7 +136,11 @@ CREATE TABLE IF NOT EXISTS event_announcements (
 
 ALTER TABLE event_announcements ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Members view announcements for their events"
+-- Fix 4: SELECT — allow approved members AND organizers in the same chapter
+DROP POLICY IF EXISTS "Members can read event announcements" ON event_announcements;
+DROP POLICY IF EXISTS "Members view announcements for their events" ON event_announcements;
+
+CREATE POLICY "Members can read event announcements"
   ON event_announcements FOR SELECT
   USING (
     EXISTS (
@@ -130,12 +149,23 @@ CREATE POLICY "Members view announcements for their events"
         AND er.user_id  = auth.uid()
         AND er.status   = 'approved'
     )
+    OR EXISTS (
+      SELECT 1 FROM profiles p
+      JOIN events e ON e.id = event_announcements.event_id
+      WHERE p.id = auth.uid()
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+        AND (p.role IN ('hq_admin', 'super_admin') OR p.chapter_id = e.chapter_id)
+    )
   );
+
+-- Fix 5: INSERT — enforce organizer_id = auth.uid()
+DROP POLICY IF EXISTS "Officers insert announcements for their chapter events" ON event_announcements;
 
 CREATE POLICY "Officers insert announcements for their chapter events"
   ON event_announcements FOR INSERT
   WITH CHECK (
-    EXISTS (
+    NEW.organizer_id = auth.uid()
+    AND EXISTS (
       SELECT 1
       FROM events e
       JOIN profiles p ON p.id = auth.uid()
@@ -229,6 +259,9 @@ GRANT EXECUTE ON FUNCTION admin_update_user_role(uuid, text) TO authenticated;
 
 
 -- ── Fix M2: event_registrations DELETE policies ───────────────────────────────
+DROP POLICY IF EXISTS "Officers can delete registrations for their events" ON event_registrations;
+DROP POLICY IF EXISTS "Members can delete own pending registrations" ON event_registrations;
+
 CREATE POLICY "Officers can delete registrations for their events"
   ON event_registrations FOR DELETE
   USING (
@@ -254,9 +287,56 @@ CREATE POLICY "Members can delete own pending registrations"
 
 
 -- ── Fix M3: volunteer_applications DELETE policy ──────────────────────────────
+DROP POLICY IF EXISTS "Members can delete own pending volunteer applications" ON volunteer_applications;
+
 CREATE POLICY "Members can delete own pending volunteer applications"
   ON volunteer_applications FOR DELETE
   USING (
     auth.uid() = user_id
     AND status = 'pending'
+  );
+
+-- Fix 3: Replace the overly broad officer policy with a chapter-scoped one.
+-- volunteer_applications links to events via event_id; use that to scope
+-- chapter_officer access to their own chapter's events only.
+DROP POLICY IF EXISTS "Officers manage volunteer applications" ON volunteer_applications;
+
+CREATE POLICY "Officers manage chapter volunteer applications"
+  ON volunteer_applications
+  FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+        AND (
+          p.role IN ('hq_admin', 'super_admin')
+          OR p.chapter_id = (
+            SELECT e.chapter_id FROM events e
+            WHERE e.id = volunteer_applications.event_id
+          )
+        )
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM profiles p
+      WHERE p.id = auth.uid()
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+    )
+  );
+
+
+-- ── Fix 6: organizer_upgrade_requests SELECT — allow hq_admin ────────────────
+-- The existing "Admins manage all upgrade requests" policy in 016_profile_upgrades.sql
+-- only covers super_admin. Add a dedicated SELECT policy for hq_admin.
+CREATE POLICY "Admins can view upgrade requests"
+  ON organizer_upgrade_requests
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid()
+        AND role IN ('hq_admin', 'super_admin')
+    )
   );
