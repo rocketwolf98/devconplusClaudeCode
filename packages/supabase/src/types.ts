@@ -60,7 +60,7 @@ export interface Profile {
   username: string | null
   email: string
   school_or_company: string | null
-  chapter_id: string | null
+  chapter_id: string
   role: UserRole
   avatar_url: string | null
   spendable_points: number | null
