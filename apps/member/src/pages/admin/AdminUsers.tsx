@@ -62,10 +62,10 @@ export default function AdminUsers() {
   useEffect(() => { void load() }, [])
 
   const handleRoleChange = async (userId: string, newRole: UserRole) => {
-    const { error: dbErr } = await supabase
-      .from('profiles')
-      .update({ role: newRole })
-      .eq('id', userId)
+    const { error: dbErr } = await supabase.rpc('admin_update_user_role', {
+      p_user_id: userId,
+      p_new_role: newRole,
+    })
     if (dbErr) { setError(dbErr.message); return }
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u))
     if (selectedUser?.id === userId) {
