@@ -1,57 +1,101 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Camera, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
-import { supabase } from '../../lib/supabase'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
+
+const MAX_CODE_ATTEMPTS = 5
+const CODE_LOCKOUT_MS   = 60_000
 
 export default function OrganizerCodeGate() {
   const navigate = useNavigate()
-  const { user, initialize, setOrganizerSession } = useAuthStore()
+  const { user, initials, setOrganizerSession, requestOrganizerUpgrade, uploadAvatar, updateProfile } = useAuthStore()
   const [code, setCode]       = useState('')
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const failedAttempts = useRef(0)
+  const lockedUntil    = useRef<number>(0)
+  const fileInputRef                        = useRef<HTMLInputElement>(null)
+  const [avatarPreview, setAvatarPreview]   = useState<string | null>(user?.avatar_url ?? null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError]       = useState<string | null>(null)
 
   const firstName = user?.full_name?.split(' ')[0] ?? 'there'
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setAvatarError(null)
+
+    const objectUrl = URL.createObjectURL(file)
+    setAvatarPreview(objectUrl)
+    setAvatarUploading(true)
+
+    try {
+      const url = await uploadAvatar(file)
+      await updateProfile({ avatar_url: url })
+    } catch (err) {
+      setAvatarError(err instanceof Error ? err.message : 'Upload failed — tap to retry')
+      setAvatarPreview(user?.avatar_url ?? null)
+    } finally {
+      setAvatarUploading(false)
+      URL.revokeObjectURL(objectUrl)
+    }
+  }
 
   const handleAccessPortal = async () => {
     const trimmed = code.trim().toUpperCase()
     if (!trimmed) { setError('Please enter your organizer code.'); return }
     if (!user) { setError('Session expired. Please sign in again.'); return }
 
+    const now = Date.now()
+    if (now < lockedUntil.current) {
+      const secsLeft = Math.ceil((lockedUntil.current - now) / 1000)
+      setError(`Too many attempts. Please wait ${secsLeft}s before trying again.`)
+      return
+    }
+
     setLoading(true)
     setError('')
 
-    const { data, error: dbError } = await supabase
-      .from('organizer_codes')
-      .select('chapter_id, assigned_role')
-      .eq('code', trimmed)
-      .eq('is_active', true)
-      .single()
+    try {
+      const result = await requestOrganizerUpgrade(trimmed)
 
-    if (dbError || !data) {
-      setError('Invalid organizer code. Please check and try again.')
+      if (result === 'invalid_code') {
+        failedAttempts.current += 1
+        if (failedAttempts.current >= MAX_CODE_ATTEMPTS) {
+          lockedUntil.current    = Date.now() + CODE_LOCKOUT_MS
+          failedAttempts.current = 0
+          setError('Too many invalid attempts. Please wait 60 seconds.')
+        } else {
+          setError('Invalid organizer code. Please check and try again.')
+        }
+        return
+      }
+      if (result === 'wrong_chapter') {
+        setError('This code does not match your chapter. Contact your chapter lead.')
+        return
+      }
+      if (result === 'already_pending') {
+        setError('You already have a pending upgrade request. Please wait for approval.')
+        return
+      }
+
+      // Explicit check — safe against future UpgradeResult union additions
+      if (result !== 'submitted') {
+        setError('Something went wrong. Please try again.')
+        return
+      }
+
+      // Success — request is pending admin approval
+      failedAttempts.current = 0
+      setSubmitted(true)
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
       setLoading(false)
-      return
     }
-
-    // Update profile role + chapter assignment in DB
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        role:       data.assigned_role,
-        chapter_id: data.chapter_id,
-      })
-      .eq('id', user.id)
-
-    if (updateError) {
-      setError('Could not update profile. Please try again.')
-      setLoading(false)
-      return
-    }
-
-    // Re-fetch updated profile then send to member home
-    await initialize()
-    navigate('/home')
   }
 
   const handleContinueAsMember = () => {
@@ -69,48 +113,114 @@ export default function OrganizerCodeGate() {
 
       {/* Card */}
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-32 overflow-y-auto">
-        <h2 className="text-lg font-black text-slate-900 mb-1">Are you a Chapter Officer?</h2>
-        <p className="text-sm text-slate-500 mb-6">
-          Enter your organizer code to access the officer portal, or continue as a member.
-        </p>
 
-        <div className="space-y-3">
-          <input
-            value={code}
-            onChange={(e) => { setCode(e.target.value); setError('') }}
-            onKeyDown={(e) => e.key === 'Enter' && handleAccessPortal()}
-            placeholder="e.g. DCN-ABC-1234"
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
-          />
-          {error && <p className="text-red text-xs">{error}</p>}
+        {submitted ? (
+          /* Success state — request is pending admin approval */
+          <div className="flex flex-col items-center text-center pt-6 gap-4">
+            <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center">
+              <svg className="w-7 h-7 text-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-base font-bold text-slate-800">Request Submitted!</p>
+              <p className="text-sm text-slate-500 mt-1">
+                Your officer upgrade request is pending approval from your chapter lead. You'll be notified once it's approved.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleContinueAsMember}
+              className="w-full bg-blue text-white font-bold py-4 rounded-2xl hover:bg-blue-dark transition-colors mt-2"
+            >
+              Continue as Member
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Avatar picker — optional, non-blocking */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="relative w-16 h-16">
+                <div className="w-16 h-16 rounded-full bg-blue/10 overflow-hidden flex items-center justify-center">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-blue font-bold text-lg select-none">{initials}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={avatarUploading}
+                  className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-blue flex items-center justify-center shadow-sm"
+                  aria-label="Upload profile photo"
+                >
+                  {avatarUploading
+                    ? <Loader2 className="w-3 h-3 text-white animate-spin" />
+                    : <Camera className="w-3 h-3 text-white" />
+                  }
+                </button>
+              </div>
 
-          <button
-            type="button"
-            onClick={handleAccessPortal}
-            disabled={loading}
-            className="w-full bg-navy text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue transition-colors"
-          >
-            {loading ? 'Verifying…' : 'Access Officer Portal'}
-          </button>
-        </div>
+              {avatarError && (
+                <p className="text-red text-xs mt-2 text-center max-w-[180px]">{avatarError}</p>
+              )}
 
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-slate-200" />
-          <span className="text-xs text-slate-400 font-medium">or</span>
-          <div className="flex-1 h-px bg-slate-200" />
-        </div>
+              <p className="text-xs text-slate-400 mt-1">Add a profile photo (optional)</p>
 
-        <button
-          type="button"
-          onClick={handleContinueAsMember}
-          className="w-full border border-slate-200 bg-white text-slate-700 font-bold py-4 rounded-2xl hover:bg-slate-50 transition-colors"
-        >
-          Continue as Member
-        </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+            </div>
 
-        <p className="text-center text-xs text-slate-400 mt-5">
-          Organizer codes are issued by your chapter lead.
-        </p>
+            <h2 className="text-lg font-black text-slate-900 mb-1">Are you a Chapter Officer?</h2>
+            <p className="text-sm text-slate-500 mb-6">
+              Enter your organizer code to request officer access, or continue as a member.
+            </p>
+
+            <div className="space-y-3">
+              <input
+                value={code}
+                onChange={(e) => { setCode(e.target.value); setError('') }}
+                onKeyDown={(e) => e.key === 'Enter' && handleAccessPortal()}
+                placeholder="e.g. DCN-ABC-1234"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
+              />
+              {error && <p className="text-red text-xs">{error}</p>}
+
+              <button
+                type="button"
+                onClick={handleAccessPortal}
+                disabled={loading}
+                className="w-full bg-navy text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue transition-colors"
+              >
+                {loading ? 'Verifying…' : 'Request Officer Access'}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 my-6">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-xs text-slate-400 font-medium">or</span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleContinueAsMember}
+              className="w-full border border-slate-200 bg-white text-slate-700 font-bold py-4 rounded-2xl hover:bg-slate-50 transition-colors"
+            >
+              Continue as Member
+            </button>
+
+            <p className="text-center text-xs text-slate-400 mt-5">
+              Organizer codes are issued by your chapter lead.
+            </p>
+          </>
+        )}
       </div>
     </div>
   )
