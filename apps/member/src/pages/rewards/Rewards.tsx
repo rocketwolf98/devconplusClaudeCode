@@ -1,13 +1,25 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
-import { ArrowLeft, Star, Info, X, Loader2, Award } from 'lucide-react'
+import {
+  ArrowLeft, Star, Info, X, Loader2,
+  Award, Lock, Gift, CheckCircle,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Reward } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useRewardsStore } from '../../stores/useRewardsStore'
 import { SkeletonRewardCard } from '../../components/Skeleton'
 import { staggerContainer, cardItem, slideUp, backdrop } from '../../lib/animation'
+
+// Unique gradient + icon per reward slot — cycles if there are more than 4
+const CARD_GRADIENTS = [
+  { gradient: 'from-navy to-primary',     Icon: Award  },
+  { gradient: 'from-purple-800 to-blue-600', Icon: Gift  },
+  { gradient: 'from-teal-700 to-emerald-500', Icon: Star },
+  { gradient: 'from-rose-700 to-promoted',  Icon: Award  },
+] as const satisfies ReadonlyArray<{ gradient: string; Icon: React.ElementType }>
 
 // ── Redemption bottom sheet ──────────────────────────────────────────────────
 
@@ -34,7 +46,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
 
   useEffect(() => {
     if (sheetState === 'success') {
-      const timer = setTimeout(() => handleClose(), 2000)
+      const timer = setTimeout(() => handleClose(), 2200)
       return () => clearTimeout(timer)
     }
   }, [sheetState, handleClose])
@@ -74,7 +86,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle */}
-            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mt-3 mb-1" />
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1" />
 
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -103,7 +115,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900 text-sm">{reward.name}</p>
-                      <p className="text-xs text-gold font-bold flex items-center gap-0.5 mt-0.5">
+                      <p className="text-xs font-bold flex items-center gap-0.5 mt-0.5 text-gold">
                         <Star className="w-3 h-3 fill-gold text-gold" />
                         {reward.points_cost.toLocaleString()} pts
                       </p>
@@ -114,18 +126,24 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
                   <div className="space-y-2 mb-5">
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-500">Your balance</span>
-                      <span className="font-semibold text-slate-900">{spendablePoints.toLocaleString()} pts</span>
+                      <span className="font-semibold text-slate-900">
+                        {spendablePoints.toLocaleString()} pts
+                      </span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm border-t border-slate-100 pt-2">
                       <span className="text-slate-500">After redemption</span>
-                      <span className="font-semibold text-slate-900">{afterRedemptionBalance.toLocaleString()} pts</span>
+                      <span className="font-semibold text-slate-900">
+                        {afterRedemptionBalance.toLocaleString()} pts
+                      </span>
                     </div>
                   </div>
 
                   {/* Warning */}
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-6">
                     <p className="text-xs text-amber-700 font-medium">This action cannot be undone.</p>
-                    <p className="text-xs text-amber-600 mt-0.5">Redemption is subject to availability.</p>
+                    <p className="text-xs text-amber-600 mt-0.5">
+                      Redemption is subject to availability.
+                    </p>
                   </div>
 
                   {/* Actions */}
@@ -150,27 +168,29 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
               )}
 
               {sheetState === 'loading' && (
-                <div className="flex flex-col items-center py-8 gap-3">
+                <div className="flex flex-col items-center py-10 gap-3">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                   <p className="text-sm text-slate-500">Processing redemption…</p>
                 </div>
               )}
 
               {sheetState === 'success' && (
-                <div className="flex flex-col items-center py-8 gap-3 text-center">
-                  <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
-                    <Star className="w-7 h-7 fill-green-500 text-green-500" />
+                <div className="flex flex-col items-center py-10 gap-3 text-center">
+                  <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center">
+                    <CheckCircle className="w-8 h-8 text-green" />
                   </div>
                   <p className="text-base font-bold text-slate-900">Redeemed!</p>
-                  <p className="text-sm text-slate-500">Check back at the next event.</p>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    Claim your reward at the next DEVCON event.
+                  </p>
                 </div>
               )}
 
               {sheetState === 'error' && (
                 <>
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-5">
-                    <p className="text-sm font-semibold text-red-700 mb-1">Redemption failed</p>
-                    <p className="text-xs text-red-600">{errorMessage}</p>
+                  <div className="bg-red/5 border border-red/20 rounded-xl p-4 mb-5">
+                    <p className="text-sm font-semibold text-red mb-1">Redemption failed</p>
+                    <p className="text-xs text-red/80">{errorMessage}</p>
                   </div>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
@@ -194,74 +214,120 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
 
 interface RewardCardProps {
   reward: Reward
+  index: number
   spendablePoints: number
   onRedeem: (reward: Reward) => void
 }
 
-function RewardCard({ reward, spendablePoints, onRedeem }: RewardCardProps) {
-  const canAfford = spendablePoints >= reward.points_cost
-  const deficit = reward.points_cost - spendablePoints
-  const hasLowStock = reward.stock_remaining !== null && reward.stock_remaining <= 5
+function RewardCard({ reward, index, spendablePoints, onRedeem }: RewardCardProps) {
+  const canAfford   = spendablePoints >= reward.points_cost
+  const deficit     = reward.points_cost - spendablePoints
+  const isOutOfStock = reward.stock_remaining !== null && reward.stock_remaining === 0
+  const hasLowStock  = reward.stock_remaining !== null
+    && reward.stock_remaining > 0
+    && reward.stock_remaining <= 5
 
-  // Derive 2-char initials from reward name for image placeholder
-  const initials = reward.name
-    .split(' ')
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
+  const { gradient, Icon } = CARD_GRADIENTS[index % CARD_GRADIENTS.length]
 
   return (
     <motion.div
       variants={cardItem}
-      className="rounded-2xl bg-white shadow-card border border-slate-200 overflow-hidden flex flex-col"
+      className="rounded-2xl bg-white shadow-card overflow-hidden"
     >
-      {/* Image area */}
-      <div className="relative w-full h-28">
+      {/* Banner — gradient with centered icon, overlays for locked / OOS */}
+      <div className={`relative w-full h-40 bg-gradient-to-br ${gradient}`}>
         {reward.image_url ? (
           <img
             src={reward.image_url}
             alt={reward.name}
-            className="w-full h-28 object-cover"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-28 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-            <span className="text-2xl font-black text-primary/40 select-none">{initials}</span>
+          <div className="w-full h-full flex items-center justify-center">
+            <Icon className="w-16 h-16 text-white/20" strokeWidth={1.2} />
           </div>
         )}
+
+        {/* Stock badge — promoted orange if low, subtle black if plenty */}
         {hasLowStock && (
-          <div className="absolute top-2 right-2 bg-promoted text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <div className="absolute top-3 right-3 bg-promoted text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
             Only {reward.stock_remaining} left!
+          </div>
+        )}
+        {!hasLowStock && !isOutOfStock && reward.stock_remaining !== null && reward.stock_remaining > 5 && (
+          <div className="absolute top-3 right-3 bg-black/30 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
+            {reward.stock_remaining} in stock
+          </div>
+        )}
+
+        {/* Lock overlay — can't afford */}
+        {!canAfford && !isOutOfStock && (
+          <div className="absolute inset-0 bg-black/55 flex flex-col items-center justify-center gap-2">
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-white" />
+            </div>
+            <p className="text-white text-xs font-semibold drop-shadow-sm">
+              {deficit.toLocaleString()} pts to unlock
+            </p>
+          </div>
+        )}
+
+        {/* Out-of-stock overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black/55 flex items-center justify-center">
+            <div className="border border-white/30 bg-white/10 rounded-full px-5 py-1.5">
+              <p className="text-white text-xs font-bold tracking-widest uppercase">
+                Out of Stock
+              </p>
+            </div>
           </div>
         )}
       </div>
 
       {/* Card body */}
-      <div className="p-3 flex flex-col flex-1 gap-1.5">
-        <p className="font-semibold text-slate-900 text-sm leading-tight line-clamp-2">{reward.name}</p>
+      <div className="p-4">
+        {/* Name + per-user limit */}
+        <div className="flex items-start gap-2">
+          <p className="font-bold text-slate-900 text-[15px] leading-snug flex-1">
+            {reward.name}
+          </p>
+          {reward.max_per_user !== null && (
+            <span className="shrink-0 mt-0.5 text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+              Max {reward.max_per_user}/yr
+            </span>
+          )}
+        </div>
 
-        {/* Points cost */}
-        <p className="flex items-center gap-0.5 text-xs font-bold text-gold">
-          <Star className="w-3 h-3 fill-gold text-gold shrink-0" />
-          {reward.points_cost.toLocaleString()} pts
-        </p>
+        {reward.description && (
+          <p className="text-xs text-slate-400 line-clamp-2 mt-1">{reward.description}</p>
+        )}
 
-        {/* Redeem button */}
-        <div className="mt-auto pt-1">
-          {canAfford ? (
+        {/* Points + CTA row */}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
+          <div className="flex items-center gap-1.5">
+            <Star className="w-4 h-4 fill-gold text-gold shrink-0" />
+            <span className="text-base font-black text-slate-900 leading-none">
+              {reward.points_cost.toLocaleString()}
+            </span>
+            <span className="text-xs text-slate-400 font-medium">pts</span>
+          </div>
+
+          {isOutOfStock ? (
+            <div className="px-4 py-2 rounded-xl bg-slate-100 text-slate-400 text-xs font-semibold">
+              Unavailable
+            </div>
+          ) : canAfford ? (
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => onRedeem(reward)}
-              className="w-full py-2 rounded-xl bg-primary text-white text-xs font-bold"
+              className="px-5 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-primary"
             >
               Redeem
             </motion.button>
           ) : (
-            <div className="w-full py-2 rounded-xl bg-slate-100 text-center">
-              <p className="text-[10px] font-semibold text-slate-400 leading-tight">
-                Need {deficit.toLocaleString()} more pts
-              </p>
+            <div className="px-3 py-2 rounded-xl bg-slate-100 text-slate-400 text-xs font-semibold leading-tight text-center">
+              {deficit.toLocaleString()} more pts
             </div>
           )}
         </div>
@@ -274,6 +340,7 @@ function RewardCard({ reward, spendablePoints, onRedeem }: RewardCardProps) {
 
 export default function Rewards() {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
   const { spendablePoints, loadTotalPoints } = usePointsStore()
   const { rewards, fetchRewards, isLoading } = useRewardsStore()
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null)
@@ -281,7 +348,7 @@ export default function Rewards() {
   useEffect(() => {
     void fetchRewards()
     void loadTotalPoints()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRedeem = useCallback((reward: Reward) => {
     setSelectedReward(reward)
@@ -293,85 +360,90 @@ export default function Rewards() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-slate-100 px-4 pt-14 pb-4">
-        <div className="flex items-center gap-3 mb-1">
+      {/* ── Header — matches Points.tsx pattern ── */}
+      <div className="sticky top-0 z-10 bg-primary px-4 pt-14 pb-5 rounded-b-3xl">
+        <div className="flex items-center gap-3 mb-4">
           <motion.button
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/home')}
-            className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0"
-            aria-label="Back to home"
+            onClick={() => navigate(-1)}
+            className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0"
+            aria-label="Go back"
           >
-            <ArrowLeft className="w-4 h-4 text-slate-700" />
+            <ArrowLeft className="w-4 h-4 text-white" />
           </motion.button>
-          <h1 className="text-lg font-bold text-slate-900">Rewards</h1>
+          <h1 className="text-lg font-bold text-white">Rewards</h1>
         </div>
 
-        {/* Available balance */}
-        <div className="flex items-center gap-1.5 pl-11">
-          <Star className="w-4 h-4 fill-gold text-gold shrink-0" />
-          <span className="text-sm font-bold text-slate-900">
-            {spendablePoints.toLocaleString()} pts available
-          </span>
+        {/* Spendable balance pill */}
+        <div className="flex items-center gap-3 bg-white/15 rounded-2xl px-4 py-3">
+          <Star className="w-5 h-5 fill-gold text-gold shrink-0" />
+          <div>
+            <p className="text-white/60 text-[10px] font-semibold uppercase tracking-wide leading-none mb-0.5">
+              Available to Spend
+            </p>
+            <p className="text-white font-black text-xl leading-none">
+              {spendablePoints.toLocaleString()}
+              <span className="text-sm font-medium text-white/70 ml-1">pts</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="px-4 pt-4 pb-24">
+      {/* ── Content ── */}
+      <div className="px-4 pt-5 pb-28">
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <SkeletonRewardCard key={i} />
-            ))}
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => <SkeletonRewardCard key={i} />)}
           </div>
         ) : rewards.length === 0 ? (
-          /* Empty state */
           <div className="flex flex-col items-center justify-center pt-20 px-8 text-center">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <Award className="w-8 h-8 text-primary/50" />
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">No rewards available yet</h3>
+            <h3 className="text-base font-bold text-slate-900 mb-1">No rewards yet</h3>
             <p className="text-sm text-slate-500">Check back soon — exciting rewards are coming!</p>
           </div>
         ) : (
           <>
-            {/* Card grid */}
             <motion.div
-              className="grid grid-cols-2 gap-3"
+              className="space-y-3"
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
             >
-              {rewards.map((reward) => (
+              {rewards.map((reward, i) => (
                 <RewardCard
                   key={reward.id}
                   reward={reward}
+                  index={i}
                   spendablePoints={spendablePoints}
                   onRedeem={handleRedeem}
                 />
               ))}
             </motion.div>
 
-            {/* Disclaimer section */}
+            {/* Disclaimer */}
             <motion.div
               variants={cardItem}
               initial="hidden"
               animate="visible"
-              className="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4"
+              className="mt-5 rounded-2xl bg-white border border-slate-200 p-4 shadow-card"
             >
               <div className="flex items-center gap-2 mb-3">
-                <Info className="w-4 h-4 text-slate-500 shrink-0" />
-                <p className="text-sm font-bold text-slate-700">Important Notes</p>
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Info className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <p className="text-sm font-bold text-slate-700">How Rewards Work</p>
               </div>
               <ul className="space-y-1.5">
                 {[
                   'Rewards are claimed at DEVCON events only',
-                  'Points deducted immediately upon redemption',
-                  'Subject to stock availability',
-                  'No cash equivalent',
+                  'Points are deducted immediately upon redemption',
+                  'Subject to stock availability at time of claim',
+                  'No cash equivalent — cannot be exchanged for money',
                 ].map((note) => (
                   <li key={note} className="flex items-start gap-2 text-xs text-slate-500">
-                    <span className="text-slate-400 mt-0.5 shrink-0">•</span>
+                    <span className="text-primary/50 mt-0.5 shrink-0">•</span>
                     {note}
                   </li>
                 ))}

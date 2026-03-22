@@ -8,7 +8,7 @@ import { fadeUp, staggerContainer } from '../../../lib/animation'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { supabase } from '../../../lib/supabase'
-import { NotFound } from '../../NotFound'
+import NotFound from '../../NotFound'
 import {
   schema,
   type FormData,

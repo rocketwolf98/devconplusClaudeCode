@@ -64,11 +64,11 @@ export default function EventTicket() {
   const { user } = useAuthStore()
   const { activeTheme } = useThemeStore()
   const theme = activeTheme()
-  const effectiveTheme = resolveEventTheme(event?.devcon_category, theme)
 
-  // Derived early so they can seed useState initial values
   const event = events.find((e) => e.id === id)
   const reg = registrations.find((r) => r.event_id === id)
+
+  const effectiveTheme = resolveEventTheme(event?.devcon_category, theme)
 
   const [token, setToken] = useState<string | null>(null)
   const [secondsLeft, setSecondsLeft] = useState(30)

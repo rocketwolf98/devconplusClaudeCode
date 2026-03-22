@@ -32,39 +32,29 @@ export default function XPCard() {
         </span>
         <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
       </div>
-      <p className={`text-slate-400 text-xs ${prestigeUnlocked ? 'mb-4' : 'mb-1'}`}>Available to spend</p>
 
-      {/* Lifetime points sub-row — hidden when prestige is unlocked */}
-      {!prestigeUnlocked && (
-        <div className="flex items-center gap-1 mb-4">
-          <Zap className="w-3 h-3 text-slate-500 shrink-0" />
-          <span className="text-xs text-slate-500">
-            {lifetimePoints.toLocaleString()} lifetime pts
-          </span>
+      {/* Lifetime points */}
+      <div className="flex items-center gap-1 mb-4">
+        <Zap className="w-3 h-3 text-slate-400 shrink-0" />
+        <span className="text-xs text-slate-400">
+          {lifetimePoints.toLocaleString()} lifetime pts
+        </span>
+      </div>
+
+      {/* Progress bar — shown until prestige is unlocked (threshold is a surprise) */}
+      {!prestigeUnlocked ? (
+        <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
+          <motion.div
+            className="h-full bg-gold rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPct}%` }}
+            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.25 }}
+          />
         </div>
-      )}
-
-      {/* Progress bar or Prestige unlocked message */}
-      {prestigeUnlocked ? (
-        <p className="text-xs font-semibold text-gold mb-4">Prestige Unlocked!</p>
       ) : (
-        <>
-          <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-1.5">
-            <motion.div
-              className="h-full bg-gold rounded-full"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPct}%` }}
-              transition={{ duration: 0.9, ease: 'easeOut', delay: 0.25 }}
-            />
-          </div>
-          <p className="text-slate-400 text-xs mb-4">
-            {lifetimePoints.toLocaleString()} / {PRESTIGE_THRESHOLD.toLocaleString()} pts
-            &nbsp;&middot;&nbsp;Earn more by attending events
-          </p>
-        </>
+        <p className="text-xs font-semibold text-gold mb-4">Prestige Unlocked!</p>
       )}
 
-      {/* CTA button */}
       <motion.button
         onClick={() => navigate('/events')}
         className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-sm"

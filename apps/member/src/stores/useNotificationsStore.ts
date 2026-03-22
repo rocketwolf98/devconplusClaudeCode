@@ -28,12 +28,16 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
 
   fetchRecent: async (approvedIds, eventTitles) => {
     if (approvedIds.length === 0) return
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('event_announcements')
       .select('id, event_id, message, created_at')
       .in('event_id', approvedIds)
       .order('created_at', { ascending: false })
       .limit(50)
+    if (error) {
+      console.warn('[fetchRecent] failed:', error.message)
+      return
+    }
     if (!data) return
     const notifications: Notification[] = data.map((row) => ({
       id: row.id,

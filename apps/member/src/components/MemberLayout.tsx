@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
 import { useNotificationsStore } from '../stores/useNotificationsStore'
-import ComingSoonModal from './ComingSoonModal'
+
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -21,7 +21,7 @@ export default function MemberLayout() {
   const registrations = useEventsStore((s) => s.registrations)
   const events = useEventsStore((s) => s.events)
   const { fetchRecent, subscribe } = useNotificationsStore()
-  const [comingSoonFeature, setComingSoonFeature] = useState<string | null>(null)
+
 
   useEffect(() => {
     if (!user) navigate('/sign-in', { replace: true })
@@ -97,14 +97,21 @@ export default function MemberLayout() {
               )}
             </NavLink>
 
-            <button
-              type="button"
-              onClick={() => setComingSoonFeature('Rewards')}
-              className="flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors text-slate-400"
+            <NavLink
+              to="/rewards"
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+                  isActive ? 'text-primary' : 'text-slate-400'
+                }`
+              }
             >
-              <Gift className="w-5 h-5" strokeWidth={1.8} />
-              <span className="text-[10px] font-medium">Rewards</span>
-            </button>
+              {({ isActive }) => (
+                <>
+                  <Gift className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[10px] font-medium">Rewards</span>
+                </>
+              )}
+            </NavLink>
 
             {/* Center: Events — elevated hero circle */}
             <NavLink to="/events" className="-mt-6" title="Events">
@@ -122,14 +129,21 @@ export default function MemberLayout() {
               )}
             </NavLink>
 
-            <button
-              type="button"
-              onClick={() => setComingSoonFeature('Jobs Board')}
-              className="flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors text-slate-400"
+            <NavLink
+              to="/jobs"
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
+                  isActive ? 'text-primary' : 'text-slate-400'
+                }`
+              }
             >
-              <Briefcase className="w-5 h-5" strokeWidth={1.8} />
-              <span className="text-[10px] font-medium">Jobs</span>
-            </button>
+              {({ isActive }) => (
+                <>
+                  <Briefcase className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <span className="text-[10px] font-medium">Jobs</span>
+                </>
+              )}
+            </NavLink>
 
             <NavLink
               to="/profile"
@@ -184,14 +198,21 @@ export default function MemberLayout() {
               )}
             </NavLink>
 
-            <button
-              type="button"
-              onClick={() => setComingSoonFeature('Rewards')}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-white/70 hover:bg-white/10 hover:text-white"
+            <NavLink
+              to="/rewards"
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`
+              }
             >
-              <Gift className="w-4 h-4 shrink-0" strokeWidth={1.8} />
-              Rewards
-            </button>
+              {({ isActive }) => (
+                <>
+                  <Gift className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  Rewards
+                </>
+              )}
+            </NavLink>
 
             {/* Events — circle accent */}
             <NavLink
@@ -214,14 +235,21 @@ export default function MemberLayout() {
               )}
             </NavLink>
 
-            <button
-              type="button"
-              onClick={() => setComingSoonFeature('Jobs Board')}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors text-white/70 hover:bg-white/10 hover:text-white"
+            <NavLink
+              to="/jobs"
+              className={({ isActive }) =>
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
+                }`
+              }
             >
-              <Briefcase className="w-4 h-4 shrink-0" strokeWidth={1.8} />
-              Jobs
-            </button>
+              {({ isActive }) => (
+                <>
+                  <Briefcase className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  Jobs
+                </>
+              )}
+            </NavLink>
 
             <NavLink
               to="/profile"
@@ -250,12 +278,6 @@ export default function MemberLayout() {
         </main>
       </div>
 
-      {comingSoonFeature && (
-        <ComingSoonModal
-          feature={comingSoonFeature}
-          onClose={() => setComingSoonFeature(null)}
-        />
-      )}
     </DesktopGuard>
   )
 }

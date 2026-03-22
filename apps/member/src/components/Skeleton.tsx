@@ -106,14 +106,18 @@ export function SkeletonTransactionGroup({ rows = 3 }: { rows?: number }) {
   )
 }
 
-/** Reward grid card (2-col) */
+/** Reward card — full-width single column */
 export function SkeletonRewardCard() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
-      <S className="h-24 w-full rounded-none" />
-      <div className="p-3 space-y-1.5">
-        <S className="h-4 w-3/4" />
+    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+      <S className="h-40 w-full rounded-none" />
+      <div className="p-4 space-y-2">
+        <S className="h-4 w-2/3" />
         <S className="h-3 w-1/2" />
+        <div className="flex items-center justify-between pt-3 mt-1 border-t border-slate-100">
+          <S className="h-5 w-24" />
+          <S className="h-8 w-20 rounded-xl" />
+        </div>
       </div>
     </div>
   )

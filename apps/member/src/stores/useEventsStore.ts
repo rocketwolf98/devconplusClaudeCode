@@ -174,7 +174,10 @@ export const useEventsStore = create<EventsState>((set) => ({
       .from('event_registrations')
       .select('*')
       .eq('user_id', userId)
-    if (error) return
+    if (error) {
+      set({ error: error.message })
+      return
+    }
     set({ registrations: (data ?? []) as FullRegistration[] })
   },
 

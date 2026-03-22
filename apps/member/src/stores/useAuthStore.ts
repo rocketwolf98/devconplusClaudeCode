@@ -72,7 +72,7 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
       username: meta.username ?? null,
       email: meta.email ?? '',
       school_or_company: meta.school_or_company ?? null,
-      chapter_id: meta.chapter_id ?? null,
+      chapter_id: meta.chapter_id || null,
       role: 'member',
       spendable_points: 0,
       lifetime_points: 0,
@@ -127,6 +127,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   initialize: async () => {
+    // Re-entry guard — prevents double-init from React StrictMode or accidental duplicate calls
+    if (get().isLoading || get().isInitialized) return
     set({ isLoading: true })
 
     // Restore existing session on page load
@@ -178,8 +180,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         data: {
           full_name,
           username,
-          school_or_company: school_or_company ?? null,
-          chapter_id: chapter_id ?? null,
+          school_or_company: school_or_company || null,
+          chapter_id: chapter_id || null,
         },
       },
     })
@@ -194,8 +196,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         full_name,
         username,
         email,
-        school_or_company: school_or_company ?? null,
-        chapter_id: chapter_id ?? null,
+        school_or_company: school_or_company || null,
+        chapter_id: chapter_id || null,
       }
       const profile = await ensureProfile(data.session.user.id, meta)
       if (profile) await applyProfile(profile, set)

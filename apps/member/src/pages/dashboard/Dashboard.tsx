@@ -175,7 +175,7 @@ export default function Dashboard() {
         {/* Rotating banner — crossfade between slides */}
         <div className="px-4">
           <div
-            className="relative h-44 rounded-2xl overflow-hidden cursor-pointer bg-primary"
+            className="relative h-52 rounded-2xl overflow-hidden cursor-pointer bg-primary"
             onClick={() => setBannerIdx((i) => (i + 1) % Math.max(banners.length, 1))}
           >
             <AnimatePresence>
@@ -202,7 +202,7 @@ export default function Dashboard() {
               >
                 <div>
                   <p className="text-white/70 text-[11px] font-medium uppercase tracking-widest mb-1">{banner.sub}</p>
-                  <p className="text-white text-2xl font-black leading-tight max-w-[70%]">{banner.title}</p>
+                  <p className="text-white text-xl font-semibold leading-tight max-w-[70%] line-clamp-2">{banner.title}</p>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); banner?.onClick() }}
