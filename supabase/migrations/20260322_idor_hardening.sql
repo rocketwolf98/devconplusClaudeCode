@@ -323,6 +323,13 @@ CREATE POLICY "Officers manage chapter volunteer applications"
       SELECT 1 FROM profiles p
       WHERE p.id = auth.uid()
         AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+        AND (
+          p.role IN ('hq_admin', 'super_admin')
+          OR p.chapter_id = (
+            SELECT e.chapter_id FROM events e
+            WHERE e.id = volunteer_applications.event_id
+          )
+        )
     )
   );
 
@@ -330,6 +337,8 @@ CREATE POLICY "Officers manage chapter volunteer applications"
 -- ── Fix 6: organizer_upgrade_requests SELECT — allow hq_admin ────────────────
 -- The existing "Admins manage all upgrade requests" policy in 016_profile_upgrades.sql
 -- only covers super_admin. Add a dedicated SELECT policy for hq_admin.
+DROP POLICY IF EXISTS "Admins can view upgrade requests" ON organizer_upgrade_requests;
+
 CREATE POLICY "Admins can view upgrade requests"
   ON organizer_upgrade_requests
   FOR SELECT
