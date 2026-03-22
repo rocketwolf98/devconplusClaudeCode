@@ -57,11 +57,8 @@ export default function AdminUpgradeRequests() {
       // Single atomic RPC — updates profile role + marks request approved server-side.
       // Direct anon-key UPDATE on another user's profile is blocked by RLS.
       const { error } = await supabase.rpc('approve_organizer_upgrade', {
-        p_user_id:     req.user_id,
-        p_role:        req.requested_role,
-        p_chapter_id:  req.chapter_id ?? null,
-        p_request_id:  req.id,
-        p_reviewer_id: user.id,
+        p_request_id: req.id,
+        p_user_id:    req.user_id,
       })
       if (error) throw error
 
@@ -78,19 +75,11 @@ export default function AdminUpgradeRequests() {
     setActionLoading(req.id)
     setError(null)
     try {
-      // Clear pending state on profile
-      const { error: profileErr } = await supabase
-        .from('profiles')
-        .update({ pending_role: null, pending_chapter_id: null })
-        .eq('id', req.user_id)
-      if (profileErr) throw profileErr
-
-      // Mark request rejected
-      const { error: reqErr } = await supabase
-        .from('organizer_upgrade_requests')
-        .update({ status: 'rejected', reviewed_by: user.id, reviewed_at: new Date().toISOString() })
-        .eq('id', req.id)
-      if (reqErr) throw reqErr
+      const { error: rpcErr } = await supabase.rpc('reject_organizer_upgrade', {
+        p_request_id: req.id,
+        p_user_id:    req.user_id,
+      })
+      if (rpcErr) throw rpcErr
 
       setRequests((prev) => prev.map((r) => r.id === req.id ? { ...r, status: 'rejected' } : r))
     } catch (err) {
