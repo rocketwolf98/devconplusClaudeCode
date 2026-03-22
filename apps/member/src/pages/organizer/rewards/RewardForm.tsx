@@ -87,9 +87,20 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
   }, [watchedType, setValue])
 
   // ── Image handlers ───────────────────────────────────────────────────────
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setCoverUploadError('Only JPG, PNG, or WebP images are allowed.')
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setCoverUploadError('Image must be under 5 MB.')
+      return
+    }
     setCoverFile(file)
     setCoverUploadError(null)
     setCoverPreview(URL.createObjectURL(file))
@@ -119,7 +130,8 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
         setSubmitError('Session expired. Please sign in again.')
         return
       }
-      const path = `${user.id}/${Date.now()}-${coverFile.name}`
+      const safeName = coverFile.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100)
+      const path = `${user.id}/${Date.now()}-${safeName}`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('reward-images')
         .upload(path, coverFile)

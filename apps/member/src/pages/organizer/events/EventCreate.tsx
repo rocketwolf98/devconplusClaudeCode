@@ -63,9 +63,20 @@ export function OrgEventCreate() {
 
   // ── Cover image handlers ─────────────────────────────────────────────────
 
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5 MB
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setCoverUploadError('Only JPG, PNG, or WebP images are allowed.')
+      return
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setCoverUploadError('Image must be under 5 MB.')
+      return
+    }
     setCoverFile(file)
     setCoverUploadError(null)
     const url = URL.createObjectURL(file)
@@ -113,7 +124,8 @@ export function OrgEventCreate() {
     // Upload cover image (non-blocking on failure)
     let cover_image_url: string | null = null
     if (coverFile) {
-      const path = `${user.id}/${Date.now()}-${coverFile.name}`
+      const safeName = coverFile.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100)
+      const path = `${user.id}/${Date.now()}-${safeName}`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('event-covers')
         .upload(path, coverFile)
