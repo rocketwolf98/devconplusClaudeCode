@@ -1,0 +1,175 @@
+// supabase/functions/check-rate-limit/index.ts
+// Generic rate limit enforcer called by the client for surfaces without their own edge function.
+//
+// IP-keyed buckets (login, login_ip, signup, username_check): no JWT required
+// User-keyed buckets (org_upgrade): valid JWT required
+//
+// Input:  { bucket: string, email?: string }
+// Output: { allowed: boolean, retryAfterSeconds?: number }
+
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade'
+const IP_BUCKETS: Bucket[] = ['login', 'login_ip', 'signup', 'username_check']
+
+// Window durations matching the check_rate_limit RPC CASE statement.
+// Used only for retryAfterSeconds calculation — not for enforcement.
+const WINDOW_MAP: Record<string, number> = {
+  qr_generate:    60,
+  qr_scan:        60,
+  login:          300,
+  login_ip:       300,
+  signup:         3600,
+  username_check: 60,
+  org_upgrade:    90000,
+}
+
+// Extract the rightmost non-private IP from the x-forwarded-for chain.
+// Rightmost = server-side proxy appended, not client-controlled.
+// Covers IPv4 RFC 1918 ranges, IPv6 loopback, link-local (fe80:), unique local (fc/fd).
+function extractIp(req: Request): string {
+  const xff = req.headers.get('x-forwarded-for') ?? ''
+  const ips = xff.split(',').map((s) => s.trim()).filter(Boolean)
+  const privateRanges =
+    /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|::1|fe80:|fc[0-9a-f]{2}:|fd[0-9a-f]{2}:)/i
+  const publicIp = [...ips].reverse().find((ip) => !privateRanges.test(ip))
+  // 'unknown' fallback: all missing-header requests share one bucket (acceptable for MVP)
+  return publicIp ?? ips[0] ?? 'unknown'
+}
+
+// Calculate how many seconds until the oldest in-window entry expires.
+// Uses anon client — GRANT SELECT ON rate_limit_log TO anon is in the migration.
+// On query error → falls back to full window duration.
+async function calcRetryAfter(
+  supabase: ReturnType<typeof createClient>,
+  identifier: string,
+  bucket: string
+): Promise<number> {
+  const window = WINDOW_MAP[bucket] ?? 60
+  const { data } = await supabase
+    .from('rate_limit_log')
+    .select('created_at')
+    .eq('identifier', identifier)
+    .eq('bucket', bucket)
+    .gt('created_at', new Date(Date.now() - window * 1000).toISOString())
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (!data) return window
+  const oldest = new Date(data.created_at).getTime()
+  return Math.ceil(Math.max(0, oldest + window * 1000 - Date.now()) / 1000)
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  // Parse body once — req.json() can only be consumed once per request
+  const json: { bucket?: string; email?: string } = await req.json().catch(() => ({}))
+  const bucket = json.bucket as Bucket | undefined
+
+  if (!bucket) {
+    return new Response(
+      JSON.stringify({ allowed: false, error: 'Missing bucket.' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Anon client — used for retryAfterSeconds SELECT query (has SELECT on rate_limit_log)
+  const supabaseAnon = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  // Service role client — required for check_rate_limit RPC (REVOKE FROM PUBLIC applied)
+  const supabaseService = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  let identifier: string
+
+  if ((IP_BUCKETS as string[]).includes(bucket)) {
+    // IP-keyed buckets: no JWT required
+    if (bucket === 'login') {
+      if (!json.email) {
+        return new Response(
+          JSON.stringify({ allowed: false, error: 'Missing email for login bucket.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      identifier = `email:${json.email.toLowerCase().trim()}`
+    } else {
+      identifier = `ip:${extractIp(req)}`
+    }
+  } else if (bucket === 'org_upgrade') {
+    // User-keyed bucket: JWT required
+    const authHeader = req.headers.get('Authorization')
+    const supabaseAuth = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: { headers: { Authorization: authHeader ?? '' } },
+        auth: { autoRefreshToken: false, persistSession: false },
+      }
+    )
+    const { data: { user }, error: authErr } = await supabaseAuth.auth.getUser()
+    if (authErr || !user) {
+      return new Response(
+        JSON.stringify({ allowed: false, error: 'Unauthorized.' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    identifier = `user:${user.id}`
+  } else {
+    // Unknown bucket → 400 Bad Request (not 429 — this is a caller error, not a rate limit event)
+    return new Response(
+      JSON.stringify({ allowed: false, error: 'Unknown bucket.' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  // Call the RPC via service_role (REVOKE FROM PUBLIC means anon cannot call it).
+  // On error: fail open for client surfaces — GoTrue + RLS are final backstops.
+  const { data: allowed, error: rpcErr } = await supabaseService.rpc('check_rate_limit', {
+    p_identifier: identifier,
+    p_bucket:     bucket,
+  })
+
+  if (rpcErr) {
+    console.error('[check-rate-limit] RPC error:', rpcErr.message)
+    return new Response(
+      JSON.stringify({ allowed: true }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+  }
+
+  if (!allowed) {
+    const secs = await calcRetryAfter(supabaseAnon, identifier, bucket)
+    return new Response(
+      JSON.stringify({ allowed: false, retryAfterSeconds: secs }),
+      {
+        status: 429,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+          'Retry-After': String(secs),  // RFC 7231 machine-readable header
+        },
+      }
+    )
+  }
+
+  return new Response(
+    JSON.stringify({ allowed: true }),
+    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+  )
+})
