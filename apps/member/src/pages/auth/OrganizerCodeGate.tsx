@@ -35,6 +35,7 @@ export default function OrganizerCodeGate() {
     try {
       const url = await uploadAvatar(file)
       await updateProfile({ avatar_url: url })
+      setAvatarPreview(url)   // swap blob URL → permanent URL before revoke
     } catch (err) {
       setAvatarError(err instanceof Error ? err.message : 'Upload failed — tap to retry')
       setAvatarPreview(user?.avatar_url ?? null)
