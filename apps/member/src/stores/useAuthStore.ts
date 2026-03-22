@@ -224,6 +224,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signUp: async (email, password, full_name, username, chapter_id, school_or_company) => {
     set({ isLoading: true, error: null })
+    // Advisory rate limit: 3 signups per IP per hour. Cannot block direct GoTrue calls.
+    // Deferred CAPTCHA (Cloudflare Turnstile) will close this gap at infrastructure level.
+    const signupLimit = await callRateLimit('signup')
+    if (!signupLimit.allowed) {
+      const secs = signupLimit.retryAfterSeconds ?? 3600
+      const err = new Error(`Too many accounts created from this network. Please try again in ${Math.ceil(secs / 60)} minutes.`)
+      set({ isLoading: false, error: err.message })
+      throw err
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -382,6 +391,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const current = get().user
     if (!current) throw new Error('Not authenticated')
 
+    // Rate limit: 3 attempts per user per 25h — prevents organizer code brute-forcing.
+    // Requires JWT (org_upgrade is a user-keyed bucket in the edge function).
+    const { data: { session } } = await supabase.auth.getSession()
+    const upgradeLimit = await callRateLimit('org_upgrade', { token: session?.access_token })
+    if (!upgradeLimit.allowed) {
+      const secs = upgradeLimit.retryAfterSeconds ?? 86400
+      const hours = Math.ceil(secs / 3600)
+      throw new Error(
+        `You've reached the daily limit for organizer code attempts. Try again in ${hours} hour${hours !== 1 ? 's' : ''}.`
+      )
+    }
+
     // Check for existing pending request
     const { data: existing } = await supabase
       .from('organizer_upgrade_requests')
@@ -432,6 +453,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   checkUsernameAvailable: async (username) => {
+    // Rate limit: 30 checks per IP per 60s. Blocked → return false (silent degradation —
+    // shows username as "unavailable", no error message shown to the user).
+    const limit = await callRateLimit('username_check')
+    if (!limit.allowed) return false
+
     const { data } = await supabase
       .from('profiles')
       .select('id')
