@@ -15,11 +15,11 @@ const USERNAME_RE = /^[a-z0-9_]+$/
 interface Chapter { id: string; name: string; region: string }
 
 const schema = z.object({
-  full_name:         z.string().min(2, 'Name required'),
+  full_name:         z.string().min(2, 'Name required').max(100, 'Name must be under 100 characters'),
   username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
   email:             z.string().email('Invalid email'),
-  password:          z.string().min(8, 'At least 8 characters'),
-  school_or_company: z.string().optional(),
+  password:          z.string().min(8, 'At least 8 characters').max(128, 'Password must be under 128 characters'),
+  school_or_company: z.string().max(100, 'Must be under 100 characters').optional(),
   chapter_id:        z.string().min(1, 'Please select your chapter'),
 })
 type FormData = z.infer<typeof schema>
@@ -91,13 +91,16 @@ export default function SignUp() {
       const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.chapter_id, data.school_or_company)
 
       // Silently confirm referral if a ?ref= code was present in the URL
-      if (refCode) {
+      // Only pass ref code if it matches expected format (alphanumeric, 6-12 chars)
+      const REFERRAL_CODE_RE = /^[A-Z0-9]{6,12}$/i
+      const sanitizedRef = refCode && REFERRAL_CODE_RE.test(refCode) ? refCode : null
+      if (sanitizedRef) {
         const newUserId = useAuthStore.getState().user?.id
         if (newUserId) {
           supabase
             .rpc('confirm_referral', {
               p_referred_user_id: newUserId,
-              p_referral_code:    refCode,
+              p_referral_code:    sanitizedRef,
             })
             .then(() => {
               // Intentionally silent — referral failures must not block signup

@@ -5,9 +5,9 @@ import type { DevconCategory } from '@devcon-plus/supabase'
 
 export const schema = z
   .object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
-    description: z.string().min(10, 'Description must be at least 10 characters'),
-    location: z.string().min(2, 'Location is required'),
+    title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be under 100 characters'),
+    description: z.string().min(10, 'Description must be at least 10 characters').max(5000, 'Description must be under 5000 characters'),
+    location: z.string().min(2, 'Location is required').max(200, 'Location must be under 200 characters'),
     event_date: z.string().min(1, 'Start date is required'),
     end_date: z.string().optional(),
     category: z.enum([
@@ -20,13 +20,13 @@ export const schema = z
       'networking',
     ], { required_error: 'Category is required' }),
     devcon_category: z.enum(['devcon', 'she', 'kids', 'campus']).optional().nullable(),
-    tags: z.array(z.string()).default([]),
+    tags: z.array(z.string().max(30)).max(10).default([]),
     visibility: z.enum(['public', 'unlisted', 'draft']).default('public'),
     is_free: z.boolean().default(true),
-    ticket_price_php: z.number({ coerce: true }).int().min(0).default(0),
+    ticket_price_php: z.number({ coerce: true }).int().min(0).max(100000, 'Price cannot exceed ₱100,000').default(0),
     capacity: z.preprocess(
       (v) => (v === '' || v === undefined || v === null ? undefined : Number(v)),
-      z.number().int().positive().optional()
+      z.number().int().positive().max(100000, 'Capacity cannot exceed 100,000').optional()
     ),
     points_value: z
       .number({ coerce: true })

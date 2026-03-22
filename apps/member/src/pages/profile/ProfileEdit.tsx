@@ -18,9 +18,9 @@ interface Chapter { id: string; name: string; region: string }
 const USERNAME_RE = /^[a-z0-9_]+$/
 
 const profileSchema = z.object({
-  full_name:         z.string().min(2, 'Name required'),
+  full_name:         z.string().min(2, 'Name required').max(100, 'Name must be under 100 characters'),
   username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
-  school_or_company: z.string().optional(),
+  school_or_company: z.string().max(100, 'Must be under 100 characters').optional(),
 })
 type ProfileFormData = z.infer<typeof profileSchema>
 
@@ -30,7 +30,7 @@ const emailSchema = z.object({
 type EmailFormData = z.infer<typeof emailSchema>
 
 const passwordSchema = z.object({
-  new_password:     z.string().min(8, 'At least 8 characters'),
+  new_password:     z.string().min(8, 'At least 8 characters').max(128),
   confirm_password: z.string(),
 }).refine((d) => d.new_password === d.confirm_password, {
   message: "Passwords don't match",
@@ -171,7 +171,13 @@ export default function ProfileEdit() {
   // ── Organizer upgrade ─────────────────────────────────────────────────────────
 
   const handleUpgradeSubmit = async () => {
-    if (!upgradeCode.trim()) return
+    const trimmed = upgradeCode.trim()
+    if (!trimmed) return
+    const ORGANIZER_CODE_RE = /^[A-Z0-9\-]{6,20}$/
+    if (!ORGANIZER_CODE_RE.test(trimmed)) {
+      setUpgradeStatus('invalid_code')
+      return
+    }
     const now = Date.now()
     if (now < upgradeLockedUntil.current) {
       setUpgradeStatus('rate_limited')
@@ -179,7 +185,7 @@ export default function ProfileEdit() {
     }
     setUpgradeStatus('loading')
     try {
-      const result = await requestOrganizerUpgrade(upgradeCode.trim())
+      const result = await requestOrganizerUpgrade(trimmed)
       if (result === 'invalid_code') {
         upgradeFailedAttempts.current += 1
         if (upgradeFailedAttempts.current >= 5) {

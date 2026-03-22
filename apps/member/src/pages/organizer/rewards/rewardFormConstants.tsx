@@ -3,18 +3,18 @@ import { z } from 'zod'
 // ── Zod schema ────────────────────────────────────────────────────────────────
 
 export const schema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  description: z.string().optional().or(z.literal('')),
-  points_cost: z.number({ coerce: true }).int().min(1, 'Must be at least 1 pt'),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be under 100 characters'),
+  description: z.string().max(1000, 'Description must be under 1000 characters').optional().or(z.literal('')),
+  points_cost: z.number({ coerce: true }).int().min(1, 'Must be at least 1 pt').max(100000, 'Points cost cannot exceed 100,000'),
   type: z.enum(['physical', 'digital']),
   claim_method: z.enum(['onsite', 'digital_delivery']),
   stock_remaining: z.preprocess(
     (v) => (v === '' || v === null || v === undefined ? null : Number(v)),
-    z.number().int().min(0, 'Cannot be negative').nullable()
+    z.number().int().min(0, 'Cannot be negative').max(100000).nullable()
   ),
   max_per_user: z.preprocess(
     (v) => (v === '' || v === null || v === undefined ? null : Number(v)),
-    z.number().int().min(1, 'Must be at least 1').nullable()
+    z.number().int().min(1, 'Must be at least 1').max(1000).nullable()
   ),
   is_active: z.boolean().default(true),
   is_coming_soon: z.boolean().default(true),

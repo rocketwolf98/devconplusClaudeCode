@@ -48,6 +48,11 @@ export default function OrganizerCodeGate() {
   const handleAccessPortal = async () => {
     const trimmed = code.trim().toUpperCase()
     if (!trimmed) { setError('Please enter your organizer code.'); return }
+    const ORGANIZER_CODE_RE = /^[A-Z0-9\-]{6,20}$/
+    if (!ORGANIZER_CODE_RE.test(trimmed)) {
+      setError('Invalid code format. Expected format: DCN-XXX-1234')
+      return
+    }
     if (!user) { setError('Session expired. Please sign in again.'); return }
 
     const now = Date.now()
