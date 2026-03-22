@@ -51,6 +51,21 @@ Deno.serve(async (req: Request) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
+    // Rate limit: 10 token requests per user per 60s.
+    // Placed before req.json() — body is only parsed if not rate-limited.
+    // Uses service_role client — check_rate_limit RPC is restricted to service_role.
+    // Fail closed — any RPC error returns 429 (protects the points ecosystem).
+    const { data: rlAllowed, error: rlError } = await supabase.rpc('check_rate_limit', {
+      p_identifier: `user:${user.id}`,
+      p_bucket:     'qr_generate',
+    })
+    if (rlError || !rlAllowed) {
+      return new Response(
+        JSON.stringify({ error: 'Too many token requests. Please wait before refreshing your ticket.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+      )
+    }
+
     const { registration_id } = await req.json() as { registration_id: string }
     if (!registration_id) {
       return new Response(
