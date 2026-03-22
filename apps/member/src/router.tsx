@@ -43,6 +43,8 @@ import { OrgEventEdit } from './pages/organizer/events/EventEdit'
 import { OrgEventRegistrants } from './pages/organizer/events/EventRegistrants'
 import { OrgEventSummary } from './pages/organizer/events/EventSummary'
 import { OrgRewardsManagement } from './pages/organizer/rewards/RewardsManagement'
+import { RewardCreate } from './pages/organizer/rewards/RewardCreate'
+import { RewardEdit } from './pages/organizer/rewards/RewardEdit'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
 
@@ -143,6 +145,8 @@ export const router = createBrowserRouter([
         },
       },
       { path: '/organizer/rewards',                      element: <OrgRewardsManagement /> },
+      { path: '/organizer/rewards/create',               element: <RewardCreate /> },
+      { path: '/organizer/rewards/:id/edit',             element: <RewardEdit /> },
       { path: '/organizer/profile',                      element: <OrgProfile /> },
       { path: '/organizer/profile/edit',                 element: <OrgProfileEdit /> },
       { path: '/organizer/notifications',                 element: <NotificationsInbox isOrganizer /> },
