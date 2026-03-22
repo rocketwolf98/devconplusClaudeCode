@@ -260,6 +260,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signIn: async (email, password) => {
     set({ isLoading: true, error: null })
+
+    // Dual-key rate limit: per-email + per-IP, in parallel for minimal latency.
+    // Known trade-off: email key is user-supplied and unverified pre-auth — an attacker
+    // could exhaust a victim's login bucket. Mitigated by the IP bucket. Accepted for MVP.
+    const [emailLimit, ipLimit] = await Promise.all([
+      callRateLimit('login', { email }),
+      callRateLimit('login_ip'),
+    ])
+
+    if (!emailLimit.allowed || !ipLimit.allowed) {
+      const secs = emailLimit.retryAfterSeconds ?? ipLimit.retryAfterSeconds ?? 300
+      const err = new Error(`Too many login attempts. Please wait ${secs} seconds before trying again.`)
+      ;(err as Error & { retryAfterSeconds: number }).retryAfterSeconds = secs
+      set({ isLoading: false, error: err.message })
+      throw err
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       set({ isLoading: false, error: error.message })
