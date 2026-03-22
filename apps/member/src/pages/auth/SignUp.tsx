@@ -88,7 +88,7 @@ export default function SignUp() {
     }
     setFormError(null)
     try {
-      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.school_or_company, data.chapter_id)
+      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.chapter_id, data.school_or_company)
 
       // Silently confirm referral if a ?ref= code was present in the URL
       if (refCode) {

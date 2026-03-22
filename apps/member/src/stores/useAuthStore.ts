@@ -31,8 +31,8 @@ interface AuthState {
     password: string,
     full_name: string,
     username: string,
+    chapter_id: string,
     school_or_company?: string,
-    chapter_id?: string
   ) => Promise<{ emailConfirmationPending: boolean }>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -62,8 +62,7 @@ async function fetchProfileById(userId: string): Promise<Profile | null> {
 }
 
 async function ensureProfile(userId: string, meta: Record<string, string | null>): Promise<Profile | null> {
-  // Insert first; on unique_violation (profile already exists) fall back to fetch.
-  // Saves one round-trip vs SELECT-then-INSERT on the common re-login path.
+  // Try INSERT first — trigger may have already created the row (23505 conflict expected on first login after email confirmation).
   const { data, error } = await supabase
     .from('profiles')
     .insert({
@@ -79,8 +78,31 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
     })
     .select()
     .single()
+
   if (!error) return (data ?? null) as unknown as Profile | null
-  if (error.code === '23505') return fetchProfileById(userId) // already exists
+
+  // Profile already exists (trigger created it). Fetch and patch any null fields
+  // the trigger left empty (username, chapter_id, school_or_company).
+  if (error.code === '23505') {
+    const existing = await fetchProfileById(userId)
+    if (!existing) return null
+
+    const patch: Partial<Pick<Profile, 'username' | 'chapter_id' | 'school_or_company'>> = {}
+    if (!existing.username && meta.username)                           patch.username          = meta.username
+    if (!existing.chapter_id && meta.chapter_id)                      patch.chapter_id        = meta.chapter_id
+    if (!existing.school_or_company && meta.school_or_company)        patch.school_or_company = meta.school_or_company
+
+    if (Object.keys(patch).length === 0) return existing
+
+    const { error: patchErr } = await supabase
+      .from('profiles')
+      .update(patch)
+      .eq('id', userId)
+    if (patchErr) console.error('[ensureProfile] patch error:', patchErr.code, patchErr.message)
+
+    return { ...existing, ...patch }
+  }
+
   console.error('[ensureProfile] error:', error.code, error.message)
   return null
 }
@@ -170,7 +192,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     authUnsubscribe = () => subscription.unsubscribe()
   },
 
-  signUp: async (email, password, full_name, username, school_or_company, chapter_id) => {
+  signUp: async (email, password, full_name, username, chapter_id, school_or_company) => {
     set({ isLoading: true, error: null })
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -267,6 +289,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const current = get().user
     if (!current) throw new Error('Not authenticated')
     if (!ALLOWED_AVATAR_TYPES.includes(file.type)) throw new Error('Only image files are allowed')
+    if (file.size > 10 * 1024 * 1024) throw new Error('Image must be under 10 MB')
     const ext = MIME_TO_EXT[file.type] ?? 'jpg'
     const path = `${current.id}/${Date.now()}.${ext}`
     const { error } = await supabase.storage
