@@ -27,6 +27,7 @@ CREATE OR REPLACE FUNCTION check_rate_limit(
 ) RETURNS boolean
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_max    integer;
@@ -66,8 +67,26 @@ BEGIN
 END;
 $$;
 
+-- Restrict direct RPC access: only service_role can call this function.
+-- The check-rate-limit edge function uses the service_role client for RPC calls.
+-- Prevents clients from calling the RPC directly to pre-exhaust rate limit slots.
+REVOKE EXECUTE ON FUNCTION check_rate_limit(text, text) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION check_rate_limit(text, text) TO service_role;
+
+-- NOTE: The check-rate-limit edge function must use SUPABASE_SERVICE_ROLE_KEY
+-- (not SUPABASE_ANON_KEY) when calling supabase.rpc('check_rate_limit', ...).
+
 -- 4. Hourly cleanup — 25h retention (safe margin over the 25h org_upgrade window).
 --    Prevents off-by-one where a cleanup run deletes rows still within an active window.
+DO $$
+BEGIN
+  -- Drop existing job if present (idempotent — safe to re-run migration)
+  PERFORM cron.unschedule('rate-limit-log-cleanup');
+EXCEPTION WHEN OTHERS THEN
+  NULL;  -- job didn't exist, that's fine
+END;
+$$;
+
 SELECT cron.schedule(
   'rate-limit-log-cleanup',
   '0 * * * *',
