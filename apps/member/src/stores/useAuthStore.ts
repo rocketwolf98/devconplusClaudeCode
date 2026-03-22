@@ -183,23 +183,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (get().isLoading || get().isInitialized) return
     set({ isLoading: true })
 
-    // Restore existing session on page load
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (sessionError) {
-      // Stale / corrupt token in storage — clear it and bail to sign-in
-      await supabase.auth.signOut()
-      set({ isLoading: false, isInitialized: true })
-      return
-    }
-    if (session?.user) {
-      const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
-      const profile = await ensureProfile(session.user.id, meta)
-      if (profile) await applyProfile(profile, set)
-    }
-
-    set({ isLoading: false, isInitialized: true })
-
-    // Subscribe to future auth state changes; clean up any prior subscription first.
+    // Register listener BEFORE getSession so TOKEN_REFRESH_FAILED is never missed.
+    // If the listener were registered after getSession, a refresh failure during that
+    // window would fire the event before the handler exists → unhandled error in console.
     if (authUnsubscribe) authUnsubscribe()
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if ((event as string) === 'TOKEN_REFRESH_FAILED') {
@@ -220,6 +206,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     })
     authUnsubscribe = () => subscription.unsubscribe()
+
+    // Restore existing session on page load
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        // Stale / corrupt token in storage — clear it and bail to sign-in
+        await supabase.auth.signOut()
+        set({ isLoading: false, isInitialized: true })
+        return
+      }
+      if (session?.user) {
+        const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
+        const profile = await ensureProfile(session.user.id, meta)
+        if (profile) await applyProfile(profile, set)
+      }
+    } catch {
+      // getSession() itself threw (e.g. corrupt storage) — clear and bail
+      await supabase.auth.signOut()
+      set({ isLoading: false, isInitialized: true })
+      return
+    }
+
+    set({ isLoading: false, isInitialized: true })
   },
 
   signUp: async (email, password, full_name, username, chapter_id, school_or_company) => {
