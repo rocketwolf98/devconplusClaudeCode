@@ -14,15 +14,17 @@ A full IDOR (Insecure Direct Object Reference) audit of the DEVCON+ codebase ide
 3. The `event_announcements` table is referenced in two source files but has no migration and no RLS — no enforcement exists.
 4. Admin role-change also does a direct `profiles.update()` on an arbitrary user — also silently fails.
 5. `event_registrations` and `volunteer_applications` have no DELETE RLS policies.
+6. The existing `approve_organizer_upgrade` RPC gates on `super_admin` only, violating the authorization model — `hq_admin` cannot approve requests.
 
 ---
 
 ## Authorization Model (Clarified)
 
-`hq_admin` shares all capabilities of `super_admin` for the purposes of this work. Every RPC and RLS policy that gates on `super_admin` must also accept `hq_admin`.
+`hq_admin` shares all capabilities of `super_admin`. Every RPC and RLS policy that gates on `super_admin` must also accept `hq_admin`. The one exception is self-referential: only `super_admin` can promote another user to `super_admin`.
 
 ```
 super_admin ≡ hq_admin > chapter_officer > member
+Exception: only super_admin may grant super_admin role
 ```
 
 ---
@@ -40,7 +42,65 @@ super_admin ≡ hq_admin > chapter_officer > member
 
 ### 1. Migration: `20260322_idor_hardening.sql`
 
-Six targeted changes in a single migration file.
+Seven targeted changes in a single migration file.
+
+---
+
+#### Fix C0 — Patch `approve_organizer_upgrade` to accept `hq_admin`
+
+**Problem:** The existing RPC in `017_security_fixes.sql` has the signature `(p_user_id uuid, p_role text, p_chapter_id uuid, p_request_id uuid, p_reviewer_id uuid)` and checks `role = 'super_admin'` only. Per the authorization model `hq_admin ≡ super_admin`, `hq_admin` must also be able to approve upgrade requests. Additionally, `reviewed_by` is currently set from the caller-supplied `p_reviewer_id` (audit trail can be spoofed) — it should always use `auth.uid()` server-side.
+
+**Note:** PostgreSQL identifies functions by name + parameter types. `CREATE OR REPLACE` with a different parameter list creates a new overload — it does NOT replace the original. The old five-parameter version must be explicitly dropped first, and both calling sites must be updated to the new two-parameter signature.
+
+**Fix — drop old overload, create replacement that reads role/chapter from the request row:**
+```sql
+-- Drop the old five-parameter overload first
+DROP FUNCTION IF EXISTS approve_organizer_upgrade(uuid, text, uuid, uuid, uuid);
+
+CREATE OR REPLACE FUNCTION approve_organizer_upgrade(
+  p_request_id uuid,
+  p_user_id     uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_caller_role  text;
+  v_req          record;
+BEGIN
+  SELECT role INTO v_caller_role FROM profiles WHERE id = auth.uid();
+
+  IF v_caller_role NOT IN ('hq_admin', 'super_admin') THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
+  SELECT chapter_id, requested_role INTO v_req
+  FROM organizer_upgrade_requests
+  WHERE id = p_request_id AND status = 'pending';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Request not found or already resolved';
+  END IF;
+
+  UPDATE profiles
+  SET role               = v_req.requested_role,
+      chapter_id         = COALESCE(v_req.chapter_id, chapter_id),
+      pending_role       = NULL,
+      pending_chapter_id = NULL
+  WHERE id = p_user_id;
+
+  UPDATE organizer_upgrade_requests
+  SET status      = 'approved',
+      reviewed_by = auth.uid(),   -- always server-side; never trusted from caller
+      reviewed_at = now()
+  WHERE id = p_request_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION approve_organizer_upgrade(uuid, uuid) TO authenticated;
+```
 
 ---
 
@@ -80,15 +140,15 @@ CREATE POLICY "Officers can delete their chapter events"
   );
 ```
 
-`hq_admin` and `super_admin` retain cross-chapter delete authority. `chapter_officer` is scoped to their own chapter.
+`hq_admin` and `super_admin` retain cross-chapter delete authority. `chapter_officer` is scoped to their own chapter only.
 
 ---
 
 #### Fix C2 — `reject_organizer_upgrade()` SECURITY DEFINER RPC
 
-**Problem:** `AdminUpgradeRequests.handleReject()` calls `profiles.update()` directly on another user's row. This is blocked by RLS (`USING (auth.uid() = id)`), so it silently fails and never writes `reviewed_by` / `reviewed_at`.
+**Problem:** `AdminUpgradeRequests.handleReject()` calls `profiles.update()` directly on another user's row. This is blocked by RLS, so it silently fails and never writes `reviewed_by` / `reviewed_at`.
 
-**Fix — new SECURITY DEFINER function:**
+**Fix — new SECURITY DEFINER function (no caller-supplied reviewer ID — always uses `auth.uid()` server-side):**
 ```sql
 CREATE OR REPLACE FUNCTION reject_organizer_upgrade(
   p_request_id uuid,
@@ -109,12 +169,13 @@ BEGIN
   END IF;
 
   UPDATE profiles
-  SET pending_role = NULL, pending_chapter_id = NULL
+  SET pending_role       = NULL,
+      pending_chapter_id = NULL
   WHERE id = p_user_id;
 
   UPDATE organizer_upgrade_requests
   SET status      = 'rejected',
-      reviewed_by = auth.uid(),
+      reviewed_by = auth.uid(),   -- set server-side; never trusted from caller
       reviewed_at = now()
   WHERE id = p_request_id;
 END;
@@ -127,9 +188,10 @@ GRANT EXECUTE ON FUNCTION reject_organizer_upgrade(uuid, uuid) TO authenticated;
 
 #### Fix C3 — `event_announcements` table + RLS
 
-**Problem:** Table is referenced in `useNotificationsStore.ts` and `SendAnnouncementSheet.tsx` but never created. No RLS → no access control.
+**Problem:** Table is referenced in `useNotificationsStore.ts` and `SendAnnouncementSheet.tsx` but never created. No RLS → no access control. `useNotificationsStore` correctly filters client-side by `approvedIds` (IDs from approved `event_registrations`) but the server enforces nothing without RLS.
 
-**Fix — create table with RLS from day one:**
+**Fix — create table with RLS from day one. The officer write policy is split into explicit operations so `WITH CHECK` applies correctly to INSERT/UPDATE (PostgreSQL does not auto-derive `WITH CHECK` from `USING` for `FOR ALL` when row doesn't yet exist):**
+
 ```sql
 CREATE TABLE IF NOT EXISTS event_announcements (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -141,7 +203,7 @@ CREATE TABLE IF NOT EXISTS event_announcements (
 
 ALTER TABLE event_announcements ENABLE ROW LEVEL SECURITY;
 
--- Members can only read announcements for events they are approved-registered in
+-- Members: read-only, only for events they are approved-registered in
 CREATE POLICY "Members view announcements for their events"
   ON event_announcements FOR SELECT
   USING (
@@ -153,9 +215,56 @@ CREATE POLICY "Members view announcements for their events"
     )
   );
 
--- Officers can manage announcements only for their chapter's events
-CREATE POLICY "Officers manage announcements for their chapter events"
-  ON event_announcements FOR ALL
+-- Officers: INSERT — WITH CHECK uses NEW.event_id to scope to their chapter
+CREATE POLICY "Officers insert announcements for their chapter events"
+  ON event_announcements FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM events e
+      JOIN profiles p ON p.id = auth.uid()
+      WHERE e.id = NEW.event_id
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+        AND (
+          p.role IN ('hq_admin', 'super_admin')
+          OR p.chapter_id = e.chapter_id
+        )
+    )
+  );
+
+-- Officers: UPDATE — USING filters existing row, WITH CHECK validates new state
+CREATE POLICY "Officers update announcements for their chapter events"
+  ON event_announcements FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM events e
+      JOIN profiles p ON p.id = auth.uid()
+      WHERE e.id = event_announcements.event_id
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+        AND (
+          p.role IN ('hq_admin', 'super_admin')
+          OR p.chapter_id = e.chapter_id
+        )
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1
+      FROM events e
+      JOIN profiles p ON p.id = auth.uid()
+      WHERE e.id = NEW.event_id
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+        AND (
+          p.role IN ('hq_admin', 'super_admin')
+          OR p.chapter_id = e.chapter_id
+        )
+    )
+  );
+
+-- Officers: DELETE — USING only (no new row)
+CREATE POLICY "Officers delete announcements for their chapter events"
+  ON event_announcements FOR DELETE
   USING (
     EXISTS (
       SELECT 1
@@ -238,7 +347,7 @@ CREATE POLICY "Officers can delete registrations for their events"
     )
   );
 
--- Members can delete (withdraw) their own pending registrations
+-- Members can withdraw their own pending registrations only
 CREATE POLICY "Members can delete own pending registrations"
   ON event_registrations FOR DELETE
   USING (
@@ -251,41 +360,94 @@ CREATE POLICY "Members can delete own pending registrations"
 
 #### Fix M3 — `volunteer_applications` DELETE policy
 
-**Problem:** Members can submit but not withdraw applications.
+**Problem:** Members can submit but not withdraw applications. No status guard means approved volunteers could also delete their records.
 
-**Fix:**
+**Fix — withdrawal limited to `pending` status, matching the M2 pattern:**
 ```sql
--- Members can withdraw their own applications
-CREATE POLICY "Members can delete own volunteer applications"
+CREATE POLICY "Members can delete own pending volunteer applications"
   ON volunteer_applications FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (
+    auth.uid() = user_id
+    AND status = 'pending'
+  );
 ```
 
 ---
 
 ### 2. Application code changes
 
-#### `AdminUpgradeRequests.tsx` — `handleReject`
+#### `AdminUpgradeRequests.tsx` — `handleApprove` (Fix C0)
 
-Replace the direct `profiles.update()` + `organizer_upgrade_requests.update()` block with a single RPC call:
+Update the `approve_organizer_upgrade` call to the new two-parameter signature:
 
 ```typescript
-// BEFORE (broken — silently fails via RLS)
+// BEFORE (five-parameter signature — old overload, super_admin only, p_reviewer_id spoofable)
+const { error } = await supabase.rpc('approve_organizer_upgrade', {
+  p_user_id:     req.user_id,
+  p_role:        req.requested_role,
+  p_chapter_id:  req.chapter_id ?? null,
+  p_request_id:  req.id,
+  p_reviewer_id: user.id,
+})
+if (error) throw error
+
+// AFTER (two-parameter signature — hq_admin accepted, reviewed_by set server-side)
+const { error } = await supabase.rpc('approve_organizer_upgrade', {
+  p_request_id: req.id,
+  p_user_id:    req.user_id,
+})
+if (error) throw error
+```
+
+#### `AdminCMS.tsx` — `handleApprove` (Fix C0)
+
+Same call-site update:
+
+```typescript
+// BEFORE
+const { error } = await supabase.rpc('approve_organizer_upgrade', {
+  p_user_id:     req.user_id,
+  p_role:        req.requested_role,
+  p_chapter_id:  req.chapter_id ?? null,
+  p_request_id:  req.id,
+  p_reviewer_id: user.id,
+})
+if (error) throw error
+
+// AFTER
+const { error } = await supabase.rpc('approve_organizer_upgrade', {
+  p_request_id: req.id,
+  p_user_id:    req.user_id,
+})
+if (error) throw error
+```
+
+---
+
+#### `AdminUpgradeRequests.tsx` — `handleReject`
+
+Replace the broken direct-update block with a single RPC call:
+
+```typescript
+// BEFORE (broken — silently fails via RLS; reviewed_by never written)
 const { error: profileErr } = await supabase
   .from('profiles')
   .update({ pending_role: null, pending_chapter_id: null })
   .eq('id', req.user_id)
+if (profileErr) throw profileErr
 
 const { error: reqErr } = await supabase
   .from('organizer_upgrade_requests')
   .update({ status: 'rejected', reviewed_by: user.id, reviewed_at: new Date().toISOString() })
   .eq('id', req.id)
+if (reqErr) throw reqErr
 
-// AFTER (server-enforced, atomic, with audit trail)
+// AFTER (server-enforced, atomic, reviewed_by set server-side via auth.uid())
 const { error } = await supabase.rpc('reject_organizer_upgrade', {
   p_request_id: req.id,
   p_user_id:    req.user_id,
 })
+if (error) throw error
 ```
 
 #### `AdminUsers.tsx` — `handleRoleChange`
@@ -298,19 +460,21 @@ const { error: dbErr } = await supabase
   .from('profiles')
   .update({ role: newRole })
   .eq('id', userId)
+if (dbErr) { setError(dbErr.message); return }
 
-// AFTER (server-enforced, with role validation)
+// AFTER (server-enforced, with role validation and super_admin guard)
 const { error: dbErr } = await supabase.rpc('admin_update_user_role', {
   p_user_id:  userId,
   p_new_role: newRole,
 })
+if (dbErr) { setError(dbErr.message); return }
 ```
 
 ---
 
 ## What Does NOT Change
 
-- `SendAnnouncementSheet.tsx` and `useNotificationsStore.ts` — the table creation + RLS policies in C3 are the enforcement. The application code already uses the correct query shape (filters by `approvedIds` from approved registrations). No code changes needed.
+- `SendAnnouncementSheet.tsx` and `useNotificationsStore.ts` — the RLS policies in C3 are the enforcement. The store already filters client-side by `approvedIds` (derived from approved `event_registrations`), which correctly matches the SELECT policy intent.
 - All other stores — ownership checks are already correct (explicit `user_id` filters + backed by RLS).
 - Edge Functions — `generate-qr-token` and `award-points-on-scan` already enforce ownership via JWT-bound queries.
 
@@ -320,19 +484,50 @@ const { error: dbErr } = await supabase.rpc('admin_update_user_role', {
 
 - `profiles` DELETE policy — account deletion is handled by a separate Edge Function (`delete-account`) with its own authorization logic.
 - `chapters`, `organizer_codes` — admin-only by design, no client write access in any current flow.
-- Referrals cross-user SELECT — intentional product feature (referrer transparency), documented as design decision.
+- Referrals cross-user SELECT — intentional product feature (referrer transparency); a `referred_user_id` can see who referred them. Documented as design decision, not a vulnerability.
+- `rewards` write access for `chapter_officer` — existing policy in `014_realtime_and_missing_rls.sql` grants full rewards write to `chapter_officer`, but per CLAUDE.md only `hq_admin` should manage the rewards catalog. This is a known gap, deferred to a separate migration sprint.
 
 ---
 
 ## Testing Checklist
 
-- [ ] Officer from Chapter A cannot delete events belonging to Chapter B
+**C0 — approve_organizer_upgrade fix:**
+- [ ] The old five-parameter overload no longer exists after migration (call with old signature returns "function does not exist")
+- [ ] `approve_organizer_upgrade(p_request_id, p_user_id)` succeeds for `hq_admin` and sets `reviewed_by` to the caller's id server-side
+- [ ] `approve_organizer_upgrade(p_request_id, p_user_id)` succeeds for `super_admin`
+- [ ] `approve_organizer_upgrade(p_request_id, p_user_id)` fails for `chapter_officer`
+
+**C1 — Events DELETE chapter scope:**
+- [ ] Officer from Chapter A **cannot** delete events belonging to Chapter B
+- [ ] Officer from Chapter A **can** delete events belonging to Chapter A
+- [ ] `hq_admin` can delete events from any chapter
+
+**C2 — reject_organizer_upgrade RPC:**
 - [ ] `reject_organizer_upgrade()` fails for `chapter_officer` role
-- [ ] `reject_organizer_upgrade()` succeeds for `hq_admin` and sets `reviewed_by` / `reviewed_at`
-- [ ] `event_announcements` SELECT returns empty for a member not registered in that event
-- [ ] `event_announcements` INSERT fails for a member (non-officer)
+- [ ] `reject_organizer_upgrade()` succeeds for `hq_admin` and sets `reviewed_by` / `reviewed_at` server-side
+- [ ] `reject_organizer_upgrade()` succeeds for `super_admin`
+
+**C3 — event_announcements RLS:**
+- [ ] Member with no registration cannot SELECT from `event_announcements` for that event
+- [ ] Member with `pending` registration cannot SELECT
+- [ ] Member with `approved` registration can SELECT
+- [ ] Member (non-officer) INSERT is rejected
+- [ ] Officer from Chapter B cannot INSERT announcement for Chapter A's event
+- [ ] Officer from Chapter A can INSERT announcement for Chapter A's event
+
+**M1 — admin_update_user_role RPC:**
 - [ ] `admin_update_user_role()` fails for `chapter_officer` role
+- [ ] `admin_update_user_role()` succeeds for `hq_admin` setting role to `chapter_officer`
 - [ ] `admin_update_user_role()` fails when `hq_admin` tries to set `super_admin` role
-- [ ] `event_registrations` DELETE fails for a member trying to delete an approved registration
-- [ ] `event_registrations` DELETE succeeds for a member deleting their own pending registration
-- [ ] `volunteer_applications` DELETE succeeds for a member deleting their own application
+- [ ] `admin_update_user_role()` succeeds for `super_admin` promoting to `super_admin`
+- [ ] `admin_update_user_role()` fails for an unknown role string
+
+**M2 — event_registrations DELETE:**
+- [ ] Member cannot DELETE an `approved` registration
+- [ ] Member can DELETE their own `pending` registration
+- [ ] Officer from Chapter A can DELETE a registration for Chapter A's event
+- [ ] Officer from Chapter A cannot DELETE a registration for Chapter B's event
+
+**M3 — volunteer_applications DELETE:**
+- [ ] Member can DELETE their own `pending` application
+- [ ] Member cannot DELETE their own `approved` application
