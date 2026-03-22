@@ -2,6 +2,31 @@ import { create } from 'zustand'
 import type { Profile } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
 
+// Calls the check-rate-limit edge function.
+// Returns { allowed, retryAfterSeconds? }.
+// On any network/server error → { allowed: true } (fail open — GoTrue + RLS are final backstops).
+// token: pass the user's access_token for user-keyed buckets (org_upgrade).
+async function callRateLimit(
+  bucket: string,
+  extra?: { email?: string; token?: string }
+): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (extra?.token) headers['Authorization'] = `Bearer ${extra.token}`
+    const { token: _unused, ...body } = extra ?? {}
+    const res = await fetch(`${supabaseUrl}/functions/v1/check-rate-limit`, {
+      method:  'POST',
+      headers,
+      body:    JSON.stringify({ bucket, ...body }),
+    })
+    if (!res.ok && res.status !== 429) return { allowed: true }
+    return await res.json() as { allowed: boolean; retryAfterSeconds?: number }
+  } catch {
+    return { allowed: true }
+  }
+}
+
 export const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin'] as const
 export type OrganizerRole = typeof ORGANIZER_ROLES[number]
 
@@ -62,7 +87,32 @@ async function fetchProfileById(userId: string): Promise<Profile | null> {
 }
 
 async function ensureProfile(userId: string, meta: Record<string, string | null>): Promise<Profile | null> {
-  // Try INSERT first — trigger may have already created the row (23505 conflict expected on first login after email confirmation).
+  // Fetch first — avoids NOT NULL violations on chapter_id for returning users
+  // who signed up before chapter_id became required.
+  const existing = await fetchProfileById(userId)
+
+  if (existing) {
+    // Patch any null fields the trigger left empty (username, chapter_id, school_or_company).
+    const patch: Partial<Pick<Profile, 'username' | 'chapter_id' | 'school_or_company'>> = {}
+    if (!existing.username && meta.username)                    patch.username          = meta.username
+    if (!existing.chapter_id && meta.chapter_id)               patch.chapter_id        = meta.chapter_id
+    if (!existing.school_or_company && meta.school_or_company) patch.school_or_company = meta.school_or_company
+
+    if (Object.keys(patch).length === 0) return existing
+
+    const { error: patchErr } = await supabase
+      .from('profiles')
+      .update(patch)
+      .eq('id', userId)
+    if (patchErr) {
+      console.error('[ensureProfile] patch error:', patchErr.code, patchErr.message)
+      return existing  // return unpatched DB row — don't diverge in-memory state from DB
+    }
+
+    return { ...existing, ...patch }
+  }
+
+  // No profile yet — INSERT (new sign-up before trigger fires, or trigger was skipped).
   const { data, error } = await supabase
     .from('profiles')
     .insert({
@@ -79,35 +129,12 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
     .select()
     .single()
 
-  if (!error) return (data ?? null) as unknown as Profile | null
-
-  // Profile already exists (trigger created it). Fetch and patch any null fields
-  // the trigger left empty (username, chapter_id, school_or_company).
-  if (error.code === '23505') {
-    const existing = await fetchProfileById(userId)
-    if (!existing) return null
-
-    const patch: Partial<Pick<Profile, 'username' | 'chapter_id' | 'school_or_company'>> = {}
-    if (!existing.username && meta.username)                           patch.username          = meta.username
-    if (!existing.chapter_id && meta.chapter_id)                      patch.chapter_id        = meta.chapter_id
-    if (!existing.school_or_company && meta.school_or_company)        patch.school_or_company = meta.school_or_company
-
-    if (Object.keys(patch).length === 0) return existing
-
-    const { error: patchErr } = await supabase
-      .from('profiles')
-      .update(patch)
-      .eq('id', userId)
-    if (patchErr) {
-      console.error('[ensureProfile] patch error:', patchErr.code, patchErr.message)
-      return existing  // return unpatched DB row — don't diverge in-memory state from DB
-    }
-
-    return { ...existing, ...patch }
+  if (error) {
+    console.error('[ensureProfile] insert error:', error.code, error.message)
+    return null
   }
 
-  console.error('[ensureProfile] error:', error.code, error.message)
-  return null
+  return (data ?? null) as unknown as Profile | null
 }
 
 async function fetchChapterName(chapterId: string | null): Promise<string | null> {
