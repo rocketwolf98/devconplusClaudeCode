@@ -98,7 +98,10 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
       .from('profiles')
       .update(patch)
       .eq('id', userId)
-    if (patchErr) console.error('[ensureProfile] patch error:', patchErr.code, patchErr.message)
+    if (patchErr) {
+      console.error('[ensureProfile] patch error:', patchErr.code, patchErr.message)
+      return existing  // return unpatched DB row — don't diverge in-memory state from DB
+    }
 
     return { ...existing, ...patch }
   }

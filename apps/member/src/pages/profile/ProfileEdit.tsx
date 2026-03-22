@@ -30,7 +30,7 @@ const emailSchema = z.object({
 type EmailFormData = z.infer<typeof emailSchema>
 
 const passwordSchema = z.object({
-  new_password:     z.string().min(6, 'At least 6 characters'),
+  new_password:     z.string().min(8, 'At least 8 characters'),
   confirm_password: z.string(),
 }).refine((d) => d.new_password === d.confirm_password, {
   message: "Passwords don't match",
@@ -66,7 +66,10 @@ export default function ProfileEdit() {
 
   // Organizer upgrade
   const [upgradeCode, setUpgradeCode] = useState('')
-  const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'loading' | 'submitted' | 'invalid_code' | 'wrong_chapter' | 'already_pending' | 'error'>('idle')
+  const [upgradeStatus, setUpgradeStatus] = useState<'idle' | 'loading' | 'submitted' | 'invalid_code' | 'wrong_chapter' | 'already_pending' | 'error' | 'rate_limited'>('idle')
+  // Client-side rate limiting (UX convenience only — server enforcement via Supabase GoTrue)
+  const upgradeFailedAttempts = useRef(0)
+  const upgradeLockedUntil    = useRef<number>(0)
 
   // Save state
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -113,7 +116,8 @@ export default function ProfileEdit() {
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setAvatarPreview(URL.createObjectURL(file))
+    const objectUrl = URL.createObjectURL(file)
+    setAvatarPreview(objectUrl)
     setAvatarError(null)
     setAvatarUploading(true)
     try {
@@ -124,6 +128,7 @@ export default function ProfileEdit() {
       setAvatarError('Upload failed. Photo not saved.')
     } finally {
       setAvatarUploading(false)
+      URL.revokeObjectURL(objectUrl)
     }
   }
 
@@ -167,10 +172,27 @@ export default function ProfileEdit() {
 
   const handleUpgradeSubmit = async () => {
     if (!upgradeCode.trim()) return
+    const now = Date.now()
+    if (now < upgradeLockedUntil.current) {
+      setUpgradeStatus('rate_limited')
+      return
+    }
     setUpgradeStatus('loading')
     try {
       const result = await requestOrganizerUpgrade(upgradeCode.trim())
-      setUpgradeStatus(result)
+      if (result === 'invalid_code') {
+        upgradeFailedAttempts.current += 1
+        if (upgradeFailedAttempts.current >= 5) {
+          upgradeLockedUntil.current    = Date.now() + 60_000
+          upgradeFailedAttempts.current = 0
+          setUpgradeStatus('rate_limited')
+        } else {
+          setUpgradeStatus('invalid_code')
+        }
+        return
+      }
+      upgradeFailedAttempts.current = 0
+      setUpgradeStatus(result ?? 'submitted')
     } catch {
       setUpgradeStatus('error')
     }
@@ -363,7 +385,7 @@ export default function ProfileEdit() {
                 <input
                   {...passwordForm.register('new_password')}
                   type="password"
-                  placeholder="New password (min 6 characters)"
+                  placeholder="New password (min 8 characters)"
                   className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {passwordForm.formState.errors.new_password && (
@@ -419,7 +441,7 @@ export default function ProfileEdit() {
                     <button
                       type="button"
                       onClick={() => void handleUpgradeSubmit()}
-                      disabled={upgradeStatus === 'loading' || !upgradeCode.trim()}
+                      disabled={upgradeStatus === 'loading' || upgradeStatus === 'rate_limited' || !upgradeCode.trim()}
                       className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shrink-0 disabled:opacity-60"
                     >
                       {upgradeStatus === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit'}
@@ -433,6 +455,9 @@ export default function ProfileEdit() {
                   )}
                   {upgradeStatus === 'error' && (
                     <p className="text-red text-xs mt-2">Something went wrong. Please try again.</p>
+                  )}
+                  {upgradeStatus === 'rate_limited' && (
+                    <p className="text-red text-xs mt-2 flex items-center gap-1"><XCircle className="w-3.5 h-3.5" /> Too many attempts. Please wait 60 seconds before trying again.</p>
                   )}
                 </>
               )}
