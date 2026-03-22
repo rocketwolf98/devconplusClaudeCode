@@ -239,6 +239,7 @@ export default function SignUp() {
                 )
               })}
             </select>
+            {errors.chapter_id && <p className="text-red text-xs mt-1">{errors.chapter_id.message}</p>}
           </div>
 
           {formError && (
