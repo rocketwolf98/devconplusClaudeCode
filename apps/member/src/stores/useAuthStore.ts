@@ -279,7 +279,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     ])
 
     if (!emailLimit.allowed || !ipLimit.allowed) {
-      const secs = emailLimit.retryAfterSeconds ?? ipLimit.retryAfterSeconds ?? 300
+      const secs = Math.max(
+        emailLimit.retryAfterSeconds ?? 0,
+        ipLimit.retryAfterSeconds ?? 0,
+      ) || 300
       const err = new Error(`Too many login attempts. Please wait ${secs} seconds before trying again.`)
       ;(err as Error & { retryAfterSeconds: number }).retryAfterSeconds = secs
       set({ isLoading: false, error: err.message })
