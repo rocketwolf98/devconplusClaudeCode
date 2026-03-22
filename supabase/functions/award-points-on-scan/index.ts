@@ -100,6 +100,22 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    // Rate limit: 60 scans per organizer per 60s (~1 scan/sec — sufficient for busy events).
+    // Uses service_role client — check_rate_limit RPC is restricted to service_role.
+    // Fail closed — any RPC error returns 429 (protects the points ecosystem).
+    // Note: double-award prevention is handled by the checked_in atomic guard below,
+    //       not by this rate limit.
+    const { data: rlAllowed, error: rlError } = await supabase.rpc('check_rate_limit', {
+      p_identifier: `user:${organizer.id}`,
+      p_bucket:     'qr_scan',
+    })
+    if (rlError || !rlAllowed) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Scan rate exceeded. Please slow down.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+      )
+    }
+
     // 4. Find registration by ID extracted from JWT (must be approved)
     const { data: reg, error: regError } = await supabase
       .from('event_registrations')
