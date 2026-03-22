@@ -20,7 +20,7 @@ const schema = z.object({
   email:             z.string().email('Invalid email'),
   password:          z.string().min(8, 'At least 8 characters'),
   school_or_company: z.string().optional(),
-  chapter_id:        z.string().optional(),
+  chapter_id:        z.string().min(1, 'Please select your chapter'),
 })
 type FormData = z.infer<typeof schema>
 
@@ -220,7 +220,7 @@ export default function SignUp() {
 
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">
-              Chapter <span className="text-slate-400 font-normal">(optional)</span>
+              Chapter
             </label>
             <select
               {...register('chapter_id')}
