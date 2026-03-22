@@ -9,7 +9,7 @@ import ComingSoonModal from '../../components/ComingSoonModal'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const MAX_ATTEMPTS = 5
-const LOCKOUT_MS   = 30_000
+const LOCKOUT_MS   = 300_000
 
 const schema = z.object({
   email:    z.string().email('Invalid email'),
@@ -59,6 +59,13 @@ export default function SignIn() {
       failedAttempts.current = 0
       navigate('/home')
     } catch (err) {
+      const serverSecs = (err as { retryAfterSeconds?: number }).retryAfterSeconds
+      if (serverSecs) {
+        failedAttempts.current = 0
+        lockedUntil.current    = Date.now() + serverSecs * 1000
+        setFormError(err instanceof Error ? err.message : `Too many login attempts. Please wait ${serverSecs} seconds before trying again.`)
+        return
+      }
       failedAttempts.current += 1
       if (failedAttempts.current >= MAX_ATTEMPTS) {
         lockedUntil.current    = Date.now() + LOCKOUT_MS
