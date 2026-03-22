@@ -183,31 +183,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (get().isLoading || get().isInitialized) return
     set({ isLoading: true })
 
-    // Register listener BEFORE getSession so TOKEN_REFRESH_FAILED is never missed.
-    // If the listener were registered after getSession, a refresh failure during that
-    // window would fire the event before the handler exists → unhandled error in console.
-    if (authUnsubscribe) authUnsubscribe()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event as string) === 'TOKEN_REFRESH_FAILED') {
-        // Refresh token is invalid / revoked — clear stale session and redirect
-        await supabase.auth.signOut()
-        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
-        window.location.replace('/sign-in')
-        return
-      }
-      if (event === 'SIGNED_OUT' || !session) {
-        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
-        return
-      }
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
-        const profile = await ensureProfile(session.user.id, meta)
-        if (profile) await applyProfile(profile, set)
-      }
-    })
-    authUnsubscribe = () => subscription.unsubscribe()
-
-    // Restore existing session on page load
+    // IMPORTANT: call getSession() BEFORE registering onAuthStateChange.
+    // Supabase JS v2 awaits all subscriber callbacks inside notifyAllSubscribers().
+    // If onAuthStateChange is registered first and the saved token is expired, Supabase
+    // fires TOKEN_REFRESHED → our handler calls ensureProfile() → PostgREST calls getSession()
+    // internally → getSession() waits for initializePromise → initializePromise waits for
+    // our callback to finish → circular wait (deadlock) → isInitialized never becomes true.
+    // With getSession() first, initializePromise is already resolved before the listener
+    // is registered, so subsequent PostgREST calls inside listener callbacks never block.
+    // TOKEN_REFRESH_FAILED during the initial getSession() surfaces as sessionError below.
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession()
       if (sessionError) {
@@ -227,6 +211,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: false, isInitialized: true })
       return
     }
+
+    // Register the listener AFTER getSession() so initializePromise is already resolved.
+    if (authUnsubscribe) authUnsubscribe()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event as string) === 'TOKEN_REFRESH_FAILED') {
+        // Refresh token invalid / revoked — clear stale session and redirect to sign-in
+        await supabase.auth.signOut()
+        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
+        window.location.replace('/sign-in')
+        return
+      }
+      if (event === 'SIGNED_OUT' || !session) {
+        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
+        return
+      }
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
+        const profile = await ensureProfile(session.user.id, meta)
+        if (profile) await applyProfile(profile, set)
+      }
+    })
+    authUnsubscribe = () => subscription.unsubscribe()
 
     set({ isLoading: false, isInitialized: true })
   },
