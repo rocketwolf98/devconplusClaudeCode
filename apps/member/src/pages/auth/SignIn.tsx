@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -8,9 +8,12 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
+const MAX_ATTEMPTS = 5
+const LOCKOUT_MS   = 30_000
+
 const schema = z.object({
   email:    z.string().email('Invalid email'),
-  password: z.string().min(6, 'At least 6 characters'),
+  password: z.string().min(8, 'At least 8 characters'),
 })
 type FormData = z.infer<typeof schema>
 
@@ -32,6 +35,9 @@ export default function SignIn() {
   const [showGoogleModal, setShowGoogleModal] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  // Client-side rate limiting (UX convenience only — server enforcement via Supabase GoTrue)
+  const failedAttempts  = useRef(0)
+  const lockedUntil     = useRef<number>(0)
 
   const passwordReset = (location.state as { passwordReset?: boolean } | null)?.passwordReset
 
@@ -40,12 +46,27 @@ export default function SignIn() {
   })
 
   const onSubmit = async (data: FormData) => {
+    const now = Date.now()
+    if (now < lockedUntil.current) {
+      const secsLeft = Math.ceil((lockedUntil.current - now) / 1000)
+      setFormError(`Too many attempts. Please wait ${secsLeft}s before trying again.`)
+      return
+    }
+
     setFormError(null)
     try {
       await signIn(data.email, data.password)
+      failedAttempts.current = 0
       navigate('/home')
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
+      failedAttempts.current += 1
+      if (failedAttempts.current >= MAX_ATTEMPTS) {
+        lockedUntil.current    = Date.now() + LOCKOUT_MS
+        failedAttempts.current = 0
+        setFormError(`Too many failed attempts. Please wait ${LOCKOUT_MS / 1000} seconds before trying again.`)
+      } else {
+        setFormError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
+      }
     }
   }
 

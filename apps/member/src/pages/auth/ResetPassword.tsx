@@ -8,8 +8,8 @@ import { supabase } from '../../lib/supabase'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const schema = z.object({
-  password:        z.string().min(6, 'At least 6 characters'),
-  confirmPassword: z.string().min(6, 'At least 6 characters'),
+  password:        z.string().min(8, 'At least 8 characters'),
+  confirmPassword: z.string().min(8, 'At least 8 characters'),
 }).refine((d) => d.password === d.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],

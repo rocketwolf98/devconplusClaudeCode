@@ -11,6 +11,7 @@ import SignUp from './pages/auth/SignUp'
 import OrganizerCodeGate from './pages/auth/OrganizerCodeGate'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import EmailSent from './pages/auth/EmailSent'
+import EmailConfirm from './pages/auth/EmailConfirm'
 import ResetPassword from './pages/auth/ResetPassword'
 import NotFound from './pages/NotFound'
 
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
   { path: '/forgot-password',      element: <ForgotPassword /> },
   { path: '/email-sent',           element: <EmailSent /> },
   { path: '/reset-password',       element: <ResetPassword /> },
+  { path: '/email-confirm',        element: <EmailConfirm /> },
 
   // Member routes — wrapped in MemberLayout with bottom tab nav
   {
