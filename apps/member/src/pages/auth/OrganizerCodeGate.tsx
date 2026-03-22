@@ -174,7 +174,7 @@ export default function OrganizerCodeGate() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleAvatarChange}
+                onChange={(e) => void handleAvatarChange(e)}
               />
             </div>
 
