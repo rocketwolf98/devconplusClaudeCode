@@ -58,7 +58,7 @@ export default function AdminUpgradeRequests() {
       // Direct anon-key UPDATE on another user's profile is blocked by RLS.
       const { error } = await supabase.rpc('approve_organizer_upgrade', {
         p_user_id:     req.user_id,
-        p_role:        req.requested_role ?? '',
+        p_role:        req.requested_role,
         p_chapter_id:  req.chapter_id ?? null,
         p_request_id:  req.id,
         p_reviewer_id: user.id,
