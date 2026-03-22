@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Navigate } from 'react-router-dom'
+import { isValidUUID } from '../../lib/validation'
 import { ArrowLeft } from 'lucide-react'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -13,8 +14,10 @@ export default function EventRegister() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  if (!isValidUUID(id)) return <Navigate to="/events" replace />
+
   const event = events.find((e) => e.id === id)
-  if (!event || !user || !id) return null
+  if (!event || !user) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

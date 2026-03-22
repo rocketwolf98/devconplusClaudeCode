@@ -59,6 +59,14 @@ Deno.serve(async (req: Request) => {
       )
     }
 
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    if (!UUID_RE.test(registration_id)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid registration_id format.' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      )
+    }
+
     // 2. Validate registration: must belong to caller and be approved
     const { data: reg, error: regErr } = await supabase
       .from('event_registrations')

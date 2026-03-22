@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
+import { isValidUUID } from '../../../lib/validation'
 import { ArrowLeft, ImagePlus, X, Pencil, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
@@ -216,6 +217,8 @@ export function OrgEventEdit() {
   }
 
   // ── Loading / not-found guards ───────────────────────────────────────────
+  if (!isValidUUID(id)) return <Navigate to="/organizer/events" replace />
+
   if (isLoading && events.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
