@@ -48,10 +48,12 @@ profiles:
 |---|--------|----------|
 | 1 | `chapter_id NOT NULL` + null cleanup migration | new migration SQL |
 | 2 | Update `handle_new_user()` trigger to read all signup metadata fields | same migration |
-| 3 | `ensureProfile` patches null fields after 23505 conflict | `useAuthStore.ts` |
-| 4 | Chapter required in Zod schema + UI label updated | `SignUp.tsx` |
-| 5 | `chapter_id` param made required in `signUp()` store function | `useAuthStore.ts` |
-| 6 | Optional non-blocking avatar picker | `OrganizerCodeGate.tsx` |
+| 3 | Update `approve_organizer_upgrade` RPC to use `COALESCE` (HQ admin safety) | same migration |
+| 4 | `ensureProfile` patches null fields after 23505 conflict | `useAuthStore.ts` |
+| 5 | Chapter required in Zod schema + UI label updated | `SignUp.tsx` |
+| 6 | `chapter_id` param made required in `signUp()` store function | `useAuthStore.ts` |
+| 7 | Fix admin approval call sites: pass `null` not `''` for HQ chapter | `AdminCMS.tsx`, `AdminUpgradeRequests.tsx` |
+| 8 | Optional non-blocking avatar picker | `OrganizerCodeGate.tsx` |
 
 ---
 
@@ -74,6 +76,62 @@ ALTER TABLE profiles ALTER COLUMN chapter_id SET NOT NULL;
 
 COMMIT;
 ```
+
+**Step 3 — Fix `approve_organizer_upgrade` RPC:**
+
+The existing RPC (`017_security_fixes.sql`) sets `chapter_id = p_chapter_id` directly. HQ organizer codes have `chapter_id = NULL` (nullable by design since `20260311`). After the NOT NULL constraint is added, approving an HQ admin upgrade would set `chapter_id = NULL` → constraint violation.
+
+Fix: use `COALESCE(p_chapter_id, chapter_id)` so the profile retains its existing chapter (Manila, assigned at signup via trigger fallback) when the upgrade code carries no chapter.
+
+```sql
+CREATE OR REPLACE FUNCTION approve_organizer_upgrade(
+  p_user_id     uuid,
+  p_role        text,
+  p_chapter_id  uuid,
+  p_request_id  uuid,
+  p_reviewer_id uuid
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'super_admin'
+  ) THEN
+    RAISE EXCEPTION 'Unauthorized';
+  END IF;
+
+  IF p_role NOT IN ('chapter_officer', 'hq_admin') THEN
+    RAISE EXCEPTION 'Invalid role: %', p_role;
+  END IF;
+
+  UPDATE profiles
+  SET
+    role               = p_role,
+    chapter_id         = COALESCE(p_chapter_id, chapter_id),  -- retain existing for HQ codes
+    pending_role       = NULL,
+    pending_chapter_id = NULL
+  WHERE id = p_user_id;
+
+  UPDATE organizer_upgrade_requests
+  SET
+    status      = 'approved',
+    reviewed_by = p_reviewer_id,
+    reviewed_at = now()
+  WHERE id = p_request_id;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION approve_organizer_upgrade TO authenticated;
+```
+
+This means:
+- **chapter_officer** upgrade: `chapter_id` is set to the code's chapter → correct
+- **hq_admin** upgrade: `chapter_id` stays as the signup chapter (Manila) → correct; HQ access is role-gated, not chapter-gated
+
+---
 
 **Note:** The `BEGIN/COMMIT` block above covers only the `UPDATE` and `ALTER TABLE` statements. The `CREATE OR REPLACE FUNCTION` and trigger DDL below runs outside that block as standard PostgreSQL DDL (auto-committed), consistent with the pattern used in `20260318_rewards_engine.sql`.
 
@@ -176,7 +234,25 @@ No other form fields change.
 
 ---
 
-### 4. Avatar Picker on OrganizerCodeGate (`OrganizerCodeGate.tsx`)
+### 4. Admin Approval Call Sites (`AdminCMS.tsx`, `AdminUpgradeRequests.tsx`)
+
+Both files pass `req.chapter_id ?? ''` as `p_chapter_id` to the `approve_organizer_upgrade` RPC. An empty string `''` cannot be cast to `uuid` in PostgreSQL and will throw a runtime error. This is a pre-existing latent bug that becomes fatal once NOT NULL is enforced.
+
+**Fix in both files:** change `req.chapter_id ?? ''` → `req.chapter_id ?? null`.
+
+```ts
+// Before (both files, same line):
+p_chapter_id:  req.chapter_id ?? '',
+
+// After:
+p_chapter_id:  req.chapter_id ?? null,
+```
+
+With the COALESCE fix in the SQL function, passing `null` is now safe — the RPC retains the user's existing chapter.
+
+---
+
+### 5. Avatar Picker on OrganizerCodeGate (`OrganizerCodeGate.tsx`)
 
 **Placement**: top of the card, above the existing heading. **Shown only in the normal state (code input form), not in the `submitted` state** (success card with checkmark + "Continue as Member" button). Once the user reaches the submitted state, the avatar section is hidden.
 
@@ -203,12 +279,13 @@ No other form fields change.
 
 ## Implementation Order
 
-1. Apply and verify the DB migration (`20260323_signup_data_fix.sql`) first — trigger fix + NOT NULL constraint
-2. Implement `SignUp.tsx` Zod change + label change
-3. Update `useAuthStore.ts` — `signUp()` signature, `ensureProfile` patch, `uploadAvatar` size guard
-4. Implement avatar picker in `OrganizerCodeGate.tsx`
+1. Apply DB migration (`20260323_signup_data_fix.sql`): null cleanup → NOT NULL → updated trigger → updated `approve_organizer_upgrade` RPC
+2. Fix admin approval call sites — `AdminCMS.tsx` and `AdminUpgradeRequests.tsx` (`?? ''` → `?? null`)
+3. Implement `SignUp.tsx` Zod change + label change
+4. Update `useAuthStore.ts` — `signUp()` signature, `ensureProfile` patch, `uploadAvatar` size guard
+5. Implement avatar picker in `OrganizerCodeGate.tsx`
 
-The `ensureProfile` patch (step 3) is a safety net for edge cases. Apply and verify the trigger fix (step 1) independently before relying on the patch to catch failures.
+The `ensureProfile` patch (step 4) is a safety net. Verify the trigger fix (step 1) independently before relying on the patch to catch failures.
 
 ---
 
