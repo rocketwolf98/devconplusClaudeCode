@@ -107,6 +107,13 @@ Deno.serve(async (req: Request) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
+      // RFC 5321: max email address length is 254 characters
+      if (json.email.length > 254) {
+        return new Response(
+          JSON.stringify({ allowed: false, error: 'Invalid email.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
       identifier = `email:${json.email.toLowerCase().trim()}`
     } else {
       identifier = `ip:${extractIp(req)}`
