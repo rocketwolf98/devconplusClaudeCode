@@ -161,15 +161,16 @@ CREATE POLICY "Members can read event announcements"
 -- Fix 5: INSERT — enforce organizer_id = auth.uid()
 DROP POLICY IF EXISTS "Officers insert announcements for their chapter events" ON event_announcements;
 
+-- In RLS WITH CHECK, reference column names directly (not NEW.col)
 CREATE POLICY "Officers insert announcements for their chapter events"
   ON event_announcements FOR INSERT
   WITH CHECK (
-    NEW.organizer_id = auth.uid()
+    organizer_id = auth.uid()
     AND EXISTS (
       SELECT 1
       FROM events e
       JOIN profiles p ON p.id = auth.uid()
-      WHERE e.id = NEW.event_id
+      WHERE e.id = event_id
         AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
         AND (
           p.role IN ('hq_admin', 'super_admin')
@@ -177,6 +178,8 @@ CREATE POLICY "Officers insert announcements for their chapter events"
         )
     )
   );
+
+DROP POLICY IF EXISTS "Officers update announcements for their chapter events" ON event_announcements;
 
 CREATE POLICY "Officers update announcements for their chapter events"
   ON event_announcements FOR UPDATE
@@ -198,7 +201,7 @@ CREATE POLICY "Officers update announcements for their chapter events"
       SELECT 1
       FROM events e
       JOIN profiles p ON p.id = auth.uid()
-      WHERE e.id = NEW.event_id
+      WHERE e.id = event_id
         AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
         AND (
           p.role IN ('hq_admin', 'super_admin')
