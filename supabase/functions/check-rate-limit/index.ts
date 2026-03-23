@@ -14,10 +14,13 @@ const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
-  return {
-    'Access-Control-Allow-Origin': origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : '',
+  const headers: Record<string, string> = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   }
+  if (origin === ALLOWED_ORIGIN) {
+    headers['Access-Control-Allow-Origin'] = ALLOWED_ORIGIN
+  }
+  return headers
 }
 
 type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade'
