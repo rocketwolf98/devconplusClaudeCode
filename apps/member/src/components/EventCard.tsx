@@ -1,19 +1,23 @@
+import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarDays } from 'lucide-react'
+import { motion } from 'framer-motion'
 import type { Event } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
 import StatusPill from './StatusPill'
 
-export default function EventCard({ event, compact = false }: { event: Event; compact?: boolean }) {
+function EventCard({ event, compact = false }: { event: Event; compact?: boolean }) {
   const navigate = useNavigate()
   const dateStr = event.event_date
     ? new Date(event.event_date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
     : 'Date TBA'
 
   return (
-    <button
+    <motion.button
       onClick={() => navigate(`/events/${event.id}`)}
       className="w-full bg-white rounded-2xl shadow-card text-left relative overflow-hidden"
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       {event.is_promoted && (
         <div className="absolute top-3 right-3 z-10">
@@ -39,6 +43,8 @@ export default function EventCard({ event, compact = false }: { event: Event; co
           <span className="text-xs text-primary font-semibold">+{event.points_value} pts</span>
         </div>
       </div>
-    </button>
+    </motion.button>
   )
 }
+
+export default memo(EventCard)

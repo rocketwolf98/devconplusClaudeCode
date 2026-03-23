@@ -29,7 +29,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
-  const { transactions, loadTotalPoints, isLoading: pointsLoading } = usePointsStore()
+  const { transactions, loadTotalPoints, loadTransactions, isLoading: pointsLoading } = usePointsStore()
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
   const [bannerIdx, setBannerIdx] = useState(0)
 
@@ -49,6 +49,7 @@ export default function Dashboard() {
   useEffect(() => {
     void fetchEvents()
     void loadTotalPoints()
+    void loadTransactions()
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

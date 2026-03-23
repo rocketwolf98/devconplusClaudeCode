@@ -119,32 +119,36 @@ export default function MemberLayout() {
               to="/home"
               end
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-primary' : 'text-slate-400'
-                }`
+                `px-3 py-1.5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`
               }
             >
               {({ isActive }) => (
-                <>
+                <motion.div
+                  className="flex flex-col items-center gap-0.5"
+                  whileTap={{ scale: 0.88 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
                   <Home className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Home</span>
-                </>
+                </motion.div>
               )}
             </NavLink>
 
             <NavLink
               to="/rewards"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-primary' : 'text-slate-400'
-                }`
+                `px-3 py-1.5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`
               }
             >
               {({ isActive }) => (
-                <>
+                <motion.div
+                  className="flex flex-col items-center gap-0.5"
+                  whileTap={{ scale: 0.88 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
                   <Gift className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Rewards</span>
-                </>
+                </motion.div>
               )}
             </NavLink>
 
@@ -167,32 +171,36 @@ export default function MemberLayout() {
             <NavLink
               to="/jobs"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-primary' : 'text-slate-400'
-                }`
+                `px-3 py-1.5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`
               }
             >
               {({ isActive }) => (
-                <>
+                <motion.div
+                  className="flex flex-col items-center gap-0.5"
+                  whileTap={{ scale: 0.88 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
                   <Briefcase className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Jobs</span>
-                </>
+                </motion.div>
               )}
             </NavLink>
 
             <NavLink
               to="/profile"
               className={({ isActive }) =>
-                `flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors ${
-                  isActive ? 'text-primary' : 'text-slate-400'
-                }`
+                `px-3 py-1.5 transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`
               }
             >
               {({ isActive }) => (
-                <>
+                <motion.div
+                  className="flex flex-col items-center gap-0.5"
+                  whileTap={{ scale: 0.88 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
                   <User className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Profile</span>
-                </>
+                </motion.div>
               )}
             </NavLink>
 

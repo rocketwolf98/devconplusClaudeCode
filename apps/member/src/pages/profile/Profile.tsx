@@ -75,28 +75,23 @@ export default function Profile() {
 
       <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8 md:max-w-full md:px-8">
 
-        {/* Program Theme */}
+        {/* Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4">
-          <p className="text-sm font-bold text-slate-900 mb-3">Program Theme</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="text-sm font-bold text-slate-900 mb-3">Theme</p>
+          <div className="flex gap-3">
             {PROGRAM_THEMES.map((theme) => {
               const isActive = theme.id === themeId
               return (
                 <button
                   key={theme.id}
                   onClick={() => setTheme(theme.id)}
-                  className={`flex items-center gap-2 border rounded-xl px-3 py-2.5 text-sm font-medium transition-colors text-left ${
-                    isActive
-                      ? 'border-primary bg-primary/5 text-primary'
-                      : 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                  }`}
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                  style={{
+                    backgroundColor: theme.hex,
+                    boxShadow: isActive ? `0 0 0 2px white, 0 0 0 4px ${theme.hex}` : 'none',
+                  }}
                 >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: theme.hex }}
-                  />
-                  <span className="flex-1">{theme.label}</span>
-                  {isActive && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                  {isActive && <Check className="w-4 h-4 text-white" />}
                 </button>
               )
             })}

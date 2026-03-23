@@ -21,7 +21,6 @@ interface CreateEventPayload {
   event_date: string
   end_date: string | null
   category: 'tech_talk' | 'hackathon' | 'workshop' | 'brown_bag' | 'summit' | 'social' | 'networking'
-  // TODO: add devcon_category column to events table before going live with Supabase
   devcon_category: DevconCategory | null
   tags: string[]
   visibility: 'public' | 'unlisted' | 'draft'
