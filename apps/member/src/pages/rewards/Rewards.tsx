@@ -158,7 +158,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => { void handleConfirm() }}
-                      disabled={sheetState === 'loading'}
+                      disabled={(sheetState as SheetState) === 'loading'}
                       className="flex-[2] py-3 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Confirm Redemption

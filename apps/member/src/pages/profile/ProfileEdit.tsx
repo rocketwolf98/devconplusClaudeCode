@@ -527,7 +527,7 @@ export default function ProfileEdit() {
               password,
             })
             if (error) throw new Error('Incorrect password')
-            await updateProfile({ chapter_id: pendingChapterId || null })
+            await updateProfile({ chapter_id: pendingChapterId || undefined })
             setChapterSuccess(true)
           }}
           onClose={() => {

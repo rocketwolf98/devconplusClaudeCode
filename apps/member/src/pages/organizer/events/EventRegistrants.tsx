@@ -73,7 +73,7 @@ export function OrgEventRegistrants() {
       .select('id, reason, status, created_at, profiles(full_name)')
       .eq('event_id', id)
       .order('created_at', { ascending: false })
-    setVolunteers((data ?? []) as VolunteerApplication[])
+    setVolunteers((data ?? []) as unknown as VolunteerApplication[])
     setVolunteersLoading(false)
   }
 
@@ -86,7 +86,7 @@ export function OrgEventRegistrants() {
 
   const handleApproveVolunteer = async (appId: string) => {
     if (!organizerUser?.id) return
-    await supabase.rpc('approve_volunteer_application', {
+    await supabase.rpc('approve_volunteer_application' as any, {
       p_application_id: appId,
       p_organizer_id:   organizerUser.id,
     })

@@ -59,6 +59,9 @@ export default function AdminUpgradeRequests() {
       const { error } = await supabase.rpc('approve_organizer_upgrade', {
         p_request_id: req.id,
         p_user_id:    req.user_id,
+        p_chapter_id: req.chapter_id ?? '',
+        p_reviewer_id: user?.id ?? '',
+        p_role: req.requested_role,
       })
       if (error) throw error
 
@@ -75,7 +78,7 @@ export default function AdminUpgradeRequests() {
     setActionLoading(req.id)
     setError(null)
     try {
-      const { error: rpcErr } = await supabase.rpc('reject_organizer_upgrade', {
+      const { error: rpcErr } = await supabase.rpc('reject_organizer_upgrade' as any, {
         p_request_id: req.id,
         p_user_id:    req.user_id,
       })

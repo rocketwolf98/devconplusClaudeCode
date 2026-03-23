@@ -145,8 +145,8 @@ export default function Points() {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-semibold text-slate-900 text-sm">{item.label}</p>
-                      {'note' in item && item.note && (
-                        <p className="text-xs text-slate-400 mt-0.5">{item.note}</p>
+                      {'note' in item && !!(item as { note?: unknown }).note && (
+                        <p className="text-xs text-slate-400 mt-0.5">{String((item as { note?: string }).note)}</p>
                       )}
                     </div>
                     <span className="text-xs font-bold text-primary ml-2 shrink-0">{item.pts}</span>

@@ -56,6 +56,7 @@ export default function EventsList() {
       .then(({ data }) => {
         const counts: Record<string, number> = {}
         data?.forEach((row) => {
+          if (row.event_id == null) return
           counts[row.event_id] = (counts[row.event_id] ?? 0) + 1
         })
         setAttendeeCounts(counts)

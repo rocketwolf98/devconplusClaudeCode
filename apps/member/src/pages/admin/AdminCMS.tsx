@@ -161,6 +161,9 @@ function UpgradeRequestsTab() {
       const { error } = await supabase.rpc('approve_organizer_upgrade', {
         p_request_id: req.id,
         p_user_id: req.user_id,
+        p_chapter_id: req.chapter_id ?? '',
+        p_reviewer_id: user?.id ?? '',
+        p_role: req.requested_role,
       })
       if (error) throw error
       setRequests((prev) => prev.map((r) => r.id === req.id ? { ...r, status: 'approved' } : r))

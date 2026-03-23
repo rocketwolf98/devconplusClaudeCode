@@ -80,7 +80,7 @@ export const useEventsStore = create<EventsState>((set) => ({
       set({ error: error.message, isLoading: false })
       return
     }
-    set({ events: (data ?? []) as Event[], isLoading: false })
+    set({ events: (data ?? []) as unknown as Event[], isLoading: false })
   },
 
   createEvent: async (payload) => {
@@ -90,7 +90,7 @@ export const useEventsStore = create<EventsState>((set) => ({
       .select()
       .single()
     if (error) throw error
-    const newEvent = data as Event
+    const newEvent = data as unknown as Event
     set((s) => ({
       events: [...s.events, newEvent].sort(
         (a, b) =>
@@ -118,7 +118,7 @@ export const useEventsStore = create<EventsState>((set) => ({
       .select()
       .single()
     if (error) throw error
-    const updated = data as Event
+    const updated = data as unknown as Event
     set((s) => ({
       events: s.events
         .map((e) => (e.id === id ? updated : e))

@@ -10,7 +10,6 @@ interface Props {
   onClose: () => void
 }
 
-const ADMIN_ROLES = ['super_admin', 'hq_admin'] as const
 
 export default function KonamiModal({ open, onClose }: Props) {
   const { user } = useAuthStore()

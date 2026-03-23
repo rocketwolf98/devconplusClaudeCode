@@ -149,7 +149,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           .select('*, chapters(name)')
           .single()
         if (dbErr) { setSubmitError(dbErr.message); return }
-        onSaved(result as EventWithChapter)
+        onSaved(result as unknown as EventWithChapter)
       } else {
         const { data: result, error: dbErr } = await supabase
           .from('events')
@@ -162,7 +162,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           .select('*, chapters(name)')
           .single()
         if (dbErr) { setSubmitError(dbErr.message); return }
-        onSaved(result as EventWithChapter)
+        onSaved(result as unknown as EventWithChapter)
       }
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
@@ -518,7 +518,7 @@ export default function AdminEvents() {
         setIsLoading(false)
         return
       }
-      setEvents((eventsResult.data ?? []) as EventWithChapter[])
+      setEvents((eventsResult.data ?? []) as unknown as EventWithChapter[])
       setChapters((chaptersResult.data ?? []) as { id: string; name: string }[])
       setIsLoading(false)
     }

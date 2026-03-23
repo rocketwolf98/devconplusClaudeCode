@@ -98,7 +98,7 @@ export default function SignUp() {
         const newUserId = useAuthStore.getState().user?.id
         if (newUserId) {
           supabase
-            .rpc('confirm_referral', {
+            .rpc('confirm_referral' as any, {
               p_referred_user_id: newUserId,
               p_referral_code:    sanitizedRef,
             })

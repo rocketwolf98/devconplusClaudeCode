@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { SearchX } from 'lucide-react'
 import { motion } from 'framer-motion'
-import logoMark from '../assets/logos/logo-mark.svg'
 
 export default function NotFound() {
   const navigate = useNavigate()
