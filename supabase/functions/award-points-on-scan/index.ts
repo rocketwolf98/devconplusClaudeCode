@@ -7,6 +7,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { verify } from 'https://deno.land/x/djwt@v3.0.2/mod.ts'
+import { logger } from '../_shared/logger.ts'
 
 // Decode 22-char base64url back to standard UUID string
 function compactToUuid(compact: string): string {
@@ -17,15 +18,20 @@ function compactToUuid(compact: string): string {
   return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? ''
+  return {
+    'Access-Control-Allow-Origin': origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : '',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 }
 
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(req) })
   }
 
   try {
@@ -43,7 +49,7 @@ Deno.serve(async (req: Request) => {
     if (authErr || !callerUser) {
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -59,7 +65,7 @@ Deno.serve(async (req: Request) => {
     if (!token) {
       return new Response(
         JSON.stringify({ success: false, error: 'Missing required fields.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -78,10 +84,14 @@ Deno.serve(async (req: Request) => {
       registrationId = compactToUuid(payload.sub as string)
     } catch (jwtErr) {
       const isExpired = jwtErr instanceof Error && jwtErr.message.toLowerCase().includes('expired')
+      logger.warn('qr_scan_invalid_token', {
+        reason: isExpired ? 'token_expired' : 'invalid_token',
+        token_prefix: typeof token === 'string' ? token.slice(0, 8) : 'unknown',
+      })
       // Return 200 so client can read the structured error body
       return new Response(
         JSON.stringify({ success: false, error: isExpired ? 'token_expired' : 'invalid_token' }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -96,7 +106,7 @@ Deno.serve(async (req: Request) => {
     if (orgError || !organizer) {
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized: not an organizer.' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 403, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -112,7 +122,7 @@ Deno.serve(async (req: Request) => {
     if (rlError || !rlAllowed) {
       return new Response(
         JSON.stringify({ success: false, error: 'Scan rate exceeded. Please slow down.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+        { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json', 'Retry-After': '60' } }
       )
     }
 
@@ -127,7 +137,7 @@ Deno.serve(async (req: Request) => {
     if (regError || !reg) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid or unrecognized QR code.' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -141,7 +151,7 @@ Deno.serve(async (req: Request) => {
     if (eventError || !event) {
       return new Response(
         JSON.stringify({ success: false, error: 'Event not found.' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -170,7 +180,7 @@ Deno.serve(async (req: Request) => {
           already_checked_in: true,
           member_name: member?.full_name ?? 'Member',
         }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -188,6 +198,12 @@ Deno.serve(async (req: Request) => {
       p_amount:  event.points_value,
     })
 
+    logger.info('qr_scan_success', {
+      member_id:      reg.user_id,
+      event_id:       reg.event_id,
+      points_awarded: event.points_value,
+    })
+
     return new Response(
       JSON.stringify({
         success:        true,
@@ -195,12 +211,13 @@ Deno.serve(async (req: Request) => {
         points_awarded: event.points_value,
         event_title:    event.title,
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   } catch (err) {
+    logger.error('qr_scan_error', { message: err instanceof Error ? err.message : 'Internal error.' })
     return new Response(
       JSON.stringify({ success: false, error: err instanceof Error ? err.message : 'Internal error.' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 })
