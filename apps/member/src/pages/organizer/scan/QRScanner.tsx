@@ -56,19 +56,20 @@ export function OrgQRScanner() {
   const [isSwitching, setIsSwitching] = useState(false)
 
   // Result overlay — null = nothing showing, non-null = slide-up sheet visible
-  const [overlay, setOverlay] = useState<ResultOverlay | null>(null)
+  const [overlayEntry, setOverlayEntry] = useState<{ data: ResultOverlay; key: number } | null>(null)
+  const overlayKeyCounterRef = useRef(0)
 
   // Refs
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null)
   const videoCallbackRef = useCallback((el: HTMLVideoElement | null) => setVideoEl(el), [])
-  const overlayKeyRef = useRef(0)   // monotonic counter — guarantees unique key per overlay
   const controlsRef = useRef<import('@zxing/browser').IScannerControls | null>(null)
   const isProcessingRef = useRef(false)         // scan lock — prevents duplicate API calls
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cameraAbortRef = useRef(false)
 
   // ── Camera helpers ────────────────────────────────────────────────────────────
 
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     controlsRef.current?.stop()
     controlsRef.current = null
     if (videoEl?.srcObject) {
@@ -76,7 +77,7 @@ export function OrgQRScanner() {
       stream.getTracks().forEach((t) => t.stop())
       videoEl.srcObject = null
     }
-  }
+  }, [videoEl])
 
   const initCamera = async (el: HTMLVideoElement, deviceId?: string): Promise<void> => {
     const { BrowserQRCodeReader } = await import('@zxing/browser')
@@ -109,7 +110,9 @@ export function OrgQRScanner() {
   }
 
   const startCameraWithRetry = async (el: HTMLVideoElement, deviceId?: string) => {
+    cameraAbortRef.current = false
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      if (cameraAbortRef.current) return
       setRetryAttempt(attempt)
       setCameraStatus('starting')
 
@@ -145,33 +148,35 @@ export function OrgQRScanner() {
       clearTimeout(overlayTimerRef.current)
       overlayTimerRef.current = null
     }
-    setOverlay(null)
+    setOverlayEntry(null)
     isProcessingRef.current = false
   }
 
   const showOverlay = (next: ResultOverlay) => {
     // Replace any existing overlay immediately (cancel its timer first)
     if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
-    overlayKeyRef.current += 1   // new key forces AnimatePresence to remount the node
-    setOverlay(next)
+    overlayKeyCounterRef.current += 1   // new key forces AnimatePresence to remount the node
+    setOverlayEntry({ data: next, key: overlayKeyCounterRef.current })
     overlayTimerRef.current = setTimeout(dismissOverlay, OVERLAY_DURATION_MS)
   }
 
   const handleScannedToken = async (token: string) => {
     // Scan lock — zxing fires this callback many times/second for the same code
     if (isProcessingRef.current) return
+
+    // Dynamic imports are cached after first load — no repeated network cost
+    const { supabase } = await import('../../../lib/supabase')
+    const { useAuthStore } = await import('../../../stores/useAuthStore')
+    const user = useAuthStore.getState().user
+
+    if (!user) {
+      showOverlay({ type: 'error', message: 'Session expired. Please sign in again.' })
+      return
+    }
+
     isProcessingRef.current = true
 
     try {
-      const { supabase } = await import('../../../lib/supabase')
-      const { useAuthStore } = await import('../../../stores/useAuthStore')
-      const user = useAuthStore.getState().user
-
-      if (!user) {
-        showOverlay({ type: 'error', message: 'Session expired. Please sign in again.' })
-        return
-      }
-
       // NOTE: existing codebase uses `{ token }` — preserve this field name to match
       // the deployed Edge Function.
       const { data, error } = await supabase.functions.invoke<{
@@ -224,27 +229,28 @@ export function OrgQRScanner() {
 
   // ── Camera switching helpers ──────────────────────────────────────────────────
 
-  const switchCamera = async (nextDeviceId: string) => {
+  const switchCamera = useCallback(async (nextDeviceId: string) => {
     if (isSwitching || nextDeviceId === selectedDeviceId || !videoEl) return
     setIsSwitching(true)
     setSelectedDeviceId(nextDeviceId)
     stopCamera()
     await startCameraWithRetry(videoEl, nextDeviceId)
     setIsSwitching(false)
-  }
+  }, [isSwitching, selectedDeviceId, videoEl, stopCamera]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cycleCamera = () => {
+  const cycleCamera = useCallback(() => {
     if (devices.length < 2) return
     const currentIndex = devices.findIndex((d) => d.deviceId === selectedDeviceId)
     const nextIndex = (currentIndex + 1) % devices.length
     void switchCamera(devices[nextIndex].deviceId)
-  }
+  }, [devices, selectedDeviceId, switchCamera])
 
   // Start camera when video element mounts (callback ref fires after DOM commit)
   useEffect(() => {
     if (!videoEl) return
     void startCameraWithRetry(videoEl)
     return () => {
+      cameraAbortRef.current = true
       stopCamera()
       if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
     }
@@ -369,9 +375,9 @@ export function OrgQRScanner() {
 
       {/* ── Result overlay (slides up, camera stays live behind) ─────────────── */}
       <AnimatePresence>
-        {overlay && (
+        {overlayEntry && (
           <motion.div
-            key={overlayKeyRef.current}
+            key={overlayEntry.key}
             initial={{ y: 120, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 120, opacity: 0 }}
@@ -379,53 +385,67 @@ export function OrgQRScanner() {
             onClick={dismissOverlay}
             className="absolute bottom-0 left-0 right-0 z-[110] px-4 pb-10 cursor-pointer"
           >
-            {overlay.type === 'success' && (
+            {overlayEntry.data.type === 'success' && (
               <div className="bg-green rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-5 h-5 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white font-black text-base truncate">{overlay.memberName}</p>
-                    <p className="text-white/70 text-xs truncate">{overlay.eventTitle}</p>
+                    <p className="text-white font-black text-base truncate">{overlayEntry.data.memberName}</p>
+                    <p className="text-white/70 text-xs truncate">{overlayEntry.data.eventTitle}</p>
                   </div>
                   <div className="ml-auto flex items-center gap-1 shrink-0">
                     <Zap className="w-4 h-4 text-white" />
-                    <span className="text-white font-black text-lg">+{overlay.pointsAwarded}</span>
+                    <span className="text-white font-black text-lg">+{overlayEntry.data.pointsAwarded}</span>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-white rounded-full"
-                    style={{ width: '100%', transition: `width ${OVERLAY_DURATION_MS}ms linear` }}
-                    ref={(el) => { if (el) requestAnimationFrame(() => { el.style.width = '0%' }) }}
+                    ref={(el) => {
+                      if (!el) return
+                      el.style.transition = 'none'
+                      el.style.width = '100%'
+                      requestAnimationFrame(() => {
+                        el.style.transition = `width ${OVERLAY_DURATION_MS}ms linear`
+                        el.style.width = '0%'
+                      })
+                    }}
                   />
                 </div>
               </div>
             )}
 
-            {overlay.type === 'already_checked_in' && (
+            {overlayEntry.data.type === 'already_checked_in' && (
               <div className="bg-amber-500 rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                     <Info className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-white font-black text-base">{overlay.memberName}</p>
+                    <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
                     <p className="text-white/80 text-xs">Already checked in</p>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-white rounded-full"
-                    style={{ width: '100%', transition: `width ${OVERLAY_DURATION_MS}ms linear` }}
-                    ref={(el) => { if (el) requestAnimationFrame(() => { el.style.width = '0%' }) }}
+                    ref={(el) => {
+                      if (!el) return
+                      el.style.transition = 'none'
+                      el.style.width = '100%'
+                      requestAnimationFrame(() => {
+                        el.style.transition = `width ${OVERLAY_DURATION_MS}ms linear`
+                        el.style.width = '0%'
+                      })
+                    }}
                   />
                 </div>
               </div>
             )}
 
-            {overlay.type === 'error' && (
+            {overlayEntry.data.type === 'error' && (
               <div className="bg-red rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
@@ -433,14 +453,21 @@ export function OrgQRScanner() {
                   </div>
                   <div>
                     <p className="text-white font-black text-base">Scan Failed</p>
-                    <p className="text-white/80 text-xs">{overlay.message}</p>
+                    <p className="text-white/80 text-xs">{overlayEntry.data.message}</p>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-white rounded-full"
-                    style={{ width: '100%', transition: `width ${OVERLAY_DURATION_MS}ms linear` }}
-                    ref={(el) => { if (el) requestAnimationFrame(() => { el.style.width = '0%' }) }}
+                    ref={(el) => {
+                      if (!el) return
+                      el.style.transition = 'none'
+                      el.style.width = '100%'
+                      requestAnimationFrame(() => {
+                        el.style.transition = `width ${OVERLAY_DURATION_MS}ms linear`
+                        el.style.width = '0%'
+                      })
+                    }}
                   />
                 </div>
               </div>
