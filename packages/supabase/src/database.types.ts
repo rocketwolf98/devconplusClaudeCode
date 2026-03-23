@@ -135,6 +135,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          devcon_category: string | null
           end_date: string | null
           end_time: string | null
           event_date: string | null
@@ -162,6 +163,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          devcon_category?: string | null
           end_date?: string | null
           end_time?: string | null
           event_date?: string | null
@@ -189,6 +191,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          devcon_category?: string | null
           end_date?: string | null
           end_time?: string | null
           event_date?: string | null
