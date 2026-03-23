@@ -115,6 +115,7 @@ export interface Event {
   ticket_price_php: number
   capacity: number | null
   points_value: number
+  volunteer_points: number
   requires_approval: boolean
   status: EventStatus
   is_featured: boolean

@@ -30,14 +30,21 @@ export default function MemberLayout() {
     if (!user) navigate('/sign-in', { replace: true })
   }, [user, navigate])
 
-  // Realtime subscriptions — live for the entire member session.
-  // Also re-subscribes when the tab returns to the foreground because a backgrounded
-  // tab may have had its WebSocket channels transition to CLOSED (browser throttling /
-  // device sleep). Tearing down and recreating guarantees a fresh SUBSCRIBED state.
+  // Unified data + realtime management for the member session.
+  // On mount: immediately fetches data and subscribes to realtime changes.
+  // On visibility/online/poll: refetches data AND re-subscribes (WebSocket channels
+  // may transition to CLOSED during device sleep or browser throttling).
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
+    if (!user) return
+
+    const recover = () => {
+      void fetchEvents()
+      void loadTotalPoints()
+      void fetchRegistrations(user.id)
+    }
     const resubscribe = () => {
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
@@ -45,47 +52,33 @@ export default function MemberLayout() {
       unsubRewardsRef.current = subscribeToRewardChanges()
     }
 
+    // Initial load on mount — mirrors OrganizerLayout's pattern
+    recover()
     resubscribe()
 
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') resubscribe()
+      if (document.visibilityState === 'visible') {
+        recover()
+        resubscribe()
+      }
     }
     document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('online', recover)
+    // Polling fallback: refetch every 5 minutes as a keepalive for stale channels
+    const pollInterval = setInterval(recover, 5 * 60 * 1000)
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('online', recover)
+      clearInterval(pollInterval)
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
   }, [location.pathname])
-
-  useEffect(() => {
-    if (user) void fetchRegistrations(user.id)
-  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Connection recovery — refetch data whenever the tab returns to the foreground
-  // or the network comes back online. Covers: browser tab switching, device sleep/wake,
-  // mobile network handoff, and any other period of inactivity that leaves data stale.
-  useEffect(() => {
-    const recover = () => {
-      void fetchEvents()
-      void loadTotalPoints()
-      if (user) void fetchRegistrations(user.id)
-    }
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') recover()
-    }
-    document.addEventListener('visibilitychange', handleVisibility)
-    window.addEventListener('online', recover)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility)
-      window.removeEventListener('online', recover)
-    }
-  }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive a stable key from the sorted approved event IDs — re-runs when a
   // registration status changes (e.g. pending → approved) even if the array

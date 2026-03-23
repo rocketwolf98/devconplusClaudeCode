@@ -9,8 +9,23 @@ import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
 import { getEventThemeStyle } from '../../lib/eventTheme'
 import { fadeUp } from '../../lib/animation'
-import { VOLUNTEER_APPROVAL_POINTS } from '../../lib/constants'
 import NotFound from '../NotFound'
+
+function VolunteerPageHeader({ event, onBack }: { event: { title: string }; onBack: () => void }) {
+  return (
+    <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
+      <motion.button
+        whileTap={{ scale: 0.95 }}
+        onClick={onBack}
+        className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
+      >
+        <ArrowLeft className="w-5 h-5 text-white" />
+      </motion.button>
+      <h1 className="text-white text-xl font-bold">Volunteer Application</h1>
+      <p className="text-white/60 text-sm mt-1">{event.title}</p>
+    </div>
+  )
+}
 
 const schema = z.object({
   reason: z.string().min(20, 'Please write at least 20 characters'),
@@ -63,18 +78,7 @@ export default function EventVolunteer() {
         className="min-h-screen bg-slate-50"
         style={getEventThemeStyle(event.devcon_category)}
       >
-        {/* Header */}
-        <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(`/events/${id}`)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </motion.button>
-          <h1 className="text-white text-xl font-bold">Volunteer Application</h1>
-          <p className="text-white/60 text-sm mt-1">{event.title}</p>
-        </div>
+        <VolunteerPageHeader event={event} onBack={() => navigate(`/events/${id}`)} />
 
         <div className="p-4 pb-24">
           <motion.div
@@ -126,18 +130,7 @@ export default function EventVolunteer() {
         className="min-h-screen bg-slate-50"
         style={getEventThemeStyle(event.devcon_category)}
       >
-        {/* Header */}
-        <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(`/events/${id}`)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </motion.button>
-          <h1 className="text-white text-xl font-bold">Volunteer Application</h1>
-          <p className="text-white/60 text-sm mt-1">{event.title}</p>
-        </div>
+        <VolunteerPageHeader event={event} onBack={() => navigate(`/events/${id}`)} />
 
         <div className="p-4 pb-24">
           <motion.div
@@ -154,7 +147,12 @@ export default function EventVolunteer() {
               </p>
             </div>
             <div className="bg-primary/10 rounded-xl px-4 py-3">
-              <p className="text-primary text-sm font-semibold">+{VOLUNTEER_APPROVAL_POINTS} pts when approved!</p>
+              <p className="text-primary text-sm font-semibold">
+                +{event.points_value + event.volunteer_points} pts when approved!
+              </p>
+              <p className="text-primary/60 text-xs mt-0.5">
+                {event.points_value} attendance + {event.volunteer_points} volunteer bonus
+              </p>
             </div>
             <motion.button
               whileTap={{ scale: 0.95 }}
@@ -174,18 +172,7 @@ export default function EventVolunteer() {
       className="min-h-screen bg-slate-50"
       style={getEventThemeStyle(event.devcon_category)}
     >
-      {/* Header */}
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </motion.button>
-        <h1 className="text-white text-xl font-bold">Volunteer Application</h1>
-        <p className="text-white/60 text-sm mt-1">{event.title}</p>
-      </div>
+      <VolunteerPageHeader event={event} onBack={() => navigate(-1)} />
 
       <motion.div
         variants={fadeUp}

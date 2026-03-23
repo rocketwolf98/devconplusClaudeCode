@@ -4,6 +4,8 @@ import { Home, CalendarDays, ScanLine, Gift, User } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
+import { useEventsStore } from '../stores/useEventsStore'
+import { useRewardsStore } from '../stores/useRewardsStore'
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -30,6 +32,10 @@ export default function OrganizerLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const fetchEvents = useEventsStore((s) => s.fetchEvents)
+  const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
+  const fetchAllRewards = useRewardsStore((s) => s.fetchAllRewards)
+  const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
 
   useEffect(() => {
     if (!user) {
@@ -42,6 +48,47 @@ export default function OrganizerLayout() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
   }, [location.pathname])
+
+  // Data management for the organizer session.
+  // Fetches data and subscribes to realtime on mount; recovers and re-subscribes
+  // on visibility/online/idle-timeout events.
+  const unsubEventsRef = useRef<(() => void) | null>(null)
+  const unsubRewardsRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    const recover = () => {
+      void fetchEvents()
+      void fetchAllRewards()
+    }
+    const resubscribe = () => {
+      unsubEventsRef.current?.()
+      unsubRewardsRef.current?.()
+      unsubEventsRef.current = subscribeToEventChanges()
+      unsubRewardsRef.current = subscribeToRewardChanges()
+    }
+
+    recover()
+    resubscribe()
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        recover()
+        resubscribe()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('online', recover)
+    // Polling fallback: same 5-minute keepalive as MemberLayout
+    const pollInterval = setInterval(recover, 5 * 60 * 1000)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('online', recover)
+      clearInterval(pollInterval)
+      unsubEventsRef.current?.()
+      unsubRewardsRef.current?.()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user || !ORGANIZER_ROLES.includes(user.role as typeof ORGANIZER_ROLES[number])) return null
 

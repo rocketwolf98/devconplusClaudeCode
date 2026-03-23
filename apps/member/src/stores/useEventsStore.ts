@@ -5,6 +5,15 @@ import { supabase } from '../lib/supabase'
 // Alias — checked_in: boolean | null is already part of EventRegistration
 type FullRegistration = EventRegistration
 
+// Sort ascending by event_date — reused across create, update, and realtime inserts
+function sortByEventDate(events: Event[]): Event[] {
+  return [...events].sort(
+    (a, b) =>
+      new Date(a.event_date ?? 0).getTime() -
+      new Date(b.event_date ?? 0).getTime()
+  )
+}
+
 interface CreateEventPayload {
   title: string
   description: string
@@ -20,6 +29,7 @@ interface CreateEventPayload {
   ticket_price_php: number
   capacity: number | null
   points_value: number
+  volunteer_points: number
   requires_approval: boolean
   cover_image_url: string | null
   chapter_id: string
@@ -40,6 +50,7 @@ export interface UpdateEventPayload {
   ticket_price_php?: number
   capacity?: number | null
   points_value?: number
+  volunteer_points?: number
   requires_approval?: boolean
   cover_image_url?: string | null
 }
@@ -80,7 +91,7 @@ export const useEventsStore = create<EventsState>((set) => ({
       set({ error: error.message, isLoading: false })
       return
     }
-    set({ events: (data ?? []) as unknown as Event[], isLoading: false })
+    set({ events: sortByEventDate((data ?? []) as Event[]), isLoading: false })
   },
 
   createEvent: async (payload) => {
@@ -90,14 +101,8 @@ export const useEventsStore = create<EventsState>((set) => ({
       .select()
       .single()
     if (error) throw error
-    const newEvent = data as unknown as Event
-    set((s) => ({
-      events: [...s.events, newEvent].sort(
-        (a, b) =>
-          new Date(a.event_date ?? 0).getTime() -
-          new Date(b.event_date ?? 0).getTime()
-      ),
-    }))
+    const newEvent = data as Event
+    set((s) => ({ events: sortByEventDate([...s.events, newEvent]) }))
     return newEvent
   },
 
@@ -118,15 +123,9 @@ export const useEventsStore = create<EventsState>((set) => ({
       .select()
       .single()
     if (error) throw error
-    const updated = data as unknown as Event
+    const updated = data as Event
     set((s) => ({
-      events: s.events
-        .map((e) => (e.id === id ? updated : e))
-        .sort(
-          (a, b) =>
-            new Date(a.event_date ?? 0).getTime() -
-            new Date(b.event_date ?? 0).getTime()
-        ),
+      events: sortByEventDate(s.events.map((e) => (e.id === id ? updated : e))),
     }))
     return updated
   },
@@ -139,11 +138,7 @@ export const useEventsStore = create<EventsState>((set) => ({
         { event: 'INSERT', schema: 'public', table: 'events' },
         (payload) => {
           set((s) => ({
-            events: [...s.events, payload.new as Event].sort(
-              (a, b) =>
-                new Date(a.event_date ?? 0).getTime() -
-                new Date(b.event_date ?? 0).getTime()
-            ),
+            events: sortByEventDate([...s.events, payload.new as Event]),
           }))
         }
       )
@@ -170,15 +165,16 @@ export const useEventsStore = create<EventsState>((set) => ({
   },
 
   fetchRegistrations: async (userId) => {
+    set({ isLoading: true, error: null })
     const { data, error } = await supabase
       .from('event_registrations')
       .select('*')
       .eq('user_id', userId)
     if (error) {
-      set({ error: error.message })
+      set({ error: error.message, isLoading: false })
       return
     }
-    set({ registrations: (data ?? []) as FullRegistration[] })
+    set({ registrations: (data ?? []) as FullRegistration[], isLoading: false })
   },
 
   register: async (eventId, userId) => {
@@ -258,7 +254,6 @@ export const useEventsStore = create<EventsState>((set) => ({
     }
   },
 
-  // Keep a synchronous getById helper for convenience
 }))
 
 // Selector helpers

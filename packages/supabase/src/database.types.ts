@@ -144,6 +144,7 @@ export type Database = {
           is_promoted: boolean | null
           location: string | null
           points_value: number | null
+          volunteer_points: number | null
           privacy_status: string | null
           requires_approval: boolean | null
           status: string | null
@@ -170,6 +171,7 @@ export type Database = {
           is_promoted?: boolean | null
           location?: string | null
           points_value?: number | null
+          volunteer_points?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
           status?: string | null
@@ -196,6 +198,7 @@ export type Database = {
           is_promoted?: boolean | null
           location?: string | null
           points_value?: number | null
+          volunteer_points?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
           status?: string | null

@@ -3,6 +3,9 @@ import type { DevconCategory } from '@devcon-plus/supabase'
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
 
+// Single source of truth for tag length — used in both schema validation and the UI input
+export const TAG_MAX_LENGTH = 20
+
 export const schema = z
   .object({
     title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be under 100 characters'),
@@ -20,7 +23,7 @@ export const schema = z
       'networking',
     ], { required_error: 'Category is required' }),
     devcon_category: z.enum(['devcon', 'she', 'kids', 'campus']).optional().nullable(),
-    tags: z.array(z.string().max(30)).max(10).default([]),
+    tags: z.array(z.string().max(TAG_MAX_LENGTH)).max(10).default([]),
     visibility: z.enum(['public', 'unlisted', 'draft']).default('public'),
     is_free: z.boolean().default(true),
     ticket_price_php: z.number({ coerce: true }).int().min(0).max(100000, 'Price cannot exceed ₱100,000').default(0),
@@ -30,7 +33,11 @@ export const schema = z
     ),
     points_value: z
       .number({ coerce: true })
-      .min(50, 'Minimum 50 XP')
+      .min(1, 'Minimum 1 XP')
+      .max(1000, 'Maximum 1000 XP'),
+    volunteer_points: z
+      .number({ coerce: true })
+      .min(0, 'Cannot be negative')
       .max(1000, 'Maximum 1000 XP'),
     requires_approval: z.boolean(),
     cover_image_url: z.string().url().optional().or(z.literal('')),
@@ -77,6 +84,24 @@ export const DEVCON_PROGRAM_OPTIONS: {
   { value: 'kids',   label: 'DEVCON Kids',   hex: '#21C45D' },
   { value: 'campus', label: 'Campus DEVCON', hex: '#F8C630', darkText: true },
 ]
+
+// ── Points defaults by category ───────────────────────────────────────────────
+// Standard (non-boosted) values from the DEVCON+ points system spec.
+// - Event Attendance (Physical): +5 pts
+// - Technical Training Attendance: +150 pts
+// Volunteer points default follows Code Camp Volunteering standard (+500 pts).
+
+export const ATTENDANCE_POINTS_BY_CATEGORY: Record<NonNullable<FormData['category']>, number> = {
+  tech_talk:   5,
+  networking:  5,
+  social:      5,
+  summit:      5,
+  workshop:    150,
+  brown_bag:   150,
+  hackathon:   150,
+}
+
+export const DEFAULT_VOLUNTEER_POINTS = 500
 
 export const VISIBILITY_OPTIONS: { value: FormData['visibility']; label: string }[] = [
   { value: 'public',   label: 'Public'   },

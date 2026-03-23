@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ImagePlus, X } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -16,6 +16,9 @@ import {
   CATEGORY_OPTIONS,
   DEVCON_PROGRAM_OPTIONS,
   VISIBILITY_OPTIONS,
+  ATTENDANCE_POINTS_BY_CATEGORY,
+  DEFAULT_VOLUNTEER_POINTS,
+  TAG_MAX_LENGTH,
   SectionHeader,
 } from './eventFormConstants'
 
@@ -31,6 +34,15 @@ export function OrgEventCreate() {
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [coverPreview, setCoverPreview] = useState<string | null>(null)
   const [coverUploadError, setCoverUploadError] = useState<string | null>(null)
+  // Track the object URL so we can revoke it to prevent memory leaks
+  const coverObjectUrlRef = useRef<string | null>(null)
+
+  // Revoke the blob URL when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (coverObjectUrlRef.current) URL.revokeObjectURL(coverObjectUrlRef.current)
+    }
+  }, [])
 
   // Tags (managed outside RHF)
   const [tags, setTags] = useState<string[]>([])
@@ -45,12 +57,14 @@ export function OrgEventCreate() {
     register,
     handleSubmit,
     watch,
+    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      points_value:      200,
+      points_value:      5,
+      volunteer_points:  DEFAULT_VOLUNTEER_POINTS,
       requires_approval: false,
       is_free:           true,
       ticket_price_php:  0,
@@ -59,7 +73,15 @@ export function OrgEventCreate() {
     },
   })
 
-  const isFree = watch('is_free')
+  const isFree     = watch('is_free')
+  const category   = watch('category')
+
+  // Auto-set attendance points when the organizer picks a category
+  const prevCategoryRef = useRef<string | undefined>(undefined)
+  if (category && category !== prevCategoryRef.current) {
+    prevCategoryRef.current = category
+    setValue('points_value', ATTENDANCE_POINTS_BY_CATEGORY[category], { shouldValidate: false })
+  }
 
   // ── Cover image handlers ─────────────────────────────────────────────────
 
@@ -77,13 +99,20 @@ export function OrgEventCreate() {
       setCoverUploadError('Image must be under 5 MB.')
       return
     }
+    // Revoke previous object URL before creating a new one
+    if (coverObjectUrlRef.current) URL.revokeObjectURL(coverObjectUrlRef.current)
     setCoverFile(file)
     setCoverUploadError(null)
     const url = URL.createObjectURL(file)
+    coverObjectUrlRef.current = url
     setCoverPreview(url)
   }
 
   const removeCover = () => {
+    if (coverObjectUrlRef.current) {
+      URL.revokeObjectURL(coverObjectUrlRef.current)
+      coverObjectUrlRef.current = null
+    }
     setCoverFile(null)
     setCoverPreview(null)
     setCoverUploadError(null)
@@ -96,7 +125,7 @@ export function OrgEventCreate() {
     if (e.key === 'Enter') {
       e.preventDefault()
       const val = tagInput.trim()
-      if (val && val.length <= 20 && !tags.includes(val)) {
+      if (val && val.length <= TAG_MAX_LENGTH && !tags.includes(val)) {
         setTags((prev) => [...prev, val])
       }
       setTagInput('')
@@ -154,6 +183,7 @@ export function OrgEventCreate() {
         ticket_price_php:  data.is_free ? 0 : data.ticket_price_php,
         capacity:          data.capacity ?? null,
         points_value:      data.points_value,
+        volunteer_points:  data.volunteer_points,
         requires_approval: data.requires_approval,
         cover_image_url,
         chapter_id:        user.chapter_id,
@@ -343,9 +373,9 @@ export function OrgEventCreate() {
                 onKeyDown={handleTagKeyDown}
                 placeholder="Type a tag, press Enter"
                 className={inputClass}
-                maxLength={20}
+                maxLength={TAG_MAX_LENGTH}
               />
-              <p className="text-[10px] text-slate-400 mt-1">Max 20 chars per tag.</p>
+              <p className="text-[10px] text-slate-400 mt-1">Max {TAG_MAX_LENGTH} chars per tag.</p>
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {tags.map((t) => (
@@ -541,22 +571,42 @@ export function OrgEventCreate() {
         {/* ── ENGAGEMENT ── */}
         <motion.div variants={fadeUp}>
           <SectionHeader title="Engagement" />
-          <div>
-            <label className={labelClass}>XP Points Value</label>
-            <input
-              {...register('points_value')}
-              type="number"
-              className={inputClass}
-              min={50}
-              max={1000}
-              step={50}
-            />
-            {errors.points_value && (
-              <p className="text-xs text-red mt-1">{errors.points_value.message}</p>
-            )}
-            <p className="text-xs text-slate-400 mt-1">
-              Members earn this many XP when checked in at the event.
-            </p>
+          <div className="space-y-4">
+            <div>
+              <label className={labelClass}>Attendance XP</label>
+              <input
+                {...register('points_value')}
+                type="number"
+                className={inputClass}
+                min={1}
+                max={1000}
+                step={1}
+              />
+              {errors.points_value && (
+                <p className="text-xs text-red mt-1">{errors.points_value.message}</p>
+              )}
+              <p className="text-xs text-slate-400 mt-1">
+                Auto-set based on category — Tech Talk/Social/Networking = 5 pts, Workshop/Brown Bag/Hackathon = 150 pts.
+              </p>
+            </div>
+
+            <div>
+              <label className={labelClass}>Volunteer XP</label>
+              <input
+                {...register('volunteer_points')}
+                type="number"
+                className={inputClass}
+                min={0}
+                max={1000}
+                step={1}
+              />
+              {errors.volunteer_points && (
+                <p className="text-xs text-red mt-1">{errors.volunteer_points.message}</p>
+              )}
+              <p className="text-xs text-slate-400 mt-1">
+                XP awarded on top of attendance XP for members who volunteer at this event. Default: 500 pts.
+              </p>
+            </div>
           </div>
         </motion.div>
 
