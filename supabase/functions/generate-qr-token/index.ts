@@ -6,6 +6,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { create, getNumericDate } from 'https://deno.land/x/djwt@v3.0.2/mod.ts'
+import { logger } from '../_shared/logger.ts'
 
 // Encode UUID (36 hex chars) → 22-char base64url (128 bits, no hyphens)
 function uuidToCompact(uuid: string): string {
@@ -15,14 +16,19 @@ function uuidToCompact(uuid: string): string {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? ''
+  return {
+    'Access-Control-Allow-Origin': origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : '',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 }
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(req) })
   }
 
   try {
@@ -40,7 +46,7 @@ Deno.serve(async (req: Request) => {
     if (authErr || !user) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -62,7 +68,7 @@ Deno.serve(async (req: Request) => {
     if (rlError || !rlAllowed) {
       return new Response(
         JSON.stringify({ error: 'Too many token requests. Please wait before refreshing your ticket.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' } }
+        { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json', 'Retry-After': '60' } }
       )
     }
 
@@ -70,7 +76,7 @@ Deno.serve(async (req: Request) => {
     if (!registration_id) {
       return new Response(
         JSON.stringify({ error: 'Missing registration_id.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -78,7 +84,7 @@ Deno.serve(async (req: Request) => {
     if (!UUID_RE.test(registration_id)) {
       return new Response(
         JSON.stringify({ error: 'Invalid registration_id format.' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -94,7 +100,7 @@ Deno.serve(async (req: Request) => {
     if (regErr || !reg) {
       return new Response(
         JSON.stringify({ error: 'Registration not found or not approved.' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -103,7 +109,7 @@ Deno.serve(async (req: Request) => {
     if (eventStatus === 'past') {
       return new Response(
         JSON.stringify({ error: 'Event has already passed.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -123,14 +129,16 @@ Deno.serve(async (req: Request) => {
       key
     )
 
+    logger.info('qr_token_generated', { registration_id: reg.id })
     return new Response(
       JSON.stringify({ token, expires_at: expiresAt }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   } catch (err) {
+    logger.error('qr_token_error', { message: err instanceof Error ? err.message : 'Internal error.' })
     return new Response(
       JSON.stringify({ error: err instanceof Error ? err.message : 'Internal error.' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 })
