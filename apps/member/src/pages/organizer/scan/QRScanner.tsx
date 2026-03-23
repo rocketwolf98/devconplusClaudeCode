@@ -98,9 +98,8 @@ export function OrgQRScanner() {
       const controls = await reader.decodeFromVideoDevice(
         activeId || allDevices[0].deviceId,
         el,
-        (res, err) => {
+        (res) => {
           if (res) void handleScannedToken(res.getText())
-          else if (err && err.name !== 'NotFoundException') console.error(err)
         }
       )
       controlsRef.current = controls
