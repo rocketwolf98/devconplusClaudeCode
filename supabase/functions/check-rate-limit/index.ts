@@ -8,10 +8,16 @@
 // Output: { allowed: boolean, retryAfterSeconds?: number }
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { logger } from '../_shared/logger.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin':  '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
+
+function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') ?? ''
+  return {
+    'Access-Control-Allow-Origin': origin === ALLOWED_ORIGIN ? ALLOWED_ORIGIN : '',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  }
 }
 
 type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade'
@@ -68,7 +74,7 @@ async function calcRetryAfter(
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(req) })
   }
 
   // Parse body once — req.json() can only be consumed once per request
@@ -78,7 +84,7 @@ Deno.serve(async (req: Request) => {
   if (!bucket) {
     return new Response(
       JSON.stringify({ allowed: false, error: 'Missing bucket.' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 
@@ -104,14 +110,14 @@ Deno.serve(async (req: Request) => {
       if (!json.email) {
         return new Response(
           JSON.stringify({ allowed: false, error: 'Missing email for login bucket.' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
         )
       }
       // RFC 5321: max email address length is 254 characters
       if (json.email.length > 254) {
         return new Response(
           JSON.stringify({ allowed: false, error: 'Invalid email.' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
         )
       }
       identifier = `email:${json.email.toLowerCase().trim()}`
@@ -133,7 +139,7 @@ Deno.serve(async (req: Request) => {
     if (authErr || !user) {
       return new Response(
         JSON.stringify({ allowed: false, error: 'Unauthorized.' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 401, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
     identifier = `user:${user.id}`
@@ -141,7 +147,7 @@ Deno.serve(async (req: Request) => {
     // Unknown bucket → 400 Bad Request (not 429 — this is a caller error, not a rate limit event)
     return new Response(
       JSON.stringify({ allowed: false, error: 'Unknown bucket.' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 
@@ -153,21 +159,22 @@ Deno.serve(async (req: Request) => {
   })
 
   if (rpcErr) {
-    console.error('[check-rate-limit] RPC error:', rpcErr.message)
+    logger.error('rate_limit_rpc_error', { message: rpcErr.message })
     return new Response(
       JSON.stringify({ allowed: true }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 
   if (!allowed) {
+    logger.warn('rate_limit_blocked', { bucket, identifier })
     const secs = await calcRetryAfter(supabaseAnon, identifier, bucket)
     return new Response(
       JSON.stringify({ allowed: false, retryAfterSeconds: secs }),
       {
         status: 429,
         headers: {
-          ...corsHeaders,
+          ...getCorsHeaders(req),
           'Content-Type': 'application/json',
           'Retry-After': String(secs),  // RFC 7231 machine-readable header
         },
@@ -177,6 +184,6 @@ Deno.serve(async (req: Request) => {
 
   return new Response(
     JSON.stringify({ allowed: true }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
   )
 })
