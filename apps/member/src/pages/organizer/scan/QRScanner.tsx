@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -60,7 +60,8 @@ export function OrgQRScanner() {
 
   // Refs
   const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null)
-  const videoCallbackRef = (el: HTMLVideoElement | null) => setVideoEl(el)
+  const videoCallbackRef = useCallback((el: HTMLVideoElement | null) => setVideoEl(el), [])
+  const overlayKeyRef = useRef(0)   // monotonic counter — guarantees unique key per overlay
   const controlsRef = useRef<import('@zxing/browser').IScannerControls | null>(null)
   const isProcessingRef = useRef(false)         // scan lock — prevents duplicate API calls
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -152,6 +153,7 @@ export function OrgQRScanner() {
   const showOverlay = (next: ResultOverlay) => {
     // Replace any existing overlay immediately (cancel its timer first)
     if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
+    overlayKeyRef.current += 1   // new key forces AnimatePresence to remount the node
     setOverlay(next)
     overlayTimerRef.current = setTimeout(dismissOverlay, OVERLAY_DURATION_MS)
   }
@@ -307,6 +309,7 @@ export function OrgQRScanner() {
               <p className="text-sm font-bold text-slate-900 mb-1">Camera unavailable</p>
               <p className="text-xs text-slate-500 mb-4">Check browser permissions and try again.</p>
               <motion.button
+                type="button"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => { if (videoEl) void startCameraWithRetry(videoEl) }}
                 className="w-full py-2.5 bg-blue text-white text-sm font-bold rounded-xl"
@@ -333,6 +336,8 @@ export function OrgQRScanner() {
       {/* ── Top bar ─────────────────────────────────────────────────────────── */}
       <div className="absolute top-0 left-0 right-0 z-[110] flex items-center justify-between px-4 pt-14 pb-4">
         <motion.button
+          type="button"
+          aria-label="Go back"
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center"
@@ -342,6 +347,8 @@ export function OrgQRScanner() {
 
         {devices.length >= 2 && (
           <motion.button
+            type="button"
+            aria-label="Switch camera lens"
             whileTap={{ scale: 0.9 }}
             onClick={cycleCamera}
             disabled={isSwitching}
@@ -365,7 +372,7 @@ export function OrgQRScanner() {
       <AnimatePresence>
         {overlay && (
           <motion.div
-            key={overlay.type}
+            key={overlayKeyRef.current}
             initial={{ y: 120, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 120, opacity: 0 }}
