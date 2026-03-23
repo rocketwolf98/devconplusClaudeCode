@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Plus, ToggleLeft, ToggleRight, RefreshCw, Trash2 } from 'lucide-react'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '../../lib/supabase'
@@ -19,8 +19,6 @@ interface OrgCode {
   id: string
   code: string
   chapter_id: string | null
-  program_id: string | null
-  scope_type: 'chapter' | 'program'
   assigned_role: string
   is_active: boolean
   usage_limit: number | null
@@ -28,15 +26,9 @@ interface OrgCode {
   expires_at: string | null
   created_at: string
   chapters?: { name: string } | null
-  programs?: { name: string } | null
 }
 
 interface Chapter {
-  id: string
-  name: string
-}
-
-interface Program {
   id: string
   name: string
 }
@@ -46,22 +38,12 @@ const CODE_PATTERN = /^DCN-[A-Z]{3}-[0-9]{4}$/
 const schema = z
   .object({
     code: z.string().regex(CODE_PATTERN, 'Must match DCN-XXX-XXXX format'),
-    scope_type: z.enum(['chapter', 'program']).default('chapter'),
-    chapter_id: z.string().optional(),
-    program_id: z.string().optional(),
+    chapter_id: z.string().min(1, 'Select a chapter'),
     assigned_role: z.enum(['chapter_officer', 'hq_admin']),
     usage_limit: z.coerce.number().int().positive().optional(),
     has_usage_limit: z.boolean().default(false),
     expires_at: z.string().optional(),
     has_expiry: z.boolean().default(false),
-  })
-  .superRefine((data, ctx) => {
-    if (data.scope_type === 'chapter' && !data.chapter_id) {
-      ctx.addIssue({ code: 'custom', path: ['chapter_id'], message: 'Select a chapter' })
-    }
-    if (data.scope_type === 'program' && !data.program_id) {
-      ctx.addIssue({ code: 'custom', path: ['program_id'], message: 'Select a program' })
-    }
   })
 
 type FormData = z.infer<typeof schema>
@@ -69,10 +51,10 @@ type FormData = z.infer<typeof schema>
 export default function AdminOrgCodes() {
   const [codes, setCodes] = useState<OrgCode[]>([])
   const [chapters, setChapters] = useState<Chapter[]>([])
-  const [programs, setPrograms] = useState<Program[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [rotatingId, setRotatingId] = useState<string | null>(null)
 
   const {
     register,
@@ -80,36 +62,31 @@ export default function AdminOrgCodes() {
     reset,
     setValue,
     watch,
-    control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       assigned_role: 'chapter_officer',
       code: generateCode(),
-      scope_type: 'chapter',
       has_usage_limit: false,
       has_expiry: false,
     },
   })
 
-  const scopeType = watch('scope_type')
   const hasUsageLimit = watch('has_usage_limit')
   const hasExpiry = watch('has_expiry')
 
   const load = async () => {
     setIsLoading(true)
-    const [codesRes, chaptersRes, programsRes] = await Promise.all([
+    const [codesRes, chaptersRes] = await Promise.all([
       supabase
         .from('organizer_codes')
-        .select('*, chapters(name), programs(name)')
+        .select('*, chapters(name)')
         .order('created_at', { ascending: false }),
       supabase.from('chapters').select('id, name').order('name'),
-      supabase.from('programs').select('id, name').order('name'),
     ])
     setCodes((codesRes.data ?? []) as OrgCode[])
     setChapters((chaptersRes.data ?? []) as Chapter[])
-    setPrograms((programsRes.data ?? []) as Program[])
     setIsLoading(false)
   }
 
@@ -122,6 +99,18 @@ export default function AdminOrgCodes() {
       .eq('id', id)
     if (dbErr) { setError(dbErr.message); return }
     setCodes((prev) => prev.map((c) => c.id === id ? { ...c, is_active: !current } : c))
+  }
+
+  const handleRotate = async (id: string) => {
+    setRotatingId(id)
+    const newCode = generateCode()
+    const { error: dbErr } = await supabase
+      .from('organizer_codes')
+      .update({ code: newCode })
+      .eq('id', id)
+    setRotatingId(null)
+    if (dbErr) { setError(dbErr.message); return }
+    setCodes((prev) => prev.map((c) => c.id === id ? { ...c, code: newCode } : c))
   }
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
@@ -145,23 +134,20 @@ export default function AdminOrgCodes() {
       .from('organizer_codes')
       .insert({
         code: data.code.toUpperCase(),
-        scope_type: data.scope_type,
-        chapter_id: data.scope_type === 'chapter' ? (data.chapter_id ?? null) : null,
-        program_id: data.scope_type === 'program' ? (data.program_id ?? null) : null,
+        chapter_id: data.chapter_id,
         assigned_role: data.assigned_role,
         is_active: true,
         usage_limit: data.has_usage_limit ? (data.usage_limit ?? null) : null,
         usage_count: 0,
         expires_at: data.has_expiry ? (data.expires_at ?? null) : null,
       })
-      .select('*, chapters(name), programs(name)')
+      .select('*, chapters(name)')
       .single()
     if (dbErr) { setError(dbErr.message); return }
     setCodes((prev) => [inserted as OrgCode, ...prev])
     reset({
       assigned_role: 'chapter_officer',
       code: generateCode(),
-      scope_type: 'chapter',
       has_usage_limit: false,
       has_expiry: false,
     })
@@ -173,7 +159,7 @@ export default function AdminOrgCodes() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black text-slate-900">Organizer Codes</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Issue codes to grant officer access per chapter or program</p>
+          <p className="text-sm text-slate-500 mt-0.5">Issue codes to grant officer access per chapter</p>
         </div>
         <button
           onClick={() => { setValue('code', generateCode()); setShowForm((v) => !v) }}
@@ -195,7 +181,7 @@ export default function AdminOrgCodes() {
         >
           <h2 className="text-sm font-bold text-slate-900">Create Organizer Code</h2>
 
-          {/* Row 1: Code */}
+          {/* Code */}
           <div>
             <label className="text-xs font-medium text-slate-700 block mb-1">Code</label>
             <div className="flex gap-1.5">
@@ -216,65 +202,22 @@ export default function AdminOrgCodes() {
             {errors.code && <p className="text-red text-[10px] mt-1">{errors.code.message}</p>}
           </div>
 
-          {/* Row 2: Scope segmented control */}
+          {/* Chapter */}
           <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Scope</label>
-            <Controller
-              control={control}
-              name="scope_type"
-              render={({ field }) => (
-                <div className="flex rounded-xl border border-slate-200 overflow-hidden">
-                  {(['chapter', 'program'] as const).map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => field.onChange(s)}
-                      className={`flex-1 py-2 text-xs font-semibold capitalize transition-colors ${
-                        field.value === s
-                          ? 'bg-blue text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
-            />
+            <label className="text-xs font-medium text-slate-700 block mb-1">Chapter</label>
+            <select
+              {...register('chapter_id')}
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+            >
+              <option value="">Select…</option>
+              {chapters.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            {errors.chapter_id && <p className="text-red text-[10px] mt-1">{errors.chapter_id.message}</p>}
           </div>
 
-          {/* Row 3: Conditional chapter or program dropdown */}
-          {scopeType === 'chapter' ? (
-            <div>
-              <label className="text-xs font-medium text-slate-700 block mb-1">Chapter</label>
-              <select
-                {...register('chapter_id')}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
-              >
-                <option value="">Select…</option>
-                {chapters.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              {errors.chapter_id && <p className="text-red text-[10px] mt-1">{errors.chapter_id.message}</p>}
-            </div>
-          ) : (
-            <div>
-              <label className="text-xs font-medium text-slate-700 block mb-1">Program</label>
-              <select
-                {...register('program_id')}
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
-              >
-                <option value="">Select…</option>
-                {programs.map((p) => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
-              {errors.program_id && <p className="text-red text-[10px] mt-1">{errors.program_id.message}</p>}
-            </div>
-          )}
-
-          {/* Row 4: Role */}
+          {/* Role */}
           <div>
             <label className="text-xs font-medium text-slate-700 block mb-1">Role</label>
             <select
@@ -286,7 +229,7 @@ export default function AdminOrgCodes() {
             </select>
           </div>
 
-          {/* Row 5: Usage Limit */}
+          {/* Usage Limit */}
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <input
@@ -309,7 +252,7 @@ export default function AdminOrgCodes() {
             {errors.usage_limit && <p className="text-red text-[10px] mt-1">{errors.usage_limit.message}</p>}
           </div>
 
-          {/* Row 6: Expiry */}
+          {/* Expiry */}
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <input
@@ -345,7 +288,6 @@ export default function AdminOrgCodes() {
                 reset({
                   assigned_role: 'chapter_officer',
                   code: generateCode(),
-                  scope_type: 'chapter',
                   has_usage_limit: false,
                   has_expiry: false,
                 })
@@ -367,7 +309,7 @@ export default function AdminOrgCodes() {
               <tr className="border-b border-slate-100 bg-slate-50">
                 <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Scope</th>
+                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Chapter</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Usage</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Expires</th>
                 <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
@@ -379,7 +321,7 @@ export default function AdminOrgCodes() {
                 <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-mono font-bold text-slate-900 text-xs tracking-wider">{c.code}</td>
                   <td className="px-4 py-3 text-slate-600 text-xs">{c.assigned_role}</td>
-                  <td className="px-4 py-3 text-slate-600">{c.chapters?.name ?? c.programs?.name ?? '—'}</td>
+                  <td className="px-4 py-3 text-slate-600">{c.chapters?.name ?? '—'}</td>
                   <td className="px-4 py-3 text-slate-600 text-xs tabular-nums">
                     {c.usage_count} / {c.usage_limit ?? '∞'}
                   </td>
@@ -397,6 +339,14 @@ export default function AdminOrgCodes() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => void handleRotate(c.id)}
+                        disabled={rotatingId === c.id}
+                        className="p-1 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue disabled:opacity-40 transition-colors"
+                        title="Rotate code"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${rotatingId === c.id ? 'animate-spin' : ''}`} />
+                      </button>
                       <button
                         onClick={() => void handleToggle(c.id, c.is_active)}
                         className="text-slate-400 hover:text-blue transition-colors"
