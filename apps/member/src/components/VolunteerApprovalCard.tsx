@@ -113,7 +113,7 @@ function VolunteerApprovalCardComponent({
           </motion.button>
           <motion.button
             onClick={() => onApprove(application.id)}
-            className="flex-1 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary-dark transition-colors flex items-center justify-center gap-1.5"
+            className="flex-1 py-2 text-sm font-semibold rounded-xl bg-blue text-white hover:bg-blue-dark transition-colors flex items-center justify-center gap-1.5"
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
