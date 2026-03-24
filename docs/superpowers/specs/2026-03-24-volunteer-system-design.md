@@ -18,6 +18,7 @@ Wire the existing member-side volunteer application flow into the organizer dash
 - New `VolunteerApprovalCard` component for displaying and actioning applications
 - New `useOrgVolunteerStore` for fetching/mutating volunteer applications on the organizer side
 - Stats bar "Pending" count updated to reflect combined pending event registrations + volunteer applications
+- RLS policy allowing chapter officers to SELECT volunteer_applications for their chapter's events
 
 ### Out of scope
 - Member-side volunteer form (`EventVolunteer.tsx`) — already complete, no changes
@@ -39,9 +40,36 @@ volunteer_applications
   phone_number        text | null
   social_media_handle text | null
   status              text  CHECK IN ('pending','approved','rejected')
-  applied_at          timestamptz
+  applied_at          timestamptz  (NOT NULL)
   reviewed_at         timestamptz | null
   reviewed_by         uuid | null → profiles
+```
+
+### RLS Policy (must be added as part of this work)
+```sql
+-- Officers can read volunteer applications for their chapter's events
+CREATE POLICY "Officers read chapter volunteer apps" ON volunteer_applications
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM events e
+      JOIN profiles p ON p.id = auth.uid()
+      WHERE e.id = volunteer_applications.event_id
+        AND e.chapter_id = p.chapter_id
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+    )
+  );
+
+-- Officers can update (approve/reject) volunteer applications for their chapter's events
+CREATE POLICY "Officers update chapter volunteer apps" ON volunteer_applications
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM events e
+      JOIN profiles p ON p.id = auth.uid()
+      WHERE e.id = volunteer_applications.event_id
+        AND e.chapter_id = p.chapter_id
+        AND p.role IN ('chapter_officer', 'hq_admin', 'super_admin')
+    )
+  );
 ```
 
 ### New Store: `useOrgVolunteerStore.ts`
@@ -49,16 +77,22 @@ Location: `apps/member/src/stores/useOrgVolunteerStore.ts`
 
 **State:**
 ```ts
-applications: OrgVolunteerApplication[]  // joined: profiles + events
+applications: OrgVolunteerApplication[]  // all statuses, joined: profiles + events
 loading: boolean
 error: string | null
 ```
 
 **Actions:**
-- `loadApplications(chapterId: string)` — fetches all volunteer_applications for events belonging to the given chapter, joining profiles (full_name, email, school_or_company) and events (title)
-- `approveApplication(id: string, reviewerId: string)` — sets status='approved', reviewed_at=now(), reviewed_by=reviewerId
-- `rejectApplication(id: string, reviewerId: string)` — sets status='rejected', reviewed_at=now(), reviewed_by=reviewerId
-- `revertApplication(id: string)` — resets status='pending', clears reviewed_at + reviewed_by
+
+- `loadApplications(chapterId: string)` — fetches ALL `volunteer_applications` (all statuses) for events belonging to the given chapter, joining `profiles` (full_name, email, school_or_company) and `events` (title). Stores all statuses so the UI can render approved/rejected cards too. `pending` count is derived by filtering in the component.
+
+- `approveApplication(id: string)` — reads `reviewerId` internally via `useAuthStore.getState().user?.id`. Sets `status='approved'`, `reviewed_at=now()`, `reviewed_by=reviewerId`. Mutates local state **on success** (non-optimistic, consistent with existing Dashboard pattern).
+
+- `rejectApplication(id: string)` — same internal reviewer pattern. Sets `status='rejected'`, `reviewed_at=now()`, `reviewed_by=reviewerId`. Mutates local state on success.
+
+- `revertApplication(id: string)` — resets `status='pending'`, `reviewed_at=null`, `reviewed_by=null`. Mutates local state on success.
+
+> Note: All three mutation actions follow the non-optimistic pattern from `Dashboard.tsx` — local state is only updated after a confirmed Supabase success. On error, `error` state is set and local state is not changed.
 
 **Joined shape (`OrgVolunteerApplication`):**
 ```ts
@@ -74,7 +108,9 @@ error: string | null
   phone_number: string | null
   social_media_handle: string | null
   status: 'pending' | 'approved' | 'rejected'
-  applied_at: string
+  applied_at: string | null     // null-guarded in card display
+  reviewed_at: string | null
+  reviewed_by: string | null
 }
 ```
 
@@ -89,17 +125,30 @@ Mirrors `ApprovalCard` layout:
 - Avatar initials circle (slate-100 bg)
 - Member name + school/company
 - Event title (small, muted)
-- Reason text — truncated to 2 lines with expand on tap
-- Optional chips: phone number, social handle (only rendered if present)
-- Action buttons: Approve (green) / Reject (red) / Revert (slate, shown when status ≠ pending)
-- `StatusBadge` for approved/rejected states
+- **"Applied {date}"** label (consistent semantic with `ApprovalCard`'s "Registered {date}"; null-guarded: shows "Applied —" if `applied_at` is null)
+- Reason text — truncated to 2 lines (`line-clamp-2`) with expand/collapse toggle on tap
+- Optional chips: phone number, social handle (only rendered if value is non-null and non-empty)
+- Action buttons:
+  - When `status === 'pending'`: Approve (green) + Reject (red)
+  - When `status === 'approved'` or `status === 'rejected'`: Revert (slate) button
+  - (Unlike event registrations, no QR token is generated on volunteer approval, so reverting an approved application is safe and both states are revertable)
+- `StatusBadge` showing current status for approved/rejected states
 
 ### Modified: `OrgDashboard.tsx`
+
+**Tab changes:**
 - `TabId`: `'approvals' | 'events'` → `'approvals' | 'volunteers'`
-- Replace Events tab button with Volunteers (label: `Volunteers(N)` when pending > 0)
-- Volunteers tab content: loading skeleton → empty state → staggered list of `VolunteerApprovalCard`
-- Empty state copy: "No volunteer applications yet."
-- Stats bar: "Pending" = pending event registrations + pending volunteer applications (sum)
+- Replace Events tab button with `Volunteers` tab
+- Volunteers tab label badge: shows pending volunteer application count only (e.g., `Volunteers (2)`), mirroring how the Approvals tab badge shows only its own pending count (`Approvals (3)`). The two tab badges are independent; the combined total is surfaced only in the stats bar.
+
+**Stats bar "Pending" count:**
+- = pending event registrations + pending volunteer applications (sum of both)
+- Requires `useOrgVolunteerStore` loaded alongside the existing registration fetch
+
+**Volunteers tab content states:**
+1. Loading: pulse skeleton (same pattern as Approvals skeleton)
+2. Empty: card with Heart icon + "No volunteer applications yet." (green-toned icon, consistent with Approvals empty state)
+3. List: staggered `VolunteerApprovalCard` list (all statuses shown, same as Approvals showing all registration statuses)
 
 ---
 
@@ -110,8 +159,7 @@ Mirrors `ApprovalCard` layout:
 | `apps/member/src/stores/useOrgVolunteerStore.ts` | Create |
 | `apps/member/src/components/VolunteerApprovalCard.tsx` | Create |
 | `apps/member/src/pages/organizer/Dashboard.tsx` | Modify |
-
----
+| Supabase migration: `20260324_volunteer_rls.sql` | Create (RLS policies) |
 
 ## Files Untouched
 
@@ -126,18 +174,23 @@ Mirrors `ApprovalCard` layout:
 ## Error Handling
 
 - All Supabase calls: loading + error + empty state required
-- Optimistic UI: update local state immediately on approve/reject, revert on Supabase error
+- Mutations: non-optimistic — mutate local state on success only; set `error` on failure
 - TypeScript strict mode: no `any`, all shapes fully typed
+- `applied_at` null-guarded in card display
 
 ---
 
 ## Testing Checklist
 
-- [ ] Volunteer tab visible on organizer dashboard
+- [ ] Volunteers tab visible on organizer dashboard (Events tab gone)
 - [ ] Pending volunteer applications appear as cards
-- [ ] Approve sets status=approved, card updates
-- [ ] Reject sets status=rejected, card updates
-- [ ] Revert resets to pending
+- [ ] Approve sets status=approved, card updates (Revert button appears)
+- [ ] Reject sets status=rejected, card updates (Revert button appears)
+- [ ] Revert resets to pending, clears reviewed_at + reviewed_by
 - [ ] Empty state shows when no applications
-- [ ] Stats "Pending" reflects combined count
+- [ ] Stats "Pending" reflects combined event registrations + volunteer applications count
+- [ ] Volunteers tab badge reflects only volunteer pending count
+- [ ] Approvals tab badge reflects only registration pending count
+- [ ] applied_at null renders "Applied —" without crash
 - [ ] Member-side application flow unaffected
+- [ ] RLS: officer can read/update their chapter's applications; cannot read other chapters'
