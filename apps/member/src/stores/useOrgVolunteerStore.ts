@@ -29,7 +29,7 @@ interface OrgVolunteerState {
   revertApplication: (id: string) => Promise<{ success: boolean; error?: string }>
 }
 
-export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
+export const useOrgVolunteerStore = create<OrgVolunteerState>((set) => ({
   applications: [],
   loading: false,
   error: null,
@@ -107,7 +107,10 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
   // Use the RPC — it awards points atomically via SECURITY DEFINER
   approveApplication: async (id) => {
     const reviewerId = useAuthStore.getState().user?.id
-    if (!reviewerId) return { success: false, error: 'Not authenticated' }
+    if (!reviewerId) {
+      set({ error: 'Not authenticated' })
+      return { success: false, error: 'Not authenticated' }
+    }
 
     set({ error: null })
 
@@ -142,7 +145,10 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
 
   rejectApplication: async (id) => {
     const reviewerId = useAuthStore.getState().user?.id
-    if (!reviewerId) return { success: false, error: 'Not authenticated' }
+    if (!reviewerId) {
+      set({ error: 'Not authenticated' })
+      return { success: false, error: 'Not authenticated' }
+    }
 
     set({ error: null })
 
@@ -172,7 +178,10 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
 
   revertApplication: async (id) => {
     const reviewerId = useAuthStore.getState().user?.id
-    if (!reviewerId) return { success: false, error: 'Not authenticated' }
+    if (!reviewerId) {
+      set({ error: 'Not authenticated' })
+      return { success: false, error: 'Not authenticated' }
+    }
 
     set({ error: null })
 
