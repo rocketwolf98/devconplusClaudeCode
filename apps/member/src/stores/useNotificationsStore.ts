@@ -92,7 +92,13 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
           toast.info(`${eventTitle}: ${preview}`)
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('[member-announcements] channel error:', err)
+        } else if (status === 'TIMED_OUT') {
+          console.warn('[member-announcements] timed out — Supabase will retry')
+        }
+      })
 
     return () => { void supabase.removeChannel(channel) }
   },

@@ -159,7 +159,13 @@ export const useEventsStore = create<EventsState>((set) => ({
           }))
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('[events-realtime] channel error:', err)
+        } else if (status === 'TIMED_OUT') {
+          console.warn('[events-realtime] connection timed out — Supabase will retry')
+        }
+      })
     return () => { void supabase.removeChannel(channel) }
   },
 
@@ -246,7 +252,13 @@ export const useEventsStore = create<EventsState>((set) => ({
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error(`[reg-${registrationId}] channel error:`, err)
+        } else if (status === 'TIMED_OUT') {
+          console.warn(`[reg-${registrationId}] timed out — Supabase will retry`)
+        }
+      })
 
     return () => {
       void supabase.removeChannel(channel)

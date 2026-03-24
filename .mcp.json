@@ -1,5 +1,15 @@
 {
   "mcpServers": {
+    "prompts-chat": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@fkadev/prompts.chat-mcp"
+      ]
+    },
     "supabase": {
       "type": "stdio",
       "command": "cmd",

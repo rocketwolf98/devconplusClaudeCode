@@ -1,8 +1,9 @@
 # DEVCON+ — Claude Code Master Context File
-> Last Updated: March 3, 2026
-> Version: MVP 1.0
+> Last Updated: March 24, 2026
+> Version: MVP 1.2
 > Team: 2 interns + Claude Code
 > Hard Deadline: April Week 1 (Cohort 3 Graduation)
+> Live App: https://devconplus.vercel.app
 > Lovable Prototype (UX Reference ONLY): https://devconplusrndprototype.lovable.app/onboarding
 
 ---
@@ -23,7 +24,7 @@ These rules are non-negotiable. Read before generating anything.
 10. **The 2nd job listing and 2nd news post always get an orange `PROMOTED` badge.** This is a design mandate, not optional.
 11. **The member app is a mobile-first web app** (React + Vite, not Expo). A `<DesktopGuard />` blocks the layout on desktop — all UI must be designed for a 390px-wide mobile viewport.
 12. **Primary color is CSS-custom-property driven** (`rgb(var(--color-primary))`). Always use `text-primary`, `bg-primary`, etc. — not hardcoded hex. Only use `text-blue` / `bg-blue` when you explicitly need the non-themed DEVCON blue alias.
-13. **All data is currently mocked.** Stores use `MOCK_*` exports from `@devcon-plus/supabase`. Do not add real Supabase calls until the Supabase project is provisioned.
+13. **Supabase is now live.** All stores use the real Supabase client (`apps/member/src/lib/supabase.ts`). The `MOCK_*` exports in `@devcon-plus/supabase` are kept for reference but are no longer used by the app. Always use the Supabase client for new data calls.
 
 ---
 
@@ -332,6 +333,15 @@ CREATE POLICY "Users view own points" ON point_transactions
 /organizer/profile/edit              → OrgProfileEdit
 /organizer/profile/notifications     → Notifications (shared)
 /organizer/profile/privacy           → Privacy (shared)
+
+— AdminLayout (requires hq_admin or super_admin role) —
+/admin                               → AdminDashboard (stats overview)
+/admin/users                         → AdminUsers (search, role assignment)
+/admin/org-codes                     → AdminOrgCodes (code generation + management)
+/admin/events                        → AdminEvents (all events across chapters)
+/admin/chapters                      → AdminChapters (chapter management)
+/admin/upgrades                      → AdminUpgrades (CMS / upgrade requests)
+/admin/kiosk                         → AdminKiosk (on-site check-in kiosk — super_admin only)
 ```
 
 ### Bottom Tab Navigation (MemberLayout)
@@ -675,13 +685,12 @@ npm run typecheck                     # tsc --noEmit across all packages
 
 ---
 
-## 17. CURRENT BUILD STATUS (as of March 3, 2026)
+## 17. CURRENT BUILD STATUS (as of March 24, 2026)
 
 ### Completed
 - [x] Monorepo scaffold (apps/member, packages/supabase)
 - [x] Tailwind + Geist font + design tokens + CSS custom property theming
 - [x] Program theme system (4 themes, CSS vars, persisted via Zustand)
-- [x] Mock data layer (all stores seeded from @devcon-plus/supabase)
 - [x] Auth flow (SplashScreen, Onboarding, SignIn, SignUp, OrganizerCodeGate)
 - [x] MemberLayout (floating pill nav, scroll reset, auth guard)
 - [x] OrganizerLayout (sidebar nav, organizer guard)
@@ -695,19 +704,25 @@ npm run typecheck                     # tsc --noEmit across all packages
 - [x] ProfileEdit (photo upload), Notifications, Privacy
 - [x] NewsDetail
 - [x] Organizer: Dashboard, EventsList, EventCreate, EventDetail, EventRegistrants, QRScanner, Profile, ProfileEdit
+- [x] Admin panel: Dashboard, Users, OrgCodes, Events, Chapters, Upgrades, Kiosk (super_admin only)
 - [x] All core components (EventCard, JobCard, NewsCard, PromotedBadge, ComingSoonModal, TransactionRow, StatusPill, ChipBar, XPCard, OrgBanner, ApprovalCard, StatusBadge)
 - [x] framer-motion animations across all list/card sections
+- [x] Supabase project provisioned + real client wired (`apps/member/src/lib/supabase.ts`)
+- [x] Real Supabase auth (signIn, signUp, Google OAuth, session persistence)
+- [x] All stores migrated to real Supabase queries (auth, events, jobs, news, points, rewards, notifications)
+- [x] DB schema migrations applied (001–017 + sprint/feature migrations through March 24)
+- [x] Seed data seeded (chapters, jobs, rewards)
+- [x] RLS policies + security hardening (IDOR hardening, rate limiting, security fixes)
+- [x] Performance indexes migration written (pending apply)
+- [x] Realtime extensions migration written (pending apply)
+- [x] Deployed to Vercel → https://devconplus.vercel.app
 
 ### Remaining for MVP
-- [ ] Wire real Supabase auth (signIn, signUp, Google OAuth)
-- [ ] Wire real Supabase data queries (replace MOCK_* in all stores)
+- [ ] Apply pending migrations: `20260324_performance_indexes.sql`, `20260324_realtime_extensions.sql`, `20260324_rls_security.sql`
 - [ ] Deploy Edge Functions (auto-approve, award-points-on-scan, award-signup-bonus, validate-organizer-code)
-- [ ] Provision Supabase project + configure Google OAuth
-- [ ] Run DB schema migrations + seed data
 - [ ] PROMOTED badge audit (verify 2nd job + 2nd news post in live data)
-- [ ] RLS policy review + security check
-- [ ] Final QA on all flows
-- [ ] Deploy to Vercel
+- [ ] Final QA on all flows end-to-end
+- [ ] Google OAuth callback URL configured in Supabase dashboard for production domain
 
 ---
 

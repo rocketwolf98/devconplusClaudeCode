@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "mcp__supabase__get_advisors"
     ],
     "additionalDirectories": [
       "c:\\Users\\LENOVO\\Documents\\DEVCON+ with Claude Code\\apps\\member\\src\\assets"

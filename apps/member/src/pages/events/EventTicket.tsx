@@ -96,12 +96,31 @@ export default function EventTicket() {
       setIsRefreshing(true)
       setFetchError(false)
 
-      const { data, error } = await supabase.functions.invoke<{ token: string; expires_at: number }>(
-        'generate-qr-token',
-        { body: { registration_id: reg!.id } }
-      )
+      const invoke = () =>
+        supabase.functions.invoke<{ token: string; expires_at: number }>(
+          'generate-qr-token',
+          { body: { registration_id: reg!.id } }
+        )
 
+      let { data, error } = await invoke()
       if (cancelled) return
+
+      // On failure: attempt a silent session refresh + one retry.
+      // Recovers the common case where the 1-hour access token expires while the ticket is open.
+      if (error || !data?.token) {
+        const { error: refreshErr } = await supabase.auth.refreshSession()
+        if (cancelled) return
+
+        if (refreshErr) {
+          // Refresh token itself is invalid — session is gone, redirect to sign-in
+          navigate('/sign-in', { replace: true })
+          return
+        }
+
+        // New JWT issued — retry the invoke with fresh credentials
+        ;({ data, error } = await invoke())
+        if (cancelled) return
+      }
 
       if (error || !data?.token) {
         setFetchError(true)

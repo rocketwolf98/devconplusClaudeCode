@@ -10,5 +10,11 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
+    realtime: {
+      params: {
+        // Throttle broadcast events to avoid overwhelming the client on busy channels
+        eventsPerSecond: 10,
+      },
+    },
   }
 )
