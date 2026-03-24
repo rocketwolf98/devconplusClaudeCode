@@ -1,21 +1,32 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Bell, Plus } from 'lucide-react'
+import { CheckCircle2, Bell, Plus, Heart } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
+import { VolunteerApprovalCard } from '../../components/VolunteerApprovalCard'
 import { useOrganizerUser } from '../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
+import { useOrgVolunteerStore } from '../../stores/useOrgVolunteerStore'
 import { supabase } from '../../lib/supabase'
 import { fadeUp, staggerContainer, cardItem } from '../../lib/animation'
 
-type TabId = 'approvals' | 'events'
+type TabId = 'approvals' | 'volunteers'
 
 export function OrgDashboard() {
   const user = useOrganizerUser()
   const { user: profile } = useAuthStore()
   const { events, fetchEvents } = useEventsStore()
+  const {
+    applications: volunteerApps,
+    loading: volunteerLoading,
+    error: volunteerError,
+    approveApplication,
+    rejectApplication,
+    revertApplication,
+    loadApplications: loadVolunteerApps,
+  } = useOrgVolunteerStore()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<TabId>('approvals')
   const [registrations, setRegistrations] = useState<Registration[]>([])
@@ -78,17 +89,19 @@ export function OrgDashboard() {
     }
 
     void loadData()
+    void loadVolunteerApps(chapterId)
   }, [chapterId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return null
 
   const chapterEvents = events.filter((e) => e.chapter_id === chapterId)
   const pending = registrations.filter((r) => r.status === 'pending')
+  const pendingVolunteers = volunteerApps.filter((a) => a.status === 'pending')
 
   const stats = [
     { label: 'Events',  value: chapterEvents.length },
     { label: 'Members', value: membersCount },
-    { label: 'Pending', value: pending.length },
+    { label: 'Pending', value: pending.length + pendingVolunteers.length },
   ]
 
   const handleApprove = async (id: string) => {
@@ -162,7 +175,7 @@ export function OrgDashboard() {
         animate="visible"
       >
         <motion.div variants={fadeUp} className="flex gap-1 mt-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
-          {(['approvals', 'events'] as const).map((tab) => (
+          {(['approvals', 'volunteers'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -174,7 +187,7 @@ export function OrgDashboard() {
             >
               {tab === 'approvals'
                 ? `Approvals${pending.length > 0 ? ` (${pending.length})` : ''}`
-                : 'Events'}
+                : `Volunteers${pendingVolunteers.length > 0 ? ` (${pendingVolunteers.length})` : ''}`}
             </button>
           ))}
         </motion.div>
@@ -235,30 +248,66 @@ export function OrgDashboard() {
             </motion.div>
           )}
 
-          {activeTab === 'events' && (
+          {activeTab === 'volunteers' && (
             <motion.div
-              key="events"
+              key="volunteers"
               variants={fadeUp}
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="space-y-3"
             >
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-slate-500">Your chapter events</p>
-                <button
-                  onClick={() => navigate('/organizer/events/create')}
-                  className="px-4 py-2 bg-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-dark transition-colors"
+              {volunteerError && (
+                <div className="bg-red/5 border border-red/20 rounded-xl px-4 py-3 mb-3">
+                  <p className="text-xs text-red">{volunteerError}</p>
+                </div>
+              )}
+              {volunteerLoading ? (
+                <div className="space-y-3">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="bg-white rounded-2xl border border-slate-200 p-4 animate-pulse">
+                      <div className="flex gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-100" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-3 bg-slate-100 rounded w-32" />
+                          <div className="h-3 bg-slate-100 rounded w-48" />
+                          <div className="h-3 bg-slate-100 rounded w-40" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : volunteerApps.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+                  <div className="w-14 h-14 rounded-full bg-blue/10 flex items-center justify-center mx-auto mb-3">
+                    <Heart className="w-7 h-7 text-blue" />
+                  </div>
+                  <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
+                  <p className="text-sm text-slate-400 mt-1">Applications will appear here when members apply.</p>
+                </div>
+              ) : (
+                <motion.div
+                  className="space-y-3"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  + New Event
-                </button>
-              </div>
-              <button
-                onClick={() => navigate('/organizer/events')}
-                className="text-sm text-blue font-semibold hover:underline"
-              >
-                View all events →
-              </button>
+                  {pendingVolunteers.length > 0 && (
+                    <p className="text-sm text-slate-500 mb-2">
+                      {pendingVolunteers.length} application{pendingVolunteers.length !== 1 ? 's' : ''} awaiting review
+                    </p>
+                  )}
+                  {volunteerApps.map((app) => (
+                    <motion.div key={app.id} variants={cardItem}>
+                      <VolunteerApprovalCard
+                        application={app}
+                        onApprove={(id) => void approveApplication(id)}
+                        onReject={(id) => void rejectApplication(id)}
+                        onRevert={(id) => void revertApplication(id)}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
