@@ -109,16 +109,25 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
     const reviewerId = useAuthStore.getState().user?.id
     if (!reviewerId) return { success: false, error: 'Not authenticated' }
 
+    set({ error: null })
+
     const { data, error } = await supabase
       .rpc('approve_volunteer_application', {
         p_application_id: id,
         p_organizer_id:   reviewerId,
       })
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      set({ error: error.message })
+      return { success: false, error: error.message }
+    }
 
     const result = data as { success: boolean; error?: string } | null
-    if (!result?.success) return { success: false, error: result?.error ?? 'RPC failed' }
+    if (!result?.success) {
+      const errorMsg = result?.error ?? 'RPC failed'
+      set({ error: errorMsg })
+      return { success: false, error: errorMsg }
+    }
 
     // Mutate local state on confirmed success
     set((s) => ({
@@ -135,6 +144,8 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
     const reviewerId = useAuthStore.getState().user?.id
     if (!reviewerId) return { success: false, error: 'Not authenticated' }
 
+    set({ error: null })
+
     const { error } = await supabase
       .from('volunteer_applications')
       .update({
@@ -144,7 +155,10 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
       })
       .eq('id', id)
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      set({ error: error.message })
+      return { success: false, error: error.message }
+    }
 
     set((s) => ({
       applications: s.applications.map((a) =>
@@ -160,12 +174,17 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
     const reviewerId = useAuthStore.getState().user?.id
     if (!reviewerId) return { success: false, error: 'Not authenticated' }
 
+    set({ error: null })
+
     const { error } = await supabase
       .from('volunteer_applications')
       .update({ status: 'pending', reviewed_by: null, reviewed_at: null })
       .eq('id', id)
 
-    if (error) return { success: false, error: error.message }
+    if (error) {
+      set({ error: error.message })
+      return { success: false, error: error.message }
+    }
 
     set((s) => ({
       applications: s.applications.map((a) =>
