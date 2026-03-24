@@ -69,7 +69,7 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set) => ({
         reviewed_at,
         reviewed_by,
         events(title),
-        profiles(full_name, email, school_or_company)
+        profiles!volunteer_applications_user_id_fkey(full_name, email, school_or_company)
       `)
       .in('event_id', eventIds)
       .order('applied_at', { ascending: false })
