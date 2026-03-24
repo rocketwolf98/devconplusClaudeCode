@@ -86,9 +86,9 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set) => ({
       const pObj  = p  as { full_name?: string; email?: string; school_or_company?: string } | null
       return {
         id:                  row.id,
-        event_id:            row.event_id,
+        event_id:            row.event_id ?? '',
         event_title:         evObj?.title ?? '',
-        user_id:             row.user_id,
+        user_id:             row.user_id ?? '',
         member_name:         pObj?.full_name ?? 'Unknown',
         member_email:        pObj?.email ?? '',
         school_or_company:   pObj?.school_or_company ?? '',

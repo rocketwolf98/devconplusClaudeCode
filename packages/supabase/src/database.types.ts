@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-03-16 (adds event_announcements table)
+// Last generated: 2026-03-24 (adds volunteer_applications, approve_volunteer_application RPC, rate_limit_log, referrals, xp_tiers)
 
 export type Json =
   | string
@@ -145,7 +145,6 @@ export type Database = {
           is_promoted: boolean | null
           location: string | null
           points_value: number | null
-          volunteer_points: number | null
           privacy_status: string | null
           requires_approval: boolean | null
           status: string | null
@@ -154,6 +153,7 @@ export type Database = {
           ticket_price_php: number | null
           title: string
           visibility: string | null
+          volunteer_points: number | null
         }
         Insert: {
           capacity?: number | null
@@ -173,7 +173,6 @@ export type Database = {
           is_promoted?: boolean | null
           location?: string | null
           points_value?: number | null
-          volunteer_points?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
           status?: string | null
@@ -182,6 +181,7 @@ export type Database = {
           ticket_price_php?: number | null
           title: string
           visibility?: string | null
+          volunteer_points?: number | null
         }
         Update: {
           capacity?: number | null
@@ -201,7 +201,6 @@ export type Database = {
           is_promoted?: boolean | null
           location?: string | null
           points_value?: number | null
-          volunteer_points?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
           status?: string | null
@@ -210,6 +209,7 @@ export type Database = {
           ticket_price_php?: number | null
           title?: string
           visibility?: string | null
+          volunteer_points?: number | null
         }
         Relationships: [
           {
@@ -467,7 +467,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
-          chapter_id: string | null
+          chapter_id: string
           created_at: string | null
           email: string
           full_name: string
@@ -483,7 +483,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
-          chapter_id?: string | null
+          chapter_id: string
           created_at?: string | null
           email: string
           full_name: string
@@ -499,7 +499,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
-          chapter_id?: string | null
+          chapter_id?: string
           created_at?: string | null
           email?: string
           full_name?: string
@@ -556,6 +556,69 @@ export type Database = {
           theme_id?: string | null
         }
         Relationships: []
+      }
+      rate_limit_log: {
+        Row: {
+          bucket: string
+          created_at: string | null
+          id: number
+          identifier: string
+        }
+        Insert: {
+          bucket: string
+          created_at?: string | null
+          id?: number
+          identifier: string
+        }
+        Update: {
+          bucket?: string
+          created_at?: string | null
+          id?: number
+          identifier?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string | null
+          id: string
+          referred_user_id: string | null
+          referrer_id: string | null
+          status: string | null
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string | null
+          id?: string
+          referred_user_id?: string | null
+          referrer_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string | null
+          id?: string
+          referred_user_id?: string | null
+          referrer_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_user_id_fkey"
+            columns: ["referred_user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reward_redemptions: {
         Row: {
@@ -647,84 +710,42 @@ export type Database = {
         }
         Relationships: []
       }
-      referrals: {
-        Row: {
-          confirmed_at: string | null
-          created_at: string
-          id: string
-          referred_user_id: string
-          referrer_id: string
-          status: string
-        }
-        Insert: {
-          confirmed_at?: string | null
-          created_at?: string
-          id?: string
-          referred_user_id: string
-          referrer_id: string
-          status?: string
-        }
-        Update: {
-          confirmed_at?: string | null
-          created_at?: string
-          id?: string
-          referred_user_id?: string
-          referrer_id?: string
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referrals_referred_user_id_fkey"
-            columns: ["referred_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referrals_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       volunteer_applications: {
         Row: {
-          applied_at: string
-          event_id: string
+          applied_at: string | null
+          event_id: string | null
           id: string
           phone_number: string | null
           reason: string
           reviewed_at: string | null
           reviewed_by: string | null
           social_media_handle: string | null
-          status: string
-          user_id: string
+          status: string | null
+          user_id: string | null
         }
         Insert: {
-          applied_at?: string
-          event_id: string
+          applied_at?: string | null
+          event_id?: string | null
           id?: string
           phone_number?: string | null
           reason: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           social_media_handle?: string | null
-          status?: string
-          user_id: string
+          status?: string | null
+          user_id?: string | null
         }
         Update: {
-          applied_at?: string
-          event_id?: string
+          applied_at?: string | null
+          event_id?: string | null
           id?: string
           phone_number?: string | null
           reason?: string
           reviewed_at?: string | null
           reviewed_by?: string | null
           social_media_handle?: string | null
-          status?: string
-          user_id?: string
+          status?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -785,15 +806,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      approve_organizer_upgrade: {
-        Args: {
-          p_chapter_id: string
-          p_request_id: string
-          p_reviewer_id: string
-          p_role: string
-          p_user_id: string
-        }
+      admin_update_user_role: {
+        Args: { p_new_role: string; p_user_id: string }
         Returns: undefined
+      }
+      approve_organizer_upgrade: {
+        Args: { p_request_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      approve_volunteer_application: {
+        Args: { p_application_id: string; p_organizer_id: string }
+        Returns: Json
+      }
+      check_rate_limit: {
+        Args: { p_bucket: string; p_identifier: string }
+        Returns: boolean
+      }
+      confirm_referral: {
+        Args: { p_referral_code: string; p_referred_user_id: string }
+        Returns: Json
       }
       delete_own_account: { Args: never; Returns: undefined }
       get_active_chapters_count: { Args: never; Returns: number }
@@ -827,6 +858,14 @@ export type Database = {
       manual_checkin: {
         Args: { p_organizer_id: string; p_registration_id: string }
         Returns: Json
+      }
+      redeem_reward: {
+        Args: { p_reward_id: string; p_user_id: string }
+        Returns: Json
+      }
+      reject_organizer_upgrade: {
+        Args: { p_request_id: string; p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

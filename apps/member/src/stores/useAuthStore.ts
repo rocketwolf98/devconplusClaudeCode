@@ -121,7 +121,7 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
       username: meta.username ?? null,
       email: meta.email ?? '',
       school_or_company: meta.school_or_company ?? null,
-      chapter_id: meta.chapter_id || null,
+      chapter_id: meta.chapter_id ?? '',
       role: 'member',
       spendable_points: 0,
       lifetime_points: 0,
