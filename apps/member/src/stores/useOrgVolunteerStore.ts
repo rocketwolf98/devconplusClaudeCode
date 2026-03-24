@@ -36,6 +36,25 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
 
   loadApplications: async (chapterId) => {
     set({ loading: true, error: null })
+
+    // Step 1: get event IDs belonging to this chapter
+    const { data: eventRows, error: eventError } = await supabase
+      .from('events')
+      .select('id')
+      .eq('chapter_id', chapterId)
+
+    if (eventError) {
+      set({ error: eventError.message, loading: false })
+      return
+    }
+
+    const eventIds = (eventRows ?? []).map((e) => e.id)
+    if (eventIds.length === 0) {
+      set({ applications: [], loading: false })
+      return
+    }
+
+    // Step 2: fetch applications filtered by those event IDs
     const { data, error } = await supabase
       .from('volunteer_applications')
       .select(`
@@ -49,10 +68,10 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
         applied_at,
         reviewed_at,
         reviewed_by,
-        events!inner(title, chapter_id),
+        events(title),
         profiles(full_name, email, school_or_company)
       `)
-      .eq('events.chapter_id', chapterId)
+      .in('event_id', eventIds)
       .order('applied_at', { ascending: false })
 
     if (error) {
@@ -138,6 +157,9 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set, get) => ({
   },
 
   revertApplication: async (id) => {
+    const reviewerId = useAuthStore.getState().user?.id
+    if (!reviewerId) return { success: false, error: 'Not authenticated' }
+
     const { error } = await supabase
       .from('volunteer_applications')
       .update({ status: 'pending', reviewed_by: null, reviewed_at: null })
