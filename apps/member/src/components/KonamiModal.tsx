@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, ShieldCheck, Monitor, Gamepad2 } from 'lucide-react'
+import { X, ShieldCheck, Monitor } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { backdrop, fadeUp } from '../lib/animation'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -103,25 +103,6 @@ export default function KonamiModal({ open, onClose }: Props) {
                   </>
                 )}
 
-                {/* State 3: Non-admin easter egg — icon only, no emoji alongside the logo image */}
-                {!isAdmin && (
-                  <>
-                    <div className="flex justify-center mb-4">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                        <Gamepad2 className="w-7 h-7 text-primary" />
-                      </div>
-                    </div>
-                    <h2 className="text-lg font-bold text-slate-900 mb-2">Thanks for using DEVCON+!</h2>
-                    <p className="text-sm text-slate-500 mb-6">Go, go, go!!! Todo na to!!!</p>
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      onClick={onClose}
-                      className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl hover:opacity-90 transition-opacity"
-                    >
-                      Let's go!
-                    </motion.button>
-                  </>
-                )}
               </div>
             </div>
           </motion.div>
