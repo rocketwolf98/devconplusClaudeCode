@@ -4,6 +4,19 @@
       "Bash(npm run:*)",
       "mcp__supabase__get_advisors"
     ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(supabase db reset*)",
+      "Bash(npm publish*)",
+      "Bash(curl * | *sh)",
+      "Bash(wget * | *sh)",
+      "Bash(sudo *)",
+      "Bash(chmod 777*)",
+      "Bash(ssh *)",
+      "Bash(* > /dev/*)"
+    ],
     "additionalDirectories": [
       "c:\\Users\\LENOVO\\Documents\\DEVCON+ with Claude Code\\apps\\member\\src\\assets"
     ]

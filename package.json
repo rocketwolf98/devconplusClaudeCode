@@ -22,8 +22,11 @@
     "ajv": "^8.18.0",
     "minimatch": "^10.2.4",
     "path-to-regexp": "^6.3.0",
-    "tar": "^7.5.9",
-    "undici": "^6.22.1"
+    "tar": "^7.5.11",
+    "undici": "^6.23.1",
+    "@tootallnate/once": "^3.0.1",
+    "smol-toml": "^1.6.1",
+    "srvx": "^0.11.13"
   },
   "dependencies": {
     "framer-motion": "^12.34.3",
