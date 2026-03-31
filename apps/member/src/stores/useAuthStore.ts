@@ -382,6 +382,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   resetPassword: async (email) => {
     set({ isLoading: true, error: null })
+    // Rate limit: 3 reset emails per email address per hour.
+    // Keyed by email (not IP) — prevents inbox flooding a single user from many IPs.
+    const resetLimit = await callRateLimit('password_reset', { email })
+    if (!resetLimit.allowed) {
+      const secs = resetLimit.retryAfterSeconds ?? 3600
+      const mins = Math.ceil(secs / 60)
+      const err = new Error(
+        `Too many password reset requests. Please wait ${mins} minute${mins !== 1 ? 's' : ''} before trying again.`
+      )
+      set({ isLoading: false, error: err.message })
+      throw err
+    }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     })

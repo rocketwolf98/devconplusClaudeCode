@@ -10,32 +10,38 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { logger } from '../_shared/logger.ts'
 
-const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:5173',
+  'https://devconplus.vercel.app',
+  'https://devconplusbeta-v1.vercel.app',
+])
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
   const headers: Record<string, string> = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
   }
-  if (origin === ALLOWED_ORIGIN) {
-    headers['Access-Control-Allow-Origin'] = ALLOWED_ORIGIN
+  if (ALLOWED_ORIGINS.has(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin
   }
   return headers
 }
 
-type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade'
-const IP_BUCKETS: Bucket[] = ['login', 'login_ip', 'signup', 'username_check']
+type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade' | 'password_reset'
+const IP_BUCKETS: Bucket[] = ['login', 'login_ip', 'signup', 'username_check', 'password_reset']
 
 // Window durations matching the check_rate_limit RPC CASE statement.
 // Used only for retryAfterSeconds calculation — not for enforcement.
 const WINDOW_MAP: Record<string, number> = {
-  qr_generate:    60,
-  qr_scan:        60,
-  login:          300,
-  login_ip:       300,
-  signup:         3600,
-  username_check: 60,
-  org_upgrade:    90000,
+  qr_generate:     60,
+  qr_scan:         60,
+  login:           300,
+  login_ip:        300,
+  signup:          3600,
+  username_check:  60,
+  org_upgrade:     90000,
+  password_reset:  3600,
 }
 
 // Extract the rightmost non-private IP from the x-forwarded-for chain.
@@ -109,10 +115,10 @@ Deno.serve(async (req: Request) => {
 
   if ((IP_BUCKETS as string[]).includes(bucket)) {
     // IP-keyed buckets: no JWT required
-    if (bucket === 'login') {
+    if (bucket === 'login' || bucket === 'password_reset') {
       if (!json.email) {
         return new Response(
-          JSON.stringify({ allowed: false, error: 'Missing email for login bucket.' }),
+          JSON.stringify({ allowed: false, error: 'Missing email.' }),
           { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
         )
       }
