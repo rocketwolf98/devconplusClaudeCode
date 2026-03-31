@@ -57,7 +57,7 @@ function LogoHorizontalWhite({ width = 132 }: { width?: number }) {
 }
 
 export default function EventTicket() {
-  const { id } = useParams<{ id: string }>()
+  const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
 
   const { events, registrations, cancelRegistration } = useEventsStore()
@@ -65,8 +65,8 @@ export default function EventTicket() {
   const { activeTheme } = useThemeStore()
   const theme = activeTheme()
 
-  const event = events.find((e) => e.id === id)
-  const reg = registrations.find((r) => r.event_id === id)
+  const event = events.find((e) => e.slug === slug)
+  const reg = registrations.find((r) => r.event_id === event?.id)
 
   const effectiveTheme = resolveEventTheme(event?.devcon_category, theme)
 
@@ -96,29 +96,43 @@ export default function EventTicket() {
       setIsRefreshing(true)
       setFetchError(false)
 
-      const invoke = () =>
-        supabase.functions.invoke<{ token: string; expires_at: number }>(
-          'generate-qr-token',
-          { body: { registration_id: reg!.id } }
-        )
-
-      let { data, error } = await invoke()
+      // Explicitly get the session so we always pass the real user JWT —
+      // supabase.functions.invoke() reads from realtime.accessToken which is
+      // only populated after SIGNED_IN/TOKEN_REFRESHED events, not on the
+      // INITIAL_SESSION restore that fires on page refresh.
+      const { data: { session } } = await supabase.auth.getSession()
       if (cancelled) return
 
-      // On failure: attempt a silent session refresh + one retry.
-      // Recovers the common case where the 1-hour access token expires while the ticket is open.
+      if (!session) {
+        navigate('/sign-in', { replace: true })
+        return
+      }
+
+      const invokeWithToken = (accessToken: string) =>
+        supabase.functions.invoke<{ token: string; expires_at: number }>(
+          'generate-qr-token',
+          {
+            body: { registration_id: reg!.id },
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        )
+
+      let { data, error } = await invokeWithToken(session.access_token)
+      if (cancelled) return
+
+      // On failure: force a session refresh and retry once.
+      // Covers the case where the 1-hour access token expired between
+      // getSession() and the actual network call.
       if (error || !data?.token) {
-        const { error: refreshErr } = await supabase.auth.refreshSession()
+        const { data: refreshData, error: refreshErr } = await supabase.auth.refreshSession()
         if (cancelled) return
 
-        if (refreshErr) {
-          // Refresh token itself is invalid — session is gone, redirect to sign-in
+        if (refreshErr || !refreshData.session) {
           navigate('/sign-in', { replace: true })
           return
         }
 
-        // New JWT issued — retry the invoke with fresh credentials
-        ;({ data, error } = await invoke())
+        ;({ data, error } = await invokeWithToken(refreshData.session.access_token))
         if (cancelled) return
       }
 

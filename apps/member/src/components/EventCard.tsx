@@ -14,7 +14,7 @@ function EventCard({ event, compact = false }: { event: Event; compact?: boolean
 
   return (
     <motion.button
-      onClick={() => navigate(`/events/${event.id}`)}
+      onClick={() => navigate(`/events/${event.slug}`)}
       className="w-full bg-white rounded-2xl shadow-card text-left relative overflow-hidden"
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}

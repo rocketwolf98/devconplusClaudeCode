@@ -36,14 +36,15 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export default function EventVolunteer() {
-  const { id } = useParams<{ id: string }>()
+  const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
 
   const { events } = useEventsStore()
   const { loadApplications, applyToVolunteer, getApplicationByEventId } = useVolunteerStore()
 
-  const event = id ? events.find((e) => e.id === id) : undefined
-  const existingApp = id ? getApplicationByEventId(id) : undefined
+  const event = slug ? events.find((e) => e.slug === slug) : undefined
+  const eventId = event?.id
+  const existingApp = eventId ? getApplicationByEventId(eventId) : undefined
 
   useEffect(() => {
     loadApplications()
@@ -60,7 +61,7 @@ export default function EventVolunteer() {
     resolver: zodResolver(schema),
   })
 
-  if (!event || !id) return <NotFound />
+  if (!event || !eventId) return <NotFound />
 
   const dateStr = event.event_date
     ? new Date(event.event_date).toLocaleDateString('en-PH', {
@@ -78,7 +79,7 @@ export default function EventVolunteer() {
         className="min-h-screen bg-slate-50"
         style={getEventThemeStyle(event.devcon_category)}
       >
-        <VolunteerPageHeader event={event} onBack={() => navigate(`/events/${id}`)} />
+        <VolunteerPageHeader event={event} onBack={() => navigate(`/events/${slug}`)} />
 
         <div className="p-4 pb-24">
           <motion.div
@@ -111,7 +112,7 @@ export default function EventVolunteer() {
 
   const onSubmit = async (values: FormValues) => {
     setSubmitError(null)
-    const result = await applyToVolunteer(id, {
+    const result = await applyToVolunteer(eventId, {
       reason: values.reason,
       phone_number: values.phone_number || undefined,
       social_media_handle: values.social_media_handle || undefined,
@@ -130,7 +131,7 @@ export default function EventVolunteer() {
         className="min-h-screen bg-slate-50"
         style={getEventThemeStyle(event.devcon_category)}
       >
-        <VolunteerPageHeader event={event} onBack={() => navigate(`/events/${id}`)} />
+        <VolunteerPageHeader event={event} onBack={() => navigate(`/events/${slug}`)} />
 
         <div className="p-4 pb-24">
           <motion.div
@@ -156,7 +157,7 @@ export default function EventVolunteer() {
             </div>
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(`/events/${id}`)}
+              onClick={() => navigate(`/events/${slug}`)}
               className="w-full bg-primary text-white font-bold py-4 rounded-2xl mt-2"
             >
               Back to Event

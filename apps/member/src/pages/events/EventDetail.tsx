@@ -8,18 +8,19 @@ import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
 
 export default function EventDetail() {
-  const { id } = useParams<{ id: string }>()
+  const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { events, registrations } = useEventsStore()
   const { loadApplications, getApplicationByEventId } = useVolunteerStore()
-  const event = events.find((e) => e.id === id)
+  const event = events.find((e) => e.slug === slug)
+  const eventId = event?.id
 
   useEffect(() => {
     loadApplications()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const reg = registrations.find((r) => r.event_id === id)
-  const volunteerApp = id ? getApplicationByEventId(id) : undefined
+  const reg = registrations.find((r) => r.event_id === eventId)
+  const volunteerApp = eventId ? getApplicationByEventId(eventId) : undefined
 
   if (!event) return <NotFound />
 
@@ -87,21 +88,21 @@ export default function EventDetail() {
         <div className="pt-2 space-y-3">
           {!reg ? (
             <button
-              onClick={() => navigate(`/events/${id}/register`)}
+              onClick={() => navigate(`/events/${slug}/register`)}
               className="w-full bg-primary text-white font-bold py-4 rounded-2xl"
             >
               Request to Join
             </button>
           ) : reg.status === 'pending' ? (
             <button
-              onClick={() => navigate(`/events/${id}/pending`)}
+              onClick={() => navigate(`/events/${slug}/pending`)}
               className="w-full bg-yellow-400 text-white font-bold py-4 rounded-2xl"
             >
               View Pending Status
             </button>
           ) : reg.status === 'approved' ? (
             <button
-              onClick={() => navigate(`/events/${id}/ticket`)}
+              onClick={() => navigate(`/events/${slug}/ticket`)}
               className="w-full bg-green text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
             >
               <Ticket className="w-5 h-5" />
@@ -136,7 +137,7 @@ export default function EventDetail() {
             ) : (
               <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => navigate(`/events/${id}/volunteer`)}
+                onClick={() => navigate(`/events/${slug}/volunteer`)}
                 className="w-full border border-primary text-primary font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
               >
                 <Heart className="w-5 h-5" />

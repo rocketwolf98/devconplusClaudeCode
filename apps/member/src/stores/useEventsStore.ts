@@ -70,7 +70,7 @@ interface EventsState {
   cancelRegistration: (regId: string) => Promise<void>
   subscribeToRegistration: (
     registrationId: string,
-    onApproved: (reg: FullRegistration) => void
+    onStatusChange: (status: 'approved' | 'rejected', reg: FullRegistration) => void
   ) => () => void
 }
 
@@ -229,7 +229,7 @@ export const useEventsStore = create<EventsState>((set) => ({
     }))
   },
 
-  subscribeToRegistration: (registrationId, onApproved) => {
+  subscribeToRegistration: (registrationId, onStatusChange) => {
     const channel = supabase
       .channel(`reg-${registrationId}`)
       .on(
@@ -242,13 +242,13 @@ export const useEventsStore = create<EventsState>((set) => ({
         },
         (payload) => {
           const updated = payload.new as FullRegistration
-          if (updated.status === 'approved') {
+          if (updated.status === 'approved' || updated.status === 'rejected') {
             set((s) => ({
               registrations: s.registrations.map((r) =>
                 r.id === registrationId ? { ...r, ...updated } : r
               ),
             }))
-            onApproved(updated)
+            onStatusChange(updated.status as 'approved' | 'rejected', updated)
           }
         }
       )
@@ -270,6 +270,9 @@ export const useEventsStore = create<EventsState>((set) => ({
 // Selector helpers
 export const getEventById = (id: string) =>
   useEventsStore.getState().events.find((e) => e.id === id)
+
+export const getEventBySlug = (slug: string) =>
+  useEventsStore.getState().events.find((e) => e.slug === slug)
 
 export const getRegistrationByEventId = (eventId: string) =>
   useEventsStore.getState().registrations.find((r) => r.event_id === eventId)

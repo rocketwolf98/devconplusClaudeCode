@@ -120,6 +120,7 @@ export interface Event {
   status: EventStatus
   is_featured: boolean
   is_promoted: boolean
+  slug: string
   cover_image_url: string | null
   created_by: string
   created_at: string

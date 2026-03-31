@@ -199,7 +199,7 @@ export default function EventsList() {
                 animate="visible"
               >
                 <button
-                  onClick={() => navigate(`/events/${featuredEvent.id}`)}
+                  onClick={() => navigate(`/events/${featuredEvent.slug}`)}
                   className="w-full bg-navy rounded-2xl p-5 text-left"
                 >
                   <div className="flex items-center gap-1.5 mb-3">
@@ -255,7 +255,7 @@ export default function EventsList() {
                     <motion.button
                       key={event.id}
                       variants={cardItem}
-                      onClick={() => navigate(`/events/${event.id}`)}
+                      onClick={() => navigate(`/events/${event.slug}`)}
                       className="w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3"
                       whileTap={{ scale: 0.98 }}
                     >
@@ -337,8 +337,8 @@ export default function EventsList() {
                   const dateParts = ev.event_date ? formatEventDate(ev.event_date) : null
                   const isApproved = reg.status === 'approved'
                   const destination = isApproved
-                    ? `/events/${ev.id}/ticket`
-                    : `/events/${ev.id}/pending`
+                    ? `/events/${ev.slug}/ticket`
+                    : `/events/${ev.slug}/pending`
                   // Checked-in ticket is always "Done" regardless of event date
                   const lifecycle = reg.checked_in ? 'done' : getEventLifecycleState(ev)
 

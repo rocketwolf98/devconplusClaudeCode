@@ -77,7 +77,7 @@ export default function Dashboard() {
       sub:   e.location ?? 'DEVCON Philippines',
       cta:   'Register Now',
       image: e.cover_image_url ?? '/photos/devcon-certificate-ceremony.jpg',
-      onClick: () => navigate(`/events/${e.id}`),
+      onClick: () => navigate(`/events/${e.slug}`),
     })),
   ].slice(0, 3)
 

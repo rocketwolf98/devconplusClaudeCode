@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { useParams, useNavigate, Navigate } from 'react-router-dom'
-import { isValidUUID } from '../../lib/validation'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 
 export default function EventRegister() {
-  const { id } = useParams<{ id: string }>()
+  const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { events, registrations, register } = useEventsStore()
   const { user } = useAuthStore()
@@ -14,9 +13,8 @@ export default function EventRegister() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  if (!isValidUUID(id)) return <Navigate to="/events" replace />
-
-  const event = events.find((e) => e.id === id)
+  const event = events.find((e) => e.slug === slug)
+  const eventId = event?.id ?? ''
   if (!event || !user) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,12 +23,12 @@ export default function EventRegister() {
     setSubmitting(true)
     setError(null)
     try {
-      await register(id, user.id)
+      await register(eventId, user.id)
       // Check the returned registration status from the store
-      const reg = useEventsStore.getState().registrations.find((r) => r.event_id === id)
+      const reg = useEventsStore.getState().registrations.find((r) => r.event_id === eventId)
       const destination = reg?.status === 'approved'
-        ? `/events/${id}/ticket`
-        : `/events/${id}/pending`
+        ? `/events/${slug}/ticket`
+        : `/events/${slug}/pending`
       navigate(destination, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
@@ -39,13 +37,13 @@ export default function EventRegister() {
   }
 
   // If already registered, redirect to the appropriate screen
-  const existingReg = registrations.find((r) => r.event_id === id)
+  const existingReg = registrations.find((r) => r.event_id === eventId)
   if (existingReg) {
     const destination = existingReg.status === 'approved'
-      ? `/events/${id}/ticket`
+      ? `/events/${slug}/ticket`
       : existingReg.status === 'rejected'
-        ? `/events/${id}`
-        : `/events/${id}/pending`
+        ? `/events/${slug}`
+        : `/events/${slug}/pending`
     navigate(destination, { replace: true })
     return null
   }
