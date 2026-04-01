@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-03-24 (adds volunteer_applications, approve_volunteer_application RPC, rate_limit_log, referrals, xp_tiers)
+// Last generated: 2026-04-01 (added is_chapter_locked column)
 
 export type Json =
   | string
@@ -140,6 +140,7 @@ export type Database = {
           end_time: string | null
           event_date: string | null
           id: string
+          is_chapter_locked: boolean | null
           is_featured: boolean | null
           is_free: boolean | null
           is_promoted: boolean | null
@@ -147,6 +148,7 @@ export type Database = {
           points_value: number | null
           privacy_status: string | null
           requires_approval: boolean | null
+          slug: string | null
           status: string | null
           tags: string[] | null
           ticket_price: number | null
@@ -168,6 +170,7 @@ export type Database = {
           end_time?: string | null
           event_date?: string | null
           id?: string
+          is_chapter_locked?: boolean | null
           is_featured?: boolean | null
           is_free?: boolean | null
           is_promoted?: boolean | null
@@ -175,6 +178,7 @@ export type Database = {
           points_value?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
+          slug?: string | null
           status?: string | null
           tags?: string[] | null
           ticket_price?: number | null
@@ -196,6 +200,7 @@ export type Database = {
           end_time?: string | null
           event_date?: string | null
           id?: string
+          is_chapter_locked?: boolean | null
           is_featured?: boolean | null
           is_free?: boolean | null
           is_promoted?: boolean | null
@@ -203,6 +208,7 @@ export type Database = {
           points_value?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
+          slug?: string | null
           status?: string | null
           tags?: string[] | null
           ticket_price?: number | null
@@ -811,7 +817,13 @@ export type Database = {
         Returns: undefined
       }
       approve_organizer_upgrade: {
-        Args: { p_request_id: string; p_user_id: string }
+        Args: {
+          p_chapter_id: string
+          p_request_id: string
+          p_reviewer_id: string
+          p_role: string
+          p_user_id: string
+        }
         Returns: undefined
       }
       approve_volunteer_application: {

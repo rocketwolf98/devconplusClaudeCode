@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CalendarDays, MapPin, Ticket, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
+import { useAuthStore } from '../../stores/useAuthStore'
+import { supabase } from '../../lib/supabase'
 import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
 
@@ -11,6 +13,7 @@ export default function EventDetail() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { events, registrations } = useEventsStore()
+  const { user } = useAuthStore()
   const { loadApplications, getApplicationByEventId } = useVolunteerStore()
   const event = events.find((e) => e.slug === slug)
   const eventId = event?.id
@@ -21,6 +24,20 @@ export default function EventDetail() {
 
   const reg = registrations.find((r) => r.event_id === eventId)
   const volunteerApp = eventId ? getApplicationByEventId(eventId) : undefined
+
+  const isChapterLocked = event?.is_chapter_locked === true && event.chapter_id !== user?.chapter_id
+
+  const [eventChapterName, setEventChapterName] = useState<string | null>(null)
+  useEffect(() => {
+    if (isChapterLocked && event?.chapter_id) {
+      supabase
+        .from('chapters')
+        .select('name')
+        .eq('id', event.chapter_id)
+        .single()
+        .then(({ data }) => setEventChapterName(data?.name ?? null))
+    }
+  }, [isChapterLocked, event?.chapter_id])
 
   if (!event) return <NotFound />
 
@@ -87,12 +104,18 @@ export default function EventDetail() {
         {/* CTA based on registration state */}
         <div className="pt-2 space-y-3">
           {!reg ? (
-            <button
-              onClick={() => navigate(`/events/${slug}/register`)}
-              className="w-full bg-primary text-white font-bold py-4 rounded-2xl"
-            >
-              Request to Join
-            </button>
+            isChapterLocked ? (
+              <div className="w-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold py-4 rounded-2xl text-center text-sm">
+                This event is exclusive to {eventChapterName ?? "this chapter's"} members
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate(`/events/${slug}/register`)}
+                className="w-full bg-primary text-white font-bold py-4 rounded-2xl"
+              >
+                Request to Join
+              </button>
+            )
           ) : reg.status === 'pending' ? (
             <button
               onClick={() => navigate(`/events/${slug}/pending`)}

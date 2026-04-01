@@ -30,6 +30,7 @@ interface CreateEventPayload {
   points_value: number
   volunteer_points: number
   requires_approval: boolean
+  is_chapter_locked: boolean
   cover_image_url: string | null
   chapter_id: string
   created_by: string
@@ -51,6 +52,7 @@ export interface UpdateEventPayload {
   points_value?: number
   volunteer_points?: number
   requires_approval?: boolean
+  is_chapter_locked?: boolean
   cover_image_url?: string | null
 }
 

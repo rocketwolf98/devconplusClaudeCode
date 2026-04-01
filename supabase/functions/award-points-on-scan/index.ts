@@ -18,15 +18,20 @@ function compactToUuid(compact: string): string {
   return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`
 }
 
-const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:5173',
+  'https://devconplus.vercel.app',
+  'https://devconplusbeta-v1.vercel.app',
+])
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
   const headers: Record<string, string> = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
   }
-  if (origin === ALLOWED_ORIGIN) {
-    headers['Access-Control-Allow-Origin'] = ALLOWED_ORIGIN
+  if (ALLOWED_ORIGINS.has(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin
   }
   return headers
 }
@@ -144,10 +149,10 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 5. Get event details (points_value, title)
+    // 5. Get event details (points_value, title, chapter_id for scope check)
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id, title, points_value')
+      .select('id, title, points_value, chapter_id, is_chapter_locked')
       .eq('id', reg.event_id)
       .single()
 
@@ -158,12 +163,50 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 6. Get member name for response (needed for both success and already-checked-in paths)
+    // 5b. Chapter scoping: chapter_officers can only scan QRs for events in their chapter.
+    //     hq_admin and super_admin bypass this check (they manage all chapters).
+    if (
+      organizer.role === 'chapter_officer' &&
+      organizer.chapter_id &&
+      event.chapter_id !== organizer.chapter_id
+    ) {
+      logger.warn('qr_scan_chapter_mismatch', {
+        organizer_id: organizer.id,
+        organizer_chapter: organizer.chapter_id,
+        event_chapter: event.chapter_id,
+        event_id: event.id,
+      })
+      return new Response(
+        JSON.stringify({ success: false, error: 'This QR is for a different chapter\'s event.' }),
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 6. Get member name + chapter for response and chapter-lock check
     const { data: member } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('full_name, chapter_id')
       .eq('id', reg.user_id)
       .single()
+
+    // 6b. Chapter-lock enforcement: if the event is locked to its chapter,
+    //     reject check-in for members from other chapters.
+    if (
+      event.is_chapter_locked === true &&
+      member?.chapter_id &&
+      event.chapter_id !== member.chapter_id
+    ) {
+      logger.warn('qr_scan_chapter_locked', {
+        member_id: reg.user_id,
+        member_chapter: member.chapter_id,
+        event_chapter: event.chapter_id,
+        event_id: event.id,
+      })
+      return new Response(
+        JSON.stringify({ success: false, error: 'This event is locked to its home chapter.' }),
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
 
     // 7. Atomically claim check-in: only succeeds if checked_in is still false.
     //    This prevents double-award from concurrent scan requests.

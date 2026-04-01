@@ -41,7 +41,7 @@ export default function EventsList() {
 
   // Chapter filter state
   const [chapters, setChapters] = useState<Chapter[]>([])
-  const [selectedChapterId, setSelectedChapterId] = useState<string | null>(null)
+  const [selectedChapterId, setSelectedChapterId] = useState<string | null>(user?.chapter_id ?? null)
   const [showChapterSheet, setShowChapterSheet] = useState(false)
   const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({})
 
