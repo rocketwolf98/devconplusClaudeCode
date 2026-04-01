@@ -17,6 +17,12 @@ export default function EventRegister() {
   const eventId = event?.id ?? ''
   if (!event || !user) return null
 
+  // Block cross-chapter registration for locked events
+  if (event.is_chapter_locked === true && event.chapter_id !== user.chapter_id) {
+    navigate(`/events/${slug}`, { replace: true })
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!agreed) return
