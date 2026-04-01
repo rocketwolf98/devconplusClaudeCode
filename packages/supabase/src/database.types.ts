@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-03-24 (adds volunteer_applications, approve_volunteer_application RPC, rate_limit_log, referrals, xp_tiers)
+// Last generated: 2026-04-01 (adds slug column on events)
 
 export type Json =
   | string
@@ -147,6 +147,7 @@ export type Database = {
           points_value: number | null
           privacy_status: string | null
           requires_approval: boolean | null
+          slug: string
           status: string | null
           tags: string[] | null
           ticket_price: number | null
@@ -175,6 +176,7 @@ export type Database = {
           points_value?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
+          slug: string
           status?: string | null
           tags?: string[] | null
           ticket_price?: number | null
@@ -203,6 +205,7 @@ export type Database = {
           points_value?: number | null
           privacy_status?: string | null
           requires_approval?: boolean | null
+          slug?: string
           status?: string | null
           tags?: string[] | null
           ticket_price?: number | null
