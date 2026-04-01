@@ -121,6 +121,7 @@ export interface Event {
   is_featured: boolean
   is_promoted: boolean
   slug: string
+  is_chapter_locked: boolean | null
   cover_image_url: string | null
   created_by: string
   created_at: string
