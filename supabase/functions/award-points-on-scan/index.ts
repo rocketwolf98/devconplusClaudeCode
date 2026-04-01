@@ -152,7 +152,7 @@ Deno.serve(async (req: Request) => {
     // 5. Get event details (points_value, title, chapter_id for scope check)
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id, title, points_value, chapter_id')
+      .select('id, title, points_value, chapter_id, is_chapter_locked')
       .eq('id', reg.event_id)
       .single()
 
@@ -182,12 +182,31 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 6. Get member name for response (needed for both success and already-checked-in paths)
+    // 6. Get member name + chapter for response and chapter-lock check
     const { data: member } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('full_name, chapter_id')
       .eq('id', reg.user_id)
       .single()
+
+    // 6b. Chapter-lock enforcement: if the event is locked to its chapter,
+    //     reject check-in for members from other chapters.
+    if (
+      event.is_chapter_locked === true &&
+      member?.chapter_id &&
+      event.chapter_id !== member.chapter_id
+    ) {
+      logger.warn('qr_scan_chapter_locked', {
+        member_id: reg.user_id,
+        member_chapter: member.chapter_id,
+        event_chapter: event.chapter_id,
+        event_id: event.id,
+      })
+      return new Response(
+        JSON.stringify({ success: false, error: 'This event is locked to its home chapter.' }),
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
 
     // 7. Atomically claim check-in: only succeeds if checked_in is still false.
     //    This prevents double-award from concurrent scan requests.
