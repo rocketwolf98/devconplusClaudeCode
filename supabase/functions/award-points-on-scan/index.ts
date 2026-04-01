@@ -18,15 +18,20 @@ function compactToUuid(compact: string): string {
   return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`
 }
 
-const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN') ?? 'http://localhost:5173'
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:5173',
+  'https://devconplus.vercel.app',
+  'https://devconplusbeta-v1.vercel.app',
+])
 
 function getCorsHeaders(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') ?? ''
   const headers: Record<string, string> = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
   }
-  if (origin === ALLOWED_ORIGIN) {
-    headers['Access-Control-Allow-Origin'] = ALLOWED_ORIGIN
+  if (ALLOWED_ORIGINS.has(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin
   }
   return headers
 }
