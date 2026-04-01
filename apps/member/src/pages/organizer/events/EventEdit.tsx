@@ -86,6 +86,7 @@ export function OrgEventEdit() {
           devcon_category:   (event.devcon_category ?? null) as FormData['devcon_category'],
           points_value:      event.points_value ?? 200,
           requires_approval: event.requires_approval ?? false,
+          is_chapter_locked: event.is_chapter_locked ?? false,
           is_free:           event.is_free ?? true,
           ticket_price_php:  event.ticket_price_php ?? 0,
           capacity:          event.capacity ?? undefined,
@@ -94,6 +95,7 @@ export function OrgEventEdit() {
       : {
           points_value:      200,
           requires_approval: false,
+          is_chapter_locked: false,
           is_free:           true,
           ticket_price_php:  0,
           visibility:        'public',
@@ -201,6 +203,7 @@ export function OrgEventEdit() {
         end_date:          isLocked ? (event.end_date ?? null)        : (data.end_date ?? null),
         points_value:      isLocked ? (event.points_value ?? 200)     : data.points_value,
         requires_approval: isLocked ? (event.requires_approval ?? false) : data.requires_approval,
+        is_chapter_locked: data.is_chapter_locked,
         category:          data.category,
         devcon_category:   data.devcon_category ?? null,
         tags,
@@ -499,6 +502,27 @@ export function OrgEventEdit() {
                 </div>
               </div>
             )}
+
+            {/* Chapter lock toggle */}
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4">
+              <input
+                {...register('is_chapter_locked')}
+                type="checkbox"
+                id="is_chapter_locked"
+                className="w-4 h-4 accent-blue rounded"
+              />
+              <div>
+                <label
+                  htmlFor="is_chapter_locked"
+                  className="text-sm font-semibold text-slate-900 cursor-pointer"
+                >
+                  Lock to Chapter
+                </label>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Only members of your chapter can register for this event. Disable to allow members from any chapter to join.
+                </p>
+              </div>
+            </div>
 
             <div>
               <label className={labelClass}>Ticket Price</label>

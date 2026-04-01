@@ -66,6 +66,7 @@ export function OrgEventCreate() {
       points_value:      5,
       volunteer_points:  DEFAULT_VOLUNTEER_POINTS,
       requires_approval: false,
+      is_chapter_locked: true,
       is_free:           true,
       ticket_price_php:  0,
       visibility:        'public',
@@ -185,6 +186,7 @@ export function OrgEventCreate() {
         points_value:      data.points_value,
         volunteer_points:  data.volunteer_points,
         requires_approval: data.requires_approval,
+        is_chapter_locked: data.is_chapter_locked,
         cover_image_url,
         chapter_id:        user.chapter_id,
         created_by:        user.id,
@@ -485,6 +487,27 @@ export function OrgEventCreate() {
                 </label>
                 <p className="text-xs text-slate-400 mt-0.5">
                   Manually approve each registration before members receive their QR ticket.
+                </p>
+              </div>
+            </div>
+
+            {/* Chapter lock toggle */}
+            <div className="flex items-center gap-3 bg-slate-50 rounded-xl border border-slate-200 p-4">
+              <input
+                {...register('is_chapter_locked')}
+                type="checkbox"
+                id="is_chapter_locked"
+                className="w-4 h-4 accent-blue rounded"
+              />
+              <div>
+                <label
+                  htmlFor="is_chapter_locked"
+                  className="text-sm font-semibold text-slate-900 cursor-pointer"
+                >
+                  Lock to Chapter
+                </label>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Only members of your chapter can register for this event. Disable to allow members from any chapter to join.
                 </p>
               </div>
             </div>
