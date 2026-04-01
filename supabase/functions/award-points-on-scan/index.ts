@@ -144,10 +144,10 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 5. Get event details (points_value, title)
+    // 5. Get event details (points_value, title, chapter_id for scope check)
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .select('id, title, points_value')
+      .select('id, title, points_value, chapter_id')
       .eq('id', reg.event_id)
       .single()
 
@@ -155,6 +155,25 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ success: false, error: 'Event not found.' }),
         { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 5b. Chapter scoping: chapter_officers can only scan QRs for events in their chapter.
+    //     hq_admin and super_admin bypass this check (they manage all chapters).
+    if (
+      organizer.role === 'chapter_officer' &&
+      organizer.chapter_id &&
+      event.chapter_id !== organizer.chapter_id
+    ) {
+      logger.warn('qr_scan_chapter_mismatch', {
+        organizer_id: organizer.id,
+        organizer_chapter: organizer.chapter_id,
+        event_chapter: event.chapter_id,
+        event_id: event.id,
+      })
+      return new Response(
+        JSON.stringify({ success: false, error: 'This QR is for a different chapter\'s event.' }),
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
