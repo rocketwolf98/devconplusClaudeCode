@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 
 // Calls the check-rate-limit edge function.
 // Returns { allowed, retryAfterSeconds? }.
-// On any network/server error → { allowed: true } (fail open — GoTrue + RLS are final backstops).
+// On any network/server error → { allowed: false } (fail closed — deny by default).
 // token: pass the user's access_token for user-keyed buckets (org_upgrade).
 async function callRateLimit(
   bucket: string,
@@ -12,7 +12,11 @@ async function callRateLimit(
 ): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
   try {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'apikey': anonKey,
+    }
     if (extra?.token) headers['Authorization'] = `Bearer ${extra.token}`
     const { token: _unused, ...body } = extra ?? {}
     const res = await fetch(`${supabaseUrl}/functions/v1/check-rate-limit`, {
@@ -20,10 +24,10 @@ async function callRateLimit(
       headers,
       body:    JSON.stringify({ bucket, ...body }),
     })
-    if (!res.ok && res.status !== 429) return { allowed: true }
+    if (!res.ok && res.status !== 429) return { allowed: false, retryAfterSeconds: 30 }
     return await res.json() as { allowed: boolean; retryAfterSeconds?: number }
   } catch {
-    return { allowed: true }
+    return { allowed: false, retryAfterSeconds: 30 }
   }
 }
 

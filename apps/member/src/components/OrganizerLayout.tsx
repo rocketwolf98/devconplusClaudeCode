@@ -6,6 +6,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
+import { useOrgVolunteerStore } from '../stores/useOrgVolunteerStore'
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -36,6 +37,7 @@ export default function OrganizerLayout() {
   const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
   const fetchAllRewards = useRewardsStore((s) => s.fetchAllRewards)
   const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
+  const loadOrgVolunteerApps = useOrgVolunteerStore((s) => s.loadApplications)
 
   useEffect(() => {
     if (!user) {
@@ -59,6 +61,7 @@ export default function OrganizerLayout() {
     const recover = () => {
       void fetchEvents()
       void fetchAllRewards()
+      if (user?.chapter_id) void loadOrgVolunteerApps(user.chapter_id)
     }
     const resubscribe = () => {
       unsubEventsRef.current?.()

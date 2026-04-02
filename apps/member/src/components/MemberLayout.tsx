@@ -7,6 +7,10 @@ import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
 import { useNotificationsStore } from '../stores/useNotificationsStore'
 import { usePointsStore } from '../stores/usePointsStore'
+import { useJobsStore } from '../stores/useJobsStore'
+import { useNewsStore } from '../stores/useNewsStore'
+import { useVolunteerStore } from '../stores/useVolunteerStore'
+import { useReferralsStore } from '../stores/useReferralsStore'
 
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
@@ -23,6 +27,12 @@ export default function MemberLayout() {
   const registrations = useEventsStore((s) => s.registrations)
   const events = useEventsStore((s) => s.events)
   const loadTotalPoints = usePointsStore((s) => s.loadTotalPoints)
+  const loadTransactions = usePointsStore((s) => s.loadTransactions)
+  const fetchJobs = useJobsStore((s) => s.fetchJobs)
+  const fetchNews = useNewsStore((s) => s.fetchNews)
+  const fetchRewards = useRewardsStore((s) => s.fetchRewards)
+  const loadVolunteerApplications = useVolunteerStore((s) => s.loadApplications)
+  const loadReferralData = useReferralsStore((s) => s.loadReferralData)
   const { fetchRecent, subscribe } = useNotificationsStore()
 
 
@@ -43,7 +53,13 @@ export default function MemberLayout() {
     const recover = () => {
       void fetchEvents()
       void loadTotalPoints()
+      void loadTransactions()
       void fetchRegistrations(user.id)
+      void fetchJobs()
+      void fetchNews()
+      void fetchRewards()
+      void loadVolunteerApplications()
+      void loadReferralData()
     }
     const resubscribe = () => {
       unsubEventsRef.current?.()

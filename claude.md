@@ -1,6 +1,6 @@
 # DEVCON+ — Claude Code Master Context File
-> Last Updated: March 24, 2026
-> Version: MVP 1.2
+> Last Updated: March 30, 2026
+> Version: MVP 1.4
 > Team: 2 interns + Claude Code
 > Hard Deadline: April Week 1 (Cohort 3 Graduation)
 > Live App: https://devconplus.vercel.app
@@ -22,7 +22,7 @@ These rules are non-negotiable. Read before generating anything.
 8. **Jobs Board is manually seeded in Supabase for MVP.** No external API integration needed.
 9. **Photos in onboarding are real chapter group photos** served from `public/photos/`. If assets are missing, use named gradient placeholders — never stock illustration components.
 10. **The 2nd job listing and 2nd news post always get an orange `PROMOTED` badge.** This is a design mandate, not optional.
-11. **The member app is a mobile-first web app** (React + Vite, not Expo). A `<DesktopGuard />` blocks the layout on desktop — all UI must be designed for a 390px-wide mobile viewport.
+11. **The member app is a mobile-first web app** (React + Vite, not Expo). All UI must be designed for a 390px-wide mobile viewport. On desktop (md+), `MemberLayout` and `OrganizerLayout` switch to a sidebar + main card layout — they are fully responsive, not blocked. `<DesktopGuard />` is a pass-through no-op.
 12. **Primary color is CSS-custom-property driven** (`rgb(var(--color-primary))`). Always use `text-primary`, `bg-primary`, etc. — not hardcoded hex. Only use `text-blue` / `bg-blue` when you explicitly need the non-themed DEVCON blue alias.
 13. **Supabase is now live.** All stores use the real Supabase client (`apps/member/src/lib/supabase.ts`). The `MOCK_*` exports in `@devcon-plus/supabase` are kept for reference but are no longer used by the app. Always use the Supabase client for new data calls.
 
@@ -65,6 +65,7 @@ devcon-plus/
 
 ## 3. TECH STACK
 
+
 ### Member App + Organizer UI (`apps/member/`)
 | Concern | Choice |
 |---------|--------|
@@ -74,7 +75,7 @@ devcon-plus/
 | Animation | **framer-motion** (workspace root dependency) |
 | State | **Zustand v5** |
 | Forms | **React Hook Form v7** + **Zod** |
-| Backend client | `@supabase/supabase-js` (wired — awaiting live project) |
+| Backend client | `@supabase/supabase-js` (live — wired to production project) |
 | QR Display | `qrcode.react` |
 | QR Scanning | `@zxing/browser` + `@zxing/library` |
 | Icons | `lucide-react` (only — no emoji icons in JSX) |
@@ -84,14 +85,14 @@ devcon-plus/
 
 > This is a **web app**, not React Native. There is no Expo, no NativeWind, no RN StyleSheet. All styling is plain Tailwind CSS classes.
 
-> A `<DesktopGuard />` wraps the app root. On non-mobile viewports it renders a "Please open on mobile" screen. All UI targets 390px width.
+> **Responsive layout:** `MemberLayout` and `OrganizerLayout` are fully responsive. On mobile (< md): floating pill bottom nav + full-screen scroll container. On desktop (md+): fixed sidebar (bg-primary / bg-blue) + main content card. `<DesktopGuard />` is now a pass-through component — it renders its children directly. All UI still targets 390px-wide as the primary viewport.
 
 ### Shared Package (`packages/supabase/`)
 | Concern | Choice |
 |---------|--------|
 | Exports | TypeScript types + mock data |
-| Mock data | `MOCK_PROFILE`, `MOCK_EVENTS`, `MOCK_JOBS`, `NEWS_POSTS`, etc. |
-| Real client | `@supabase/supabase-js` (not yet wired) |
+| Mock data | `MOCK_PROFILE`, `MOCK_EVENTS`, `MOCK_JOBS`, `NEWS_POSTS`, etc. (kept for reference, not used by the app) |
+| DB types | `packages/supabase/src/database.types.ts` — generated from live DB via `supabase gen types typescript` |
 
 ---
 
@@ -114,24 +115,36 @@ CREATE TABLE chapters (
 CREATE TABLE profiles (
   id uuid REFERENCES auth.users PRIMARY KEY,
   full_name text NOT NULL,
+  username text UNIQUE,                -- display handle, set on sign-up
   email text UNIQUE NOT NULL,
   school_or_company text,
-  chapter_id uuid REFERENCES chapters(id),
+  chapter_id uuid REFERENCES chapters(id) NOT NULL,
   role text CHECK (role IN ('member', 'chapter_officer', 'hq_admin', 'super_admin')) DEFAULT 'member',
   avatar_url text,
-  total_points integer DEFAULT 0,
+  spendable_points integer DEFAULT 0,  -- decremented on reward redemptions
+  lifetime_points integer DEFAULT 0,   -- never decremented (for tier tracking)
+  referral_code text UNIQUE,           -- used in referrals system
+  pending_role text,                   -- set when organizer upgrade is pending review
+  pending_chapter_id uuid REFERENCES chapters(id), -- target chapter for pending upgrade
   created_at timestamptz DEFAULT now()
 );
 ```
+
+> **Note:** The live DB uses `spendable_points` (not `total_points`) and `lifetime_points`. Generated types in `database.types.ts` reflect this.
 
 ### `organizer_codes`
 ```sql
 CREATE TABLE organizer_codes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   code text UNIQUE NOT NULL,
-  chapter_id uuid REFERENCES chapters(id),
+  chapter_id uuid REFERENCES chapters(id),   -- nullable; null = HQ-scope code
+  program_id uuid REFERENCES programs(id),   -- optional program association
   assigned_role text CHECK (assigned_role IN ('chapter_officer', 'hq_admin')),
   is_active boolean DEFAULT true,
+  usage_limit integer,                        -- null = unlimited
+  usage_count integer DEFAULT 0,
+  expires_at timestamptz,                     -- null = never
+  scope_type text,                            -- 'chapter' | 'hq'
   created_at timestamptz DEFAULT now()
 );
 ```
@@ -145,7 +158,19 @@ CREATE TABLE events (
   description text,
   location text,
   event_date timestamptz,
+  end_date timestamptz,
+  end_time time,                       -- event end time (separate from end_date)
+  category text CHECK (category IN ('tech_talk','hackathon','workshop','brown_bag','summit','social','networking')),
+  devcon_category text,                -- program theme override: 'devcon'|'she'|'kids'|'campus'
+  tags text[] DEFAULT '{}',
+  visibility text CHECK (visibility IN ('public','unlisted','draft')) DEFAULT 'public',
+  privacy_status text,                 -- additional privacy field
+  is_free boolean DEFAULT true,
+  ticket_price integer DEFAULT 0,      -- alias for ticket_price_php
+  ticket_price_php integer DEFAULT 0,
+  capacity integer,                    -- null = unlimited
   points_value integer DEFAULT 100,
+  volunteer_points integer DEFAULT 500,
   requires_approval boolean DEFAULT false,
   status text CHECK (status IN ('upcoming', 'ongoing', 'past')) DEFAULT 'upcoming',
   is_featured boolean DEFAULT false,
@@ -156,6 +181,8 @@ CREATE TABLE events (
 );
 ```
 
+> **`devcon_category`** drives per-event theme overrides via `getEventThemeStyle()` in `lib/eventTheme.ts`. When set, event pages override `--color-primary` / `--color-primary-dark` as inline styles (scoped to the page, not global state).
+
 ### `event_registrations`
 ```sql
 CREATE TABLE event_registrations (
@@ -164,6 +191,7 @@ CREATE TABLE event_registrations (
   user_id uuid REFERENCES profiles(id),
   status text CHECK (status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
   qr_code_token text UNIQUE,
+  checked_in boolean DEFAULT false,    -- set to true atomically on first QR scan
   registered_at timestamptz DEFAULT now(),
   approved_at timestamptz,
   UNIQUE(event_id, user_id)
@@ -171,6 +199,19 @@ CREATE TABLE event_registrations (
 ```
 
 > **Approval logic:** If `events.requires_approval = false` → auto-set status to `approved` and generate `qr_code_token` on insert via Edge Function. If `true` → status stays `pending` until an officer approves.
+> **Double-award prevention:** `checked_in` is updated atomically (`false → true`). Concurrent scans will not double-award points.
+
+### `event_announcements`
+```sql
+CREATE TABLE event_announcements (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid REFERENCES events(id) NOT NULL,
+  organizer_id uuid REFERENCES profiles(id) NOT NULL,
+  message text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+```
+Created by organizers via `<SendAnnouncementSheet />`.
 
 ### `point_transactions`
 ```sql
@@ -199,6 +240,9 @@ CREATE TABLE rewards (
   type text CHECK (type IN ('digital', 'physical')),
   claim_method text CHECK (claim_method IN ('onsite', 'digital_delivery')),
   image_url text,
+  stock_remaining integer,             -- null = unlimited
+  max_per_user integer,                -- null = unlimited
+  financial_cost_php integer,          -- internal cost tracking
   is_active boolean DEFAULT true,
   is_coming_soon boolean DEFAULT true,
   created_at timestamptz DEFAULT now()
@@ -248,16 +292,73 @@ CREATE TABLE news_posts (
 );
 ```
 
+### `programs`
+```sql
+CREATE TABLE programs (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  theme_id text,
+  description text,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now()
+);
+```
+
+### `xp_tiers`
+XP tier milestone definitions (e.g. "Bronze", "Silver", "Gold"). Seeded manually.
+
+### `volunteer_applications`
+```sql
+CREATE TABLE volunteer_applications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id uuid REFERENCES events(id),
+  user_id uuid REFERENCES profiles(id),
+  status text CHECK (status IN ('pending', 'approved', 'rejected')) DEFAULT 'pending',
+  reviewed_by uuid REFERENCES profiles(id),
+  reviewed_at timestamptz,
+  created_at timestamptz DEFAULT now(),
+  UNIQUE(event_id, user_id)
+);
+```
+Approved by organizer via `approve_volunteer_application(p_application_id, p_organizer_id)` RPC.
+Points awarded = `events.points_value + events.volunteer_points`.
+
+### `referrals`
+```sql
+CREATE TABLE referrals (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  referrer_id uuid REFERENCES profiles(id),
+  referred_user_id uuid REFERENCES profiles(id),
+  created_at timestamptz DEFAULT now()
+);
+```
+
+### `organizer_upgrade_requests`
+```sql
+CREATE TABLE organizer_upgrade_requests (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES profiles(id),
+  organizer_code text NOT NULL,        -- the code they submitted
+  requested_role text,                 -- 'chapter_officer' | 'hq_admin'
+  chapter_id uuid REFERENCES chapters(id),
+  status text DEFAULT 'pending',       -- 'pending' | 'approved' | 'rejected'
+  reviewed_by uuid REFERENCES profiles(id),
+  reviewed_at timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+```
+Created by `useAuthStore.requestOrganizerUpgrade()`. Reviewed by admins in `/admin/upgrades` (AdminCMS). Rate-limited to 1 request per 25 hours per user via `check-rate-limit`.
+
 ---
 
 ## 5. ROLE-BASED ACCESS CONTROL
 
 | Role | Key Capabilities |
 |------|-----------------|
-| `member` | Register for events, earn/redeem points, browse jobs, view own QR ticket |
+| `member` | Register for events, earn/redeem points, browse jobs, view own QR ticket, request organizer upgrade |
 | `chapter_officer` | All member + create events, approve/reject registrations, scan QR at door |
-| `hq_admin` | All officer + manage rewards catalog, manage all chapters |
-| `super_admin` | Full system access, role assignment, platform config |
+| `hq_admin` | All officer + manage rewards catalog, manage all chapters, review upgrade requests |
+| `super_admin` | Full system access, role assignment, platform config, kiosk access |
 
 ### Organizer Gateway Flow
 ```
@@ -267,6 +368,17 @@ Sign Up → "DO YOU HAVE AN ORGANIZER CODE?"
          → route to /organizer (OrganizerLayout)
   → NO:  default to member role
          → route to /home (MemberLayout)
+```
+
+### In-App Organizer Upgrade (post sign-up)
+```
+Profile → "Request Organizer Access"
+  → Submit organizer code
+  → Rate limit check (1 per 25h via check-rate-limit)
+  → Insert into organizer_upgrade_requests
+  → sets profiles.pending_role + profiles.pending_chapter_id
+  → Admin reviews at /admin/upgrades
+  → On approval: role + chapter_id updated, pending fields cleared
 ```
 
 ### Key RLS Policies
@@ -303,14 +415,19 @@ CREATE POLICY "Users view own points" ON point_transactions
 /sign-in                 → SignIn
 /sign-up                 → SignUp
 /organizer-code-gate     → OrganizerCodeGate
+/forgot-password         → ForgotPassword
+/email-sent              → EmailSent
+/reset-password          → ResetPassword
+/email-confirm           → EmailConfirm
 
-— MemberLayout (floating pill bottom nav) —
+— MemberLayout (floating pill bottom nav on mobile, sidebar on desktop) —
 /home                    → Dashboard
 /events                  → EventsList
 /events/:id              → EventDetail
 /events/:id/register     → EventRegister
 /events/:id/pending      → EventPending
 /events/:id/ticket       → EventTicket
+/events/:id/volunteer    → EventVolunteer
 /jobs                    → JobsList
 /jobs/:id                → JobDetail
 /points                  → Points
@@ -319,32 +436,42 @@ CREATE POLICY "Users view own points" ON point_transactions
 /rewards                 → Rewards
 /profile                 → Profile
 /profile/edit            → ProfileEdit
+/notifications           → NotificationsInbox
 /profile/notifications   → Notifications
 /profile/privacy         → Privacy
 
-— OrganizerLayout (sidebar nav) —
+— OrganizerLayout (floating pill bottom nav on mobile, sidebar on desktop) —
 /organizer                           → OrgDashboard
-/organizer/events                    → OrgEventsList
+/organizer/events                    → OrgEventManagement
 /organizer/events/create             → OrgEventCreate
 /organizer/events/:id                → OrgEventDetail
+/organizer/events/:id/edit           → OrgEventEdit
 /organizer/events/:id/registrants    → OrgEventRegistrants
-/organizer/scan                      → OrgQRScanner
+/organizer/events/:id/summary        → OrgEventSummary
+/organizer/scan                      → OrgQRScanner (lazy-loaded — pulls in @zxing)
+/organizer/rewards                   → OrgRewardsManagement
+/organizer/rewards/create            → RewardCreate
+/organizer/rewards/:id/edit          → RewardEdit
 /organizer/profile                   → OrgProfile
 /organizer/profile/edit              → OrgProfileEdit
+/organizer/notifications             → NotificationsInbox (isOrganizer)
 /organizer/profile/notifications     → Notifications (shared)
 /organizer/profile/privacy           → Privacy (shared)
 
-— AdminLayout (requires hq_admin or super_admin role) —
+— AdminLayout (requires hq_admin or super_admin — all lazy-loaded) —
 /admin                               → AdminDashboard (stats overview)
 /admin/users                         → AdminUsers (search, role assignment)
 /admin/org-codes                     → AdminOrgCodes (code generation + management)
 /admin/events                        → AdminEvents (all events across chapters)
 /admin/chapters                      → AdminChapters (chapter management)
-/admin/upgrades                      → AdminUpgrades (CMS / upgrade requests)
+/admin/upgrades                      → AdminCMS (upgrade request review — labeled "CMS" in sidebar)
 /admin/kiosk                         → AdminKiosk (on-site check-in kiosk — super_admin only)
+
+— Catch-all —
+*                                    → NotFound (404 page)
 ```
 
-### Bottom Tab Navigation (MemberLayout)
+### Bottom Tab Navigation (MemberLayout — mobile)
 ```
 [Home]  [Rewards]  [● Events ●]  [Jobs]  [Profile]
                         ↑
@@ -352,6 +479,31 @@ CREATE POLICY "Users view own points" ON point_transactions
      button (elevated circle, QrCode icon, bg-primary).
      Active state: text-primary / icon strokeWidth 2.5.
      Inactive: text-slate-400 / strokeWidth 1.8.
+```
+
+### Desktop Sidebar (MemberLayout — md+)
+```
+Left sidebar: bg-primary, w-48 lg:w-56, rounded-2xl
+  Logo + "Member" label
+  Nav items: Home | Rewards | Events (circle accent) | Jobs | Profile
+Right: bg-white main content card
+```
+
+### Bottom Tab Navigation (OrganizerLayout — mobile)
+```
+[Home]  [Rewards]  [● Scan ●]  [Events]  [Profile]
+                       ↑
+     Scan is center hero (ScanLine icon).
+     Active hero: bg-navy. Inactive hero: bg-blue.
+     Active tabs: text-blue. Inactive: text-slate-400.
+     OrganizerLayout does NOT apply program themes.
+```
+
+### Desktop Sidebar (OrganizerLayout — md+)
+```
+Left sidebar: bg-blue, w-48 lg:w-56, rounded-2xl
+  Logo + "Organizer" label
+  Nav items: Home | Rewards | Scan (circle accent) | Events | Profile
 ```
 
 ---
@@ -387,12 +539,13 @@ IF requires_approval = true  → Pending screen (Realtime subscription)
 
 ### QR Check-In at Venue
 ```
-Member: shows QR Ticket screen
+Member: shows QR Ticket screen (calls generate-qr-token → short-lived JWT)
 Officer: /organizer/scan → camera opens
 Officer: scans member QR → award-points-on-scan Edge Function
-  → marks checked_in
+  → validates token (kind 'r' = registration, 'u' = user identity, 'p' = pending)
+  → atomic checked_in update (false → true) prevents double-award
   → inserts point_transaction
-  → updates profiles.total_points
+  → updates profiles.spendable_points + lifetime_points
 Officer sees: "✓ Juan dela Cruz — 200 pts awarded"
 ```
 
@@ -460,10 +613,10 @@ Group by date. Redemptions show negative. End with "That's it!" empty state.
 primary           → CSS var: rgb(var(--color-primary))   — driven by program theme
 primary-dark      → CSS var: rgb(var(--color-primary-dark))
 
-blue              #367BDD   legacy alias — non-themed blue (links, fallback)
+blue              #367BDD   legacy alias — non-themed blue (links, organizer nav, fallback)
 blue-dark         #2962C4
 blue-light        #5A9AEA
-navy              #1E2A56   deep navy (banner dot indicator, dark text)
+navy              #1E2A56   deep navy (banner dot indicator, dark text, organizer scan hero active)
 gold              #F8C630   XP bar fill, star icon fill
 promoted          #F97316   ONLY for PROMOTED badge
 green             #21C45D   success / positive XP
@@ -489,6 +642,10 @@ Campus        id=campus   primary=#F8C630   dark=#EAB308
 Theme is persisted via `useThemeStore` (Zustand persist). CSS custom properties
 `--color-primary` and `--color-primary-dark` are injected on the `<html>` element
 by the MemberLayout on mount. Organizer routes do NOT apply program themes.
+
+Per-event theme override: when `events.devcon_category` is set, event pages use
+`getEventThemeStyle(devcon_category)` (from `lib/eventTheme.ts`) as inline styles
+scoped to the page root — does not mutate global state.
 
 ### Box Shadows
 ```
@@ -525,21 +682,30 @@ whileTap={{ scale: 0.95 }}  — standard press feedback on all buttons/cards
 
 ### Core Components (built — reuse everywhere)
 ```
-<MemberLayout />         floating pill bottom nav, scroll container, auth guard
-<OrganizerLayout />      sidebar nav, isOrganizerSession guard
-<DesktopGuard />         blocks desktop viewports (wraps app root)
-<EventCard />            dashboard + events list cards (compact prop)
-<JobCard />              jobs board full card
-<NewsCard />             DEVCON + Tech Community feed items
-<PromotedBadge />        orange "PROMOTED" tag
-<ComingSoonModal />      reusable for incomplete features
-<TransactionRow />       points history list item
-<StatusPill />           Pending / Approved / Rejected / You're In
-<ChipBar />              horizontal scroll chip filter bar
-<XPCard />               standalone XP display card
-<OrgBanner />            organizer top banner strip
-<ApprovalCard />         organizer approval item card
-<StatusBadge />          organizer status badge
+<MemberLayout />             responsive layout: floating pill nav (mobile) + sidebar (desktop), auth guard
+<OrganizerLayout />          responsive layout: floating pill nav (mobile) + sidebar (desktop), organizer guard
+<AdminLayout />              desktop-only sidebar nav, hq_admin/super_admin guard, recovery remount
+<DesktopGuard />             pass-through no-op — renders children directly (responsive handled in layouts)
+<EventCard />                dashboard + events list cards (compact prop)
+<JobCard />                  jobs board full card
+<NewsCard />                 DEVCON + Tech Community feed items
+<PromotedBadge />            orange "PROMOTED" tag
+<ComingSoonModal />          reusable for incomplete features
+<TransactionRow />           points history list item
+<StatusPill />               Pending / Approved / Rejected / You're In
+<ChipBar />                  horizontal scroll chip filter bar
+<XPCard />                   standalone XP display card
+<OrgBanner />                organizer top banner strip
+<ApprovalCard />             organizer event registration approval card
+<VolunteerApprovalCard />    organizer volunteer application approval card
+<StatusBadge />              organizer status badge
+<AddToCalendarSheet />       bottom sheet for adding event to device calendar
+<SendAnnouncementSheet />    organizer bottom sheet for broadcasting announcements (creates event_announcements row)
+<PasswordConfirmModal />     confirm password for sensitive actions
+<PasswordStrengthMeter />    password strength indicator (used in SignUp / ProfileEdit)
+<Skeleton />                 loading skeleton placeholder
+<KonamiCodeWrapper />        Easter egg wrapper (to be removed before production — see DEVCON_PLUS.md L1)
+<KonamiModal />              Easter egg modal dialog
 ```
 
 ### Icon Rules
@@ -555,49 +721,98 @@ whileTap={{ scale: 0.95 }}  — standard press feedback on all buttons/cards
 ## 10. STORES (`apps/member/src/stores/`)
 
 ```
-useAuthStore.ts     — user (Profile|null), initials, signIn, signOut,
-                      setOrganizerSession, updateProfile
-useEventsStore.ts   — events[], registrations[], register(), getById()
-useJobsStore.ts     — jobs[], getById()
-usePointsStore.ts   — transactions[], totalPoints
-useOrgAuthStore.ts  — organizer session state
-useThemeStore.ts    — themeId, setTheme(), activeTheme()
-                      persisted to localStorage as 'devcon-theme'
+useAuthStore.ts           — user (Profile|null), initials, chapterName, isInitialized,
+                            isOrganizerSession, initialize(), signIn(), signUp(),
+                            signOut(), setOrganizerSession(), updateProfile(),
+                            updateEmail(), updatePassword(), uploadAvatar(),
+                            deleteAccount(), resetPassword(),
+                            requestOrganizerUpgrade(), checkUsernameAvailable()
+useEventsStore.ts         — events[], registrations[], register(), getById(),
+                            fetchEvents(), fetchRegistrations(),
+                            subscribeToChanges(), subscribeToEventChanges()
+useJobsStore.ts           — jobs[], fetchJobs(), getById()
+usePointsStore.ts         — transactions[], loadTotalPoints(), loadTransactions()
+useNewsStore.ts           — newsPosts[], fetchNews()
+useRewardsStore.ts        — rewards[], fetchRewards(), fetchAllRewards(),
+                            subscribeToChanges()
+useNotificationsStore.ts  — notifications[], fetchRecent(), subscribe(), markRead()
+useVolunteerStore.ts      — member volunteer applications, loadApplications(),
+                            applyToVolunteer()
+useOrgVolunteerStore.ts   — organizer volunteer queue, loadApplications(),
+                            approveApplication(), rejectApplication()
+useReferralsStore.ts      — referrals[], referralCode, loadReferralData()
+useOrgAuthStore.ts        — organizer session state
+useThemeStore.ts          — themeId, setTheme(), activeTheme()
+                            persisted to localStorage as 'devcon-theme'
 ```
 
-All stores are currently seeded with mock data from `@devcon-plus/supabase`.
-Replace mock calls with Supabase client calls when the project is provisioned.
+All stores use real Supabase queries via `apps/member/src/lib/supabase.ts`.
 
 ---
 
 ## 11. LIB UTILITIES (`apps/member/src/lib/`)
 
 ```
-animation.ts    — framer-motion variants: staggerContainer, cardItem, fadeUp
-constants.ts    — WORK_TYPE_LABELS, CATEGORY_LABELS
-dates.ts        — formatDate.compact(), formatDate.full(), formatDate.time()
+animation.ts         — framer-motion variants: staggerContainer, cardItem, fadeUp
+constants.ts         — VOLUNTEER_APPROVAL_POINTS (35), ROLE_DISPLAY_NAMES,
+                       WORK_TYPE_LABELS, CATEGORY_LABELS
+dates.ts             — formatDate.compact(), formatDate.full(), formatDate.time()
+eventTheme.ts        — getEventThemeStyle(devcon_category): inline CSS vars for
+                       per-event theme overrides (scoped, does not mutate global state)
+                       resolveEventTheme(devcon_category, fallbackTheme): hex values
+supabase.ts          — Supabase client with custom navigator.locks auth lock
+                       (no timeout) + realtime throttle at 10 events/sec
+validation.ts        — form validation helpers (Zod schemas, reusable validators)
+useRecoverOnFocus.ts — recovery hook: refetches + resubscribes on visibilitychange,
+                       online event, and 5-minute polling interval
+```
+
+### Hooks (`apps/member/src/hooks/`)
+```
+useKonamiCode.ts     — Konami code easter egg detector
 ```
 
 ---
 
 ## 12. EDGE FUNCTIONS (`supabase/functions/`)
 
-### `validate-organizer-code`
-- Input: `{ code: string }`
-- Returns: `{ valid: boolean, role: string, chapter_id: string }`
-
-### `auto-approve-registration`
-- Trigger: INSERT on `event_registrations`
-- If `event.requires_approval = false` → set status `approved` + generate `qr_code_token`
+### `generate-qr-token`
+- Input: `{ registration_id: string }`
+- Returns: `{ token: string, expires_at: number }`
+- Generates a compact JWT-based QR token (kind=`'r'`, sub=registration_id)
+- Rate limited: 10 token requests/user/60s (fail closed)
 
 ### `award-points-on-scan`
-- Input: `{ qr_code_token: string, organizer_id: string }`
-- Validates token, inserts `point_transaction`, updates `profiles.total_points`
-- Returns: `{ success: boolean, member_name: string, points_awarded: number }`
+- Input: `{ token: string }` — the short-lived JWT from `generate-qr-token`
+- Returns: `{ success: boolean, member_name?, points_awarded?, event_title?, already_checked_in?, error? }`
+- Token kinds (discriminated by `k` claim):
+  - `k='r'` — registration token (sub = registration_id): standard check-in
+  - `k='u'` — user identity token (sub = user_id): finds most imminent approved event in chapter
+  - `k='p'` — pending door-approval token (sub = registration_id): returns pending state for Approve/Reject UI
+- Validates token signature + expiry (HMAC-SHA256)
+- Atomically sets `checked_in: false → true` to prevent double-award
+- Rate limited: 60 scans/organizer/60s
 
-### `award-signup-bonus`
-- Trigger: new profile created
-- Inserts 500pt `signup` transaction, sets `total_points = 500`
+### `approve-at-door`
+- Input: `{ registration_id: string, action: 'approve' | 'reject' }`
+- Called by QR scanner after scanning a pending member QR
+- Returns (approve): `{ success: true, member_name, points_awarded, event_title }`
+- Returns (reject): `{ success: true, rejected: true, member_name }`
+
+### `check-rate-limit`
+- Input: `{ bucket: string, email?: string }`
+- Returns: `{ allowed: boolean, retryAfterSeconds?: number }`
+- IP-keyed buckets (no JWT required): `login`, `login_ip`, `signup`, `username_check`
+- User-keyed buckets (JWT required): `org_upgrade`
+- Rate limit windows: login=300s, signup=3600s, username_check=60s, org_upgrade=90000s (25h), qr_generate=60s, qr_scan=60s
+- Fails open on RPC error (GoTrue + RLS are final backstops)
+
+### `_shared/logger.ts`
+- Structured JSON logger used by all edge functions
+- Format: `{ level, event, ts, ...data }` → stdout → Supabase Dashboard Logs
+- Levels: `info`, `warn`, `error`
+
+> All functions share CORS origin allowlist: `localhost:5173`, `devconplus.vercel.app`, `devconplusbeta-v1.vercel.app`
 
 ---
 
@@ -669,6 +884,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 - No dead navigation — every route renders something
 - `framer-motion` `whileTap={{ scale: 0.95 }}` on all tappable cards and buttons
 - Use `motion.div` + `variants={staggerContainer}` + `variants={cardItem}` for list sections
+- **Realtime recovery pattern:** data fetches + realtime resubscriptions must be triggered on `visibilitychange` (visible), `window.online`, and a 5-minute polling interval. Use `useRecoverOnFocus` or mirror the pattern from `MemberLayout`/`OrganizerLayout`.
 
 ---
 
@@ -685,44 +901,61 @@ npm run typecheck                     # tsc --noEmit across all packages
 
 ---
 
-## 17. CURRENT BUILD STATUS (as of March 24, 2026)
+## 17. CURRENT BUILD STATUS (as of March 30, 2026)
 
 ### Completed
 - [x] Monorepo scaffold (apps/member, packages/supabase)
 - [x] Tailwind + Geist font + design tokens + CSS custom property theming
 - [x] Program theme system (4 themes, CSS vars, persisted via Zustand)
+- [x] Per-event theme overrides via `devcon_category` + `lib/eventTheme.ts`
 - [x] Auth flow (SplashScreen, Onboarding, SignIn, SignUp, OrganizerCodeGate)
-- [x] MemberLayout (floating pill nav, scroll reset, auth guard)
-- [x] OrganizerLayout (sidebar nav, organizer guard)
-- [x] DesktopGuard
+- [x] Password reset + email confirmation flows (ForgotPassword, EmailSent, ResetPassword, EmailConfirm)
+- [x] MemberLayout — responsive (floating pill nav on mobile, sidebar on desktop md+)
+- [x] OrganizerLayout — responsive (floating pill nav on mobile, sidebar on desktop md+)
+- [x] AdminLayout (desktop sidebar nav, hq_admin/super_admin guard, lazy-loaded routes)
+- [x] DesktopGuard (pass-through — responsive handled in each layout)
 - [x] Dashboard (cradle XP card, quick actions, rotating banner, events, jobs carousel, news tabs, XP history preview)
-- [x] EventsList, EventDetail, EventRegister, EventPending, EventTicket
+- [x] EventsList, EventDetail, EventRegister, EventPending, EventTicket, EventVolunteer
 - [x] JobsList, JobDetail
 - [x] Points, PointsHistory
 - [x] Rewards (catalog grid + ComingSoonModal)
 - [x] Profile (program theme selector, XP badge, menu, sign out)
-- [x] ProfileEdit (photo upload), Notifications, Privacy
+- [x] ProfileEdit (photo upload, username edit), Notifications, NotificationsInbox, Privacy
 - [x] NewsDetail
-- [x] Organizer: Dashboard, EventsList, EventCreate, EventDetail, EventRegistrants, QRScanner, Profile, ProfileEdit
-- [x] Admin panel: Dashboard, Users, OrgCodes, Events, Chapters, Upgrades, Kiosk (super_admin only)
-- [x] All core components (EventCard, JobCard, NewsCard, PromotedBadge, ComingSoonModal, TransactionRow, StatusPill, ChipBar, XPCard, OrgBanner, ApprovalCard, StatusBadge)
+- [x] Organizer: Dashboard, EventManagement, EventCreate, EventDetail, EventEdit, EventRegistrants, EventSummary, QRScanner (lazy), RewardsManagement, RewardCreate, RewardEdit, Profile, ProfileEdit
+- [x] Admin panel: Dashboard, Users, OrgCodes, Events, Chapters, CMS/Upgrades, Kiosk (super_admin only)
+- [x] All core components (see Section 9) including KonamiCodeWrapper + KonamiModal (Easter egg)
 - [x] framer-motion animations across all list/card sections
 - [x] Supabase project provisioned + real client wired (`apps/member/src/lib/supabase.ts`)
+- [x] Custom navigator.locks auth (no timeout) + realtime throttle (10 events/sec)
 - [x] Real Supabase auth (signIn, signUp, Google OAuth, session persistence)
-- [x] All stores migrated to real Supabase queries (auth, events, jobs, news, points, rewards, notifications)
-- [x] DB schema migrations applied (001–017 + sprint/feature migrations through March 24)
+- [x] All stores migrated to real Supabase queries (auth, events, jobs, news, points, rewards, notifications, volunteers, referrals)
+- [x] useAuthStore: updateEmail, updatePassword, uploadAvatar, deleteAccount, requestOrganizerUpgrade, checkUsernameAvailable
+- [x] username field on profiles — unique, set on sign-up
+- [x] In-app organizer upgrade request flow (organizer_upgrade_requests table + admin review)
+- [x] event_announcements table + SendAnnouncementSheet
+- [x] DB schema migrations applied (001–017 + all sprint/feature migrations through `20260324_volunteer_indexes.sql`)
+- [x] DB types regenerated from live Supabase DB (March 24)
 - [x] Seed data seeded (chapters, jobs, rewards)
 - [x] RLS policies + security hardening (IDOR hardening, rate limiting, security fixes)
-- [x] Performance indexes migration written (pending apply)
-- [x] Realtime extensions migration written (pending apply)
+- [x] Performance indexes applied (`20260324_performance_indexes.sql`)
+- [x] Realtime extensions applied (`20260324_realtime_extensions.sql`)
+- [x] Realtime recovery pattern (visibilitychange + online + 5min poll) in MemberLayout, OrganizerLayout, AdminLayout
+- [x] Volunteer system wired end-to-end (member apply flow + organizer approval queue)
+- [x] Edge functions deployed: `generate-qr-token`, `award-points-on-scan`, `approve-at-door`, `check-rate-limit`
+- [x] QR token kinds: `'r'` (registration), `'u'` (user identity), `'p'` (pending door-approval)
+- [x] Rate limiting: login (5/5min), signup (1/hr), username_check (10/min), org_upgrade (1/25hr), qr_generate (10/min), qr_scan (60/min)
+- [x] Shared edge function logger (`_shared/logger.ts`)
+- [x] NotFound (404) catch-all route
+- [x] CSP headers enforced (promoted from Report-Only)
 - [x] Deployed to Vercel → https://devconplus.vercel.app
 
 ### Remaining for MVP
-- [ ] Apply pending migrations: `20260324_performance_indexes.sql`, `20260324_realtime_extensions.sql`, `20260324_rls_security.sql`
-- [ ] Deploy Edge Functions (auto-approve, award-points-on-scan, award-signup-bonus, validate-organizer-code)
+- [ ] Deploy any remaining Edge Functions not yet live (verify via Supabase dashboard)
 - [ ] PROMOTED badge audit (verify 2nd job + 2nd news post in live data)
+- [ ] Remove test accounts + Easter eggs (KonamiCodeWrapper / KonamiModal) per DEVCON_PLUS.md L1
 - [ ] Final QA on all flows end-to-end
-- [ ] Google OAuth callback URL configured in Supabase dashboard for production domain
+- [ ] Google OAuth callback URL confirmed for production domain
 
 ---
 
@@ -739,4 +972,14 @@ Show `<ComingSoonModal />` if user reaches any of these:
 - Developer Spotlight CMS
 - Super Admin panel
 - Multi-language support
-- Volunteering registration flow
+
+
+---
+
+## 📁 Project-Specific Instructions
+
+This repository includes a separate instruction file for the **Devcon Plus Beta V3** project.
+
+> 📄 See [`DEVCON_PLUS.md`](./DEVCON_PLUS.md) for the full project context including team setup, weekly roadmap, feature checklist, security guidelines, and conventions.
+
+Read it at the start of any session involving this project.

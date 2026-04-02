@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck, ScanLine, ArrowLeft } from 'lucide-react'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -19,6 +19,7 @@ const ADMIN_ROLES = ['super_admin', 'hq_admin'] as const
 export default function AdminLayout() {
   const { user, signOut } = useAuthStore()
   const navigate = useNavigate()
+  const [recoveryKey, setRecoveryKey] = useState(0)
 
   useEffect(() => {
     if (!user) {
@@ -27,6 +28,24 @@ export default function AdminLayout() {
       navigate('/home', { replace: true })
     }
   }, [user, navigate])
+
+  // Recovery: when tab regains visibility after idle, bump key to remount child
+  // pages so their useEffect hooks re-fetch data from Supabase.
+  const handleRecover = useCallback(() => setRecoveryKey((k) => k + 1), [])
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') handleRecover()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('online', handleRecover)
+    const poll = setInterval(handleRecover, 5 * 60 * 1000)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('online', handleRecover)
+      clearInterval(poll)
+    }
+  }, [handleRecover])
 
   if (!user || !ADMIN_ROLES.includes(user.role as typeof ADMIN_ROLES[number])) return null
 
@@ -83,7 +102,7 @@ export default function AdminLayout() {
 
       {/* Main content area — floating card */}
       <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-y-auto">
-        <Outlet />
+        <Outlet key={recoveryKey} />
       </main>
     </div>
   )

@@ -2,18 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, SwitchCamera, CheckCircle2, Info, XCircle, Zap } from 'lucide-react'
+import { ArrowLeft, SwitchCamera, CheckCircle2, Info, XCircle, Zap, Clock, UserCheck, UserX } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type CameraStatus = 'starting' | 'active' | 'permission_denied' | 'error'
 
 interface ResultOverlay {
-  type: 'success' | 'already_checked_in' | 'error'
+  type: 'success' | 'already_checked_in' | 'error' | 'pending' | 'rejected'
   memberName?: string
   eventTitle?: string
   pointsAwarded?: number
   message?: string
+  registrationId?: string
 }
 
 // ── Module-level constants ────────────────────────────────────────────────────
@@ -157,12 +158,21 @@ export function OrgQRScanner() {
     if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current)
     overlayKeyCounterRef.current += 1   // new key forces AnimatePresence to remount the node
     setOverlayEntry({ data: next, key: overlayKeyCounterRef.current })
-    overlayTimerRef.current = setTimeout(dismissOverlay, OVERLAY_DURATION_MS)
+    // Pending overlay stays until the organizer taps Approve or Reject
+    if (next.type !== 'pending') {
+      overlayTimerRef.current = setTimeout(dismissOverlay, OVERLAY_DURATION_MS)
+    }
   }
 
   const handleScannedToken = async (token: string) => {
     // Scan lock — zxing fires this callback many times/second for the same code
     if (isProcessingRef.current) return
+
+    // Validate token format before sending to server (compact JWT: 3 base64url segments)
+    if (!/^[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}$/.test(token)) {
+      showOverlay({ type: 'error', message: 'Invalid QR format.' })
+      return
+    }
 
     // Dynamic imports are cached after first load — no repeated network cost
     const { supabase } = await import('../../../lib/supabase')
@@ -177,10 +187,10 @@ export function OrgQRScanner() {
     isProcessingRef.current = true
 
     try {
-      // NOTE: existing codebase uses `{ token }` — preserve this field name to match
-      // the deployed Edge Function.
       const { data, error } = await supabase.functions.invoke<{
         success: boolean
+        pending?: boolean
+        registration_id?: string
         member_name?: string
         points_awarded?: number
         event_title?: string
@@ -189,7 +199,18 @@ export function OrgQRScanner() {
       }>('award-points-on-scan', { body: { token } })
 
       if (error) {
-        showOverlay({ type: 'error', message: error.message ?? 'Scan failed. Try again.' })
+        showOverlay({ type: 'error', message: 'Scan failed. Try again.' })
+        return
+      }
+
+      if (data?.pending && data.registration_id) {
+        // Member is pending — show approve/reject overlay (keeps scan lock held)
+        showOverlay({
+          type: 'pending',
+          memberName: data.member_name ?? 'Member',
+          eventTitle: data.event_title ?? '',
+          registrationId: data.registration_id,
+        })
         return
       }
 
@@ -198,13 +219,8 @@ export function OrgQRScanner() {
         return
       }
 
-      if (data?.error === 'token_expired') {
-        showOverlay({ type: 'error', message: 'QR expired — ask member to refresh.' })
-        return
-      }
-
-      if (data?.error === 'invalid_token') {
-        showOverlay({ type: 'error', message: 'Invalid QR code.' })
+      if (data?.error === 'token_expired' || data?.error === 'invalid_token') {
+        showOverlay({ type: 'error', message: 'Invalid or expired QR code.' })
         return
       }
 
@@ -219,10 +235,52 @@ export function OrgQRScanner() {
         eventTitle: data.event_title ?? '',
         pointsAwarded: data.points_awarded ?? 0,
       })
+    } catch {
+      showOverlay({
+        type: 'error',
+        message: 'Scan failed. Try again.',
+      })
+    }
+  }
+
+  const handleDoorAction = async (registrationId: string, action: 'approve' | 'reject') => {
+    const { supabase } = await import('../../../lib/supabase')
+    try {
+      const { data, error } = await supabase.functions.invoke<{
+        success: boolean
+        rejected?: boolean
+        already_approved?: boolean
+        member_name?: string
+        points_awarded?: number
+        event_title?: string
+        error?: string
+      }>('approve-at-door', { body: { registration_id: registrationId, action } })
+
+      if (error || !data?.success) {
+        showOverlay({ type: 'error', message: data?.error ?? 'Action failed. Try again.' })
+        return
+      }
+
+      if (action === 'reject' || data.rejected) {
+        showOverlay({ type: 'rejected', memberName: data.member_name ?? 'Member' })
+        return
+      }
+
+      if (data.already_approved) {
+        showOverlay({ type: 'already_checked_in', memberName: data.member_name ?? 'Member' })
+        return
+      }
+
+      showOverlay({
+        type: 'success',
+        memberName: data.member_name ?? 'Member',
+        eventTitle: data.event_title ?? '',
+        pointsAwarded: data.points_awarded ?? 0,
+      })
     } catch (e) {
       showOverlay({
         type: 'error',
-        message: e instanceof Error ? e.message : 'Scan failed. Try again.',
+        message: e instanceof Error ? e.message : 'Action failed. Try again.',
       })
     }
   }
@@ -426,6 +484,80 @@ export function OrgQRScanner() {
                   <div>
                     <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
                     <p className="text-white/80 text-xs">Already checked in</p>
+                  </div>
+                </div>
+                <div className="h-1 bg-white/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-white rounded-full"
+                    ref={(el) => {
+                      if (!el) return
+                      el.style.transition = 'none'
+                      el.style.width = '100%'
+                      requestAnimationFrame(() => {
+                        el.style.transition = `width ${OVERLAY_DURATION_MS}ms linear`
+                        el.style.width = '0%'
+                      })
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {overlayEntry.data.type === 'pending' && overlayEntry.data.registrationId && (
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xl">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
+                    <Clock className="w-5 h-5 text-yellow-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-slate-900 font-black text-base truncate">{overlayEntry.data.memberName}</p>
+                    <p className="text-slate-500 text-xs truncate">{overlayEntry.data.eventTitle}</p>
+                  </div>
+                  <span className="ml-auto shrink-0 bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
+                    Pending
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mb-4 mt-2">
+                  This member requires approval to attend. Approve to check them in and award points.
+                </p>
+                <div className="flex gap-2">
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      void handleDoorAction(overlayEntry.data.registrationId!, 'reject')
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-red/30 bg-red/5 text-red text-sm font-bold"
+                  >
+                    <UserX className="w-4 h-4" />
+                    Reject
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      void handleDoorAction(overlayEntry.data.registrationId!, 'approve')
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green text-white text-sm font-bold"
+                  >
+                    <UserCheck className="w-4 h-4" />
+                    Approve
+                  </motion.button>
+                </div>
+              </div>
+            )}
+
+            {overlayEntry.data.type === 'rejected' && (
+              <div className="bg-slate-700 rounded-2xl p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <UserX className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
+                    <p className="text-white/70 text-xs">Entry rejected</p>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
