@@ -9,6 +9,18 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
+      // Keep navigator.locks serialization to prevent concurrent token-refresh
+      // races (multiple stores firing getSession() simultaneously), but remove
+      // the default 10 s acquire timeout. On a single-tab mobile app the lock
+      // is always released quickly — waiting indefinitely is safe and avoids
+      // the cascade where a timed-out waiter fires its own refresh with an
+      // already-consumed refresh token, causing a 401 on the next invoke.
+      lock: async (name, _acquireTimeout, fn) => {
+        if (typeof navigator !== 'undefined' && navigator.locks) {
+          return navigator.locks.request(name, fn)
+        }
+        return fn()
+      },
     },
     realtime: {
       params: {

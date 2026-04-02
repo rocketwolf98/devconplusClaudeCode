@@ -35,6 +35,22 @@ function GoogleIcon() {
   )
 }
 
+/** Map raw Supabase/GoTrue errors to user-friendly messages. */
+function friendlyAuthError(msg: string): string {
+  const lower = msg.toLowerCase()
+  if (lower.includes('database error saving new user'))
+    return 'Something went wrong creating your account. This usually means the username is already taken or your chapter selection is invalid. Please try a different username.'
+  if (lower.includes('user already registered') || lower.includes('already been registered'))
+    return 'An account with this email already exists. Try signing in instead.'
+  if (lower.includes('password') && lower.includes('least'))
+    return 'Your password is too short. Please use at least 8 characters.'
+  if (lower.includes('rate limit') || lower.includes('too many'))
+    return msg // already user-friendly from our rate limiter
+  if (lower.includes('network') || lower.includes('fetch'))
+    return 'Unable to reach our servers. Please check your internet connection and try again.'
+  return msg
+}
+
 function getPostAuthRoute(): string {
   return '/organizer-code-gate'
 }
@@ -114,7 +130,8 @@ export default function SignUp() {
         navigate(getPostAuthRoute())
       }
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Sign-up failed. Please try again.')
+      const raw = err instanceof Error ? err.message : 'Sign-up failed. Please try again.'
+      setFormError(friendlyAuthError(raw))
     }
   }
 

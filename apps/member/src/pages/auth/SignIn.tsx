@@ -11,6 +11,20 @@ import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 const MAX_ATTEMPTS = 5
 const LOCKOUT_MS   = 300_000
 
+/** Map raw Supabase/GoTrue errors to user-friendly messages. */
+function friendlyAuthError(msg: string): string {
+  const lower = msg.toLowerCase()
+  if (lower.includes('invalid login credentials'))
+    return 'Incorrect email or password. Please double-check and try again.'
+  if (lower.includes('email not confirmed'))
+    return 'Your email hasn\u2019t been verified yet. Please check your inbox for a confirmation link.'
+  if (lower.includes('rate limit') || lower.includes('too many'))
+    return msg // already user-friendly from our rate limiter
+  if (lower.includes('network') || lower.includes('fetch'))
+    return 'Unable to reach our servers. Please check your internet connection and try again.'
+  return msg
+}
+
 const schema = z.object({
   email:    z.string().email('Invalid email'),
   password: z.string().min(8, 'At least 8 characters'),
@@ -63,7 +77,7 @@ export default function SignIn() {
       if (serverSecs) {
         failedAttempts.current = 0
         lockedUntil.current    = Date.now() + serverSecs * 1000
-        setFormError(err instanceof Error ? err.message : `Too many login attempts. Please wait ${serverSecs} seconds before trying again.`)
+        setFormError(friendlyAuthError(err instanceof Error ? err.message : `Too many login attempts. Please wait ${serverSecs} seconds before trying again.`))
         return
       }
       failedAttempts.current += 1
@@ -72,7 +86,7 @@ export default function SignIn() {
         failedAttempts.current = 0
         setFormError(`Too many failed attempts. Please wait ${LOCKOUT_MS / 1000} seconds before trying again.`)
       } else {
-        setFormError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.')
+        setFormError(friendlyAuthError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.'))
       }
     }
   }
