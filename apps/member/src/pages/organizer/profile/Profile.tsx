@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ComponentType } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, User, CalendarDays, MapPin } from 'lucide-react'
+import { ChevronRight, LogOut, User, CalendarDays, MapPin, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -9,11 +9,12 @@ import { useEventsStore } from '../../../stores/useEventsStore'
 import ComingSoonModal from '../../../components/ComingSoonModal'
 import { staggerContainer, cardItem } from '../../../lib/animation'
 
-const MENU_ITEMS: { label: string; path?: string; modal?: string }[] = [
-  { label: 'Edit Profile',       path: '/organizer/profile/edit'          },
-  { label: 'Notifications',      path: '/organizer/profile/notifications' },
-  { label: 'Privacy & Security', path: '/organizer/profile/privacy'       },
-  { label: 'Help & Support',     modal: 'Help & Support'                  },
+const MENU_ITEMS: { label: string; icon?: ComponentType<{ className?: string }>; path?: string; modal?: string }[] = [
+  { label: 'Edit Profile',          path: '/organizer/profile/edit'           },
+  { label: 'Manage Co-Organizers',  path: '/organizer/profile/co-organizers' },
+  { label: 'Notifications',         path: '/organizer/profile/notifications'  },
+  { label: 'Privacy & Security',    path: '/organizer/profile/privacy'        },
+  { label: 'Help & Support',        modal: 'Help & Support'                   },
 ]
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -153,7 +154,10 @@ export function OrgProfile() {
                 i < MENU_ITEMS.length - 1 ? 'border-b border-slate-100' : ''
               }`}
             >
-              <span className="text-sm font-semibold text-slate-900">{item.label}</span>
+              <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                {item.icon && <item.icon className="w-4 h-4 text-slate-400" />}
+                {item.label}
+              </span>
               <ChevronRight className="w-4 h-4 text-slate-300" />
             </button>
           ))}

@@ -48,6 +48,7 @@ import { RewardCreate } from './pages/organizer/rewards/RewardCreate'
 import { RewardEdit } from './pages/organizer/rewards/RewardEdit'
 import { OrgProfile } from './pages/organizer/profile/Profile'
 import { OrgProfileEdit } from './pages/organizer/profile/ProfileEdit'
+import { OrgCoOrganizers } from './pages/organizer/profile/OrgCoOrganizers'
 
 // OrgQRScanner is lazy-loaded: it pulls in @zxing (large barcode library)
 // which is only needed when an officer scans tickets at the door.
@@ -151,6 +152,7 @@ export const router = createBrowserRouter([
       { path: '/organizer/rewards/:id/edit',             element: <RewardEdit /> },
       { path: '/organizer/profile',                      element: <OrgProfile /> },
       { path: '/organizer/profile/edit',                 element: <OrgProfileEdit /> },
+      { path: '/organizer/profile/co-organizers',        element: <OrgCoOrganizers /> },
       { path: '/organizer/notifications',                 element: <NotificationsInbox isOrganizer /> },
       { path: '/organizer/profile/notifications',        element: <Notifications /> },
       { path: '/organizer/profile/privacy',              element: <Privacy /> },

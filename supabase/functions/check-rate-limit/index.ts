@@ -161,7 +161,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Call the RPC via service_role (REVOKE FROM PUBLIC means anon cannot call it).
-  // On error: fail open for client surfaces — GoTrue + RLS are final backstops.
+  // On error: fail closed — deny the request rather than silently allowing brute-force.
   const { data: allowed, error: rpcErr } = await supabaseService.rpc('check_rate_limit', {
     p_identifier: identifier,
     p_bucket:     bucket,
@@ -170,8 +170,8 @@ Deno.serve(async (req: Request) => {
   if (rpcErr) {
     logger.error('rate_limit_rpc_error', { message: rpcErr.message })
     return new Response(
-      JSON.stringify({ allowed: true }),
-      { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      JSON.stringify({ allowed: false, retryAfterSeconds: WINDOW_MAP[bucket] ?? 60 }),
+      { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 
