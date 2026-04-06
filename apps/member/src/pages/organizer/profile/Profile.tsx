@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, User, CalendarDays, MapPin, Users } from 'lucide-react'
+import { ChevronRight, LogOut, User, CalendarDays, MapPin } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'

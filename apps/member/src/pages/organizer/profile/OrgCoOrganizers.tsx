@@ -28,7 +28,7 @@ interface CoOrganizer {
   full_name: string
   email: string
   avatar_url: string | null
-  created_at: string
+  created_at: string | null
 }
 
 function getInitials(name: string): string {
@@ -76,7 +76,7 @@ export function OrgCoOrganizers() {
 
         supabase
           .from('organizer_upgrade_requests')
-          .select('id, created_at, profiles(id, full_name, email, avatar_url)')
+          .select('id, created_at, profiles!user_id(id, full_name, email, avatar_url)')
           .eq('chapter_id', chapterId)
           .eq('status', 'pending')
           .eq('requested_role', 'chapter_officer')
@@ -92,7 +92,7 @@ export function OrgCoOrganizers() {
       ])
 
       if (codeRes.data) setChapterCode(codeRes.data)
-      if (pendingRes.data) setPendingRequests(pendingRes.data as PendingRequest[])
+      if (pendingRes.data) setPendingRequests(pendingRes.data as unknown as PendingRequest[])
       if (coOrgRes.data) setCoOrganizers(coOrgRes.data)
     } catch {
       setError('Failed to load co-organizer data. Please try again.')
@@ -112,10 +112,12 @@ export function OrgCoOrganizers() {
     if (!user?.id) return
     setActionLoading(requestId)
     try {
-      const { data, error: rpcError } = await supabase.rpc('officer_approve_upgrade', {
+      // RPCs not yet in generated types — cast to bypass strict overload checks
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error: rpcError } = await (supabase.rpc as any)('officer_approve_upgrade', {
         p_request_id: requestId,
         p_reviewer_id: user.id,
-      })
+      }) as { data: { success: boolean; error?: string } | null; error: { message: string } | null }
       if (rpcError || !data?.success) {
         alert(data?.error ?? rpcError?.message ?? 'Failed to approve')
         return
@@ -160,10 +162,12 @@ export function OrgCoOrganizers() {
     setActionLoading(targetId)
     setConfirmRemoveId(null)
     try {
-      const { data, error: rpcError } = await supabase.rpc('officer_demote_coorganizer', {
+      // RPC not yet in generated types — cast to bypass strict overload checks
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error: rpcError } = await (supabase.rpc as any)('officer_demote_coorganizer', {
         p_target_id: targetId,
         p_officer_id: user.id,
-      })
+      }) as { data: { success: boolean; error?: string } | null; error: { message: string } | null }
       if (rpcError || !data?.success) {
         alert(data?.error ?? rpcError?.message ?? 'Failed to remove')
         return
@@ -180,13 +184,13 @@ export function OrgCoOrganizers() {
     <div className="bg-slate-50 min-h-screen">
       {/* Header */}
       <div className="bg-blue px-4 pt-14 pb-5 flex items-center gap-3">
-        <button
+        <motion.button
           onClick={() => navigate('/organizer/profile')}
           className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"
           whileTap={{ scale: 0.95 }}
         >
           <ArrowLeft className="w-4 h-4 text-white" />
-        </button>
+        </motion.button>
         <h1 className="text-lg font-black text-white">Co-Organizers</h1>
       </div>
 
@@ -373,7 +377,7 @@ export function OrgCoOrganizers() {
                           <div className="flex items-center gap-1 mt-0.5">
                             <Clock className="w-2.5 h-2.5 text-slate-300" />
                             <p className="text-[10px] text-slate-300">
-                              Officer since {formatDate.short(coOrg.created_at)}
+                              Officer since {formatDate.short(coOrg.created_at ?? '')}
                             </p>
                           </div>
                         </div>
