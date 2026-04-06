@@ -4,6 +4,7 @@ import { Briefcase, Heart, Gift, ChevronRight, Flame, Bell } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
+import { useJobsStore } from '../../stores/useJobsStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useNotificationsStore } from '../../stores/useNotificationsStore'
 import EventCard from '../../components/EventCard'
@@ -29,11 +30,14 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
+  const { jobs, isLoading: jobsLoading, fetchJobs } = useJobsStore()
   const { transactions, loadTotalPoints, loadTransactions, isLoading: pointsLoading } = usePointsStore()
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
   const [bannerIdx, setBannerIdx] = useState(0)
+  const [jobBannerIdx, setJobBannerIdx] = useState(0)
 
   const bannersLengthRef = useRef(1)
+  const jobsLengthRef    = useRef(0)
 
   const scrollYMV      = useMotionValue(0)
   const cradleOpacity  = useTransform(scrollYMV, [0,  110], [1, 0])
@@ -48,12 +52,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     void fetchEvents()
+    void fetchJobs()
     void loadTotalPoints()
     void loadTransactions()
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const t = setInterval(() => setBannerIdx((i) => (i + 1) % Math.max(bannersLengthRef.current, 1)), 4000)
+    return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (jobsLengthRef.current > 1) {
+        setJobBannerIdx(i => (i + 1) % jobsLengthRef.current)
+      }
+    }, 4000)
     return () => clearInterval(t)
   }, [])
 
@@ -86,6 +100,13 @@ export default function Dashboard() {
   const banner = banners[safeIdx] ?? banners[0]
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
   const forYouEvents = events.filter((e) => e.status === 'upcoming' && !isEventArchived(e)).slice(0, 3)
+  const promotedJobs = jobs
+    .filter(j => j.is_promoted)
+    .sort((a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime())
+    .slice(0, 5)
+  jobsLengthRef.current = promotedJobs.length
+  const safeJobIdx = jobBannerIdx % Math.max(promotedJobs.length, 1)
+  const currentJob = promotedJobs[safeJobIdx]
   const recentTxns = transactions.slice(0, 4)
 
   return (
@@ -260,33 +281,85 @@ export default function Dashboard() {
           )}
         </section>
 
-        {/* Hot Jobs — Coming Soon teaser */}
-        <section>
-          <div className="flex justify-between items-center px-4 mb-3">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
-              Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
-            </h2>
-            <button
-              onClick={() => navigate('/jobs')}
-              className="text-xs text-primary font-semibold flex items-center gap-0.5"
-            >
-              See All <ChevronRight className="w-3 h-3" />
-            </button>
-          </div>
-          <motion.button
-            onClick={() => navigate('/jobs')}
-            className="mx-4 w-[calc(100%-2rem)] bg-primary rounded-2xl p-5 text-left"
-            whileTap={{ scale: 0.98 }}
-          >
-            <p className="text-white/60 text-xs font-medium uppercase tracking-widest mb-1">Coming Soon</p>
-            <p className="text-white text-base font-bold leading-tight">
-              Global tech opportunities for Filipino developers
-            </p>
-            <p className="text-white/60 text-xs mt-2">
-              Jobs Board launches with the full MVP — stay tuned!
-            </p>
-          </motion.button>
-        </section>
+        {/* Hot Jobs — auto-rotating crossfade banner, swipeable */}
+        {(jobsLoading || promotedJobs.length > 0) && (
+          <section>
+            <div className="flex justify-between items-center px-4 mb-3">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
+              </h2>
+              <button
+                onClick={() => navigate('/jobs')}
+                className="text-xs text-primary font-semibold flex items-center gap-0.5"
+              >
+                See All <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+
+            {jobsLoading ? (
+              <div className="mx-4 h-44 rounded-2xl animate-pulse bg-slate-200" />
+            ) : (
+              <div className="px-4">
+                <motion.div
+                  className="relative h-44 rounded-2xl overflow-hidden bg-gradient-to-br from-navy to-slate-900 cursor-pointer select-none"
+                  onPanEnd={(_, info) => {
+                    if (info.offset.x < -50) {
+                      setJobBannerIdx(i => (i + 1) % Math.max(promotedJobs.length, 1))
+                    } else if (info.offset.x > 50) {
+                      setJobBannerIdx(i => (i - 1 + Math.max(promotedJobs.length, 1)) % Math.max(promotedJobs.length, 1))
+                    }
+                  }}
+                >
+                  <AnimatePresence mode="wait">
+                    {currentJob && (
+                      <motion.div
+                        key={safeJobIdx}
+                        className="absolute inset-0 flex flex-col justify-between p-5"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.35 }}
+                      >
+                        <div>
+                          <p className="text-white/50 text-[10px] font-semibold uppercase tracking-widest mb-1.5">
+                            {currentJob.company}{currentJob.location ? ` · ${currentJob.location}` : ''}
+                          </p>
+                          <p className="text-white text-xl font-bold leading-snug line-clamp-2 max-w-[85%]">
+                            {currentJob.title}
+                          </p>
+                        </div>
+                        <motion.button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(`/jobs?id=${currentJob.id}`)
+                          }}
+                          className="self-start bg-blue text-white text-xs font-bold px-4 py-2 rounded-full shadow"
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Apply Now
+                        </motion.button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                <div className="flex justify-center gap-1.5 mt-2.5">
+                  {promotedJobs.map((_, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{
+                        width:           i === safeJobIdx ? 16 : 6,
+                        backgroundColor: i === safeJobIdx ? '#1E2A56' : '#CBD5E1',
+                      }}
+                      transition={{ duration: 0.25 }}
+                      className="h-1.5 rounded-full"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Updates — welcome card */}
         <section>
