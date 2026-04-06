@@ -26,7 +26,7 @@ interface UpgradeRequest {
 
 // ── Constants ─────────────────────────────────────────────────────────────
 
-const TABS = ['Upgrade Requests', 'Rewards', 'Jobs', 'Articles', 'XP Tiers'] as const
+const TABS = ['Upgrade Requests', 'Rewards', 'Jobs', 'Missions', 'Articles', 'XP Tiers'] as const
 type Tab = typeof TABS[number]
 
 const ROLE_LABELS: Record<string, string> = {
@@ -984,6 +984,345 @@ interface XpTierForm {
   badge_color: string
 }
 
+// ── Tab 4: Missions ───────────────────────────────────────────────────────
+
+interface MissionRow {
+  id: string
+  title: string
+  description: string | null
+  xp_reward: number
+  difficulty: 'easy' | 'medium' | 'hard'
+  status: 'available' | 'claimed'
+  github_url: string | null
+  created_at: string
+}
+
+interface MissionSubmissionRow {
+  id: string
+  mission_id: string
+  user_id: string
+  pr_link: string
+  status: 'pending' | 'approved'
+  submitted_at: string
+  missions?: { title: string } | null
+  profiles?: { full_name: string; email: string } | null
+}
+
+interface MissionForm {
+  title: string
+  description: string
+  xp_reward: string
+  difficulty: 'easy' | 'medium' | 'hard'
+  github_url: string
+}
+
+const defaultMissionForm = (): MissionForm => ({
+  title: '',
+  description: '',
+  xp_reward: '100',
+  difficulty: 'medium',
+  github_url: '',
+})
+
+const DIFF_COLORS = {
+  easy:   'bg-green/10 text-green',
+  medium: 'bg-amber-100 text-amber-700',
+  hard:   'bg-red/10 text-red',
+} as const
+
+function MissionsTab() {
+  const [subTab, setSubTab] = useState<'manage' | 'queue'>('manage')
+
+  // ── Mission CRUD ──────────────────────────────────────────────────────────
+  const [rows, setRows] = useState<MissionRow[]>([])
+  const [loadingMissions, setLoadingMissions] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [slideOver, setSlideOver] = useState<'create' | 'edit' | null>(null)
+  const [editingItem, setEditingItem] = useState<MissionRow | null>(null)
+  const [form, setForm] = useState<MissionForm>(defaultMissionForm())
+  const [saving, setSaving] = useState(false)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+
+  // ── Review queue ──────────────────────────────────────────────────────────
+  const [queue, setQueue] = useState<MissionSubmissionRow[]>([])
+  const [loadingQueue, setLoadingQueue] = useState(false)
+  const [approvingId, setApprovingId] = useState<string | null>(null)
+  const [approveError, setApproveError] = useState<string | null>(null)
+
+  const loadMissions = async () => {
+    setLoadingMissions(true)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error: err } = await (supabase as any)
+      .from('missions')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (err) setError(err.message)
+    else setRows((data ?? []) as MissionRow[])
+    setLoadingMissions(false)
+  }
+
+  const loadQueue = async () => {
+    setLoadingQueue(true)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error: err } = await (supabase as any)
+      .from('mission_submissions')
+      .select(`*, missions:mission_id(title), profiles:user_id(full_name, email)`)
+      .eq('status', 'pending')
+      .order('submitted_at', { ascending: true })
+    if (err) setApproveError(err.message)
+    else setQueue((data ?? []) as MissionSubmissionRow[])
+    setLoadingQueue(false)
+  }
+
+  useEffect(() => { void loadMissions() }, [])
+  useEffect(() => { if (subTab === 'queue') void loadQueue() }, [subTab])
+
+  const openCreate = () => {
+    setEditingItem(null)
+    setForm(defaultMissionForm())
+    setSlideOver('create')
+  }
+  const openEdit = (m: MissionRow) => {
+    setEditingItem(m)
+    setForm({
+      title:       m.title,
+      description: m.description ?? '',
+      xp_reward:   String(m.xp_reward),
+      difficulty:  m.difficulty,
+      github_url:  m.github_url ?? '',
+    })
+    setSlideOver('edit')
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+    const payload = {
+      title:       form.title.trim(),
+      description: form.description.trim() || null,
+      xp_reward:   parseInt(form.xp_reward, 10) || 100,
+      difficulty:  form.difficulty,
+      github_url:  form.github_url.trim() || null,
+    }
+    try {
+      if (slideOver === 'create') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: err } = await (supabase as any).from('missions').insert(payload)
+        if (err) throw err
+      } else if (editingItem) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: err } = await (supabase as any).from('missions').update(payload).eq('id', editingItem.id)
+        if (err) throw err
+      }
+      setSlideOver(null)
+      await loadMissions()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: err } = await (supabase as any).from('missions').delete().eq('id', id)
+    if (err) setError(err.message)
+    else setRows((prev) => prev.filter((m) => m.id !== id))
+    setConfirmDeleteId(null)
+  }
+
+  const handleApprove = async (subId: string) => {
+    setApprovingId(subId)
+    setApproveError(null)
+    try {
+      const { error: err } = await supabase.rpc('approve_mission_winner' as never, { sub_id: subId } as never)
+      if (err) throw err
+      setQueue((prev) => prev.filter((s) => s.id !== subId))
+      await loadMissions()
+    } catch (err) {
+      setApproveError(err instanceof Error ? err.message : 'Approve failed')
+    } finally {
+      setApprovingId(null)
+    }
+  }
+
+  const f = (key: keyof MissionForm) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+      setForm((p) => ({ ...p, [key]: e.target.value }))
+
+  return (
+    <div className="p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-lg font-bold text-slate-900">Missions</h2>
+          <p className="text-sm text-slate-500 mt-0.5">Manage bounty missions and review submissions</p>
+        </div>
+        {subTab === 'manage' && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Mission
+          </button>
+        )}
+      </div>
+
+      {/* Sub-tabs */}
+      <div className="flex gap-2 mb-6">
+        {(['manage', 'queue'] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setSubTab(t)}
+            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+              subTab === t ? 'bg-blue text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+            }`}
+          >
+            {t === 'manage' ? 'Mission Manager' : `Review Queue${queue.length > 0 ? ` (${queue.length})` : ''}`}
+          </button>
+        ))}
+      </div>
+
+      {error && <p className="text-sm text-red mb-4">{error}</p>}
+
+      {/* Mission Manager */}
+      {subTab === 'manage' && (
+        loadingMissions ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : rows.length === 0 ? (
+          <p className="text-sm text-slate-400 text-center py-12">No missions yet. Add one to get started.</p>
+        ) : (
+          <div className="space-y-2">
+            {rows.map((m) => (
+              <div key={m.id} className="flex items-center gap-4 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-card">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-slate-900 truncate">{m.title}</span>
+                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${DIFF_COLORS[m.difficulty]}`}>
+                      {m.difficulty}
+                    </span>
+                    {m.status === 'claimed' && (
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                        claimed
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">+{m.xp_reward} XP</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button onClick={() => openEdit(m)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600">
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => setConfirmDeleteId(m.id)} className="p-1.5 rounded-lg hover:bg-red/10 text-slate-400 hover:text-red">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
+
+      {/* Review Queue */}
+      {subTab === 'queue' && (
+        loadingQueue ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-20 bg-slate-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : queue.length === 0 ? (
+          <p className="text-sm text-slate-400 text-center py-12">No pending submissions. The queue is clear.</p>
+        ) : (
+          <div className="space-y-3">
+            {approveError && <p className="text-sm text-red mb-2">{approveError}</p>}
+            {queue.map((sub) => (
+              <div key={sub.id} className="bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-card">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{sub.profiles?.full_name ?? 'Unknown'}</p>
+                    <p className="text-xs text-slate-400">{sub.profiles?.email}</p>
+                    <p className="text-xs text-slate-500 mt-1 font-medium">{sub.missions?.title}</p>
+                    <a
+                      href={sub.pr_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue hover:underline mt-1 block truncate"
+                    >
+                      {sub.pr_link}
+                    </a>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Submitted {new Date(sub.submitted_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => void handleApprove(sub.id)}
+                    disabled={approvingId === sub.id}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 transition-colors disabled:opacity-50 shrink-0"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {approvingId === sub.id ? 'Approving…' : 'Approve & Award'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
+
+      {/* SlideOver: Create / Edit */}
+      {slideOver && (
+        <SlideOver
+          title={slideOver === 'create' ? 'New Mission' : 'Edit Mission'}
+          onClose={() => setSlideOver(null)}
+          onSubmit={() => void handleSave()}
+          saving={saving}
+        >
+          <div>
+            <label className={LABEL_CLS}>Title</label>
+            <input className={INPUT_CLS} value={form.title} onChange={f('title')} placeholder="e.g. Build a CLI tool" required />
+          </div>
+          <div>
+            <label className={LABEL_CLS}>Description (Markdown supported)</label>
+            <textarea className={INPUT_CLS} rows={5} value={form.description} onChange={f('description')} placeholder="What needs to be done?" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={LABEL_CLS}>XP Reward</label>
+              <input className={INPUT_CLS} type="number" min="1" value={form.xp_reward} onChange={f('xp_reward')} required />
+            </div>
+            <div>
+              <label className={LABEL_CLS}>Difficulty</label>
+              <select className={INPUT_CLS} value={form.difficulty} onChange={f('difficulty')}>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className={LABEL_CLS}>GitHub URL</label>
+            <input className={INPUT_CLS} type="url" value={form.github_url} onChange={f('github_url')} placeholder="https://github.com/org/repo" />
+          </div>
+        </SlideOver>
+      )}
+
+      {confirmDeleteId && (
+        <ConfirmDelete
+          label="mission"
+          onConfirm={() => void handleDelete(confirmDeleteId)}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
+      )}
+    </div>
+  )
+}
+
 const defaultXpTierForm = (): XpTierForm => ({
   name: '',
   label: '',
@@ -1227,6 +1566,7 @@ export default function AdminCMS() {
         {activeTab === 'Upgrade Requests' && <UpgradeRequestsTab />}
         {activeTab === 'Rewards' && <RewardsTab />}
         {activeTab === 'Jobs' && <JobsTab />}
+        {activeTab === 'Missions' && <MissionsTab />}
         {activeTab === 'Articles' && <ArticlesTab />}
         {activeTab === 'XP Tiers' && <XpTiersTab />}
       </div>

@@ -242,3 +242,35 @@ export interface Referral {
   created_at: string
   confirmed_at: string | null
 }
+
+// ── Missions (Bounty System) ─────────────────────────────────────────────────
+
+export type MissionDifficulty = 'easy' | 'medium' | 'hard'
+export type MissionStatus     = 'available' | 'claimed'
+export type SubmissionStatus  = 'pending' | 'approved'
+
+export interface Mission {
+  id: string
+  title: string
+  description: string | null
+  xp_reward: number
+  difficulty: MissionDifficulty
+  status: MissionStatus
+  github_url: string | null
+  created_at: string
+}
+
+export interface MissionParticipant {
+  mission_id: string
+  user_id: string
+  joined_at: string
+}
+
+export interface MissionSubmission {
+  id: string
+  mission_id: string
+  user_id: string
+  pr_link: string
+  status: SubmissionStatus
+  submitted_at: string
+}
