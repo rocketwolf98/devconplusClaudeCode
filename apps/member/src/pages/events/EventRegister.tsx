@@ -5,10 +5,113 @@ import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { supabase } from '../../lib/supabase'
 
+// ── Custom form field types ───────────────────────────────────────────────────
+
+type CustomFieldType = 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
+
+interface CustomFormField {
+  id: string
+  label: string
+  type: CustomFieldType
+  required: boolean
+  options: string[]
+}
+
+// ── Confirmation email builder ────────────────────────────────────────────────
+
 interface EmailParams { memberName: string; eventTitle: string; eventDate: string; eventLocation?: string; pointsValue: number; ticketUrl: string }
 function buildConfirmationEmail({ memberName, eventTitle, eventDate, eventLocation, pointsValue, ticketUrl }: EmailParams): string {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><style>body{margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.w{max-width:390px;margin:0 auto}.hd{background:#1E2A56;padding:28px 24px;text-align:center;color:#fff;font-size:22px;font-weight:900}.bd{background:#fff;padding:28px 24px}.ft{background:#1E2A56;padding:20px 24px;text-align:center}h2{color:#0F172A;font-size:20px;font-weight:800;margin:0 0 8px}p{color:#334155;font-size:14px;line-height:1.65;margin:0 0 16px}.row{font-size:13px;margin-bottom:10px}.lbl{color:#94A3B8;font-size:12px;margin-right:8px}.val{color:#0F172A;font-weight:600}.badge{display:inline-block;background:#DCFCE7;color:#16A34A;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}.cta{display:block;background:#367BDD;color:#fff;font-weight:700;font-size:15px;text-align:center;text-decoration:none;padding:14px 24px;border-radius:14px;margin-top:24px}.ft p{color:rgba(255,255,255,.45);font-size:11px;margin:0}hr{border:none;border-top:1px solid #E2E8F0;margin:20px 0}</style></head><body><div class="w"><div class="hd">DEVCON<span style="color:#EA641D">+</span></div><div class="bd"><h2>You're registered! 🎉</h2><p>Hi ${memberName},</p><p>Your spot has been confirmed for <strong>${eventTitle}</strong>. See you there!</p><hr/><div class="row"><span class="lbl">Event</span><span class="val">${eventTitle}</span></div><div class="row"><span class="lbl">Date</span><span class="val">${eventDate}</span></div>${eventLocation ? `<div class="row"><span class="lbl">Location</span><span class="val">${eventLocation}</span></div>` : ''}<div class="row"><span class="lbl">Points</span><span class="badge">+${pointsValue} XP on attendance</span></div><hr/><p style="font-size:13px;color:#64748B">Show your QR ticket at the venue entrance to check in.</p><a href="${ticketUrl}" class="cta">View My Ticket</a></div><div class="ft"><p>DEVCON Philippines — Sync. Support. Succeed.</p></div></div></body></html>`
 }
+
+// ── Dynamic field renderer ────────────────────────────────────────────────────
+
+const inputCls = 'w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20'
+
+function renderField(
+  field: CustomFormField,
+  value: string | string[],
+  onChange: (val: string | string[]) => void,
+) {
+  switch (field.type) {
+    case 'text':
+      return (
+        <input
+          type="text"
+          value={value as string}
+          onChange={e => onChange(e.target.value)}
+          placeholder={`Enter ${field.label.toLowerCase()}`}
+          className={inputCls}
+        />
+      )
+    case 'textarea':
+      return (
+        <textarea
+          value={value as string}
+          onChange={e => onChange(e.target.value)}
+          rows={3}
+          placeholder={`Enter ${field.label.toLowerCase()}`}
+          className={`${inputCls} resize-none`}
+        />
+      )
+    case 'select':
+      return (
+        <select
+          value={value as string}
+          onChange={e => onChange(e.target.value)}
+          className={inputCls}
+        >
+          <option value="">Select an option…</option>
+          {field.options.map(opt => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      )
+    case 'radio':
+      return (
+        <div className="space-y-2 pt-1">
+          {field.options.map(opt => (
+            <label key={opt} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="radio"
+                value={opt}
+                checked={value === opt}
+                onChange={() => onChange(opt)}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-sm text-slate-700">{opt}</span>
+            </label>
+          ))}
+        </div>
+      )
+    case 'checkbox': {
+      const checked = Array.isArray(value) ? value : []
+      return (
+        <div className="space-y-2 pt-1">
+          {field.options.map(opt => (
+            <label key={opt} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={checked.includes(opt)}
+                onChange={e => onChange(
+                  e.target.checked
+                    ? [...checked, opt]
+                    : checked.filter(v => v !== opt)
+                )}
+                className="w-4 h-4 accent-primary rounded"
+              />
+              <span className="text-sm text-slate-700">{opt}</span>
+            </label>
+          ))}
+        </div>
+      )
+    }
+    default:
+      return null
+  }
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function EventRegister() {
   const { slug } = useParams<{ slug: string }>()
@@ -19,8 +122,18 @@ export default function EventRegister() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const event = events.find((e) => e.slug === slug)
+  const [formResponses, setFormResponses] = useState<Record<string, string | string[]>>({})
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  const event   = events.find((e) => e.slug === slug)
   const eventId = event?.id ?? ''
+
+  // custom_form_schema is returned by the store's select('*') since the column now exists.
+  // Derive it directly — no extra fetch needed.
+  const customSchema: CustomFormField[] = Array.isArray(event?.custom_form_schema)
+    ? (event.custom_form_schema as CustomFormField[])
+    : []
+
   if (!event || !user) return null
 
   // Block cross-chapter registration for locked events
@@ -29,18 +142,57 @@ export default function EventRegister() {
     return null
   }
 
+  // If already registered, redirect to the appropriate screen
+  const existingReg = registrations.find((r) => r.event_id === eventId)
+  if (existingReg) {
+    const destination = existingReg.status === 'approved'
+      ? `/events/${slug}/ticket`
+      : existingReg.status === 'rejected'
+        ? `/events/${slug}`
+        : `/events/${slug}/pending`
+    navigate(destination, { replace: true })
+    return null
+  }
+
+  const setResponse = (fieldId: string, value: string | string[]) => {
+    setFormResponses(prev => ({ ...prev, [fieldId]: value }))
+    if (fieldErrors[fieldId]) setFieldErrors(prev => ({ ...prev, [fieldId]: '' }))
+  }
+
+  const validateCustomFields = (): boolean => {
+    const errors: Record<string, string> = {}
+    for (const field of customSchema) {
+      if (!field.required) continue
+      const val = formResponses[field.id]
+      const isEmpty = !val || (Array.isArray(val) ? val.length === 0 : val.trim() === '')
+      if (isEmpty) errors[field.id] = 'This field is required'
+    }
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!agreed) return
+    if (!validateCustomFields()) return
+
     setSubmitting(true)
     setError(null)
     try {
       await register(eventId, user.id)
-      // Check the returned registration status from the store
       const reg = useEventsStore.getState().registrations.find((r) => r.event_id === eventId)
       const destination = reg?.status === 'approved'
         ? `/events/${slug}/ticket`
         : `/events/${slug}/pending`
+
+      // Save form responses to the registration row
+      if (reg && customSchema.length > 0 && Object.keys(formResponses).length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- form_responses not yet in generated DB types
+        await (supabase as any)
+          .from('event_registrations')
+          .update({ form_responses: formResponses })
+          .eq('id', reg.id)
+      }
 
       // Fire-and-forget confirmation email for auto-approved registrations
       if (reg?.status === 'approved') {
@@ -68,18 +220,6 @@ export default function EventRegister() {
     }
   }
 
-  // If already registered, redirect to the appropriate screen
-  const existingReg = registrations.find((r) => r.event_id === eventId)
-  if (existingReg) {
-    const destination = existingReg.status === 'approved'
-      ? `/events/${slug}/ticket`
-      : existingReg.status === 'rejected'
-        ? `/events/${slug}`
-        : `/events/${slug}/pending`
-    navigate(destination, { replace: true })
-    return null
-  }
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
@@ -94,6 +234,7 @@ export default function EventRegister() {
       </div>
 
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
+        {/* Pre-filled profile fields */}
         <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Your Details (pre-filled)</p>
 
         {[
@@ -111,7 +252,33 @@ export default function EventRegister() {
           </div>
         ))}
 
-        <label className="flex items-start gap-3 cursor-pointer">
+        {/* Dynamic custom fields */}
+        {customSchema.length > 0 && (
+          <>
+            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide pt-2">
+              Additional Information
+            </p>
+            {customSchema.map(field => (
+              <div key={field.id}>
+                <label className="text-sm font-medium text-slate-700 block mb-1">
+                  {field.label}
+                  {field.required && <span className="text-red ml-1">*</span>}
+                </label>
+                {renderField(
+                  field,
+                  formResponses[field.id] ?? (field.type === 'checkbox' ? [] : ''),
+                  val => setResponse(field.id, val),
+                )}
+                {fieldErrors[field.id] && (
+                  <p className="text-xs text-red mt-1">{fieldErrors[field.id]}</p>
+                )}
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* T&C consent */}
+        <label className="flex items-start gap-3 cursor-pointer pt-2">
           <input
             type="checkbox"
             checked={agreed}

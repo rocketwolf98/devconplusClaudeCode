@@ -1,5 +1,19 @@
+import { useState } from 'react'
+import { Plus, Trash2, X } from 'lucide-react'
 import { z } from 'zod'
 import type { DevconCategory } from '@devcon-plus/supabase'
+
+// ── Custom form field types ───────────────────────────────────────────────────
+
+export type CustomFieldType = 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
+
+export interface CustomFormField {
+  id: string
+  label: string
+  type: CustomFieldType
+  required: boolean
+  options: string[]
+}
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
 
@@ -116,6 +130,160 @@ export function SectionHeader({ title }: { title: string }) {
   return (
     <div className="border-t border-slate-100 pt-5">
       <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">{title}</p>
+    </div>
+  )
+}
+
+// ── CustomFieldsBuilder ────────────────────────────────────────────────────────
+// Shared controlled component used by EventCreate and EventEdit.
+// Parent owns `customFields` state; this component manages option draft inputs internally.
+
+const FIELD_TYPE_OPTIONS: { value: CustomFieldType; label: string }[] = [
+  { value: 'text',     label: 'Short Text'   },
+  { value: 'textarea', label: 'Long Text'    },
+  { value: 'select',   label: 'Dropdown'     },
+  { value: 'radio',    label: 'Radio'        },
+  { value: 'checkbox', label: 'Checkboxes'   },
+]
+
+export function CustomFieldsBuilder({
+  customFields,
+  setCustomFields,
+}: {
+  customFields: CustomFormField[]
+  setCustomFields: React.Dispatch<React.SetStateAction<CustomFormField[]>>
+}) {
+  // Per-field option draft inputs (keyed by field id)
+  const [optionDrafts, setOptionDrafts] = useState<Record<string, string>>({})
+
+  const addField = () => {
+    setCustomFields(prev => [
+      ...prev,
+      { id: crypto.randomUUID(), label: '', type: 'text', required: false, options: [] },
+    ])
+  }
+
+  const removeField = (id: string) => {
+    setCustomFields(prev => prev.filter(f => f.id !== id))
+    setOptionDrafts(prev => { const next = { ...prev }; delete next[id]; return next })
+  }
+
+  const updateField = (id: string, patch: Partial<CustomFormField>) => {
+    setCustomFields(prev => prev.map(f => f.id === id ? { ...f, ...patch } : f))
+  }
+
+  const addOption = (fieldId: string) => {
+    const val = (optionDrafts[fieldId] ?? '').trim()
+    if (!val) return
+    updateField(fieldId, {
+      options: [...(customFields.find(f => f.id === fieldId)?.options ?? []), val],
+    })
+    setOptionDrafts(prev => ({ ...prev, [fieldId]: '' }))
+  }
+
+  const removeOption = (fieldId: string, opt: string) => {
+    updateField(fieldId, {
+      options: (customFields.find(f => f.id === fieldId)?.options ?? []).filter(o => o !== opt),
+    })
+  }
+
+  const hasOptions = (type: CustomFieldType) =>
+    type === 'select' || type === 'radio' || type === 'checkbox'
+
+  return (
+    <div className="space-y-3">
+      {customFields.map((field, idx) => (
+        <div key={field.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+              Question {idx + 1}
+            </span>
+            <button
+              type="button"
+              onClick={() => removeField(field.id)}
+              className="w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-red hover:bg-red/10 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Label */}
+          <input
+            value={field.label}
+            onChange={e => updateField(field.id, { label: e.target.value })}
+            placeholder="Question label"
+            className={inputClass}
+          />
+
+          {/* Type + Required row */}
+          <div className="flex gap-2">
+            <select
+              value={field.type}
+              onChange={e => updateField(field.id, { type: e.target.value as CustomFieldType, options: [] })}
+              className={`${inputClass} flex-1`}
+            >
+              {FIELD_TYPE_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+
+            <label className="flex items-center gap-1.5 text-xs text-slate-600 font-medium shrink-0 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={field.required}
+                onChange={e => updateField(field.id, { required: e.target.checked })}
+                className="w-3.5 h-3.5 accent-blue"
+              />
+              Required
+            </label>
+          </div>
+
+          {/* Options (select / radio / checkbox only) */}
+          {hasOptions(field.type) && (
+            <div className="space-y-2">
+              {field.options.map(opt => (
+                <div key={opt} className="flex items-center gap-2">
+                  <span className="flex-1 text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
+                    {opt}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeOption(field.id, opt)}
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-red hover:bg-red/10 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex gap-2">
+                <input
+                  value={optionDrafts[field.id] ?? ''}
+                  onChange={e => setOptionDrafts(prev => ({ ...prev, [field.id]: e.target.value }))}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addOption(field.id) } }}
+                  placeholder="Add option, press Enter"
+                  className={`${inputClass} flex-1`}
+                />
+                <button
+                  type="button"
+                  onClick={() => addOption(field.id)}
+                  className="w-9 h-9 rounded-xl bg-blue text-white flex items-center justify-center shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      <button
+        type="button"
+        onClick={addField}
+        className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-blue hover:text-blue text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+      >
+        <Plus className="w-3.5 h-3.5" />
+        Add Question
+      </button>
     </div>
   )
 }

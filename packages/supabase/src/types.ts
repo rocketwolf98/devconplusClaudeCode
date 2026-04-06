@@ -125,6 +125,8 @@ export interface Event {
   cover_image_url: string | null
   created_by: string
   created_at: string
+  /** JSONB: array of CustomFormField objects defined by the officer/admin */
+  custom_form_schema: unknown
 }
 
 export interface EventRegistration {
@@ -136,6 +138,8 @@ export interface EventRegistration {
   checked_in: boolean | null
   registered_at: string
   approved_at: string | null
+  /** JSONB: answers keyed by CustomFormField.id */
+  form_responses: unknown
 }
 
 export interface PointTransaction {

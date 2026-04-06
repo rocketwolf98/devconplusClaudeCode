@@ -34,6 +34,8 @@ interface CreateEventPayload {
   cover_image_url: string | null
   chapter_id: string
   created_by: string
+  /** JSONB: array of CustomFormField objects — not yet in generated DB types */
+  custom_form_schema?: unknown
 }
 
 export interface UpdateEventPayload {
@@ -54,6 +56,8 @@ export interface UpdateEventPayload {
   requires_approval?: boolean
   is_chapter_locked?: boolean
   cover_image_url?: string | null
+  /** JSONB: array of CustomFormField objects — not yet in generated DB types */
+  custom_form_schema?: unknown
 }
 
 interface EventsState {

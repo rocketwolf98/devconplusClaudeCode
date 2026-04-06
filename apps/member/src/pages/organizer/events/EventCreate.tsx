@@ -11,6 +11,7 @@ import { supabase } from '../../../lib/supabase'
 import {
   schema,
   type FormData,
+  type CustomFormField,
   inputClass,
   labelClass,
   CATEGORY_OPTIONS,
@@ -20,6 +21,7 @@ import {
   DEFAULT_VOLUNTEER_POINTS,
   TAG_MAX_LENGTH,
   SectionHeader,
+  CustomFieldsBuilder,
 } from './eventFormConstants'
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -50,6 +52,9 @@ export function OrgEventCreate() {
 
   // Visibility (managed outside RHF for segmented control feel)
   const [visibility, setVisibility] = useState<'public' | 'unlisted' | 'draft'>('public')
+
+  // Custom registration form fields
+  const [customFields, setCustomFields] = useState<CustomFormField[]>([])
 
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -171,25 +176,26 @@ export function OrgEventCreate() {
 
     try {
       await createEvent({
-        title:             data.title,
-        description:       data.description,
-        location:          data.location,
-        event_date:        data.event_date,
-        end_date:          data.end_date ?? null,
-        category:          data.category,
-        devcon_category:   data.devcon_category,
+        title:               data.title,
+        description:         data.description,
+        location:            data.location,
+        event_date:          data.event_date,
+        end_date:            data.end_date ?? null,
+        category:            data.category,
+        devcon_category:     data.devcon_category,
         tags,
         visibility,
-        is_free:           data.is_free,
-        ticket_price_php:  data.is_free ? 0 : data.ticket_price_php,
-        capacity:          data.capacity ?? null,
-        points_value:      data.points_value,
-        volunteer_points:  data.volunteer_points,
-        requires_approval: data.requires_approval,
-        is_chapter_locked: data.is_chapter_locked,
+        is_free:             data.is_free,
+        ticket_price_php:    data.is_free ? 0 : data.ticket_price_php,
+        capacity:            data.capacity ?? null,
+        points_value:        data.points_value,
+        volunteer_points:    data.volunteer_points,
+        requires_approval:   data.requires_approval,
+        is_chapter_locked:   data.is_chapter_locked,
         cover_image_url,
-        chapter_id:        user.chapter_id,
-        created_by:        user.id,
+        chapter_id:          user.chapter_id,
+        created_by:          user.id,
+        custom_form_schema:  customFields.length > 0 ? customFields : null,
       })
       navigate('/organizer/events')
     } catch (err) {
@@ -631,6 +637,18 @@ export function OrgEventCreate() {
               </p>
             </div>
           </div>
+        </motion.div>
+
+        {/* ── REGISTRATION QUESTIONS ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Registration Questions" />
+          <p className="text-xs text-slate-400 mb-3">
+            Add custom fields to collect extra information from registrants.
+          </p>
+          <CustomFieldsBuilder
+            customFields={customFields}
+            setCustomFields={setCustomFields}
+          />
         </motion.div>
 
         {/* Submit error */}

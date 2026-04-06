@@ -13,12 +13,14 @@ import NotFound from '../../NotFound'
 import {
   schema,
   type FormData,
+  type CustomFormField,
   inputClass,
   labelClass,
   CATEGORY_OPTIONS,
   DEVCON_PROGRAM_OPTIONS,
   VISIBILITY_OPTIONS,
   SectionHeader,
+  CustomFieldsBuilder,
 } from './eventFormConstants'
 
 export function OrgEventEdit() {
@@ -41,6 +43,11 @@ export function OrgEventEdit() {
     event?.cover_image_url ?? null
   )
   const [coverUploadError, setCoverUploadError] = useState<string | null>(null)
+
+  // ── Custom registration fields ───────────────────────────────────────────
+  const [customFields, setCustomFields] = useState<CustomFormField[]>(
+    Array.isArray(event?.custom_form_schema) ? (event.custom_form_schema as CustomFormField[]) : []
+  )
 
   // ── Tags ─────────────────────────────────────────────────────────────────
   const [tags, setTags] = useState<string[]>(event?.tags ?? [])
@@ -196,22 +203,23 @@ export function OrgEventEdit() {
 
     try {
       await updateEvent(event.id, {
-        title:             data.title,
-        description:       data.description,
-        location:          data.location,
-        event_date:        isLocked ? (event.event_date ?? undefined) : data.event_date,
-        end_date:          isLocked ? (event.end_date ?? null)        : (data.end_date ?? null),
-        points_value:      isLocked ? (event.points_value ?? 200)     : data.points_value,
-        requires_approval: isLocked ? (event.requires_approval ?? false) : data.requires_approval,
-        is_chapter_locked: data.is_chapter_locked,
-        category:          data.category,
-        devcon_category:   data.devcon_category ?? null,
+        title:              data.title,
+        description:        data.description,
+        location:           data.location,
+        event_date:         isLocked ? (event.event_date ?? undefined) : data.event_date,
+        end_date:           isLocked ? (event.end_date ?? null)        : (data.end_date ?? null),
+        points_value:       isLocked ? (event.points_value ?? 200)     : data.points_value,
+        requires_approval:  isLocked ? (event.requires_approval ?? false) : data.requires_approval,
+        is_chapter_locked:  data.is_chapter_locked,
+        category:           data.category,
+        devcon_category:    data.devcon_category ?? null,
         tags,
         visibility,
-        is_free:           data.is_free,
-        ticket_price_php:  data.is_free ? 0 : data.ticket_price_php,
-        capacity:          data.capacity ?? null,
+        is_free:            data.is_free,
+        ticket_price_php:   data.is_free ? 0 : data.ticket_price_php,
+        capacity:           data.capacity ?? null,
         cover_image_url,
+        custom_form_schema: customFields.length > 0 ? customFields : null,
       })
       navigate(`/organizer/events/${event.id}`)
     } catch (err) {
@@ -585,6 +593,18 @@ export function OrgEventEdit() {
               <p className="text-xs text-slate-400 mt-1">Members earn this many XP when checked in at the event.</p>
             </div>
           )}
+        </motion.div>
+
+        {/* ── REGISTRATION QUESTIONS ── */}
+        <motion.div variants={fadeUp}>
+          <SectionHeader title="Registration Questions" />
+          <p className="text-xs text-slate-400 mb-3">
+            Add custom fields to collect extra information from registrants.
+          </p>
+          <CustomFieldsBuilder
+            customFields={customFields}
+            setCustomFields={setCustomFields}
+          />
         </motion.div>
 
         {/* Submit error */}

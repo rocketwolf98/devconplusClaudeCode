@@ -7,6 +7,18 @@ import { z } from 'zod'
 import { supabase } from '../../lib/supabase'
 import type { Event } from '@devcon-plus/supabase'
 
+// ── Custom form field types ────────────────────────────────────────────────────
+
+type CustomFieldType = 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
+
+interface CustomFormField {
+  id: string          // crypto.randomUUID() — stable key, survives label edits
+  label: string
+  type: CustomFieldType
+  required: boolean
+  options: string[]   // only used for select / radio / checkbox
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 interface EventWithChapter extends Event {
@@ -94,6 +106,43 @@ interface SlideOverFormProps {
 function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOverFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null)
 
+  // ── Custom form fields state ─────────────────────────────────────────────────
+  const [customFields, setCustomFields] = useState<CustomFormField[]>(() => {
+    const raw = event?.custom_form_schema
+    return Array.isArray(raw) ? (raw as CustomFormField[]) : []
+  })
+  const [optionDrafts, setOptionDrafts] = useState<Record<string, string>>({})
+
+  const addField = () =>
+    setCustomFields(prev => [...prev, {
+      id:       crypto.randomUUID(),
+      label:    '',
+      type:     'text',
+      required: false,
+      options:  [],
+    }])
+
+  const removeField = (id: string) =>
+    setCustomFields(prev => prev.filter(f => f.id !== id))
+
+  const updateField = (id: string, patch: Partial<CustomFormField>) =>
+    setCustomFields(prev => prev.map(f => f.id === id ? { ...f, ...patch } : f))
+
+  const addOption = (fieldId: string) => {
+    const draft = optionDrafts[fieldId]?.trim()
+    if (!draft) return
+    const field = customFields.find(f => f.id === fieldId)
+    if (!field) return
+    updateField(fieldId, { options: [...field.options, draft] })
+    setOptionDrafts(prev => ({ ...prev, [fieldId]: '' }))
+  }
+
+  const removeOption = (fieldId: string, index: number) => {
+    const field = customFields.find(f => f.id === fieldId)
+    if (!field) return
+    updateField(fieldId, { options: field.options.filter((_, i) => i !== index) })
+  }
+
   const {
     register,
     handleSubmit,
@@ -132,36 +181,41 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
   const onSubmit = async (data: EventFormData) => {
     setSubmitError(null)
     try {
+      const schema = customFields.length > 0 ? customFields : null
       if (mode === 'create') {
-        const { data: result, error: dbErr } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- custom_form_schema not yet in generated DB types
+        const { data: result, error: dbErr } = await (supabase as any)
           .from('events')
           .insert({
             ...data,
-            end_date:          data.end_date ?? null,
-            capacity:          data.capacity ?? null,
-            status:            'upcoming',
-            tags:              [],
-            cover_image_url:   null,
-            created_by:        null,
-            is_featured:       false,
-            is_promoted:       false,
+            end_date:           data.end_date ?? null,
+            capacity:           data.capacity ?? null,
+            status:             'upcoming',
+            tags:               [],
+            cover_image_url:    null,
+            created_by:         null,
+            is_featured:        false,
+            is_promoted:        false,
+            custom_form_schema: schema,
           })
           .select('*, chapters(name)')
           .single()
-        if (dbErr) { setSubmitError(dbErr.message); return }
+        if (dbErr) { setSubmitError((dbErr as { message: string }).message); return }
         onSaved(result as unknown as EventWithChapter)
       } else {
-        const { data: result, error: dbErr } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- custom_form_schema not yet in generated DB types
+        const { data: result, error: dbErr } = await (supabase as any)
           .from('events')
           .update({
             ...data,
-            end_date:  data.end_date ?? null,
-            capacity:  data.capacity ?? null,
+            end_date:           data.end_date ?? null,
+            capacity:           data.capacity ?? null,
+            custom_form_schema: schema,
           })
           .eq('id', event!.id)
           .select('*, chapters(name)')
           .single()
-        if (dbErr) { setSubmitError(dbErr.message); return }
+        if (dbErr) { setSubmitError((dbErr as { message: string }).message); return }
         onSaved(result as unknown as EventWithChapter)
       }
     } catch (err) {
@@ -456,6 +510,146 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           <p className="text-xs text-slate-400 mt-1">
             Members earn this many XP when checked in at the event.
           </p>
+        </div>
+
+        {/* ── Registration Questions (form builder) ── */}
+        <div className="border-t border-slate-100 pt-4 mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <p className={labelClass}>Registration Questions</p>
+              <p className="text-xs text-slate-400 -mt-1 mb-2">
+                Extra fields shown on the member registration form.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={addField}
+              className="flex items-center gap-1.5 text-xs font-bold text-blue bg-blue/10 hover:bg-blue/20 px-3 py-1.5 rounded-xl transition-colors shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add Question
+            </button>
+          </div>
+
+          {customFields.length === 0 && (
+            <p className="text-xs text-slate-300 italic text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+              No extra questions — only name, email, and school/company will be collected.
+            </p>
+          )}
+
+          <div className="space-y-3">
+            {customFields.map((field, index) => (
+              <div key={field.id} className="bg-slate-50 rounded-xl border border-slate-200 p-3 space-y-3">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                    Question {index + 1}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => removeField(field.id)}
+                    className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Label */}
+                <div>
+                  <label className={labelClass}>
+                    Label <span className="text-red normal-case">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={field.label}
+                    onChange={e => updateField(field.id, { label: e.target.value })}
+                    placeholder="e.g. What is your shirt size?"
+                    className={inputClass}
+                  />
+                </div>
+
+                {/* Type + Required */}
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <label className={labelClass}>Type</label>
+                    <select
+                      value={field.type}
+                      onChange={e =>
+                        updateField(field.id, {
+                          type:    e.target.value as CustomFieldType,
+                          options: [],
+                        })
+                      }
+                      className={inputClass}
+                    >
+                      <option value="text">Short Text</option>
+                      <option value="textarea">Long Text</option>
+                      <option value="select">Dropdown</option>
+                      <option value="radio">Multiple Choice</option>
+                      <option value="checkbox">Checkboxes</option>
+                    </select>
+                  </div>
+                  <label className="flex items-center gap-2 cursor-pointer pb-2.5 shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={field.required}
+                      onChange={e => updateField(field.id, { required: e.target.checked })}
+                      className="w-4 h-4 accent-blue"
+                    />
+                    <span className="text-xs font-semibold text-slate-600">Required</span>
+                  </label>
+                </div>
+
+                {/* Options — only for select / radio / checkbox */}
+                {(field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') && (
+                  <div>
+                    <label className={labelClass}>Options</label>
+                    <div className="flex flex-wrap gap-1.5 mb-2 min-h-[26px]">
+                      {field.options.map((opt, i) => (
+                        <span
+                          key={i}
+                          className="flex items-center gap-1 bg-white border border-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full"
+                        >
+                          {opt}
+                          <button
+                            type="button"
+                            onClick={() => removeOption(field.id, i)}
+                            className="text-slate-400 hover:text-red transition-colors"
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </span>
+                      ))}
+                      {field.options.length === 0 && (
+                        <span className="text-xs text-slate-300 italic">No options yet</span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={optionDrafts[field.id] ?? ''}
+                        onChange={e =>
+                          setOptionDrafts(prev => ({ ...prev, [field.id]: e.target.value }))
+                        }
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') { e.preventDefault(); addOption(field.id) }
+                        }}
+                        placeholder="Add option…"
+                        className={inputClass}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => addOption(field.id)}
+                        className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-xl hover:bg-blue-dark transition-colors shrink-0"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Submit error */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, ClipboardList, Megaphone, Users } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown, ClipboardList, Megaphone, Users } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -14,6 +14,97 @@ interface EmailParams { memberName: string; eventTitle: string; eventDate: strin
 function buildApprovedEmail({ memberName, eventTitle, eventDate, eventLocation, pointsValue, ticketUrl }: EmailParams): string {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><style>body{margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.w{max-width:390px;margin:0 auto}.hd{background:#1E2A56;padding:28px 24px;text-align:center;color:#fff;font-size:22px;font-weight:900}.bd{background:#fff;padding:28px 24px}.ft{background:#1E2A56;padding:20px 24px;text-align:center}h2{color:#0F172A;font-size:20px;font-weight:800;margin:0 0 8px}p{color:#334155;font-size:14px;line-height:1.65;margin:0 0 16px}.row{font-size:13px;margin-bottom:10px}.lbl{color:#94A3B8;font-size:12px;margin-right:8px}.val{color:#0F172A;font-weight:600}.badge{display:inline-block;background:#DCFCE7;color:#16A34A;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}.cta{display:block;background:#367BDD;color:#fff;font-weight:700;font-size:15px;text-align:center;text-decoration:none;padding:14px 24px;border-radius:14px;margin-top:24px}.ft p{color:rgba(255,255,255,.45);font-size:11px;margin:0}hr{border:none;border-top:1px solid #E2E8F0;margin:20px 0}</style></head><body><div class="w"><div class="hd">DEVCON<span style="color:#EA641D">+</span></div><div class="bd"><h2>You're approved! ✅</h2><p>Hi ${memberName},</p><p>Great news — your registration for <strong>${eventTitle}</strong> has been approved by the organizer.</p><hr/><div class="row"><span class="lbl">Event</span><span class="val">${eventTitle}</span></div><div class="row"><span class="lbl">Date</span><span class="val">${eventDate}</span></div>${eventLocation ? `<div class="row"><span class="lbl">Location</span><span class="val">${eventLocation}</span></div>` : ''}<div class="row"><span class="lbl">Points</span><span class="badge">+${pointsValue} XP on attendance</span></div><hr/><p style="font-size:13px;color:#64748B">Your QR ticket is ready. Show it at the venue entrance to check in.</p><a href="${ticketUrl}" class="cta">View My Ticket</a></div><div class="ft"><p>DEVCON Philippines — Sync. Support. Succeed.</p></div></div></body></html>`
 }
+
+// ── Custom form field types ───────────────────────────────────────────────────
+
+type CustomFieldType = 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
+
+interface CustomFormField {
+  id: string
+  label: string
+  type: CustomFieldType
+  required: boolean
+  options: string[]
+}
+
+type RegistrantWithResponses = Registration & {
+  form_responses?: Record<string, unknown> | null
+}
+
+// ── Local component: form responses panel ─────────────────────────────────────
+
+function FormResponsesPanel({
+  schema,
+  responses,
+  isExpanded,
+  onToggle,
+}: {
+  schema: CustomFormField[]
+  responses: Record<string, unknown>
+  isExpanded: boolean
+  onToggle: () => void
+}) {
+  const answeredCount = schema.filter(f => {
+    const v = responses[f.id]
+    return v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)
+  }).length
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+      >
+        <span className="flex items-center gap-1.5">
+          <ClipboardList className="w-3.5 h-3.5" />
+          Registration Responses
+          <span className="ml-1 bg-slate-100 text-slate-500 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
+            {answeredCount}/{schema.length}
+          </span>
+        </span>
+        <motion.div
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        >
+          <ChevronDown className="w-3.5 h-3.5" />
+        </motion.div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3">
+              {schema.map(field => {
+                const answer = responses[field.id]
+                const isEmpty = answer === undefined || answer === null || answer === '' ||
+                  (Array.isArray(answer) && answer.length === 0)
+                const display = isEmpty
+                  ? <span className="text-slate-300 italic">No answer</span>
+                  : <span className="text-slate-800">{Array.isArray(answer) ? answer.join(', ') : String(answer)}</span>
+                return (
+                  <div key={field.id}>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">
+                      {field.label}{field.required ? ' *' : ''}
+                    </p>
+                    <p className="text-sm">{display}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
 type MainTab = 'registrants' | 'volunteers'
@@ -33,25 +124,59 @@ export function OrgEventRegistrants() {
 
   const event = events.find((e) => e.id === id)
   const organizerUser = useOrganizerUser()
-  const [registrants, setRegistrants] = useState<Registration[]>([])
+  const [registrants, setRegistrants] = useState<RegistrantWithResponses[]>([])
   const [isLoading, setIsLoading]     = useState(true)
   const [filter, setFilter]           = useState<FilterStatus>('all')
   const [showAnnounce, setShowAnnounce] = useState(false)
   const [mainTab, setMainTab]           = useState<MainTab>('registrants')
   const [volunteers, setVolunteers]     = useState<VolunteerApplication[]>([])
   const [volunteersLoading, setVolunteersLoading] = useState(false)
+  const [formSchema, setFormSchema]     = useState<CustomFormField[]>([])
+  const [expandedResponseIds, setExpandedResponseIds] = useState<Set<string>>(new Set())
 
-  // Fetch registrations with joined member profile data
+  const toggleResponses = (regId: string) =>
+    setExpandedResponseIds(prev => {
+      const next = new Set(prev)
+      if (next.has(regId)) next.delete(regId)
+      else next.add(regId)
+      return next
+    })
+
+  // Fetch custom_form_schema for this event
+  useEffect(() => {
+    if (!id) return
+    void (async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- custom_form_schema not yet in generated DB types
+      const { data } = await (supabase as any)
+        .from('events')
+        .select('custom_form_schema')
+        .eq('id', id)
+        .single() as { data: { custom_form_schema: unknown } | null }
+      if (Array.isArray(data?.custom_form_schema)) {
+        setFormSchema(data.custom_form_schema as CustomFormField[])
+      }
+    })()
+  }, [id])
+
+  // Fetch registrations with joined member profile data + form_responses
   useEffect(() => {
     if (!id) return
     setIsLoading(true)
-    supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- form_responses not yet in generated DB types
+    ;(supabase as any)
       .from('event_registrations')
-      .select('id, status, registered_at, checked_in, profiles(full_name, email, school_or_company)')
+      .select('id, status, registered_at, checked_in, form_responses, profiles(full_name, email, school_or_company)')
       .eq('event_id', id)
       .neq('status', 'cancelled')
-      .then(({ data }) => {
-        const mapped: Registration[] = (data ?? []).map((row) => {
+      .then(({ data }: { data: Array<{
+        id: string
+        status: string | null
+        registered_at: string | null
+        checked_in: boolean | null
+        form_responses: Record<string, unknown> | null
+        profiles: { full_name?: string; email?: string; school_or_company?: string } | null
+      }> | null }) => {
+        const mapped: RegistrantWithResponses[] = (data ?? []).map((row) => {
           const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
           const p = profile as { full_name?: string; email?: string; school_or_company?: string } | null
           return {
@@ -62,7 +187,8 @@ export function OrgEventRegistrants() {
             event_title:       event?.title ?? '',
             registered_at:     row.registered_at ?? '',
             status:            row.status as Registration['status'],
-            checked_in:        (row.checked_in as boolean | null) ?? false,
+            checked_in:        row.checked_in ?? false,
+            form_responses:    row.form_responses ?? null,
           }
         })
         setRegistrants(mapped)
@@ -322,7 +448,7 @@ export function OrgEventRegistrants() {
                       exit="exit"
                     >
                       {filtered.map((reg) => (
-                        <motion.div key={reg.id} variants={cardItem}>
+                        <motion.div key={reg.id} variants={cardItem} className="space-y-1.5">
                           <ApprovalCard
                             registration={reg}
                             onApprove={handleApprove}
@@ -330,6 +456,14 @@ export function OrgEventRegistrants() {
                             onRevert={handleRevert}
                             onCheckIn={handleCheckIn}
                           />
+                          {formSchema.length > 0 && reg.form_responses && (
+                            <FormResponsesPanel
+                              schema={formSchema}
+                              responses={reg.form_responses}
+                              isExpanded={expandedResponseIds.has(reg.id)}
+                              onToggle={() => toggleResponses(reg.id)}
+                            />
+                          )}
                         </motion.div>
                       ))}
                     </motion.div>
