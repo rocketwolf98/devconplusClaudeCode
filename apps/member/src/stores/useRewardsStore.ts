@@ -133,7 +133,11 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
           }
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[rewards-realtime] channel error', status, err)
+        }
+      })
     return () => { void supabase.removeChannel(channel) }
   },
 

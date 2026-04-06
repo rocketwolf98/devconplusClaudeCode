@@ -79,6 +79,8 @@ Deno.serve(async (req: Request) => {
 
     // 2. Verify QR JWT signature and expiry — signing secret never leaves the server
     let registrationId: string
+    let tokenKind: string  // 'r' = registration QR, 'u' = user identity QR
+    let userIdFromToken: string | null = null
     try {
       const rawSecret = Deno.env.get('QR_JWT_SECRET') ?? ''
       const key = await crypto.subtle.importKey(
@@ -89,7 +91,17 @@ Deno.serve(async (req: Request) => {
         ['sign', 'verify']
       )
       const payload = await verify(token, key)
-      registrationId = compactToUuid(payload.sub as string)
+      tokenKind = (payload.k as string | undefined) ?? 'r'  // default to 'r' for backwards compat
+
+      if (tokenKind === 'u') {
+        // User identity token — sub encodes user_id, not registration_id
+        // We resolve registration_id after the organizer role check (we need organizer.chapter_id)
+        userIdFromToken = compactToUuid(payload.sub as string)
+        registrationId = ''  // resolved below
+      } else {
+        // Standard registration token (k='r' or legacy tokens without k claim)
+        registrationId = compactToUuid(payload.sub as string)
+      }
     } catch (jwtErr) {
       const isExpired = jwtErr instanceof Error && jwtErr.message.toLowerCase().includes('expired')
       logger.warn('qr_scan_invalid_token', {
@@ -132,6 +144,40 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ success: false, error: 'Scan rate exceeded. Please slow down.' }),
         { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json', 'Retry-After': '60' } }
       )
+    }
+
+    // 3b. For k='u' tokens: resolve the registration_id from the user_id.
+    //     Finds the member's most imminent approved event registration in the organizer's chapter.
+    if (tokenKind === 'u' && userIdFromToken) {
+      const chapterFilter = (organizer.role === 'chapter_officer' && organizer.chapter_id)
+        ? organizer.chapter_id
+        : null  // hq_admin / super_admin: not scoped to one chapter
+
+      let regQuery = supabase
+        .from('event_registrations')
+        .select('id, event_id, checked_in, events!inner(chapter_id, status, event_date)')
+        .eq('user_id', userIdFromToken)
+        .eq('status', 'approved')
+        .eq('checked_in', false)
+        .in('events.status', ['upcoming', 'ongoing'])
+        .order('events.event_date', { ascending: true })
+        .limit(1)
+
+      if (chapterFilter) {
+        regQuery = regQuery.eq('events.chapter_id', chapterFilter)
+      }
+
+      const { data: matchedReg, error: matchErr } = await regQuery.maybeSingle()
+
+      if (matchErr || !matchedReg) {
+        logger.warn('qr_scan_user_qr_no_match', { user_id: userIdFromToken, organizer_chapter: organizer.chapter_id })
+        return new Response(
+          JSON.stringify({ success: false, error: 'No upcoming registration found for this member at your chapter.' }),
+          { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        )
+      }
+
+      registrationId = matchedReg.id
     }
 
     // 4. Find registration by ID extracted from JWT (must be approved)

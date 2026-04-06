@@ -13,3 +13,6 @@ remix-of-devcon-connect/
 
 # Git worktrees
 .worktrees/
+
+# Local development files  
+.mcp.json

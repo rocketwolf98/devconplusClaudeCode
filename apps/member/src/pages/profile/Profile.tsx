@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Award, Check, ChevronRight, LogOut, Shield, Star } from 'lucide-react'
+import { Award, Check, ChevronRight, Download, LogOut, Shield, Star } from 'lucide-react'
 import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
 import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -8,7 +8,13 @@ import { useThemeStore, PROGRAM_THEMES } from '../../stores/useThemeStore'
 import { ROLE_DISPLAY_NAMES } from '../../lib/constants'
 import ComingSoonModal from '../../components/ComingSoonModal'
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
 const MENU_ITEMS: { label: string; path: string }[] = [
+  { label: 'My QR Code',           path: '/qr'                    },
   { label: 'XP History',           path: '/points/history'        },
   { label: 'Edit Profile',         path: '/profile/edit'          },
   { label: 'Notifications',        path: '/profile/notifications' },
@@ -21,10 +27,33 @@ export default function Profile() {
   const { spendablePoints, prestigeUnlocked, loadTotalPoints } = usePointsStore()
   const { themeId, setTheme } = useThemeStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
+  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
+  const [canInstall, setCanInstall] = useState(false)
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent)
+  const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches
 
   useEffect(() => {
     loadTotalPoints()
   }, [loadTotalPoints])
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault()
+      deferredPrompt.current = e as BeforeInstallPromptEvent
+      setCanInstall(true)
+    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
+  }, [])
+
+  async function handleAddToHomeScreen() {
+    if (deferredPrompt.current) {
+      deferredPrompt.current.prompt()
+      await deferredPrompt.current.userChoice
+      deferredPrompt.current = null
+      setCanInstall(false)
+    }
+  }
 
   return (
     <div>
@@ -112,6 +141,25 @@ export default function Profile() {
               <ChevronRight className="w-4 h-4 text-slate-300" />
             </button>
           ))}
+          {!isInStandaloneMode && (canInstall || isIos) && (
+            <button
+              onClick={canInstall ? handleAddToHomeScreen : undefined}
+              className="w-full px-4 py-4 flex items-center justify-between text-left border-t border-slate-100 hover:bg-slate-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Download className="w-4 h-4 text-primary" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-900">Add to Home Screen</p>
+                  {isIos && !canInstall && (
+                    <p className="text-xs text-slate-400 mt-0.5">Tap Share → "Add to Home Screen"</p>
+                  )}
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
+            </button>
+          )}
           <button
             onClick={() => setShowHelpModal(true)}
             className="w-full px-4 py-4 flex items-center justify-between text-left border-t border-slate-100 hover:bg-slate-50 transition-colors"

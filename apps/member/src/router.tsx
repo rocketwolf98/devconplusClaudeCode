@@ -30,6 +30,7 @@ import PointsHistory from './pages/points/PointsHistory'
 import Rewards from './pages/rewards/Rewards'
 import NewsDetail from './pages/news/NewsDetail'
 import Profile from './pages/profile/Profile'
+import MyQR from './pages/profile/MyQR'
 import ProfileEdit from './pages/profile/ProfileEdit'
 import Notifications from './pages/profile/Notifications'
 import Privacy from './pages/profile/Privacy'
@@ -86,6 +87,7 @@ export const router = createBrowserRouter([
       { path: '/news/:id',                  element: <NewsDetail /> },
       { path: '/rewards',                   element: <Rewards /> },
       { path: '/profile',                   element: <Profile /> },
+      { path: '/qr',                        element: <MyQR /> },
       { path: '/profile/edit',              element: <ProfileEdit /> },
       { path: '/notifications',             element: <NotificationsInbox /> },
       { path: '/profile/notifications',     element: <Notifications /> },

@@ -79,14 +79,16 @@ export default function OrganizerLayout() {
         resubscribe()
       }
     }
+    const handleOnline = () => { recover(); resubscribe() }
     document.addEventListener('visibilitychange', handleVisibility)
-    window.addEventListener('online', recover)
-    // Polling fallback: same 5-minute keepalive as MemberLayout
-    const pollInterval = setInterval(recover, 5 * 60 * 1000)
+    window.addEventListener('online', handleOnline)
+    // Polling fallback: refetch + re-subscribe every 5 minutes — channels can
+    // silently die during idle even without a full network drop
+    const pollInterval = setInterval(() => { recover(); resubscribe() }, 5 * 60 * 1000)
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
-      window.removeEventListener('online', recover)
+      window.removeEventListener('online', handleOnline)
       clearInterval(pollInterval)
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()

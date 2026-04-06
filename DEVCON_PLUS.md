@@ -50,7 +50,7 @@ Read this before doing anything. Follow it strictly.
 - [x] RBAC — HQ admin, chapter admin, standard user roles — **Kenshin** ✅
 
 #### Infra
-- [ ] Email SMTP client (transactional emails) — **Kenshin**
+- [~] Email SMTP client (transactional emails via Resend) — **Kenshin** 🔄 (edge function + templates deployed Apr 6; end-to-end test pending)
 - [ ] Finalize `plus.devcon.com` domain (DNS + Cloudflare) — **Kenshin**
 - [ ] Cloudflare anti-DDoS + CAPTCHA on auth routes — **Kenshin**
 
@@ -65,8 +65,8 @@ Read this before doing anything. Follow it strictly.
 - [x] Admin standardization — HQ admin vs. chapter admin flows defined and implemented — **Kenshin** ✅
 
 #### QR System
-- [ ] Always-on QR — QR accessible at all times in the app — **Kenshin**
-- [ ] Unique QR per user with default fallback QR — **Kenshin**
+- [x] Always-on QR — `/qr` page in Profile menu, `generate-user-qr` edge function deployed — **Kenshin** ✅ (Apr 6)
+- [x] Unique QR per user with default fallback QR — user identity token (`k='u'`), auto-matches to next event at organizer's chapter — **Kenshin** ✅ (Apr 6)
 
 #### Security (see Security section below)
 - [ ] Dependency / CVE audit — all packages patched — **Kenshin** (ongoing, 25 CVEs cleared Mar 30)
@@ -79,13 +79,13 @@ Read this before doing anything. Follow it strictly.
 
 ### L2 — Should Ship (~70–80% by April 30)
 
-- [ ] Dedicated admin user page — **Kenshin**
-- [ ] Dedicated standard user page — **Kenshin**
-- [ ] Themes — auto-detect and apply correct chapter theme — **Kenshin**
+- [x] Dedicated admin user page — **Kenshin** ✅ (AdminLayout + AdminUsers + AdminCMS)
+- [x] Dedicated standard user page — **Kenshin** ✅ (MemberLayout + full member flow)
+- [ ] Themes — auto-detect and apply correct chapter theme — **Kenshin** (deferred to future iteration)
 - [ ] Announcements — broadcast messages to chapter members — **Kien** (ongoing)
 - [ ] Missions System — basic gamified task/missions flow (MVP only) — **Kien**
 - [ ] Boosted / Partnered Events — flag and surface promoted events — **Kien**
-- [ ] Add to homepage shortcut (PWA manifest) — **Kenshin**
+- [x] Add to homepage shortcut (PWA manifest) — **Kenshin** ✅ (Apr 6; icons 192/512/maskable, shortcuts, apple-touch-icon)
 - [ ] Custom event fields on event creation — modular form components (Google Forms-style) — **Kien**
 - [ ] Group Chat — async message board minimum (only if Kenshin has bandwidth in Week 4) — **Kenshin/Kien**
 

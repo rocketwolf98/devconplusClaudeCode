@@ -10,6 +10,11 @@ import { ApprovalCard, type Registration } from '../../../components/ApprovalCar
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
 
+interface EmailParams { memberName: string; eventTitle: string; eventDate: string; eventLocation?: string; pointsValue: number; ticketUrl: string }
+function buildApprovedEmail({ memberName, eventTitle, eventDate, eventLocation, pointsValue, ticketUrl }: EmailParams): string {
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><style>body{margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.w{max-width:390px;margin:0 auto}.hd{background:#1E2A56;padding:28px 24px;text-align:center;color:#fff;font-size:22px;font-weight:900}.bd{background:#fff;padding:28px 24px}.ft{background:#1E2A56;padding:20px 24px;text-align:center}h2{color:#0F172A;font-size:20px;font-weight:800;margin:0 0 8px}p{color:#334155;font-size:14px;line-height:1.65;margin:0 0 16px}.row{font-size:13px;margin-bottom:10px}.lbl{color:#94A3B8;font-size:12px;margin-right:8px}.val{color:#0F172A;font-weight:600}.badge{display:inline-block;background:#DCFCE7;color:#16A34A;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}.cta{display:block;background:#367BDD;color:#fff;font-weight:700;font-size:15px;text-align:center;text-decoration:none;padding:14px 24px;border-radius:14px;margin-top:24px}.ft p{color:rgba(255,255,255,.45);font-size:11px;margin:0}hr{border:none;border-top:1px solid #E2E8F0;margin:20px 0}</style></head><body><div class="w"><div class="hd">DEVCON<span style="color:#EA641D">+</span></div><div class="bd"><h2>You're approved! ✅</h2><p>Hi ${memberName},</p><p>Great news — your registration for <strong>${eventTitle}</strong> has been approved by the organizer.</p><hr/><div class="row"><span class="lbl">Event</span><span class="val">${eventTitle}</span></div><div class="row"><span class="lbl">Date</span><span class="val">${eventDate}</span></div>${eventLocation ? `<div class="row"><span class="lbl">Location</span><span class="val">${eventLocation}</span></div>` : ''}<div class="row"><span class="lbl">Points</span><span class="badge">+${pointsValue} XP on attendance</span></div><hr/><p style="font-size:13px;color:#64748B">Your QR ticket is ready. Show it at the venue entrance to check in.</p><a href="${ticketUrl}" class="cta">View My Ticket</a></div><div class="ft"><p>DEVCON Philippines — Sync. Support. Succeed.</p></div></div></body></html>`
+}
+
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
 type MainTab = 'registrants' | 'volunteers'
 
@@ -107,6 +112,25 @@ export function OrgEventRegistrants() {
       setRegistrants((prev) =>
         prev.map((r) => (r.id === regId ? { ...r, status: 'approved' as const } : r))
       )
+      // Fire-and-forget approval email
+      const reg = registrants.find((r) => r.id === regId)
+      if (reg?.member_email) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session && event) {
+          const eventDate = event.event_date
+            ? new Date(event.event_date).toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+            : 'Date TBA'
+          const ticketUrl = `${window.location.origin}/events/${event.slug ?? event.id}/ticket`
+          void supabase.functions.invoke('send-email', {
+            body: {
+              to: reg.member_email,
+              subject: `You're approved for ${event.title}!`,
+              html: buildApprovedEmail({ memberName: reg.member_name, eventTitle: event.title, eventDate, eventLocation: event.location ?? undefined, pointsValue: event.points_value ?? 100, ticketUrl }),
+            },
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          })
+        }
+      }
     }
   }
 
