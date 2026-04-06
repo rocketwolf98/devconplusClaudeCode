@@ -3,7 +3,7 @@
 > Version: MVP 1.4
 > Team: 2 interns + Claude Code
 > Hard Deadline: April Week 1 (Cohort 3 Graduation)
-> Live App: https://devconplus.vercel.app
+> Live App: https://devconplusbeta-v1.vercel.app
 > Lovable Prototype (UX Reference ONLY): https://devconplusrndprototype.lovable.app/onboarding
 
 ---
@@ -948,7 +948,7 @@ npm run typecheck                     # tsc --noEmit across all packages
 - [x] Shared edge function logger (`_shared/logger.ts`)
 - [x] NotFound (404) catch-all route
 - [x] CSP headers enforced (promoted from Report-Only)
-- [x] Deployed to Vercel → https://devconplus.vercel.app
+- [x] Deployed to Vercel → https://devconplusbeta-v1.vercel.app
 
 ### Remaining for MVP
 - [ ] Deploy any remaining Edge Functions not yet live (verify via Supabase dashboard)

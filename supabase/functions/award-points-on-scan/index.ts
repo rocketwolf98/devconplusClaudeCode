@@ -79,7 +79,7 @@ Deno.serve(async (req: Request) => {
 
     // 2. Verify QR JWT signature and expiry — signing secret never leaves the server
     let registrationId: string
-    let tokenKind: string  // 'r' = registration QR, 'u' = user identity QR
+    let tokenKind: string  // 'r' = registration QR, 'u' = user identity QR, 'p' = pending door-approval
     let userIdFromToken: string | null = null
     try {
       const rawSecret = Deno.env.get('QR_JWT_SECRET') ?? ''
@@ -100,6 +100,7 @@ Deno.serve(async (req: Request) => {
         registrationId = ''  // resolved below
       } else {
         // Standard registration token (k='r' or legacy tokens without k claim)
+        // sub always encodes registration_id for these kinds
         registrationId = compactToUuid(payload.sub as string)
       }
     } catch (jwtErr) {
@@ -146,7 +147,53 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // 3b. For k='u' tokens: resolve the registration_id from the user_id.
+    // 3b. For k='p' tokens: pending door-approval — return pending state for scanner Approve/Reject UI.
+    //     The organizer scanner already has the overlay UI; it just needs the registration_id + names.
+    if (tokenKind === 'p') {
+      const { data: pendingReg, error: pendingErr } = await supabase
+        .from('event_registrations')
+        .select('id, user_id, event_id, status')
+        .eq('id', registrationId)
+        .eq('status', 'pending')
+        .single()
+
+      if (pendingErr || !pendingReg) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Pending registration not found or already processed.' }),
+          { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        )
+      }
+
+      const [pendingMemberRes, pendingEventRes] = await Promise.all([
+        supabase.from('profiles').select('full_name').eq('id', pendingReg.user_id).single(),
+        supabase.from('events').select('title, chapter_id').eq('id', pendingReg.event_id).single(),
+      ])
+
+      // Chapter scope check for k='p' same as k='r'
+      if (
+        organizer.role === 'chapter_officer' &&
+        organizer.chapter_id &&
+        pendingEventRes.data?.chapter_id !== organizer.chapter_id
+      ) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'This QR is for a different chapter\'s event.' }),
+          { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        )
+      }
+
+      return new Response(
+        JSON.stringify({
+          success:         false,
+          pending:         true,
+          registration_id: pendingReg.id,
+          member_name:     pendingMemberRes.data?.full_name ?? 'Member',
+          event_title:     pendingEventRes.data?.title ?? '',
+        }),
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // 3c. For k='u' tokens: resolve the registration_id from the user_id.
     //     Finds the member's most imminent approved event registration in the organizer's chapter.
     if (tokenKind === 'u' && userIdFromToken) {
       const chapterFilter = (organizer.role === 'chapter_officer' && organizer.chapter_id)

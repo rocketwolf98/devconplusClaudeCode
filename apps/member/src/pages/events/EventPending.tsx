@@ -76,7 +76,7 @@ export default function EventPending() {
 
       const invokeWithToken = (accessToken: string) =>
         supabase.functions.invoke<{ token: string; expires_at: number }>(
-          'generate-qr-token',
+          'generate-pending-qr',
           {
             body: { registration_id: reg!.id },
             headers: { Authorization: `Bearer ${accessToken}` },
