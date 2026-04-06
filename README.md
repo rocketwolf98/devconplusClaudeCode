@@ -3,7 +3,7 @@
 > **Tagline:** Sync. Support. Succeed.
 > Platform for DEVCON Philippines — 11 chapters, 60,000+ members.
 >
-> **Live app:** https://devconplus.vercel.app
+> **Live app:** https://devconplusbeta-v1.vercel.app
 
 This monorepo contains one main app and one shared package:
 
@@ -266,7 +266,7 @@ devcon-plus/
 
 ## 11. Deployment (Vercel)
 
-The app is live at **https://devconplus.vercel.app**.
+The app is live at **https://devconplusbeta-v1.vercel.app**.
 
 | Project | Root Directory | Build Command | Output |
 |---------|---------------|---------------|--------|

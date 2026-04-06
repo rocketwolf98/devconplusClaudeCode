@@ -174,7 +174,7 @@ Derived from Sir Dom's "Zero Trust Architecture" slide.
 
 ## HTTP Security Headers Audit
 
-Run: `curl -I https://devconplus.vercel.app`
+Run: `curl -I https://devconplusbeta-v1.vercel.app`
 
 | Header | Expected Value |
 |--------|---------------|

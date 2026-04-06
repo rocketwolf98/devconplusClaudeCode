@@ -44,7 +44,7 @@ or test references `total_points`, that is a bug. The rename happened in v1.4.
 ```
 Priority: CRITICAL
 Steps:
-1. Open https://devconplus.vercel.app on mobile (390px)
+1. Open https://devconplusbeta-v1.vercel.app on mobile (390px)
 2. Complete onboarding (4 slides — swipe through, verify real DEVCON photos)
 3. Sign up with email/password
 4. Complete email confirmation flow
@@ -403,7 +403,7 @@ goes on stage on May 15.
 - [ ] Demo chapter_officer account: at least 1 event created, camera permission pre-granted
 
 ### Infrastructure
-- [ ] App loads at https://devconplus.vercel.app (no Vercel error page)
+- [ ] App loads at https://devconplusbeta-v1.vercel.app (no Vercel error page)
 - [ ] plus.devcon.com DNS resolves to Vercel deployment
 - [ ] Google OAuth works from plus.devcon.com (callback URL confirmed in GCP Console)
 - [ ] All 4 Edge Functions respond (verify in Supabase dashboard → Functions)

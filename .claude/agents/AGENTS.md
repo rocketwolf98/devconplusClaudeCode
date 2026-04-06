@@ -1,7 +1,7 @@
 # DEVCON+ AI Agent System
 > Version: 1.2 | CLAUDE.md Synced: MVP 1.4 | Last Updated: March 30, 2026
 > Project: DEVCON Plus — Tech Community Unified Platform
-> Live App: https://devconplus.vercel.app
+> Live App: https://devconplusbeta-v1.vercel.app
 > Cohort 3 Graduation: April 30, 2026
 > Public Preview: May 15, 2026 (Dev B presents)
 > Claude Code Cutoff: April 26, 2026
@@ -59,7 +59,7 @@ then switch to agents/PM_AGENT.md to help me update the remaining MVP checklist.
 - Tailwind CSS v3 + framer-motion
 - Supabase (Auth + DB + Edge Functions + Realtime)
 - Zustand v5 for state, React Hook Form + Zod for forms
-- Deployed on Vercel → https://devconplus.vercel.app
+- Deployed on Vercel → https://devconplusbeta-v1.vercel.app
 
 ### Codebase Location
 ```

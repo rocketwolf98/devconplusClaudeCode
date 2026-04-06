@@ -14,7 +14,7 @@ const DEFAULT_FROM = 'DEVCON+ <noreply@devconplus.ph>'
 
 const ALLOWED_ORIGINS = new Set([
   'http://localhost:5173',
-  'https://devconplus.vercel.app',
+  'https://devconplusbeta-v1.vercel.app',
   'https://devconplusbeta-v1.vercel.app',
 ])
 

@@ -20,7 +20,7 @@ function compactToUuid(compact: string): string {
 
 const ALLOWED_ORIGINS = new Set([
   'http://localhost:5173',
-  'https://devconplus.vercel.app',
+  'https://devconplusbeta-v1.vercel.app',
   'https://devconplusbeta-v1.vercel.app',
 ])
 

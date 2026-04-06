@@ -33,7 +33,7 @@ It must **only** exist in Supabase's Edge Function secrets store and be read via
 Never add it to Vercel, never reference it in frontend code, never commit it to git.
 
 ### 3. `ALLOWED_ORIGIN` is not a secret
-It is the public URL of the deployed app (e.g. `https://devconplus.vercel.app`).
+It is the public URL of the deployed app (e.g. `https://devconplusbeta-v1.vercel.app`).
 Store it as a plain Edge Function environment variable — not in the secrets store.
 For local development, set it to `http://localhost:5173` in your shell or local `.env`.
 
@@ -57,7 +57,7 @@ do not commit. Add it to `.gitignore` if missing.
 - [ ] Set `SUPABASE_SERVICE_ROLE_KEY` in Supabase → Edge Functions → Secrets
 - [ ] Set `QR_JWT_SECRET` in Supabase → Edge Functions → Secrets (generate with: `openssl rand -hex 32`)
 - [ ] Set `ALLOWED_ORIGIN` in Supabase → Edge Functions → Environment (plain var, not secret)
-  - Value: your Vercel production URL, e.g. `https://devconplus.vercel.app`
+  - Value: your Vercel production URL, e.g. `https://devconplusbeta-v1.vercel.app`
 
 ---
 
