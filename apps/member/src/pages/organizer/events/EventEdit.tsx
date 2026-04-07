@@ -25,6 +25,7 @@ import {
   SectionHeader,
   CustomFieldsBuilder,
 } from './eventFormConstants'
+import type { Json } from '@devcon-plus/supabase'
 
 export function OrgEventEdit() {
   const { id } = useParams<{ id: string }>()
@@ -237,7 +238,7 @@ export function OrgEventEdit() {
         ticket_price_php:   data.is_free ? 0 : data.ticket_price_php,
         capacity:           data.capacity ?? null,
         cover_image_url,
-        custom_form_schema: customFields.length > 0 ? customFields : null,
+        custom_form_schema: customFields.length > 0 ? customFields as unknown as Json : null,
       })
       navigate(`/organizer/events/${event.id}`)
     } catch (err) {

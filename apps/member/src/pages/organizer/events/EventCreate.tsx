@@ -23,6 +23,7 @@ import {
   SectionHeader,
   CustomFieldsBuilder,
 } from './eventFormConstants'
+import type { Json } from '@devcon-plus/supabase'
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -195,7 +196,7 @@ export function OrgEventCreate() {
         cover_image_url,
         chapter_id:          user.chapter_id,
         created_by:          user.id,
-        custom_form_schema:  customFields.length > 0 ? customFields : null,
+        custom_form_schema:  customFields.length > 0 ? customFields as unknown as Json : null,
       })
       navigate('/organizer/events')
     } catch (err) {
