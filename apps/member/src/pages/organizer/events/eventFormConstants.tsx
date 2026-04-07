@@ -110,7 +110,7 @@ export const ATTENDANCE_POINTS_BY_CATEGORY: Record<NonNullable<FormData['categor
   tech_talk:   5,
   networking:  5,
   social:      5,
-  summit:      5,
+  summit:      500,
   workshop:    150,
   brown_bag:   150,
   hackathon:   150,

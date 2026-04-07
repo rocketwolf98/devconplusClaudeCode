@@ -1,27 +1,17 @@
 import { useNavigate } from 'react-router-dom'
-import { Star, Award, Zap } from 'lucide-react'
+import { Star, Zap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { usePointsStore } from '../stores/usePointsStore'
 
-const PRESTIGE_THRESHOLD = 3000
-
 export default function XPCard() {
   const navigate = useNavigate()
-  const { spendablePoints, lifetimePoints, prestigeUnlocked } = usePointsStore()
-
-  const progressPct = Math.min((lifetimePoints / PRESTIGE_THRESHOLD) * 100, 100)
+  const { spendablePoints, lifetimePoints, currentTier, nextTier, tierProgress } = usePointsStore()
 
   return (
     <div className="bg-white rounded-3xl shadow-xl p-5">
-      {/* Header row: label + optional Prestige badge */}
+      {/* Header row */}
       <div className="flex items-center justify-between mb-3">
         <p className="text-slate-400 text-xs font-medium">Current DEVCON Points</p>
-        {prestigeUnlocked && (
-          <div className="flex items-center gap-1 bg-gold/10 rounded-full px-2 py-1">
-            <Award className="w-4 h-4 text-gold fill-gold" />
-            <span className="text-[11px] font-bold text-gold leading-none">Prestige Access</span>
-          </div>
-        )}
       </div>
 
       {/* Main points number */}
@@ -41,19 +31,41 @@ export default function XPCard() {
         </span>
       </div>
 
-      {/* Progress bar — shown until prestige is unlocked (threshold is a surprise) */}
-      {!prestigeUnlocked ? (
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
-          <motion.div
-            className="h-full bg-gold rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPct}%` }}
-            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.25 }}
-          />
-        </div>
-      ) : (
-        <p className="text-xs font-semibold text-gold mb-4">Prestige Unlocked!</p>
+      {/* Tier badge row */}
+      <div className="flex items-center justify-between mb-1">
+        <span
+          className="text-xs font-semibold px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: currentTier.color + '20', color: currentTier.color }}
+        >
+          {currentTier.icon} {currentTier.name}
+        </span>
+        {nextTier ? (
+          <span className="text-[10px] text-slate-400">
+            Next: {nextTier.name} at {nextTier.min.toLocaleString()} XP
+          </span>
+        ) : (
+          <span className="text-[10px] text-slate-400">Max tier reached</span>
+        )}
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-1">
+        <motion.div
+          className="h-full rounded-full"
+          style={{ backgroundColor: nextTier ? '#F8C630' : currentTier.color }}
+          initial={{ width: 0 }}
+          animate={{ width: `${tierProgress}%` }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        />
+      </div>
+
+      {/* Progress label */}
+      {nextTier && (
+        <p className="text-[10px] text-slate-400 mb-3 text-right">
+          {tierProgress}% to {nextTier.name}
+        </p>
       )}
+      {!nextTier && <div className="mb-3" />}
 
       <motion.button
         onClick={() => navigate('/events')}

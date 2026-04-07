@@ -1,5 +1,18 @@
 export const VOLUNTEER_APPROVAL_POINTS = 35
 
+export const EVENT_XP: Record<string, number> = {
+  tech_talk:  5,
+  social:     5,
+  networking: 5,
+  workshop:   150,
+  brown_bag:  150,
+  hackathon:  150,
+  summit:     500,
+}
+
+export const DEFAULT_EVENT_XP = 5
+export const VOLUNTEER_BONUS_XP = 500
+
 export const ROLE_DISPLAY_NAMES: Record<string, string> = {
   member:          'Member',
   chapter_officer: 'Chapter Officer',

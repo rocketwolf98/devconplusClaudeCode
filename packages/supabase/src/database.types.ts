@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-04-07 (added custom_form_schema to events, form_responses to event_registrations)
+// Last generated: 2026-04-07 (added icon + color_hex to xp_tiers)
 
 export type Json =
   | string
@@ -240,6 +240,45 @@ export type Database = {
           },
         ]
       }
+      jobs: {
+        Row: {
+          apply_url: string | null
+          company: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_promoted: boolean | null
+          location: string | null
+          posted_at: string | null
+          title: string
+          work_type: string | null
+        }
+        Insert: {
+          apply_url?: string | null
+          company: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_promoted?: boolean | null
+          location?: string | null
+          posted_at?: string | null
+          title: string
+          work_type?: string | null
+        }
+        Update: {
+          apply_url?: string | null
+          company?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_promoted?: boolean | null
+          location?: string | null
+          posted_at?: string | null
+          title?: string
+          work_type?: string | null
+        }
+        Relationships: []
+      }
       mission_participants: {
         Row: {
           joined_at: string | null
@@ -345,45 +384,6 @@ export type Database = {
           status?: string | null
           title?: string
           xp_reward?: number
-        }
-        Relationships: []
-      }
-      jobs: {
-        Row: {
-          apply_url: string | null
-          company: string
-          description: string | null
-          id: string
-          is_active: boolean | null
-          is_promoted: boolean | null
-          location: string | null
-          posted_at: string | null
-          title: string
-          work_type: string | null
-        }
-        Insert: {
-          apply_url?: string | null
-          company: string
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          is_promoted?: boolean | null
-          location?: string | null
-          posted_at?: string | null
-          title: string
-          work_type?: string | null
-        }
-        Update: {
-          apply_url?: string | null
-          company?: string
-          description?: string | null
-          id?: string
-          is_active?: boolean | null
-          is_promoted?: boolean | null
-          location?: string | null
-          posted_at?: string | null
-          title?: string
-          work_type?: string | null
         }
         Relationships: []
       }
@@ -894,7 +894,9 @@ export type Database = {
       xp_tiers: {
         Row: {
           badge_color: string | null
+          color_hex: string | null
           created_at: string | null
+          icon: string | null
           id: string
           label: string
           max_points: number | null
@@ -903,7 +905,9 @@ export type Database = {
         }
         Insert: {
           badge_color?: string | null
+          color_hex?: string | null
           created_at?: string | null
+          icon?: string | null
           id?: string
           label: string
           max_points?: number | null
@@ -912,7 +916,9 @@ export type Database = {
         }
         Update: {
           badge_color?: string | null
+          color_hex?: string | null
           created_at?: string | null
+          icon?: string | null
           id?: string
           label?: string
           max_points?: number | null
@@ -930,6 +936,7 @@ export type Database = {
         Args: { p_new_role: string; p_user_id: string }
         Returns: undefined
       }
+      approve_mission_winner: { Args: { sub_id: string }; Returns: undefined }
       approve_organizer_upgrade: {
         Args: {
           p_chapter_id: string
@@ -981,8 +988,17 @@ export type Database = {
         Args: { p_amount: number; p_user_id: string }
         Returns: undefined
       }
+      is_admin: { Args: never; Returns: boolean }
       manual_checkin: {
         Args: { p_organizer_id: string; p_registration_id: string }
+        Returns: Json
+      }
+      officer_approve_upgrade: {
+        Args: { p_request_id: string; p_reviewer_id: string }
+        Returns: Json
+      }
+      officer_demote_coorganizer: {
+        Args: { p_officer_id: string; p_target_id: string }
         Returns: Json
       }
       redeem_reward: {
