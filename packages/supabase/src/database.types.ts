@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-04-01 (added is_chapter_locked column)
+// Last generated: 2026-04-07 (added custom_form_schema to events, form_responses to event_registrations)
 
 export type Json =
   | string
@@ -83,6 +83,7 @@ export type Database = {
           approved_at: string | null
           checked_in: boolean | null
           event_id: string | null
+          form_responses: Json | null
           id: string
           qr_code_token: string | null
           registered_at: string | null
@@ -93,6 +94,7 @@ export type Database = {
           approved_at?: string | null
           checked_in?: boolean | null
           event_id?: string | null
+          form_responses?: Json | null
           id?: string
           qr_code_token?: string | null
           registered_at?: string | null
@@ -103,6 +105,7 @@ export type Database = {
           approved_at?: string | null
           checked_in?: boolean | null
           event_id?: string | null
+          form_responses?: Json | null
           id?: string
           qr_code_token?: string | null
           registered_at?: string | null
@@ -134,6 +137,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string | null
           created_by: string | null
+          custom_form_schema: Json | null
           description: string | null
           devcon_category: string | null
           end_date: string | null
@@ -164,6 +168,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string | null
           created_by?: string | null
+          custom_form_schema?: Json | null
           description?: string | null
           devcon_category?: string | null
           end_date?: string | null
@@ -194,6 +199,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string | null
           created_by?: string | null
+          custom_form_schema?: Json | null
           description?: string | null
           devcon_category?: string | null
           end_date?: string | null
@@ -233,6 +239,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mission_participants: {
+        Row: {
+          joined_at: string | null
+          mission_id: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string | null
+          mission_id: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string | null
+          mission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_participants_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_submissions: {
+        Row: {
+          id: string
+          mission_id: string | null
+          pr_link: string
+          status: string | null
+          submitted_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          mission_id?: string | null
+          pr_link: string
+          status?: string | null
+          submitted_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          mission_id?: string | null
+          pr_link?: string
+          status?: string | null
+          submitted_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_submissions_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          github_url: string | null
+          id: string
+          status: string | null
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          github_url?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          github_url?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
       }
       jobs: {
         Row: {

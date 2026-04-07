@@ -25,12 +25,9 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   fetchAll: async () => {
     set({ isLoading: true, error: null })
     const [mRes, pRes, sRes] = await Promise.all([
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any).from('missions').select('*').order('created_at', { ascending: false }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any).from('mission_participants').select('*'),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any).from('mission_submissions').select('*'),
+      supabase.from('missions').select('*').order('created_at', { ascending: false }),
+      supabase.from('mission_participants').select('*'),
+      supabase.from('mission_submissions').select('*'),
     ])
     if (mRes.error) {
       set({ error: mRes.error.message, isLoading: false })
@@ -45,8 +42,7 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   },
 
   startMission: async (missionId, userId) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('mission_participants')
       .insert({ mission_id: missionId, user_id: userId })
     if (error) throw error
@@ -66,8 +62,7 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
     )
     const now = new Date().toISOString()
     if (existing) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('mission_submissions')
         .update({ pr_link: prLink, submitted_at: now })
         .eq('id', existing.id)
@@ -78,8 +73,7 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
         ),
       }))
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('mission_submissions')
         .insert({ mission_id: missionId, user_id: userId, pr_link: prLink })
         .select()
@@ -90,8 +84,7 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   },
 
   subscribeToChanges: () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const channel = (supabase as any)
+    const channel = supabase
       .channel('missions-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mission_participants' },
         (payload: { new: MissionParticipant }) => {

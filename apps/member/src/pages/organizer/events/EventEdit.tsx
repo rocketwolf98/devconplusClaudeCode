@@ -19,6 +19,9 @@ import {
   CATEGORY_OPTIONS,
   DEVCON_PROGRAM_OPTIONS,
   VISIBILITY_OPTIONS,
+  ATTENDANCE_POINTS_BY_CATEGORY,
+  DEFAULT_VOLUNTEER_POINTS,
+  TAG_MAX_LENGTH,
   SectionHeader,
   CustomFieldsBuilder,
 } from './eventFormConstants'
@@ -74,6 +77,7 @@ export function OrgEventEdit() {
     register,
     handleSubmit,
     watch,
+    setValue,
     control,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
@@ -91,7 +95,8 @@ export function OrgEventEdit() {
             : '',
           category:          event.category as FormData['category'],
           devcon_category:   (event.devcon_category ?? null) as FormData['devcon_category'],
-          points_value:      event.points_value ?? 200,
+          points_value:      event.points_value ?? 5,
+          volunteer_points:  event.volunteer_points ?? DEFAULT_VOLUNTEER_POINTS,
           requires_approval: event.requires_approval ?? false,
           is_chapter_locked: event.is_chapter_locked ?? false,
           is_free:           event.is_free ?? true,
@@ -100,7 +105,8 @@ export function OrgEventEdit() {
           visibility:        (event.visibility ?? 'public') as 'public' | 'unlisted' | 'draft',
         }
       : {
-          points_value:      200,
+          points_value:      5,
+          volunteer_points:  DEFAULT_VOLUNTEER_POINTS,
           requires_approval: false,
           is_chapter_locked: false,
           is_free:           true,
@@ -110,7 +116,18 @@ export function OrgEventEdit() {
         },
   })
 
-  const isFree = watch('is_free')
+  const isFree    = watch('is_free')
+  const category  = watch('category')
+
+  // Auto-set attendance points when category changes (mirrors EventCreate)
+  const prevCategoryRef = useRef<string | undefined>(undefined)
+  if (category && category !== prevCategoryRef.current) {
+    prevCategoryRef.current = category
+    // Only auto-set if the event isn't locked AND the category actually changed from stored value
+    if (!isLocked && category !== event?.category) {
+      setValue('points_value', ATTENDANCE_POINTS_BY_CATEGORY[category], { shouldValidate: false })
+    }
+  }
 
   // ── Cover image handlers ────────────────────────────────────────────────
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -208,7 +225,8 @@ export function OrgEventEdit() {
         location:           data.location,
         event_date:         isLocked ? (event.event_date ?? undefined) : data.event_date,
         end_date:           isLocked ? (event.end_date ?? null)        : (data.end_date ?? null),
-        points_value:       isLocked ? (event.points_value ?? 200)     : data.points_value,
+        points_value:       isLocked ? (event.points_value ?? 5)       : data.points_value,
+        volunteer_points:   isLocked ? (event.volunteer_points ?? DEFAULT_VOLUNTEER_POINTS) : data.volunteer_points,
         requires_approval:  isLocked ? (event.requires_approval ?? false) : data.requires_approval,
         is_chapter_locked:  data.is_chapter_locked,
         category:           data.category,
@@ -395,9 +413,9 @@ export function OrgEventEdit() {
                 onKeyDown={handleTagKeyDown}
                 placeholder="Type a tag, press Enter"
                 className={inputClass}
-                maxLength={20}
+                maxLength={TAG_MAX_LENGTH}
               />
-              <p className="text-[10px] text-slate-400 mt-1">Max 20 chars per tag.</p>
+              <p className="text-[10px] text-slate-400 mt-1">Max {TAG_MAX_LENGTH} chars per tag.</p>
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {tags.map((t) => (
@@ -576,21 +594,55 @@ export function OrgEventEdit() {
         <motion.div variants={fadeUp}>
           <SectionHeader title="Engagement" />
           {isLocked ? (
-            <div>
-              <label className={labelClass}>XP Points Value</label>
-              <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
-                <span className="text-sm text-slate-700">{event.points_value} XP</span>
-                <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
-                  Locked — event is {event.status}
-                </span>
-              </div>
+            <div className="space-y-4">
+              {[
+                { label: 'Attendance XP', value: event.points_value },
+                { label: 'Volunteer XP',  value: event.volunteer_points },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <label className={labelClass}>{label}</label>
+                  <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
+                    <span className="text-sm text-slate-700">{value ?? 0} pts</span>
+                    <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
+                      Locked — event is {event.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
-            <div>
-              <label className={labelClass}>XP Points Value</label>
-              <input {...register('points_value')} type="number" className={inputClass} min={50} max={1000} step={50} />
-              {errors.points_value && <p className="text-xs text-red mt-1">{errors.points_value.message}</p>}
-              <p className="text-xs text-slate-400 mt-1">Members earn this many XP when checked in at the event.</p>
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass}>Attendance XP</label>
+                <input
+                  {...register('points_value')}
+                  type="number"
+                  className={inputClass}
+                  min={1}
+                  max={1000}
+                  step={1}
+                />
+                {errors.points_value && <p className="text-xs text-red mt-1">{errors.points_value.message}</p>}
+                <p className="text-xs text-slate-400 mt-1">
+                  Auto-set based on category — Tech Talk/Social/Networking = 5 pts, Workshop/Brown Bag/Hackathon = 150 pts.
+                </p>
+              </div>
+
+              <div>
+                <label className={labelClass}>Volunteer XP</label>
+                <input
+                  {...register('volunteer_points')}
+                  type="number"
+                  className={inputClass}
+                  min={0}
+                  max={1000}
+                  step={1}
+                />
+                {errors.volunteer_points && <p className="text-xs text-red mt-1">{errors.volunteer_points.message}</p>}
+                <p className="text-xs text-slate-400 mt-1">
+                  XP awarded on top of attendance XP for members who volunteer at this event. Default: 500 pts.
+                </p>
+              </div>
             </div>
           )}
         </motion.div>

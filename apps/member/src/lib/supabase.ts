@@ -9,15 +9,33 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       detectSessionInUrl: true,
-      // Keep navigator.locks serialization to prevent concurrent token-refresh
-      // races (multiple stores firing getSession() simultaneously), but remove
-      // the default 10 s acquire timeout. On a single-tab mobile app the lock
-      // is always released quickly — waiting indefinitely is safe and avoids
-      // the cascade where a timed-out waiter fires its own refresh with an
-      // already-consumed refresh token, causing a 401 on the next invoke.
-      lock: async (name, _acquireTimeout, fn) => {
+      // Use navigator.locks to serialize concurrent token-refresh calls and
+      // prevent multiple tabs from consuming the same refresh token.
+      // We honour the acquireTimeout passed by GoTrue (default 10 s) via an
+      // AbortController signal. On timeout we fall back to calling fn()
+      // directly — this trades a theoretical multi-tab refresh-token race for
+      // the guarantee that a stale/hung background refresh never permanently
+      // blocks user-initiated writes (e.g. form submissions).
+      lock: async (name, acquireTimeout, fn) => {
         if (typeof navigator !== 'undefined' && navigator.locks) {
-          return navigator.locks.request(name, fn)
+          if (acquireTimeout <= 0) {
+            // Indefinite wait explicitly requested — honour it.
+            return navigator.locks.request(name, fn)
+          }
+          const controller = new AbortController()
+          const timer = setTimeout(() => controller.abort(), acquireTimeout)
+          try {
+            return await navigator.locks.request(name, { signal: controller.signal }, fn)
+          } catch (err) {
+            if ((err as DOMException).name === 'AbortError') {
+              // Lock acquisition timed out (background refresh stalled).
+              // Call fn() without the lock so the operation can proceed.
+              return fn()
+            }
+            throw err
+          } finally {
+            clearTimeout(timer)
+          }
         }
         return fn()
       },

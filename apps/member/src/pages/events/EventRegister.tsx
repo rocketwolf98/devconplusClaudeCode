@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -134,25 +134,28 @@ export default function EventRegister() {
     ? (event.custom_form_schema as CustomFormField[])
     : []
 
-  if (!event || !user) return null
-
-  // Block cross-chapter registration for locked events
-  if (event.is_chapter_locked === true && event.chapter_id !== user.chapter_id) {
-    navigate(`/events/${slug}`, { replace: true })
-    return null
-  }
-
-  // If already registered, redirect to the appropriate screen
   const existingReg = registrations.find((r) => r.event_id === eventId)
-  if (existingReg) {
-    const destination = existingReg.status === 'approved'
-      ? `/events/${slug}/ticket`
-      : existingReg.status === 'rejected'
-        ? `/events/${slug}`
-        : `/events/${slug}/pending`
-    navigate(destination, { replace: true })
-    return null
-  }
+
+  const isChapterBlocked = !!(event && user && event.is_chapter_locked === true && event.chapter_id !== user.chapter_id)
+
+  useEffect(() => {
+    if (!event || !user) return
+    if (isChapterBlocked) {
+      navigate(`/events/${slug}`, { replace: true })
+      return
+    }
+    if (existingReg) {
+      const destination = existingReg.status === 'approved'
+        ? `/events/${slug}/ticket`
+        : existingReg.status === 'rejected'
+          ? `/events/${slug}`
+          : `/events/${slug}/pending`
+      navigate(destination, { replace: true })
+    }
+  }, [isChapterBlocked, existingReg, event, user, slug, navigate])
+
+  if (!event || !user) return null
+  if (isChapterBlocked || existingReg) return null
 
   const setResponse = (fieldId: string, value: string | string[]) => {
     setFormResponses(prev => ({ ...prev, [fieldId]: value }))

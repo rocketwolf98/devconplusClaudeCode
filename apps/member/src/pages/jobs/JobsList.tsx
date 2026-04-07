@@ -137,7 +137,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
 // ── Missions tab ──────────────────────────────────────────────────────────────
 
 function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
-  const { missions, participants, submissions, isLoading, error, fetchAll, startMission, submitMission } = useMissionsStore()
+  const { missions, participants, submissions, isLoading, error, fetchAll, startMission, submitMission, subscribeToChanges } = useMissionsStore()
   const { user } = useAuthStore()
   const [expandedId, setExpandedId] = useState<string | null>(initialExpandId)
   // Per-mission: is the PR link input visible?
@@ -149,7 +149,9 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
 
   useEffect(() => {
     void fetchAll()
-  }, [fetchAll])
+    const unsubscribe = subscribeToChanges()
+    return unsubscribe
+  }, [fetchAll, subscribeToChanges])
 
   // Deep-link scroll
   useEffect(() => {
