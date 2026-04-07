@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import type { Reward, RewardRedemption } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
+
+let _chanSeq = 0
+const nextChan = (base: string) => `${base}-${++_chanSeq}`
 import { useAuthStore } from './useAuthStore'
 import { usePointsStore } from './usePointsStore'
 import type { RewardFormData } from '../pages/organizer/rewards/rewardFormConstants'
@@ -125,7 +128,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
   // ── Realtime ─────────────────────────────────────────────────────────────
   subscribeToChanges: () => {
     const channel = supabase
-      .channel('rewards-realtime')
+      .channel(nextChan('rewards-realtime'))
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'rewards' },

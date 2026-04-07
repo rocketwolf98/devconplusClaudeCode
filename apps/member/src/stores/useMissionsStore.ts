@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import type { Mission, MissionParticipant, MissionSubmission } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
 
+let _chanSeq = 0
+const nextChan = (base: string) => `${base}-${++_chanSeq}`
+
 interface MissionsState {
   missions: Mission[]
   participants: MissionParticipant[]
@@ -92,7 +95,7 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
 
   subscribeToChanges: () => {
     const channel = supabase
-      .channel('missions-realtime')
+      .channel(nextChan('missions-realtime'))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mission_participants' },
         (payload: { new: MissionParticipant }) => {
           const row = payload.new

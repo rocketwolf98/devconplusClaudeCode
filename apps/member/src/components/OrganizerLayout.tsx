@@ -58,11 +58,15 @@ export default function OrganizerLayout() {
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
   const recoverRef = useRef<(() => void) | null>(null)
+  const resubscribeRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        // Re-establish channels AND refetch data — channels authenticated with
+        // the old token must be replaced after a token refresh.
         recoverRef.current?.()
+        resubscribeRef.current?.()
       }
     })
     return () => { subscription.unsubscribe() }
@@ -82,6 +86,7 @@ export default function OrganizerLayout() {
       unsubEventsRef.current = subscribeToEventChanges()
       unsubRewardsRef.current = subscribeToRewardChanges()
     }
+    resubscribeRef.current = resubscribe
 
     recover()
     resubscribe()

@@ -1,6 +1,9 @@
 // apps/member/src/stores/useNotificationsStore.ts
 import { create } from 'zustand'
 import { supabase } from '../lib/supabase'
+
+let _chanSeq = 0
+const nextChan = (base: string) => `${base}-${++_chanSeq}`
 import { toast } from 'sonner'
 
 export interface Notification {
@@ -54,7 +57,7 @@ export const useNotificationsStore = create<NotificationsState>((set) => ({
     if (approvedIds.length === 0) return () => {}
     const approvedSet = new Set(approvedIds)
     const channel = supabase
-      .channel('member-announcements')
+      .channel(nextChan('member-announcements'))
       .on(
         'postgres_changes',
         {

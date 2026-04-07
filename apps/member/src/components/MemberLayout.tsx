@@ -47,7 +47,10 @@ export default function MemberLayout() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        // Re-establish channels AND refetch data — channels authenticated with
+        // the old token must be replaced after a token refresh.
         recoverRef.current?.()
+        resubscribeRef.current?.()
       }
     })
     return () => { subscription.unsubscribe() }
@@ -60,9 +63,10 @@ export default function MemberLayout() {
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
   const unsubMissionsRef = useRef<(() => void) | null>(null)
-  // Stable ref so the onAuthStateChange effect (empty deps) always calls the
-  // current recover() without a stale closure.
+  // Stable refs so the onAuthStateChange effect (empty deps) always calls the
+  // current recover() / resubscribe() without a stale closure.
   const recoverRef = useRef<(() => void) | null>(null)
+  const resubscribeRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -89,6 +93,7 @@ export default function MemberLayout() {
       unsubRewardsRef.current = subscribeToRewardChanges()
       unsubMissionsRef.current = subscribeMissions()
     }
+    resubscribeRef.current = resubscribe
 
     // Initial load on mount — mirrors OrganizerLayout's pattern
     recover()

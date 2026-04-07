@@ -2,6 +2,13 @@ import { create } from 'zustand'
 import type { Event, EventRegistration, DevconCategory, Json } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
 
+// Monotonic counter to generate unique channel names on every subscribe call.
+// supabase.channel(name) deduplicates by name — returning the same (possibly
+// stale) channel if the previous removal hasn't resolved yet. Unique names
+// guarantee a fresh channel object regardless of async cleanup timing.
+let _chanSeq = 0
+const nextChan = (base: string) => `${base}-${++_chanSeq}`
+
 // Alias — checked_in: boolean | null is already part of EventRegistration
 type FullRegistration = EventRegistration
 
@@ -140,7 +147,7 @@ export const useEventsStore = create<EventsState>((set) => ({
 
   subscribeToChanges: () => {
     const channel = supabase
-      .channel('events-realtime')
+      .channel(nextChan('events-realtime'))
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'events' },
