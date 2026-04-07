@@ -24,21 +24,28 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
 
   fetchAll: async () => {
     set({ isLoading: true, error: null })
-    const [mRes, pRes, sRes] = await Promise.all([
-      supabase.from('missions').select('*').order('created_at', { ascending: false }),
-      supabase.from('mission_participants').select('*'),
-      supabase.from('mission_submissions').select('*'),
-    ])
-    if (mRes.error) {
-      set({ error: mRes.error.message, isLoading: false })
-      return
+    try {
+      const [mRes, pRes, sRes] = await Promise.all([
+        supabase.from('missions').select('*').order('created_at', { ascending: false }),
+        supabase.from('mission_participants').select('*'),
+        supabase.from('mission_submissions').select('*'),
+      ])
+      if (mRes.error) throw mRes.error
+      set({
+        missions:     (mRes.data ?? []) as Mission[],
+        participants: (pRes.data ?? []) as MissionParticipant[],
+        submissions:  (sRes.data ?? []) as MissionSubmission[],
+      })
+    } catch (err) {
+      set({
+        missions: [],
+        participants: [],
+        submissions: [],
+        error: err instanceof Error ? err.message : String(err),
+      })
+    } finally {
+      set({ isLoading: false })
     }
-    set({
-      missions:     (mRes.data ?? []) as Mission[],
-      participants: (pRes.data ?? []) as MissionParticipant[],
-      submissions:  (sRes.data ?? []) as MissionSubmission[],
-      isLoading: false,
-    })
   },
 
   startMission: async (missionId, userId) => {

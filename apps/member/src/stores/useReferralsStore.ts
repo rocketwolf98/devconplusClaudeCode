@@ -29,46 +29,42 @@ export const useReferralsStore = create<ReferralsState>((set) => ({
 
     const startOfYear = new Date(new Date().getFullYear(), 0, 1).toISOString()
 
-    const [profileResult, referralsResult, earningsResult] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('referral_code')
-        .eq('id', user.id)
-        .single(),
-      supabase
-        .from('referrals')
-        .select('*')
-        .eq('referrer_id', user.id)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('point_transactions')
-        .select('amount')
-        .eq('user_id', user.id)
-        .eq('source', 'referral')
-        .gte('created_at', startOfYear),
-    ])
+    try {
+      const [profileResult, referralsResult, earningsResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('referral_code')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('referrals')
+          .select('*')
+          .eq('referrer_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('point_transactions')
+          .select('amount')
+          .eq('user_id', user.id)
+          .eq('source', 'referral')
+          .gte('created_at', startOfYear),
+      ])
 
-    const firstError = profileResult.error ?? referralsResult.error ?? earningsResult.error
-    if (firstError) {
-      set({ loading: false, error: firstError.message })
-      return
+      const firstError = profileResult.error ?? referralsResult.error ?? earningsResult.error
+      if (firstError) throw firstError
+
+      const referralCode = profileResult.data?.referral_code ?? null
+      const referrals = (referralsResult.data ?? []) as Referral[]
+      const referralCount = referrals.filter((r) => r.status === 'confirmed').length
+      const annualEarnings = (earningsResult.data ?? []).reduce(
+        (sum, tx) => sum + tx.amount,
+        0
+      )
+
+      set({ referralCode, referrals, referralCount, annualEarnings, error: null })
+    } catch (err) {
+      set({ referrals: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ loading: false })
     }
-
-    const referralCode = profileResult.data?.referral_code ?? null
-    const referrals = (referralsResult.data ?? []) as Referral[]
-    const referralCount = referrals.filter((r) => r.status === 'confirmed').length
-    const annualEarnings = (earningsResult.data ?? []).reduce(
-      (sum, tx) => sum + tx.amount,
-      0
-    )
-
-    set({
-      referralCode,
-      referrals,
-      referralCount,
-      annualEarnings,
-      loading: false,
-      error: null,
-    })
   },
 }))

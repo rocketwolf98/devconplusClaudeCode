@@ -31,16 +31,19 @@ export const useVolunteerStore = create<VolunteerState>((set, get) => ({
     const user = useAuthStore.getState().user
     if (!user) return
     set({ loading: true, error: null })
-    const { data, error } = await supabase
-      .from('volunteer_applications')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('applied_at', { ascending: false })
-    if (error) {
-      set({ error: error.message, loading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('volunteer_applications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('applied_at', { ascending: false })
+      if (error) throw error
+      set({ applications: (data ?? []) as VolunteerApplication[] })
+    } catch (err) {
+      set({ applications: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ loading: false })
     }
-    set({ applications: (data ?? []) as VolunteerApplication[], loading: false })
   },
 
   applyToVolunteer: async (eventId, data) => {

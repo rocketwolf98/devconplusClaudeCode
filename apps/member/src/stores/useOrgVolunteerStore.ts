@@ -36,72 +36,69 @@ export const useOrgVolunteerStore = create<OrgVolunteerState>((set) => ({
 
   loadApplications: async (chapterId) => {
     set({ loading: true, error: null })
+    try {
+      // Step 1: get event IDs belonging to this chapter
+      const { data: eventRows, error: eventError } = await supabase
+        .from('events')
+        .select('id')
+        .eq('chapter_id', chapterId)
+      if (eventError) throw eventError
 
-    // Step 1: get event IDs belonging to this chapter
-    const { data: eventRows, error: eventError } = await supabase
-      .from('events')
-      .select('id')
-      .eq('chapter_id', chapterId)
-
-    if (eventError) {
-      set({ error: eventError.message, loading: false })
-      return
-    }
-
-    const eventIds = (eventRows ?? []).map((e) => e.id)
-    if (eventIds.length === 0) {
-      set({ applications: [], loading: false })
-      return
-    }
-
-    // Step 2: fetch applications filtered by those event IDs
-    const { data, error } = await supabase
-      .from('volunteer_applications')
-      .select(`
-        id,
-        event_id,
-        user_id,
-        reason,
-        phone_number,
-        social_media_handle,
-        status,
-        applied_at,
-        reviewed_at,
-        reviewed_by,
-        events(title),
-        profiles!volunteer_applications_user_id_fkey(full_name, email, school_or_company)
-      `)
-      .in('event_id', eventIds)
-      .order('applied_at', { ascending: false })
-
-    if (error) {
-      set({ error: error.message, loading: false })
-      return
-    }
-
-    const mapped: OrgVolunteerApplication[] = (data ?? []).map((row) => {
-      const ev = Array.isArray(row.events) ? row.events[0] : row.events
-      const p  = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-      const evObj = ev as { title?: string } | null
-      const pObj  = p  as { full_name?: string; email?: string; school_or_company?: string } | null
-      return {
-        id:                  row.id,
-        event_id:            row.event_id ?? '',
-        event_title:         evObj?.title ?? '',
-        user_id:             row.user_id ?? '',
-        member_name:         pObj?.full_name ?? 'Unknown',
-        member_email:        pObj?.email ?? '',
-        school_or_company:   pObj?.school_or_company ?? '',
-        reason:              row.reason,
-        phone_number:        row.phone_number ?? null,
-        social_media_handle: row.social_media_handle ?? null,
-        status:              row.status as OrgVolunteerApplication['status'],
-        applied_at:          row.applied_at ?? null,
-        reviewed_at:         row.reviewed_at ?? null,
-        reviewed_by:         row.reviewed_by ?? null,
+      const eventIds = (eventRows ?? []).map((e) => e.id)
+      if (eventIds.length === 0) {
+        set({ applications: [] })
+        return
       }
-    })
-    set({ applications: mapped, loading: false })
+
+      // Step 2: fetch applications filtered by those event IDs
+      const { data, error } = await supabase
+        .from('volunteer_applications')
+        .select(`
+          id,
+          event_id,
+          user_id,
+          reason,
+          phone_number,
+          social_media_handle,
+          status,
+          applied_at,
+          reviewed_at,
+          reviewed_by,
+          events(title),
+          profiles!volunteer_applications_user_id_fkey(full_name, email, school_or_company)
+        `)
+        .in('event_id', eventIds)
+        .order('applied_at', { ascending: false })
+      if (error) throw error
+
+      const mapped: OrgVolunteerApplication[] = (data ?? []).map((row) => {
+        const ev = Array.isArray(row.events) ? row.events[0] : row.events
+        const p  = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+        const evObj = ev as { title?: string } | null
+        const pObj  = p  as { full_name?: string; email?: string; school_or_company?: string } | null
+        return {
+          id:                  row.id,
+          event_id:            row.event_id ?? '',
+          event_title:         evObj?.title ?? '',
+          user_id:             row.user_id ?? '',
+          member_name:         pObj?.full_name ?? 'Unknown',
+          member_email:        pObj?.email ?? '',
+          school_or_company:   pObj?.school_or_company ?? '',
+          reason:              row.reason,
+          phone_number:        row.phone_number ?? null,
+          social_media_handle: row.social_media_handle ?? null,
+          status:              row.status as OrgVolunteerApplication['status'],
+          applied_at:          row.applied_at ?? null,
+          reviewed_at:         row.reviewed_at ?? null,
+          reviewed_by:         row.reviewed_by ?? null,
+        }
+      })
+      set({ applications: mapped })
+    } catch (err) {
+      set({ applications: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ loading: false })
+    }
   },
 
   // Use the RPC — it awards points atomically via SECURITY DEFINER

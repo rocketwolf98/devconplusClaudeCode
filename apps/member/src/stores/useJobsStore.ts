@@ -20,16 +20,19 @@ export const useJobsStore = create<JobsState>((set, get) => ({
 
   fetchJobs: async () => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('jobs')
-      .select('*')
-      .eq('is_active', true)
-      .order('posted_at', { ascending: true })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('is_active', true)
+        .order('posted_at', { ascending: true })
+      if (error) throw error
+      set({ jobs: (data ?? []) as Job[] })
+    } catch (err) {
+      set({ jobs: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoading: false })
     }
-    set({ jobs: (data ?? []) as Job[], isLoading: false })
   },
 
   toggleSave: (id) => {

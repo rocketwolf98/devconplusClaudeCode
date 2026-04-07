@@ -88,15 +88,18 @@ export const useEventsStore = create<EventsState>((set) => ({
 
   fetchEvents: async () => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('events')
-      .select('*')
-      .order('event_date', { ascending: true })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('event_date', { ascending: true })
+      if (error) throw error
+      set({ events: sortByEventDate((data ?? []) as Event[]) })
+    } catch (err) {
+      set({ events: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoading: false })
     }
-    set({ events: sortByEventDate((data ?? []) as Event[]), isLoading: false })
   },
 
   createEvent: async (payload) => {
@@ -177,15 +180,18 @@ export const useEventsStore = create<EventsState>((set) => ({
 
   fetchRegistrations: async (userId) => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('event_registrations')
-      .select('*')
-      .eq('user_id', userId)
-    if (error) {
-      set({ error: error.message, isLoading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('*')
+        .eq('user_id', userId)
+      if (error) throw error
+      set({ registrations: (data ?? []) as FullRegistration[] })
+    } catch (err) {
+      set({ registrations: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoading: false })
     }
-    set({ registrations: (data ?? []) as FullRegistration[], isLoading: false })
   },
 
   register: async (eventId, userId) => {

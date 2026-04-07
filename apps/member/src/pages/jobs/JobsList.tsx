@@ -33,6 +33,16 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
     void fetchJobs()
   }, [fetchJobs])
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && jobs.length === 0) {
+        void fetchJobs()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => { document.removeEventListener('visibilitychange', handleVisibility) }
+  }, [jobs.length, fetchJobs])
+
   // Deep-link scroll
   useEffect(() => {
     if (initialExpandId && cardRefs.current[initialExpandId]) {

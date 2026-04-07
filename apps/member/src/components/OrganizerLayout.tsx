@@ -7,6 +7,7 @@ import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
 import { useOrgVolunteerStore } from '../stores/useOrgVolunteerStore'
+import { supabase } from '../lib/supabase'
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
@@ -56,6 +57,16 @@ export default function OrganizerLayout() {
   // on visibility/online/idle-timeout events.
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
+  const recoverRef = useRef<(() => void) | null>(null)
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        recoverRef.current?.()
+      }
+    })
+    return () => { subscription.unsubscribe() }
+  }, [])
 
   useEffect(() => {
     const recover = () => {
@@ -63,6 +74,8 @@ export default function OrganizerLayout() {
       void fetchAllRewards()
       if (user?.chapter_id) void loadOrgVolunteerApps(user.chapter_id)
     }
+    recoverRef.current = recover
+
     const resubscribe = () => {
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()

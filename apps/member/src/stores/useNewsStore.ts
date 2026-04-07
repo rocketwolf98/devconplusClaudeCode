@@ -17,14 +17,17 @@ export const useNewsStore = create<NewsState>((set) => ({
 
   fetchNews: async () => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('news_posts')
-      .select('*')
-      .order('created_at', { ascending: false })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('news_posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      set({ posts: (data ?? []) as NewsPost[] })
+    } catch (err) {
+      set({ posts: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoading: false })
     }
-    set({ posts: (data ?? []) as NewsPost[], isLoading: false })
   },
 }))

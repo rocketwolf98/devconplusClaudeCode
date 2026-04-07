@@ -38,30 +38,36 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
   // ── Member: active rewards only ─────────────────────────────────────────
   fetchRewards: async () => {
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('rewards')
-      .select('*')
-      .eq('is_active', true)
-      .order('points_cost', { ascending: true })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('rewards')
+        .select('*')
+        .eq('is_active', true)
+        .order('points_cost', { ascending: true })
+      if (error) throw error
+      set({ rewards: (data ?? []) as Reward[] })
+    } catch (err) {
+      set({ rewards: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoading: false })
     }
-    set({ rewards: (data ?? []) as Reward[], isLoading: false })
   },
 
   // ── Organizer: all rewards ───────────────────────────────────────────────
   fetchAllRewards: async () => {
     set({ isLoadingAll: true, error: null })
-    const { data, error } = await supabase
-      .from('rewards')
-      .select('*')
-      .order('points_cost', { ascending: true })
-    if (error) {
-      set({ error: error.message, isLoadingAll: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('rewards')
+        .select('*')
+        .order('points_cost', { ascending: true })
+      if (error) throw error
+      set({ allRewards: (data ?? []) as Reward[] })
+    } catch (err) {
+      set({ allRewards: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoadingAll: false })
     }
-    set({ allRewards: (data ?? []) as Reward[], isLoadingAll: false })
   },
 
   // ── Create ───────────────────────────────────────────────────────────────
@@ -172,15 +178,18 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     const user = useAuthStore.getState().user
     if (!user) return
     set({ isLoading: true, error: null })
-    const { data, error } = await supabase
-      .from('reward_redemptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('redeemed_at', { ascending: false })
-    if (error) {
-      set({ error: error.message, isLoading: false })
-      return
+    try {
+      const { data, error } = await supabase
+        .from('reward_redemptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('redeemed_at', { ascending: false })
+      if (error) throw error
+      set({ redemptions: (data ?? []) as RewardRedemption[] })
+    } catch (err) {
+      set({ redemptions: [], error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoading: false })
     }
-    set({ redemptions: (data ?? []) as RewardRedemption[], isLoading: false })
   },
 }))

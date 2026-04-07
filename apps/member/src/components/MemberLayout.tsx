@@ -12,6 +12,7 @@ import { useNewsStore } from '../stores/useNewsStore'
 import { useVolunteerStore } from '../stores/useVolunteerStore'
 import { useReferralsStore } from '../stores/useReferralsStore'
 import { useMissionsStore } from '../stores/useMissionsStore'
+import { supabase } from '../lib/supabase'
 
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
@@ -43,6 +44,15 @@ export default function MemberLayout() {
     if (!user) navigate('/sign-in', { replace: true })
   }, [user, navigate])
 
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        recoverRef.current?.()
+      }
+    })
+    return () => { subscription.unsubscribe() }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Unified data + realtime management for the member session.
   // On mount: immediately fetches data and subscribes to realtime changes.
   // On visibility/online/poll: refetches data AND re-subscribes (WebSocket channels
@@ -50,6 +60,9 @@ export default function MemberLayout() {
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
   const unsubMissionsRef = useRef<(() => void) | null>(null)
+  // Stable ref so the onAuthStateChange effect (empty deps) always calls the
+  // current recover() without a stale closure.
+  const recoverRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -66,6 +79,8 @@ export default function MemberLayout() {
       void loadReferralData()
       void fetchMissions()
     }
+    recoverRef.current = recover
+
     const resubscribe = () => {
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
