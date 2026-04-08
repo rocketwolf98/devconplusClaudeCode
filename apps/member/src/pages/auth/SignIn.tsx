@@ -6,7 +6,6 @@ import { z } from 'zod'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAuthStore } from '../../stores/useAuthStore'
-import ComingSoonModal from '../../components/ComingSoonModal'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const MAX_ATTEMPTS = 5
@@ -46,8 +45,8 @@ function GoogleIcon() {
 export default function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signIn } = useAuthStore()
-  const [showGoogleModal, setShowGoogleModal] = useState(false)
+  const { signIn, signInWithGoogle } = useAuthStore()
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
@@ -117,11 +116,15 @@ export default function SignIn() {
 
         <button
           type="button"
-          onClick={() => setShowGoogleModal(true)}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card"
+          disabled={googleLoading}
+          onClick={async () => {
+            setGoogleLoading(true)
+            try { await signInWithGoogle() } catch { setGoogleLoading(false) }
+          }}
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
         >
           <GoogleIcon />
-          Continue with Google
+          {googleLoading ? 'Redirecting…' : 'Continue with Google'}
         </button>
 
         <div className="flex items-center gap-3 mb-5">
@@ -198,12 +201,6 @@ export default function SignIn() {
         </p>
       </div>
 
-      {showGoogleModal && (
-        <ComingSoonModal
-          feature="Google Sign-In"
-          onClose={() => setShowGoogleModal(false)}
-        />
-      )}
     </div>
   )
 }

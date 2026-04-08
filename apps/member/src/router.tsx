@@ -13,6 +13,8 @@ import ForgotPassword from './pages/auth/ForgotPassword'
 import EmailSent from './pages/auth/EmailSent'
 import EmailConfirm from './pages/auth/EmailConfirm'
 import ResetPassword from './pages/auth/ResetPassword'
+import OAuthCallback from './pages/auth/OAuthCallback'
+import OAuthProfileComplete from './pages/auth/OAuthProfileComplete'
 import NotFound from './pages/NotFound'
 
 // Member tab pages
@@ -66,8 +68,10 @@ export const router = createBrowserRouter([
   { path: '/organizer-code-gate',  element: <OrganizerCodeGate /> },
   { path: '/forgot-password',      element: <ForgotPassword /> },
   { path: '/email-sent',           element: <EmailSent /> },
-  { path: '/reset-password',       element: <ResetPassword /> },
-  { path: '/email-confirm',        element: <EmailConfirm /> },
+  { path: '/reset-password',           element: <ResetPassword /> },
+  { path: '/email-confirm',            element: <EmailConfirm /> },
+  { path: '/oauth-callback',           element: <OAuthCallback /> },
+  { path: '/oauth-profile-complete',   element: <OAuthProfileComplete /> },
 
   // Member routes — wrapped in MemberLayout with bottom tab nav
   {

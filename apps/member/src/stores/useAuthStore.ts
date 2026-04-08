@@ -78,6 +78,7 @@ interface AuthState {
   resetPassword: (email: string, captchaToken?: string) => Promise<void>
   requestOrganizerUpgrade: (code: string) => Promise<UpgradeResult>
   checkUsernameAvailable: (username: string) => Promise<boolean>
+  signInWithGoogle: () => Promise<void>
 }
 
 async function fetchProfileById(userId: string): Promise<Profile | null> {
@@ -520,6 +521,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     set({ user: { ...current, pending_role: codeRow.assigned_role, pending_chapter_id: codeRow.chapter_id } })
     return 'submitted'
+  },
+
+  signInWithGoogle: async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/oauth-callback`,
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
+    })
+    if (error) throw error
   },
 
   checkUsernameAvailable: async (username) => {
