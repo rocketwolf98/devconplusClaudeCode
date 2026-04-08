@@ -1,7 +1,7 @@
 # DEVCON+ Product Manager Agent
 > Persona: Senior Product Manager
 > Scope: Feature prioritization, sprint planning, stakeholder communication, handover
-> CLAUDE.md Version: MVP 1.4 | Last Synced: March 30, 2026
+> CLAUDE.md Version: MVP 1.4 | Last Synced: April 8, 2026
 > Cohort 3 Graduation: April 30, 2026 | Public Preview: May 15, 2026
 > Read AGENTS.md first for full project context before acting on any request.
 
@@ -66,36 +66,53 @@ When evaluating any feature request or task, apply this filter in order:
       - useAuthStore.resetPassword: callRateLimit('password_reset') gate added
       - check-rate-limit Edge Function: password_reset bucket added + redeployed
       - DB migration applied via Supabase MCP — blocker cleared
+- [x] Cloudflare Turnstile CAPTCHA on auth forms — deployed (commit 9ca7272, Apr 8) — **Kenshin** ✅
+- [x] XP Tier System — milestone definitions + progress bar wired to lifetime_points (commit 2991a5f) — **Kenshin** ✅
+- [x] generate-user-qr edge function + `/qr` MyQR page — deployed (commit 93704bf, Apr 6) — **Kenshin** ✅
+- [x] PWA manifest — icons 192/512/maskable, shortcuts, apple-touch-icon (commit 93704bf, Apr 6) — **Kenshin** ✅
+- [x] Email SMTP via Resend — edge function + templates deployed (Apr 6); end-to-end test pending — **Kenshin** 🔄
+- [x] Custom event registration fields — modular form schema, DB migration applied (commit 1de72b5) — **Kien** ✅
+- [x] Missions System — basic gamified missions flow shipped (commit 527f0d1) — **Kien** ✅
 
 ### Still Open — Must Close by April 26
-- [ ] Remove all test accounts from production Supabase — **Kenshin** (ongoing)
-- [ ] PROMOTED badge audit: verify 2nd job (Sui Foundation) + 2nd Tech news post
-      have `is_promoted = true` in live Supabase data — **Kenshin**
 - [x] Event URL Slugs (Task 5) — COMPLETE (commit b9c3081, migration applied via MCP March 31) — **Kenshin** ✅
       Routes changed from /events/:id (UUID) to /events/:slug (human-readable)
       Format: title-kebab-case-{first-8-uuid-chars}. Organizer routes unchanged.
 - [ ] Google OAuth (Task 4) — credentials arriving March 31, unblocked — **Kenshin**
-- [ ] Always-on User QR (Task 6) — **Kenshin**
+- [x] Always-on User QR (Task 6) — COMPLETE (commit 93704bf, Apr 6) — **Kenshin** ✅
+      `/qr` page in Profile menu. `generate-user-qr` edge function deployed.
+      User identity token (`k='u'`), auto-matches to next event at organizer's chapter.
+- [x] Cloudflare Turnstile CAPTCHA on auth forms — COMPLETE (commit 9ca7272) — **Kenshin** ✅
+- [~] Email SMTP (transactional via Resend) — edge function + templates deployed Apr 6;
+      end-to-end test still pending — **Kenshin** 🔄
+- [~] DB connection resilience — multiple hardening commits (2295df8, dd85baa);
+      connection still drops when app is unfocused — **Kenshin** ⚠️ STILL OPEN
+- [ ] Google OAuth (Task 4) — credentials pending — **Kenshin**
 - [ ] Google OAuth callback URL confirmed for `plus.devcon.com` — **Kenshin**
 - [ ] Add `plus.devcon.com` to Edge Function CORS allowlist — **Kenshin**
       (currently only: `localhost:5173`, `devconplus.vercel.app`, `devconplusbeta-v1.vercel.app`)
-- [ ] Verify all 4 Edge Functions are live (Supabase dashboard → Functions) — **Kenshin**
+- [ ] Remove all test accounts from production Supabase — **Kenshin** (ongoing)
+- [ ] PROMOTED badge audit: verify 2nd job (Sui Foundation) + 2nd Tech news post
+      have `is_promoted = true` in live Supabase data — **Kenshin**
+- [ ] Verify all 4 Edge Functions + generate-user-qr are live (Supabase dashboard) — **Kenshin**
 - [ ] DNS + Cloudflare setup for `plus.devcon.com` — **Kenshin**
-- [ ] Cloudflare anti-DDoS + CAPTCHA on auth routes — **Kenshin**
 - [ ] All 5 documentation files generated (README, FEATURES, API, SECURITY, HANDOVER) — **Kenshin**
 
 ---
 
 ## L2 Remaining (Target 70–80% by April 30)
 
-- [ ] Dedicated admin user page — **Kenshin**
-- [ ] Dedicated standard user page — **Kenshin**
+- [x] Dedicated admin user page — **Kenshin** ✅ (AdminLayout + AdminUsers + AdminCMS)
+- [x] Dedicated standard user page — **Kenshin** ✅ (MemberLayout + full member flow)
+- [x] PWA manifest (Add to homescreen shortcut) — **Kenshin** ✅ (commit 93704bf, Apr 6)
+      Icons 192/512/maskable, shortcuts, apple-touch-icon
+- [x] Missions System — basic gamified task/missions flow — **Kien** ✅ (commit 527f0d1)
+- [x] Custom event fields on event creation (Google Forms-style modular form) — **Kien** ✅ (commit 1de72b5)
+- [x] XP Tier System — tier milestones + progress UI — **Kenshin** ✅ (commit 2991a5f)
+- [x] Jobs Board — expanded job details + Hot Jobs in dashboard — **Kenshin** ✅ (commit 8c17f3c)
 - [ ] Announcements UI — broadcast messages to chapter members — **Kien** (ongoing)
-      (event_announcements table exists; UI surface may be partial)
-- [ ] Missions System — basic gamified task/missions flow (MVP only) — **Kien**
+      (event_announcements table + SendAnnouncementSheet exist; member-facing inbox surface may be partial)
 - [ ] Boosted / Partnered Events — surface promoted events flag — **Kien**
-- [ ] PWA manifest (Add to homescreen shortcut) — **Kenshin**
-- [ ] Custom event fields on event creation (Google Forms-style modular form) — **Kien**
 - [ ] Group Chat — async message board minimum — **Kenshin/Kien**
       (ONLY if Kenshin confirms bandwidth in Week 4)
 
@@ -241,27 +258,28 @@ When someone asks for a new feature:
 
 | Risk | Likelihood | Impact | Owner | Status |
 |------|-----------|--------|-------|--------|
+| DB connection drops when app is unfocused (Supabase WebSocket) | HIGH | HIGH | Dev A | ⚠️ OPEN — hardening commits applied (2295df8, dd85baa) but issue persists |
 | DB migration not applied — password reset broken for all users | — | — | Dev A | ✅ Resolved Mar 31 — applied via Supabase MCP |
-| GCP credentials not delivered March 31 — Task 4 slips to Week 2 | MEDIUM | HIGH | Company | ⚠️ Open |
-| Cloudflare Turnstile credentials not delivered March 31 — CAPTCHA slips | MEDIUM | HIGH | Company | ⚠️ Open |
-| Week 1 Tasks 4–6 not completed by April 4 — rollover to Week 2 | MEDIUM | MEDIUM | Dev A | ⚠️ Monitor |
+| GCP credentials not delivered — Google OAuth Task 4 blocked | HIGH | CRITICAL | Company | ⚠️ Open |
+| Cloudflare Turnstile CAPTCHA | — | — | Dev A | ✅ Resolved Apr 8 (commit 9ca7272) |
 | Google OAuth callback not set for plus.devcon.com | HIGH | CRITICAL | Dev A | ⚠️ Open |
 | plus.devcon.com missing from Edge Function CORS allowlist | HIGH | HIGH | Dev A | ⚠️ Open |
 | Test accounts not removed before April 30 | MEDIUM | HIGH | Dev A | ⚠️ Open |
 | KonamiCode easter egg | LOW | MEDIUM | Dev A | ✅ Closed — non-admin state removed, shortcut restricted to hq_admin + super_admin (c8d926d) |
+| Email SMTP (Resend) end-to-end not verified | MEDIUM | MEDIUM | Dev A | ⚠️ Open — edge function deployed, test pending |
 | Dev B cannot explain flows on Demo Day | MEDIUM | HIGH | Dev B | ⚠️ Open |
 | Edge Functions not all confirmed live in Supabase | MEDIUM | HIGH | Dev A | ⚠️ Open |
 | DNS / Cloudflare not configured by demo | LOW | CRITICAL | Dev A | ⚠️ Open |
-| HANDOVER.md not written before April 26 | MEDIUM | HIGH | Dev A | ⚠️ Open |
+| HANDOVER.md not written before April 26 | HIGH | HIGH | Dev A | ⚠️ Open — Week 3 now, deadline approaching |
 | Login rate limit misconfigured (300s vs 60s per SOP) | HIGH | HIGH | Dev A | ⚠️ Open |
 | bcrypt cost factor not verified in Supabase Auth | MEDIUM | HIGH | Dev A | ⚠️ Open |
 | Session inactivity timeout not set to 30 min | MEDIUM | HIGH | Dev A | ⚠️ Open |
 | Refresh token rotation not enabled | MEDIUM | HIGH | Dev A | ⚠️ Open |
 | Hardcoded secrets or credentials in git history | MEDIUM | CRITICAL | Dev A | ⚠️ Open |
-| L2 features crowding out L1 completion | MEDIUM | HIGH | PM | ⚠️ Monitor |
+| L2 features crowding out L1 completion | LOW | MEDIUM | PM | ✅ Most L2 done — risk reduced |
 | 25 npm CVEs patched | — | — | Dev A | ✅ Resolved Mar 30 |
 | AgentShield config vulnerabilities | — | — | Dev A | ✅ Resolved Mar 30 |
-| Rate limiting gap on password_reset | — | — | Dev A | ✅ Code fixed Mar 30 — DB migration pending |
+| Rate limiting gap on password_reset | — | — | Dev A | ✅ Resolved Mar 31 |
 
 ---
 
