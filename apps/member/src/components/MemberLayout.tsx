@@ -86,6 +86,11 @@ export default function MemberLayout() {
     recoverRef.current = recover
 
     const resubscribe = () => {
+      // Explicitly reconnect the transport first. If the socket is already open
+      // this is a no-op; if it closed while the tab was hidden (or due to an
+      // idle timeout) it initiates a new WebSocket before channels try to re-join.
+      // Without this, channel join messages are queued but never sent.
+      supabase.realtime.connect()
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
       unsubMissionsRef.current?.()

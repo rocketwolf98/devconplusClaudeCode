@@ -52,9 +52,9 @@ export const supabase = createClient<Database>(
   }
 )
 
-// Callbacks registered by the active layout — called when the Phoenix socket
-// closes unexpectedly (network drop, server-side timeout, etc.)
+// Callback registered by the active layout — called when the WebSocket closes.
 let _onDisconnect: (() => void) | null = null
+let _disconnectDebounce: ReturnType<typeof setTimeout> | null = null
 
 /**
  * Register a callback that fires whenever the Realtime WebSocket closes.
@@ -67,28 +67,20 @@ export function onRealtimeDisconnect(cb: () => void): () => void {
   return () => { if (_onDisconnect === cb) _onDisconnect = null }
 }
 
-// Wire Phoenix socket lifecycle hooks once the client exists.
-// `conn` is the underlying RealtimeClient; it exposes `onClose` and `onError`
-// from the Phoenix socket API.
-supabase.realtime.setCustomHeartbeatCallback?.(() => {
-  // no-op — heartbeat is managed by the Web Worker; this just confirms the API
-  // is available and the worker mode is active.
-})
-
-// Attach to socket close so any silent drop triggers immediate recovery.
-// `supabase.realtime` is the RealtimeClient from @supabase/realtime-js.
-// It connects lazily, so we hook into its connect event to attach the
-// onClose handler after the socket is established.
-const _origConnect = supabase.realtime.connect.bind(supabase.realtime)
-supabase.realtime.connect = function (...args) {
-  const result = _origConnect(...args)
-  // After connecting, attach the close handler to the live socket.
-  // The Phoenix socket surfaces itself as supabase.realtime.conn
-  const conn = (supabase.realtime as unknown as { conn?: { onClose: (cb: () => void) => void } }).conn
-  if (conn?.onClose) {
-    conn.onClose(() => {
-      if (_onDisconnect) _onDisconnect()
-    })
-  }
-  return result
+// Hook directly into RealtimeClient's internal stateChangeCallbacks.close array.
+// _triggerStateCallbacks('close') iterates this on every WebSocket close —
+// silent drop, server timeout, or network loss.
+// Debounced at 2 s: the built-in reconnect timer may fire close→open→close in
+// quick succession; we only want to resubscribe once it has stabilised.
+type RealtimeClientInternal = {
+  stateChangeCallbacks: { close: Array<(event?: CloseEvent) => void> }
 }
+;(supabase.realtime as unknown as RealtimeClientInternal)
+  .stateChangeCallbacks.close.push(() => {
+    if (!_onDisconnect) return
+    if (_disconnectDebounce) clearTimeout(_disconnectDebounce)
+    _disconnectDebounce = setTimeout(() => {
+      _disconnectDebounce = null
+      _onDisconnect?.()
+    }, 2000)
+  })
