@@ -32,7 +32,7 @@ export default function XPCard() {
       </div>
 
       {/* Tier badge row */}
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-4">
         <span
           className="text-xs font-semibold px-2 py-0.5 rounded-full"
           style={{ backgroundColor: currentTier.color + '20', color: currentTier.color }}
@@ -42,7 +42,7 @@ export default function XPCard() {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-1">
+      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
         <motion.div
           className="h-full rounded-full"
           style={{ backgroundColor: nextTier ? '#F8C630' : currentTier.color }}
