@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, Link2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
@@ -12,11 +12,16 @@ const USERNAME_RE = /^[a-z0-9_]+$/
 
 interface Chapter { id: string; name: string; region: string }
 
+const optionalUrl = z.string().url('Must be a valid URL').or(z.literal('')).optional()
+
 const schema = z.object({
   full_name:         z.string().min(2, 'Name required').max(100, 'Name must be under 100 characters'),
   username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
+  school_or_company: z.string().max(100, 'Must be under 100 characters').optional(),
+  linkedin_url:      optionalUrl,
+  github_url:        optionalUrl,
+  portfolio_url:     optionalUrl,
   chapter_id:        z.string().min(1, 'Please select your chapter'),
-  school_or_company: z.string().max(100).optional(),
 })
 type FormData = z.infer<typeof schema>
 
@@ -33,7 +38,6 @@ export default function OAuthProfileComplete() {
   })
 
   useEffect(() => {
-    // Load chapters and pre-fill name from Google metadata in parallel
     void supabase.from('chapters').select('id, name, region').order('name').then(({ data }) => {
       if (data) setChapters(data as Chapter[])
     })
@@ -41,7 +45,7 @@ export default function OAuthProfileComplete() {
       if (!session) return
       const meta = session.user.user_metadata
       const googleName = (meta.full_name as string | undefined) ?? (meta.name as string | undefined) ?? ''
-      reset({ full_name: googleName, username: '', chapter_id: '', school_or_company: '' })
+      reset({ full_name: googleName, username: '', school_or_company: '', linkedin_url: '', github_url: '', portfolio_url: '', chapter_id: '' })
     })
   }, [reset])
 
@@ -60,7 +64,7 @@ export default function OAuthProfileComplete() {
 
   const onSubmit = async (data: FormData) => {
     if (usernameStatus === 'taken' || usernameStatus === 'checking') {
-      setFormError(usernameStatus === 'checking' ? 'Please wait for username check.' : 'Username is already taken.')
+      setFormError(usernameStatus === 'checking' ? 'Please wait for username check to complete.' : 'Username is already taken.')
       return
     }
     setFormError(null)
@@ -68,18 +72,19 @@ export default function OAuthProfileComplete() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { navigate('/sign-in', { replace: true }); return }
 
-    const userId = session.user.id
     const meta = session.user.user_metadata
 
-    // Upsert — handles both "no profile yet" and "partial profile from trigger"
     const { error } = await supabase.from('profiles').upsert({
-      id:                userId,
+      id:                session.user.id,
       full_name:         data.full_name,
       username:          data.username.toLowerCase(),
       email:             session.user.email ?? '',
       chapter_id:        data.chapter_id,
       school_or_company: data.school_or_company || null,
       avatar_url:        (meta.avatar_url as string | undefined) ?? null,
+      linkedin_url:      data.linkedin_url  || null,
+      github_url:        data.github_url    || null,
+      portfolio_url:     data.portfolio_url || null,
       role:              'member',
       spendable_points:  0,
       lifetime_points:   0,
@@ -93,7 +98,6 @@ export default function OAuthProfileComplete() {
     // Initialize store so OrganizerCodeGate can read user + initials
     await useAuthStore.getState().initialize()
 
-    // Same post-signup flow as standard sign-up
     navigate('/organizer-code-gate', { replace: true })
   }
 
@@ -125,59 +129,97 @@ export default function OAuthProfileComplete() {
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">Username</label>
             <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm select-none">@</span>
               <input
                 {...register('username', {
                   onChange: (e: React.ChangeEvent<HTMLInputElement>) => handleUsernameChange(e.target.value),
                 })}
                 type="text"
-                placeholder="e.g. juandelacruz"
+                placeholder="juan_delacruz"
                 autoCapitalize="none"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
               />
-              {watchedUsername.length >= 3 && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
-                  {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green" />}
-                  {usernameStatus === 'taken' && <XCircle className="w-4 h-4 text-red" />}
-                </span>
-              )}
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green" />}
+                {usernameStatus === 'taken' && <XCircle className="w-4 h-4 text-red" />}
+              </span>
             </div>
             {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
-            {usernameStatus === 'taken' && <p className="text-red text-xs mt-1">Username taken — try another.</p>}
+            {usernameStatus === 'taken' && !errors.username && <p className="text-red text-xs mt-1">Username already taken</p>}
             {usernameStatus === 'available' && <p className="text-green text-xs mt-1">Username available!</p>}
           </div>
 
-          {/* Chapter */}
-          <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">DEVCON Chapter</label>
-            <select
-              {...register('chapter_id')}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
-              defaultValue=""
-            >
-              <option value="" disabled>Select your chapter</option>
-              {['Luzon', 'Visayas', 'Mindanao'].map((region) => (
-                <optgroup key={region} label={region}>
-                  {chapters.filter((c) => c.region === region).map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            {errors.chapter_id && <p className="text-red text-xs mt-1">{errors.chapter_id.message}</p>}
-          </div>
-
-          {/* School / Company (optional) */}
+          {/* School / Company */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">
-              School or Company <span className="text-slate-400 font-normal">(optional)</span>
+              School / Company <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <input
               {...register('school_or_company')}
               type="text"
-              placeholder="e.g. UP Diliman"
+              placeholder="University of Santo Tomas"
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
             />
+          </div>
+
+          {/* Social Links */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+              <Link2 className="w-4 h-4 text-slate-400" />
+              Social Links <span className="text-slate-400 font-normal">(optional)</span>
+            </p>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">LinkedIn</label>
+              <input
+                {...register('linkedin_url')}
+                type="url"
+                placeholder="https://linkedin.com/in/yourprofile"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              {errors.linkedin_url && <p className="text-red text-xs mt-1">{errors.linkedin_url.message}</p>}
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">GitHub</label>
+              <input
+                {...register('github_url')}
+                type="url"
+                placeholder="https://github.com/yourusername"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              {errors.github_url && <p className="text-red text-xs mt-1">{errors.github_url.message}</p>}
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">Portfolio</label>
+              <input
+                {...register('portfolio_url')}
+                type="url"
+                placeholder="https://yourportfolio.com"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              />
+              {errors.portfolio_url && <p className="text-red text-xs mt-1">{errors.portfolio_url.message}</p>}
+            </div>
+          </div>
+
+          {/* Chapter */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">Chapter</label>
+            <select
+              {...register('chapter_id')}
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+            >
+              <option value="">Select your chapter…</option>
+              {['Luzon', 'Visayas', 'Mindanao'].map((region) => {
+                const group = chapters.filter((c) => c.region === region)
+                if (!group.length) return null
+                return (
+                  <optgroup key={region} label={region}>
+                    {group.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </optgroup>
+                )
+              })}
+            </select>
+            {errors.chapter_id && <p className="text-red text-xs mt-1">{errors.chapter_id.message}</p>}
           </div>
 
           {formError && (
