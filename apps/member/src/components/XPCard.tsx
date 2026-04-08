@@ -39,13 +39,6 @@ export default function XPCard() {
         >
           {currentTier.icon} {currentTier.name}
         </span>
-        {nextTier ? (
-          <span className="text-[10px] text-slate-400">
-            Next: {nextTier.name} at {nextTier.min.toLocaleString()} XP
-          </span>
-        ) : (
-          <span className="text-[10px] text-slate-400">Max tier reached</span>
-        )}
       </div>
 
       {/* Progress bar */}
@@ -59,13 +52,6 @@ export default function XPCard() {
         />
       </div>
 
-      {/* Progress label */}
-      {nextTier && (
-        <p className="text-[10px] text-slate-400 mb-3 text-right">
-          {tierProgress}% to {nextTier.name}
-        </p>
-      )}
-      {!nextTier && <div className="mb-3" />}
 
       <motion.button
         onClick={() => navigate('/events')}
