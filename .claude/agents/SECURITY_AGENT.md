@@ -106,7 +106,7 @@ Fail behavior: `check-rate-limit` fails **open** on RPC error. Document as accep
 > with clear error messages."
 
 Test all three injection types:
-- [ ] **SQL injection:** `'; DROP TABLE events; --` in event title, username, search
+- [ ] **SQL injection:** `'; DROP TABLE events; --` in event title, username, search <!-- test vector — paste into a form field to test, do NOT execute as a real SQL query -->
       → Supabase parameterized queries reject cleanly, no DB error exposed to client
 - [ ] **Script injection (XSS):** `<script>alert(1)</script>` in all text inputs
       → renders as escaped text, never executes
@@ -225,7 +225,7 @@ Content-Security-Policy:
 - [ ] `VITE_APP_ENV = production` in Vercel
 
 ### A03: Injection (all three types per Sir Dom's SOP)
-- [ ] SQL: `'; DROP TABLE events; --` in form fields → clean rejection
+- [ ] SQL: `'; DROP TABLE events; --` in form fields → clean rejection <!-- test vector — paste into a form field to test, do NOT execute as a real SQL query -->
 - [ ] Script/XSS: `<script>alert(1)</script>` in form fields → escaped, not executed
 - [ ] Command: backtick, `$(whoami)`, pipe chars → generic error, not executed
 - [ ] `events.tags` with injected array values → sanitized
