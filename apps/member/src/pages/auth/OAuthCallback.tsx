@@ -1,17 +1,38 @@
-import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin']
+const TIMEOUT_MS = 10_000
+
+function friendlyOAuthError(code: string | null): string {
+  if (!code) return 'Google sign-in failed. Please try again.'
+  if (code === 'access_denied') return 'You cancelled Google sign-in. You can try again below.'
+  if (code === 'server_error') return 'Google returned a server error. Please try again in a moment.'
+  return 'Google sign-in failed. Please try again.'
+}
 
 export default function OAuthCallback() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const navigated = useRef(false)
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [error, setError] = useState<string | null>(() => {
+    // Supabase appends ?error= when OAuth fails (e.g. user cancels consent)
+    const code = searchParams.get('error')
+    return code ? friendlyOAuthError(code) : null
+  })
 
   useEffect(() => {
+    // If there's already an error in the URL, don't wait for a session
+    if (error) return
+
     async function redirect(userId: string) {
       if (navigated.current) return
       navigated.current = true
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -28,20 +49,59 @@ export default function OAuthCallback() {
       }
     }
 
-    // Listen for SIGNED_IN — fired when Supabase processes the OAuth tokens from the URL hash
+    // Timeout fallback — if SIGNED_IN never fires, show an error instead of spinning forever
+    timeoutRef.current = setTimeout(() => {
+      if (!navigated.current) {
+        setError('Sign-in timed out. Please check your connection and try again.')
+      }
+    }, TIMEOUT_MS)
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         void redirect(session.user.id)
       }
     })
 
-    // Fallback: if the session was already parsed before the listener registered
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) void redirect(session.user.id)
     })
 
-    return () => subscription.unsubscribe()
-  }, [navigate])
+    return () => {
+      subscription.unsubscribe()
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [navigate, error])
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-blue flex flex-col">
+        <div className="bg-blue px-6 pt-16 pb-10 text-center">
+          <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
+        </div>
+        <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-12 pb-10 flex flex-col items-center text-center">
+          <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
+            <AlertCircle className="w-7 h-7 text-red" />
+          </div>
+          <p className="text-base font-bold text-slate-800 mb-2">Sign-in failed</p>
+          <p className="text-sm text-slate-500 mb-8 max-w-xs">{error}</p>
+          <Link
+            to="/sign-in"
+            replace
+            className="w-full max-w-xs bg-blue text-white font-bold py-4 rounded-2xl text-center hover:bg-blue-dark transition-colors"
+          >
+            Back to Sign In
+          </Link>
+          <Link
+            to="/sign-up"
+            replace
+            className="w-full max-w-xs mt-3 border border-slate-200 bg-white text-slate-700 font-bold py-4 rounded-2xl text-center hover:bg-slate-50 transition-colors"
+          >
+            Create an Account
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
