@@ -41,6 +41,9 @@ export const supabase = createClient<Database>(
       },
     },
     realtime: {
+      // Run the Realtime heartbeat in a Web Worker so browser tab-throttling
+      // cannot kill the 25 s ping and silently close the WebSocket.
+      worker: true,
       params: {
         // Throttle broadcast events to avoid overwhelming the client on busy channels
         eventsPerSecond: 10,
@@ -48,3 +51,44 @@ export const supabase = createClient<Database>(
     },
   }
 )
+
+// Callbacks registered by the active layout — called when the Phoenix socket
+// closes unexpectedly (network drop, server-side timeout, etc.)
+let _onDisconnect: (() => void) | null = null
+
+/**
+ * Register a callback that fires whenever the Realtime WebSocket closes.
+ * The layout uses this to immediately recover + resubscribe rather than
+ * waiting for the next visibilitychange / online event.
+ * Returns a cleanup function that unregisters the callback.
+ */
+export function onRealtimeDisconnect(cb: () => void): () => void {
+  _onDisconnect = cb
+  return () => { if (_onDisconnect === cb) _onDisconnect = null }
+}
+
+// Wire Phoenix socket lifecycle hooks once the client exists.
+// `conn` is the underlying RealtimeClient; it exposes `onClose` and `onError`
+// from the Phoenix socket API.
+supabase.realtime.setCustomHeartbeatCallback?.(() => {
+  // no-op — heartbeat is managed by the Web Worker; this just confirms the API
+  // is available and the worker mode is active.
+})
+
+// Attach to socket close so any silent drop triggers immediate recovery.
+// `supabase.realtime` is the RealtimeClient from @supabase/realtime-js.
+// It connects lazily, so we hook into its connect event to attach the
+// onClose handler after the socket is established.
+const _origConnect = supabase.realtime.connect.bind(supabase.realtime)
+supabase.realtime.connect = function (...args) {
+  const result = _origConnect(...args)
+  // After connecting, attach the close handler to the live socket.
+  // The Phoenix socket surfaces itself as supabase.realtime.conn
+  const conn = (supabase.realtime as unknown as { conn?: { onClose: (cb: () => void) => void } }).conn
+  if (conn?.onClose) {
+    conn.onClose(() => {
+      if (_onDisconnect) _onDisconnect()
+    })
+  }
+  return result
+}

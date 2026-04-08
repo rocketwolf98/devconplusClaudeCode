@@ -12,7 +12,7 @@ import { useNewsStore } from '../stores/useNewsStore'
 import { useVolunteerStore } from '../stores/useVolunteerStore'
 import { useReferralsStore } from '../stores/useReferralsStore'
 import { useMissionsStore } from '../stores/useMissionsStore'
-import { supabase } from '../lib/supabase'
+import { supabase, onRealtimeDisconnect } from '../lib/supabase'
 
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
@@ -106,6 +106,11 @@ export default function MemberLayout() {
       }
     }
     const handleOnline = () => { recover(); resubscribe() }
+    // Socket-level disconnect: fires immediately when the Phoenix WebSocket
+    // closes (network drop, server timeout) — no need to wait for the tab to
+    // regain focus.
+    const unregisterDisconnect = onRealtimeDisconnect(() => { recover(); resubscribe() })
+
     document.addEventListener('visibilitychange', handleVisibility)
     window.addEventListener('online', handleOnline)
     // Polling fallback: refetch + re-subscribe every 5 minutes — channels can
@@ -115,6 +120,7 @@ export default function MemberLayout() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('online', handleOnline)
+      unregisterDisconnect()
       clearInterval(pollInterval)
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
