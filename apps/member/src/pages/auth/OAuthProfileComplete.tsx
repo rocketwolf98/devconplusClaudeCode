@@ -9,11 +9,11 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const USERNAME_RE = /^[a-z0-9_]+$/
-const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin']
 
 interface Chapter { id: string; name: string; region: string }
 
 const schema = z.object({
+  full_name:         z.string().min(2, 'Name required').max(100, 'Name must be under 100 characters'),
   username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
   chapter_id:        z.string().min(1, 'Please select your chapter'),
   school_or_company: z.string().max(100).optional(),
@@ -28,15 +28,22 @@ export default function OAuthProfileComplete() {
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
   useEffect(() => {
-    supabase.from('chapters').select('id, name, region').order('name').then(({ data }) => {
+    // Load chapters and pre-fill name from Google metadata in parallel
+    void supabase.from('chapters').select('id, name, region').order('name').then(({ data }) => {
       if (data) setChapters(data as Chapter[])
     })
-  }, [])
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      const meta = session.user.user_metadata
+      const googleName = (meta.full_name as string | undefined) ?? (meta.name as string | undefined) ?? ''
+      reset({ full_name: googleName, username: '', chapter_id: '', school_or_company: '' })
+    })
+  }, [reset])
 
   const handleUsernameChange = useCallback((value: string) => {
     if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
@@ -67,7 +74,7 @@ export default function OAuthProfileComplete() {
     // Upsert — handles both "no profile yet" and "partial profile from trigger"
     const { error } = await supabase.from('profiles').upsert({
       id:                userId,
-      full_name:         (meta.full_name as string | undefined) ?? meta.name ?? session.user.email?.split('@')[0] ?? 'User',
+      full_name:         data.full_name,
       username:          data.username.toLowerCase(),
       email:             session.user.email ?? '',
       chapter_id:        data.chapter_id,
@@ -83,15 +90,11 @@ export default function OAuthProfileComplete() {
       return
     }
 
-    // Initialize store with the now-complete profile
+    // Initialize store so OrganizerCodeGate can read user + initials
     await useAuthStore.getState().initialize()
 
-    const profile = useAuthStore.getState().user
-    if (profile && ORGANIZER_ROLES.includes(profile.role)) {
-      navigate('/organizer', { replace: true })
-    } else {
-      navigate('/home', { replace: true })
-    }
+    // Same post-signup flow as standard sign-up
+    navigate('/organizer-code-gate', { replace: true })
   }
 
   const watchedUsername = watch('username') ?? ''
@@ -105,6 +108,18 @@ export default function OAuthProfileComplete() {
 
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 overflow-y-auto">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+          {/* Full Name — pre-filled from Google */}
+          <div>
+            <label className="text-sm font-medium text-slate-700 block mb-1">Full Name</label>
+            <input
+              {...register('full_name')}
+              type="text"
+              placeholder="Juan dela Cruz"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+            />
+            {errors.full_name && <p className="text-red text-xs mt-1">{errors.full_name.message}</p>}
+          </div>
 
           {/* Username */}
           <div>
