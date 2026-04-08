@@ -5,9 +5,10 @@ import { Toaster } from 'sonner'
 import { router } from './router'
 import { useThemeStore, PROGRAM_THEMES } from './stores/useThemeStore'
 import { useAuthStore } from './stores/useAuthStore'
+import { useEventsStore } from './stores/useEventsStore'
+import { useJobsStore } from './stores/useJobsStore'
+import { useNewsStore } from './stores/useNewsStore'
 import logoHorizontal from './assets/logos/logo-horizontal.svg'
-import KonamiCodeWrapper from './components/KonamiCodeWrapper'
-
 export default function App() {
   const { themeId } = useThemeStore()
   const { initialize, isInitialized } = useAuthStore()
@@ -20,7 +21,14 @@ export default function App() {
   }, [themeId])
 
   useEffect(() => {
+    // Kick off auth init AND public data fetches concurrently.
+    // events/jobs/news have public RLS (SELECT USING true) — no auth required.
+    // By the time the auth waterfall finishes and the router renders /home,
+    // these stores are already populated, so the dashboard feels instant.
     initialize()
+    void useEventsStore.getState().fetchEvents()
+    void useJobsStore.getState().fetchJobs()
+    void useNewsStore.getState().fetchNews()
   }, [initialize])
 
   // Block render until session is restored — prevents a flash redirect to /sign-in
@@ -36,7 +44,6 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <RouterProvider router={router} />
-      <KonamiCodeWrapper />
       <Toaster
         position="bottom-center"
         richColors

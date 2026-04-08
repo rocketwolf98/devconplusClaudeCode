@@ -72,16 +72,21 @@ export default function MemberLayout() {
     if (!user) return
 
     const recover = () => {
+      // Critical — needed for first paint of Dashboard and Events screens.
       void fetchEvents()
       void loadTotalPoints()
-      void loadTransactions()
       void fetchRegistrations(user.id)
-      void fetchJobs()
       void fetchNews()
-      void fetchRewards()
-      void loadVolunteerApplications()
-      void loadReferralData()
-      void fetchMissions()
+      // Deferred — yields to the browser frame so critical queries claim
+      // PostgREST connections first on Supabase's free-tier connection pool.
+      setTimeout(() => {
+        void loadTransactions()
+        void fetchJobs()
+        void fetchRewards()
+        void loadVolunteerApplications()
+        void loadReferralData()
+        void fetchMissions()
+      }, 0)
     }
     recoverRef.current = recover
 

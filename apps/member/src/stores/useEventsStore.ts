@@ -250,14 +250,14 @@ export const useEventsStore = create<EventsState>((set) => ({
 
   subscribeToRegistration: (registrationId, onStatusChange) => {
     const channel = supabase
-      .channel(`reg-${registrationId}`)
+      .channel(nextChan(`reg-${registrationId}`))
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'event_registrations',
-          filter: `id=eq.${registrationId}`,
+          filter: `id=eq.${registrationId}::uuid`,
         },
         (payload) => {
           const updated = payload.new as FullRegistration

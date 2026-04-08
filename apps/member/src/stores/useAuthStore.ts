@@ -146,14 +146,21 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
   return (data ?? null) as unknown as Profile | null
 }
 
+// Module-level chapter name cache — populated once per session on first auth.
+// Chapters are static seed data (11 entries) that never change mid-session.
+// Subsequent TOKEN_REFRESHED events read from this Map with zero network calls.
+const _chapterNameCache = new Map<string, string>()
+
 async function fetchChapterName(chapterId: string | null): Promise<string | null> {
   if (!chapterId) return null
-  const { data } = await supabase
-    .from('chapters')
-    .select('name')
-    .eq('id', chapterId)
-    .single()
-  return data?.name ?? null
+  if (_chapterNameCache.has(chapterId)) return _chapterNameCache.get(chapterId) ?? null
+  // Cache miss — fetch all chapters at once to populate the full cache.
+  // Cost: 1 extra query on first auth only; every subsequent call is a Map lookup.
+  const { data } = await supabase.from('chapters').select('id, name')
+  if (data) {
+    for (const ch of data) _chapterNameCache.set(ch.id, ch.name)
+  }
+  return _chapterNameCache.get(chapterId) ?? null
 }
 
 // Applies a fetched profile to the store; shared by initialize, signIn, signUp, and onAuthStateChange.
@@ -165,6 +172,19 @@ async function applyProfile(profile: Profile, set: (partial: Partial<AuthState>)
     chapterName,
     isOrganizerSession: ORGANIZER_ROLES.includes(profile.role as OrganizerRole),
   })
+}
+
+// Maps raw Supabase Auth error messages to user-friendly strings.
+// Raw messages (e.g. "invalid claim: missing sub claim") expose internal details
+// that are not meaningful to users and can assist auth system fingerprinting.
+function toUserMessage(message: string): string {
+  if (/invalid login credentials/i.test(message)) return 'Incorrect email or password.'
+  if (/email not confirmed/i.test(message))        return 'Please confirm your email before signing in.'
+  if (/user already registered/i.test(message))    return 'An account with this email already exists.'
+  if (/password.*too short/i.test(message))        return 'Password is too short.'
+  if (/email.*invalid/i.test(message))             return 'Please enter a valid email address.'
+  if (/over_email_send_rate_limit/i.test(message)) return 'Too many emails sent. Please wait a moment and try again.'
+  return 'Something went wrong. Please try again.'
 }
 
 // Holds the auth listener cleanup so initialize() can safely re-register without leaking.
@@ -275,7 +295,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     })
     if (error) {
-      set({ isLoading: false, error: error.message })
+      console.error('[signUp] auth error:', error.message)
+      set({ isLoading: false, error: toUserMessage(error.message) })
       throw error
     }
     // If session is immediately available (email confirmation disabled),
@@ -322,7 +343,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } })
     if (error) {
-      set({ isLoading: false, error: error.message })
+      console.error('[signIn] auth error:', error.message)
+      set({ isLoading: false, error: toUserMessage(error.message) })
       throw error
     }
     // Eagerly fetch/create profile so callers can read user.role immediately after signIn() returns
@@ -415,7 +437,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       captchaToken,
     })
     if (error) {
-      set({ isLoading: false, error: error.message })
+      console.error('[resetPassword] auth error:', error.message)
+      set({ isLoading: false, error: toUserMessage(error.message) })
       throw error
     }
     set({ isLoading: false })
