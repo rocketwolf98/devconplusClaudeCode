@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -64,6 +65,8 @@ export default function SignUp() {
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileInstance>(null)
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [chapters, setChapters] = useState<Chapter[]>([])
 
@@ -104,7 +107,7 @@ export default function SignUp() {
     }
     setFormError(null)
     try {
-      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.chapter_id, data.school_or_company)
+      const { emailConfirmationPending } = await signUp(data.email, data.password, data.full_name, data.username, data.chapter_id, data.school_or_company, turnstileToken ?? undefined)
 
       // Silently confirm referral if a ?ref= code was present in the URL
       // Only pass ref code if it matches expected format (alphanumeric, 6-12 chars)
@@ -132,6 +135,8 @@ export default function SignUp() {
     } catch (err) {
       const raw = err instanceof Error ? err.message : 'Sign-up failed. Please try again.'
       setFormError(friendlyAuthError(raw))
+      turnstileRef.current?.reset()
+      setTurnstileToken(null)
     }
   }
 
@@ -268,9 +273,18 @@ export default function SignUp() {
             </p>
           )}
 
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
+            onSuccess={(token) => setTurnstileToken(token)}
+            onExpire={() => setTurnstileToken(null)}
+            onError={() => setTurnstileToken(null)}
+            options={{ theme: 'light', size: 'normal' }}
+          />
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !turnstileToken}
             className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
           >
             {isSubmitting ? 'Creating account…' : 'Create Account'}

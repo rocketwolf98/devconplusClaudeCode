@@ -12,6 +12,7 @@
   "dependencies": {
     "@devcon-plus/supabase": "*",
     "@hookform/resolvers": "^3.10.0",
+    "@marsidev/react-turnstile": "^1.5.0",
     "@supabase/supabase-js": "^2.49.1",
     "@zxing/browser": "^0.1.5",
     "@zxing/library": "^0.21.3",

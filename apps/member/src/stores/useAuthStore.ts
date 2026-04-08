@@ -62,8 +62,9 @@ interface AuthState {
     username: string,
     chapter_id: string,
     school_or_company?: string,
+    captchaToken?: string,
   ) => Promise<{ emailConfirmationPending: boolean }>
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<void>
   signOut: () => Promise<void>
   setOrganizerSession: (val: boolean) => void
   updateProfile: (
@@ -73,7 +74,7 @@ interface AuthState {
   updatePassword: (newPassword: string, currentPassword: string) => Promise<void>
   uploadAvatar: (file: File) => Promise<string>
   deleteAccount: () => Promise<void>
-  resetPassword: (email: string) => Promise<void>
+  resetPassword: (email: string, captchaToken?: string) => Promise<void>
   requestOrganizerUpgrade: (code: string) => Promise<UpgradeResult>
   checkUsernameAvailable: (username: string) => Promise<boolean>
 }
@@ -241,7 +242,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: false, isInitialized: true })
   },
 
-  signUp: async (email, password, full_name, username, chapter_id, school_or_company) => {
+  signUp: async (email, password, full_name, username, chapter_id, school_or_company, captchaToken) => {
     set({ isLoading: true, error: null })
     // Advisory rate limit: 3 signups per IP per hour. Cannot block direct GoTrue calls.
     // Deferred CAPTCHA (Cloudflare Turnstile) will close this gap at infrastructure level.
@@ -257,6 +258,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/email-confirm`,
+        captchaToken,
         data: {
           full_name,
           username,
@@ -286,7 +288,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return { emailConfirmationPending: !data.session }
   },
 
-  signIn: async (email, password) => {
+  signIn: async (email, password, captchaToken) => {
     set({ isLoading: true, error: null })
 
     // Dual-key rate limit: per-email + per-IP, in parallel for minimal latency.
@@ -308,7 +310,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw err
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } })
     if (error) {
       set({ isLoading: false, error: error.message })
       throw error
@@ -384,7 +386,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await supabase.auth.signOut()
   },
 
-  resetPassword: async (email) => {
+  resetPassword: async (email, captchaToken) => {
     set({ isLoading: true, error: null })
     // Rate limit: 3 reset emails per email address per hour.
     // Keyed by email (not IP) — prevents inbox flooding a single user from many IPs.
@@ -400,6 +402,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
+      captchaToken,
     })
     if (error) {
       set({ isLoading: false, error: error.message })

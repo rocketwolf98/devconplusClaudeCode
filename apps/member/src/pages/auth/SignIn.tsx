@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -49,6 +50,8 @@ export default function SignIn() {
   const [showGoogleModal, setShowGoogleModal] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileInstance>(null)
   // Client-side rate limiting (UX convenience only — server enforcement via Supabase GoTrue)
   const failedAttempts  = useRef(0)
   const lockedUntil     = useRef<number>(0)
@@ -69,10 +72,12 @@ export default function SignIn() {
 
     setFormError(null)
     try {
-      await signIn(data.email, data.password)
+      await signIn(data.email, data.password, turnstileToken ?? undefined)
       failedAttempts.current = 0
       navigate('/home')
     } catch (err) {
+      turnstileRef.current?.reset()
+      setTurnstileToken(null)
       const serverSecs = (err as { retryAfterSeconds?: number }).retryAfterSeconds
       if (serverSecs) {
         failedAttempts.current = 0
@@ -169,9 +174,18 @@ export default function SignIn() {
             </p>
           )}
 
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
+            onSuccess={(token) => setTurnstileToken(token)}
+            onExpire={() => setTurnstileToken(null)}
+            onError={() => setTurnstileToken(null)}
+            options={{ theme: 'light', size: 'normal' }}
+          />
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !turnstileToken}
             className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
           >
             {isSubmitting ? 'Signing in…' : 'Sign In'}
