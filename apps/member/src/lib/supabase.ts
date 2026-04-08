@@ -69,14 +69,21 @@ export function onRealtimeDisconnect(cb: () => void): () => void {
 }
 
 // Use the official onHeartbeat API to detect silent disconnects.
-// The heartbeat fires every 25 s. If the socket is down it gets status
-// 'disconnected'; if the server stopped replying it gets 'timeout'.
-// In both cases: reconnect the transport (safe — heartbeat only runs when the
-// socket is already confirmed down, so connect() cannot race a CONNECTING socket).
-// Then notify the layout to resubscribe channels.
+// The heartbeat fires every 25 s (driven by the Web Worker when worker:true).
+// Status 'disconnected' = socket not open when heartbeat tried to send.
+// Status 'timeout'      = server stopped replying to pings.
+//
+// IMPORTANT: do NOT call supabase.realtime.connect() here.
+// The library's own reconnectTimer already handles socket reconnection with
+// exponential backoff. Calling connect() from the heartbeat callback would
+// race that timer: if a socket is already CONNECTING (readyState=0), connect()
+// replaces it with a new socket, orphaning the first → both fail → infinite loop
+// that only a page reload can escape.
+//
+// Our only job here is to notify the layout to recreate channels once the socket
+// comes back. The library reconnects the socket; we reconnect the channels.
 supabase.realtime.onHeartbeat((status) => {
   if (status === 'disconnected' || status === 'timeout') {
-    supabase.realtime.connect()
     _onDisconnect?.()
   }
 })

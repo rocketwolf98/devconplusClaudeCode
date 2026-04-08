@@ -86,10 +86,12 @@ export default function MemberLayout() {
     recoverRef.current = recover
 
     const resubscribe = () => {
-      // Only initiate a new WebSocket when the socket is genuinely down.
-      // Calling connect() when readyState is CONNECTING creates a duplicate
-      // socket that races the auto-reconnect timer and kills both.
-      if (!supabase.realtime.isConnected()) {
+      // Only call connect() when the socket is truly CLOSED (conn=null or
+      // readyState=3). If connectionState() is 'connecting', the library's
+      // reconnectTimer already started a socket — calling connect() again
+      // would replace it with a duplicate, orphan the first, and create an
+      // infinite reconnect loop that only a page reload can break.
+      if (supabase.realtime.connectionState() === 'closed') {
         supabase.realtime.connect()
       }
       unsubEventsRef.current?.()
@@ -107,12 +109,12 @@ export default function MemberLayout() {
 
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
+        // Always refetch HTTP data — store may be stale regardless of socket state.
         recover()
-        // Only tear down and recreate channels if the socket actually dropped
-        // while the tab was hidden. If the worker kept the heartbeat alive and
-        // the socket is still open, a resubscribe would create an unnecessary
-        // channel gap for no benefit.
-        if (!supabase.realtime.isConnected()) {
+        // Resubscribe only if socket is closed (not 'connecting' — the reconnect
+        // timer is already working). If 'open', channels are still live.
+        const state = supabase.realtime.connectionState()
+        if (state === 'closed') {
           resubscribe()
         }
       }
