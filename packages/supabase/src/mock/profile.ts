@@ -14,6 +14,9 @@ export const MOCK_PROFILE: Profile = {
   referral_code: null,
   pending_role: null,
   pending_chapter_id: null,
+  linkedin_url: null,
+  github_url: null,
+  portfolio_url: null,
   created_at: '2026-01-01T00:00:00Z',
 }
 

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
   ArrowLeft, Camera, CheckCircle2, XCircle, Loader2,
-  Mail, Lock, MapPin, ShieldCheck,
+  Mail, Lock, MapPin, ShieldCheck, Link2,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -17,10 +17,15 @@ interface Chapter { id: string; name: string; region: string }
 
 const USERNAME_RE = /^[a-z0-9_]+$/
 
+const optionalUrl = z.string().url('Must be a valid URL').or(z.literal('')).optional()
+
 const profileSchema = z.object({
   full_name:         z.string().min(2, 'Name required').max(100, 'Name must be under 100 characters'),
   username:          z.string().min(3, 'Min 3 characters').max(20, 'Max 20 characters').regex(USERNAME_RE, 'Only lowercase letters, numbers, underscores'),
   school_or_company: z.string().max(100, 'Must be under 100 characters').optional(),
+  linkedin_url:      optionalUrl,
+  github_url:        optionalUrl,
+  portfolio_url:     optionalUrl,
 })
 type ProfileFormData = z.infer<typeof profileSchema>
 
@@ -94,6 +99,9 @@ export default function ProfileEdit() {
       full_name:         user?.full_name ?? '',
       username:          user?.username ?? '',
       school_or_company: user?.school_or_company ?? '',
+      linkedin_url:      user?.linkedin_url  ?? '',
+      github_url:        user?.github_url    ?? '',
+      portfolio_url:     user?.portfolio_url ?? '',
     },
   })
 
@@ -140,6 +148,9 @@ export default function ProfileEdit() {
         full_name: data.full_name,
         username: data.username,
         school_or_company: data.school_or_company ?? '',
+        linkedin_url:  data.linkedin_url  || null,
+        github_url:    data.github_url    || null,
+        portfolio_url: data.portfolio_url || null,
       })
       navigate('/profile')
     } catch (err) {
@@ -306,6 +317,44 @@ export default function ProfileEdit() {
               {...register('school_or_company')}
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
+          </div>
+
+          {/* Social Links */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+              <Link2 className="w-4 h-4 text-slate-400" />
+              Social Links <span className="text-slate-400 font-normal">(optional)</span>
+            </p>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">LinkedIn</label>
+              <input
+                {...register('linkedin_url')}
+                type="url"
+                placeholder="https://linkedin.com/in/yourprofile"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              {errors.linkedin_url && <p className="text-red text-xs mt-1">{errors.linkedin_url.message}</p>}
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">GitHub</label>
+              <input
+                {...register('github_url')}
+                type="url"
+                placeholder="https://github.com/yourusername"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              {errors.github_url && <p className="text-red text-xs mt-1">{errors.github_url.message}</p>}
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 block mb-1">Portfolio</label>
+              <input
+                {...register('portfolio_url')}
+                type="url"
+                placeholder="https://yourportfolio.com"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              {errors.portfolio_url && <p className="text-red text-xs mt-1">{errors.portfolio_url.message}</p>}
+            </div>
           </div>
 
           {/* Chapter — password gated (managed outside RHF) */}

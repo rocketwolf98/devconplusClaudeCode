@@ -591,10 +591,13 @@ export type Database = {
           created_at: string | null
           email: string
           full_name: string
+          github_url: string | null
           id: string
           lifetime_points: number | null
+          linkedin_url: string | null
           pending_chapter_id: string | null
           pending_role: string | null
+          portfolio_url: string | null
           referral_code: string | null
           role: string | null
           school_or_company: string | null
@@ -607,10 +610,13 @@ export type Database = {
           created_at?: string | null
           email: string
           full_name: string
+          github_url?: string | null
           id: string
           lifetime_points?: number | null
+          linkedin_url?: string | null
           pending_chapter_id?: string | null
           pending_role?: string | null
+          portfolio_url?: string | null
           referral_code?: string | null
           role?: string | null
           school_or_company?: string | null
@@ -623,10 +629,13 @@ export type Database = {
           created_at?: string | null
           email?: string
           full_name?: string
+          github_url?: string | null
           id?: string
           lifetime_points?: number | null
+          linkedin_url?: string | null
           pending_chapter_id?: string | null
           pending_role?: string | null
+          portfolio_url?: string | null
           referral_code?: string | null
           role?: string | null
           school_or_company?: string | null

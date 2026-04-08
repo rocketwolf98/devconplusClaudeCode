@@ -68,6 +68,9 @@ export interface Profile {
   referral_code: string | null
   pending_role: string | null
   pending_chapter_id: string | null
+  linkedin_url: string | null
+  github_url: string | null
+  portfolio_url: string | null
   created_at: string
 }
 

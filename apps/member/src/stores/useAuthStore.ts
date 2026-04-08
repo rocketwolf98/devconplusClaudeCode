@@ -63,12 +63,13 @@ interface AuthState {
     chapter_id: string,
     school_or_company?: string,
     captchaToken?: string,
+    socialLinks?: { linkedin_url?: string; github_url?: string; portfolio_url?: string },
   ) => Promise<{ emailConfirmationPending: boolean }>
   signIn: (email: string, password: string, captchaToken?: string) => Promise<void>
   signOut: () => Promise<void>
   setOrganizerSession: (val: boolean) => void
   updateProfile: (
-    patch: Partial<Pick<Profile, 'full_name' | 'username' | 'school_or_company' | 'avatar_url' | 'chapter_id'>>
+    patch: Partial<Pick<Profile, 'full_name' | 'username' | 'school_or_company' | 'avatar_url' | 'chapter_id' | 'linkedin_url' | 'github_url' | 'portfolio_url'>>
   ) => Promise<void>
   updateEmail: (newEmail: string, currentPassword: string) => Promise<void>
   updatePassword: (newPassword: string, currentPassword: string) => Promise<void>
@@ -130,6 +131,9 @@ async function ensureProfile(userId: string, meta: Record<string, string | null>
       role: 'member',
       spendable_points: 0,
       lifetime_points: 0,
+      linkedin_url:  meta.linkedin_url  ?? null,
+      github_url:    meta.github_url    ?? null,
+      portfolio_url: meta.portfolio_url ?? null,
     })
     .select()
     .single()
@@ -242,7 +246,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ isLoading: false, isInitialized: true })
   },
 
-  signUp: async (email, password, full_name, username, chapter_id, school_or_company, captchaToken) => {
+  signUp: async (email, password, full_name, username, chapter_id, school_or_company, captchaToken, socialLinks) => {
     set({ isLoading: true, error: null })
     // Advisory rate limit: 3 signups per IP per hour. Cannot block direct GoTrue calls.
     // Deferred CAPTCHA (Cloudflare Turnstile) will close this gap at infrastructure level.
@@ -264,6 +268,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           username,
           school_or_company: school_or_company || null,
           chapter_id: chapter_id || null,
+          linkedin_url:  socialLinks?.linkedin_url  || null,
+          github_url:    socialLinks?.github_url    || null,
+          portfolio_url: socialLinks?.portfolio_url || null,
         },
       },
     })
@@ -280,6 +287,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email,
         school_or_company: school_or_company || null,
         chapter_id: chapter_id || null,
+        linkedin_url:  socialLinks?.linkedin_url  || null,
+        github_url:    socialLinks?.github_url    || null,
+        portfolio_url: socialLinks?.portfolio_url || null,
       }
       const profile = await ensureProfile(data.session.user.id, meta)
       if (profile) await applyProfile(profile, set)
