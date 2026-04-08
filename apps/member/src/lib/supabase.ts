@@ -52,14 +52,15 @@ export const supabase = createClient<Database>(
   }
 )
 
-// Callback registered by the active layout — called when the WebSocket closes.
+// Callback registered by the active layout — called when a heartbeat detects
+// the socket is down. Set via onRealtimeDisconnect(); cleared on layout unmount.
 let _onDisconnect: (() => void) | null = null
-let _disconnectDebounce: ReturnType<typeof setTimeout> | null = null
 
 /**
- * Register a callback that fires whenever the Realtime WebSocket closes.
- * The layout uses this to immediately recover + resubscribe rather than
- * waiting for the next visibilitychange / online event.
+ * Register a callback that fires whenever the Realtime heartbeat detects the
+ * WebSocket is down ('disconnected' or 'timeout' status). This uses the official
+ * onHeartbeat API rather than internal hooks, so it cannot race the built-in
+ * auto-reconnect timer.
  * Returns a cleanup function that unregisters the callback.
  */
 export function onRealtimeDisconnect(cb: () => void): () => void {
@@ -67,20 +68,15 @@ export function onRealtimeDisconnect(cb: () => void): () => void {
   return () => { if (_onDisconnect === cb) _onDisconnect = null }
 }
 
-// Hook directly into RealtimeClient's internal stateChangeCallbacks.close array.
-// _triggerStateCallbacks('close') iterates this on every WebSocket close —
-// silent drop, server timeout, or network loss.
-// Debounced at 2 s: the built-in reconnect timer may fire close→open→close in
-// quick succession; we only want to resubscribe once it has stabilised.
-type RealtimeClientInternal = {
-  stateChangeCallbacks: { close: Array<(event?: CloseEvent) => void> }
-}
-;(supabase.realtime as unknown as RealtimeClientInternal)
-  .stateChangeCallbacks.close.push(() => {
-    if (!_onDisconnect) return
-    if (_disconnectDebounce) clearTimeout(_disconnectDebounce)
-    _disconnectDebounce = setTimeout(() => {
-      _disconnectDebounce = null
-      _onDisconnect?.()
-    }, 2000)
-  })
+// Use the official onHeartbeat API to detect silent disconnects.
+// The heartbeat fires every 25 s. If the socket is down it gets status
+// 'disconnected'; if the server stopped replying it gets 'timeout'.
+// In both cases: reconnect the transport (safe — heartbeat only runs when the
+// socket is already confirmed down, so connect() cannot race a CONNECTING socket).
+// Then notify the layout to resubscribe channels.
+supabase.realtime.onHeartbeat((status) => {
+  if (status === 'disconnected' || status === 'timeout') {
+    supabase.realtime.connect()
+    _onDisconnect?.()
+  }
+})

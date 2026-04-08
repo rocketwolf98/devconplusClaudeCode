@@ -86,11 +86,12 @@ export default function MemberLayout() {
     recoverRef.current = recover
 
     const resubscribe = () => {
-      // Explicitly reconnect the transport first. If the socket is already open
-      // this is a no-op; if it closed while the tab was hidden (or due to an
-      // idle timeout) it initiates a new WebSocket before channels try to re-join.
-      // Without this, channel join messages are queued but never sent.
-      supabase.realtime.connect()
+      // Only initiate a new WebSocket when the socket is genuinely down.
+      // Calling connect() when readyState is CONNECTING creates a duplicate
+      // socket that races the auto-reconnect timer and kills both.
+      if (!supabase.realtime.isConnected()) {
+        supabase.realtime.connect()
+      }
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
       unsubMissionsRef.current?.()
@@ -107,7 +108,13 @@ export default function MemberLayout() {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         recover()
-        resubscribe()
+        // Only tear down and recreate channels if the socket actually dropped
+        // while the tab was hidden. If the worker kept the heartbeat alive and
+        // the socket is still open, a resubscribe would create an unnecessary
+        // channel gap for no benefit.
+        if (!supabase.realtime.isConnected()) {
+          resubscribe()
+        }
       }
     }
     const handleOnline = () => { recover(); resubscribe() }
