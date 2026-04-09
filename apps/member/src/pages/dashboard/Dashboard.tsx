@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, Flame, Bell } from 'lucide-react'
+import { Briefcase, Heart, Gift, ChevronRight, Flame, Bell, CalendarX } from 'lucide-react'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -310,6 +310,29 @@ export default function Dashboard() {
             <div className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
             </div>
+          ) : nearbyEvents.length === 0 ? (
+            <motion.div
+              className="mx-4 flex flex-col items-center gap-3 py-8 px-6 rounded-2xl bg-white border border-slate-200 shadow-card text-center"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <CalendarX className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Events coming soon</p>
+                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                  Your chapter is planning something. Check back soon or browse all events.
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/events')}
+                className="text-xs font-semibold text-primary"
+              >
+                Browse all events
+              </button>
+            </motion.div>
           ) : (
             <motion.div
               className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
