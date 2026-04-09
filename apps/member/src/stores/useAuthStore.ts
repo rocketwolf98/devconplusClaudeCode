@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 // Returns { allowed, retryAfterSeconds? }.
 // On any network/server error → { allowed: false } (fail closed — deny by default).
 // token: pass the user's access_token for user-keyed buckets (org_upgrade).
-async function callRateLimit(
+export async function callRateLimit(
   bucket: string,
   extra?: { email?: string; token?: string }
 ): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
@@ -524,6 +524,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signInWithGoogle: async () => {
+    const rl = await callRateLimit('oauth_initiate')
+    if (!rl.allowed) {
+      const wait = rl.retryAfterSeconds ?? 60
+      set({ error: `Too many sign-in attempts. Try again in ${wait}s.`, isLoading: false })
+      return
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

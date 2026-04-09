@@ -14,23 +14,32 @@ const WELCOME_POST = {
   title: 'Welcome to DEVCON+ — Your Tech Community Hub',
   body: `DEVCON+ is the unified platform for DEVCON Philippines — the country's largest volunteer tech community with 11 nationwide chapters, 60,000+ members, and 14,000+ annual attendees.
 
-## What you can do with DEVCON+
+## What's Live on DEVCON+
 
-### Register for Events
-Browse and register for 100+ annual chapter events across all 11 chapters. Get your QR ticket instantly or track your pending approval from chapter officers.
+### Event Registration
+Browse and register for chapter events across all 11 DEVCON chapters nationwide. Submit your registration and receive a QR ticket instantly — or track your pending approval from chapter officers in real time.
 
-### Earn Points+
-Every activity earns you points. Attend events, volunteer at chapters, share content, and more. Watch your score grow and unlock reward tiers.
+### QR Check-In
+Show your QR ticket at the venue and get checked in by an officer with a single scan. Points are awarded automatically the moment you're verified at the door.
 
-### Redeem Rewards
-Spend your Points+ on exclusive DEVCON merchandise, vouchers, and more. The Rewards catalog is launching soon — keep earning in the meantime.
+### Points+ System
+Every activity earns you Points+. Attend events, volunteer at chapters, refer new members, and more. Points are tracked live — check your balance and full transaction history anytime from the Points tab.
+
+### Rewards Catalog
+Spend your Points+ on exclusive DEVCON merchandise: lanyards, caps, shirts, mugs, keyboard, headset, and coffee vouchers. The catalog is live — rewards are claimable on-site at chapter events.
 
 ### Jobs Board
-Access global tech career opportunities curated for Filipino developers. Coming soon with the full MVP.
+Browse tech career opportunities curated for Filipino developers — from frontend and full-stack roles to DevOps, data engineering, and product management. Listings are updated regularly with both local and remote positions.
+
+### Volunteer at Events
+Sign up to volunteer at upcoming chapter events directly through the app. Approved volunteers earn bonus points on top of the standard attendance award.
+
+### Google Sign-In
+Create your account or log in instantly with Google — no separate password needed. Your profile, points, and registrations sync across all your devices.
 
 ---
 
-We're excited to have you in the community. Keep attending events, keep earning, and keep leveling up!
+DEVCON+ is built by the community, for the community. Keep attending events, keep earning, and keep leveling up.
 
 — The DEVCON+ Team`,
   category: 'devcon' as const,
@@ -38,7 +47,7 @@ We're excited to have you in the community. Keep attending events, keep earning,
   is_promoted: false,
   cover_image_url: '/photos/devcon-summit-group.jpg',
   author_id: null,
-  created_at: '2026-03-01T09:00:00Z',
+  created_at: '2026-04-09T09:00:00Z',
 }
 
 /** Renders a body string with basic markdown-like formatting:
@@ -114,38 +123,33 @@ export default function NewsDetail() {
 
   return (
     <div className="bg-slate-50 min-h-full pb-10">
-      {/* Hero image with sticky back button */}
-      <div className="relative">
-        {post.cover_image_url ? (
-          <img
-            src={post.cover_image_url}
-            alt={post.title}
-            className="w-full h-56 object-cover"
-          />
-        ) : (
-          <div className="w-full h-56 bg-primary flex items-center justify-center">
-            <Newspaper className="w-14 h-14 text-white/20" />
-          </div>
-        )}
+      {/* Hero image */}
+      {post.cover_image_url ? (
+        <img
+          src={post.cover_image_url}
+          alt={post.title}
+          className="w-full h-52 object-cover rounded-b-3xl"
+        />
+      ) : (
+        <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
+          <Newspaper className="w-14 h-14 text-white/20" />
+        </div>
+      )}
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
+      {/* Back button */}
+      <motion.button
+        onClick={() => navigate(-1)}
+        whileTap={{ scale: 0.95 }}
+        className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </motion.button>
 
-        {/* Back button */}
-        <motion.button
-          onClick={() => navigate(-1)}
-          whileTap={{ scale: 0.95 }}
-          className="absolute top-12 left-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center"
-        >
-          <ArrowLeft className="w-5 h-5 text-white" />
-        </motion.button>
-
-        {post.is_promoted && (
-          <div className="absolute top-12 right-4">
-            <PromotedBadge />
-          </div>
-        )}
-      </div>
+      {post.is_promoted && (
+        <div className="fixed top-14 right-4 z-20">
+          <PromotedBadge />
+        </div>
+      )}
 
       {/* Article content */}
       <motion.div

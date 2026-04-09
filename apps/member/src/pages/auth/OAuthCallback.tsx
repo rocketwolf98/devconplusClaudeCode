@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { AlertCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { callRateLimit } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin']
@@ -11,6 +12,7 @@ function friendlyOAuthError(code: string | null): string {
   if (!code) return 'Google sign-in failed. Please try again.'
   if (code === 'access_denied') return 'You cancelled Google sign-in. You can try again below.'
   if (code === 'server_error') return 'Google returned a server error. Please try again in a moment.'
+  if (code === 'rate_limited') return 'Too many sign-up attempts from this network. Please try again later.'
   return 'Google sign-in failed. Please try again.'
 }
 
@@ -41,6 +43,14 @@ export default function OAuthCallback() {
         .maybeSingle()
 
       if (!profile || !profile.chapter_id || !profile.username) {
+        // New user — gate account creation with an IP-based rate limit
+        const rl = await callRateLimit('oauth_signup')
+        if (!rl.allowed) {
+          await supabase.auth.signOut()
+          navigated.current = false  // allow error state to render
+          setError('rate_limited')
+          return
+        }
         navigate('/oauth-profile-complete', { replace: true })
       } else if (ORGANIZER_ROLES.includes(profile.role ?? '')) {
         navigate('/organizer', { replace: true })

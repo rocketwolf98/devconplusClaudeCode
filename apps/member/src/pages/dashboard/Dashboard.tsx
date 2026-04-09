@@ -7,6 +7,7 @@ import { useEventsStore } from '../../stores/useEventsStore'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useNotificationsStore } from '../../stores/useNotificationsStore'
+import { supabase } from '../../lib/supabase'
 import EventCard from '../../components/EventCard'
 import XPCard from '../../components/XPCard'
 import {
@@ -33,6 +34,8 @@ export default function Dashboard() {
   const { jobs, isLoading: jobsLoading, fetchJobs } = useJobsStore()
   const { transactions, loadTotalPoints, loadTransactions, isLoading: pointsLoading } = usePointsStore()
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
+  // IDs of all chapters in the user's region (including their own). Used to filter nearby events.
+  const [regionChapterIds, setRegionChapterIds] = useState<Set<string>>(new Set())
   const [bannerIdx, setBannerIdx] = useState(0)
   const [jobBannerIdx, setJobBannerIdx] = useState(0)
 
@@ -56,6 +59,31 @@ export default function Dashboard() {
     void loadTotalPoints()
     void loadTransactions()
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resolve the user's region and sibling chapter IDs for "Events near you" filtering.
+  useEffect(() => {
+    const chapterId = user?.chapter_id
+    if (!chapterId) return
+
+    void (async () => {
+      // Fetch the user's own chapter to get their region
+      const { data: ownChapter } = await supabase
+        .from('chapters')
+        .select('region')
+        .eq('id', chapterId)
+        .single()
+      if (!ownChapter?.region) return
+
+      // Then fetch all chapters in the same region
+      const { data: siblings } = await supabase
+        .from('chapters')
+        .select('id')
+        .eq('region', ownChapter.region)
+      if (siblings) {
+        setRegionChapterIds(new Set(siblings.map((c) => c.id)))
+      }
+    })()
+  }, [user?.chapter_id])
 
   useEffect(() => {
     const t = setInterval(() => setBannerIdx((i) => (i + 1) % Math.max(bannersLengthRef.current, 1)), 4000)
@@ -99,7 +127,24 @@ export default function Dashboard() {
   const safeIdx = bannerIdx % Math.max(banners.length, 1)
   const banner = banners[safeIdx] ?? banners[0]
   const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
-  const forYouEvents = events.filter((e) => e.status === 'upcoming' && !isEventArchived(e)).slice(0, 3)
+  const userChapterId = user?.chapter_id ?? null
+  const nearbyEvents = events
+    .filter((e) => {
+      if (e.status !== 'upcoming' || isEventArchived(e)) return false
+      // Chapter-locked events are only visible to members of that chapter
+      if (e.is_chapter_locked && e.chapter_id !== userChapterId) return false
+      // Show events from the user's region (or all events if region hasn't loaded yet)
+      if (regionChapterIds.size > 0 && e.chapter_id && !regionChapterIds.has(e.chapter_id)) return false
+      return true
+    })
+    .sort((a, b) => {
+      // Own chapter floats to the top; within each group sort by date
+      const aOwn = a.chapter_id === userChapterId ? 0 : 1
+      const bOwn = b.chapter_id === userChapterId ? 0 : 1
+      if (aOwn !== bOwn) return aOwn - bOwn
+      return new Date(a.event_date ?? 0).getTime() - new Date(b.event_date ?? 0).getTime()
+    })
+    .slice(0, 3)
   const promotedJobs = jobs
     .filter(j => j.is_promoted)
     .sort((a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime())
@@ -253,7 +298,7 @@ export default function Dashboard() {
         {/* Events For You */}
         <section>
           <div className="flex justify-between items-center px-4 mb-3">
-            <h2 className="text-base font-bold text-slate-900">Events For You</h2>
+            <h2 className="text-base font-bold text-slate-900">Events Near You</h2>
             <button
               onClick={() => navigate('/events')}
               className="text-xs text-primary font-semibold flex items-center gap-0.5"
@@ -272,7 +317,7 @@ export default function Dashboard() {
               initial="hidden"
               animate="visible"
             >
-              {forYouEvents.map((e) => (
+              {nearbyEvents.map((e) => (
                 <motion.div key={e.id} variants={cardItem}>
                   <EventCard event={e} compact />
                 </motion.div>

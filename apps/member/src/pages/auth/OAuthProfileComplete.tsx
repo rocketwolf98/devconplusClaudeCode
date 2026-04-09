@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { CheckCircle2, XCircle, Loader2, Link2 } from 'lucide-react'
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
@@ -33,7 +34,10 @@ export default function OAuthProfileComplete() {
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle')
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileInstance>(null)
+
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
@@ -86,8 +90,7 @@ export default function OAuthProfileComplete() {
       github_url:        data.github_url    || null,
       portfolio_url:     data.portfolio_url || null,
       role:              'member',
-      spendable_points:  0,
-      lifetime_points:   0,
+      // spendable_points and lifetime_points are managed by DB triggers — never overwrite them here
     }, { onConflict: 'id', ignoreDuplicates: false })
 
     if (error) {
@@ -100,8 +103,6 @@ export default function OAuthProfileComplete() {
 
     navigate('/organizer-code-gate', { replace: true })
   }
-
-  const watchedUsername = watch('username') ?? ''
 
   return (
     <div className="min-h-screen bg-blue flex flex-col">
@@ -226,9 +227,17 @@ export default function OAuthProfileComplete() {
             <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">{formError}</p>
           )}
 
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
+            onSuccess={(token) => setTurnstileToken(token)}
+            onExpire={() => setTurnstileToken(null)}
+            onError={() => setTurnstileToken(null)}
+          />
+
           <button
             type="submit"
-            disabled={isSubmitting || usernameStatus === 'taken' || usernameStatus === 'checking'}
+            disabled={isSubmitting || usernameStatus === 'taken' || usernameStatus === 'checking' || !turnstileToken}
             className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
           >
             {isSubmitting ? 'Saving…' : 'Continue'}

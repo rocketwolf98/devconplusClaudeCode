@@ -28,8 +28,8 @@ function getCorsHeaders(req: Request): Record<string, string> {
   return headers
 }
 
-type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade' | 'password_reset'
-const IP_BUCKETS: Bucket[] = ['login', 'login_ip', 'signup', 'username_check', 'password_reset']
+type Bucket = 'login' | 'login_ip' | 'signup' | 'username_check' | 'org_upgrade' | 'password_reset' | 'oauth_initiate' | 'oauth_signup'
+const IP_BUCKETS: Bucket[] = ['login', 'login_ip', 'signup', 'username_check', 'password_reset', 'oauth_initiate', 'oauth_signup']
 
 // Window durations matching the check_rate_limit RPC CASE statement.
 // Used only for retryAfterSeconds calculation — not for enforcement.
@@ -42,6 +42,8 @@ const WINDOW_MAP: Record<string, number> = {
   username_check:  60,
   org_upgrade:     90000,
   password_reset:  3600,
+  oauth_initiate:  300,   // 5 minutes — matches oauth_initiate SQL window
+  oauth_signup:    3600,  // 1 hour   — matches oauth_signup SQL window
 }
 
 // Extract the rightmost non-private IP from the x-forwarded-for chain.
