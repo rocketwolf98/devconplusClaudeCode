@@ -14,5 +14,9 @@ remix-of-devcon-connect/
 # Git worktrees
 .worktrees/
 
-# Local development files  
+# Local development files
 .mcp.json
+
+# AI tool config/cache
+.gemini/
+supabase/migrations/.claude/
