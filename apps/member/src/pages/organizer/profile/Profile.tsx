@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, User, CalendarDays, MapPin } from 'lucide-react'
+import { AltArrowRightOutline, LogoutOutline, UserOutline, CalendarOutline, MapPointOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -89,7 +89,7 @@ export function OrgProfile() {
           {chapterEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-8">
               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-2">
-                <CalendarDays className="w-5 h-5 text-slate-300" />
+                <CalendarOutline className="w-5 h-5 text-slate-300" />
               </div>
               <p className="text-sm font-semibold text-slate-500">No events yet</p>
               <p className="text-xs text-slate-400 mt-0.5">Events you create will appear here.</p>
@@ -118,7 +118,7 @@ export function OrgProfile() {
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
-                      <CalendarDays className="w-5 h-5 text-blue" />
+                      <CalendarOutline className="w-5 h-5 text-blue" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-900 leading-tight truncate">
@@ -128,7 +128,7 @@ export function OrgProfile() {
                         <p className="text-xs text-slate-400">{dateStr}</p>
                         {event.location && (
                           <p className="text-xs text-slate-400 flex items-center gap-0.5 truncate">
-                            <MapPin className="w-2.5 h-2.5 shrink-0" />
+                            <MapPointOutline className="w-2.5 h-2.5 shrink-0" />
                             {event.location}
                           </p>
                         )}
@@ -158,7 +158,7 @@ export function OrgProfile() {
                 {item.icon && <item.icon className="w-4 h-4 text-slate-400" />}
                 {item.label}
               </span>
-              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
             </button>
           ))}
         </div>
@@ -168,7 +168,7 @@ export function OrgProfile() {
           onClick={() => navigate('/home')}
           className="w-full py-3.5 bg-primary/10 text-primary text-sm font-bold rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
         >
-          <User className="w-4 h-4" />
+          <UserOutline className="w-4 h-4" />
           Switch to Member View
         </button>
 
@@ -177,7 +177,7 @@ export function OrgProfile() {
           onClick={handleLogout}
           className="w-full py-3.5 bg-red/10 text-red text-sm font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
         >
-          <LogOut className="w-4 h-4" />
+          <LogoutOutline className="w-4 h-4" />
           Sign Out
         </button>
 

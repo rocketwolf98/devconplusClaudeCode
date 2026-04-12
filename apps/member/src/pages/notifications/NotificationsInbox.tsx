@@ -1,7 +1,7 @@
 // apps/member/src/pages/notifications/NotificationsInbox.tsx
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, BellOff, X } from 'lucide-react'
+import { ArrowLeftOutline, BellOffOutline, CloseSquareOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotificationsStore } from '../../stores/useNotificationsStore'
 import { formatDate } from '../../lib/dates'
@@ -30,7 +30,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
           whileTap={{ scale: 0.95 }}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </motion.button>
         <div className="flex items-end justify-between">
           <div>
@@ -54,7 +54,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-8 pt-20 text-center">
             <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-5">
-              <BellOff className="w-9 h-9 text-slate-300" />
+              <BellOffOutline className="w-9 h-9 text-slate-300" />
             </div>
             <p className="text-base font-bold text-slate-700">No announcements yet</p>
             <p className="text-sm text-slate-400 mt-2 leading-relaxed">
@@ -78,7 +78,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
                   className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-slate-300 active:text-slate-500"
                   aria-label="Dismiss notification"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <CloseSquareOutline className="w-3.5 h-3.5" />
                 </motion.button>
                 <div className="flex items-center justify-between mb-2 pr-6">
                   <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">

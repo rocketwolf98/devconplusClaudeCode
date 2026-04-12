@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, Tag, Newspaper } from 'lucide-react'
+import { ArrowLeftOutline, CalendarOutline, TagOutline, DocumentTextOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useNewsStore } from '../../stores/useNewsStore'
 import PromotedBadge from '../../components/PromotedBadge'
@@ -132,7 +132,7 @@ export default function NewsDetail() {
         />
       ) : (
         <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <Newspaper className="w-14 h-14 text-white/20" />
+          <DocumentTextOutline className="w-14 h-14 text-white/20" />
         </div>
       )}
 
@@ -142,7 +142,7 @@ export default function NewsDetail() {
         whileTap={{ scale: 0.95 }}
         className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeftOutline className="w-5 h-5" />
       </motion.button>
 
       {post.is_promoted && (
@@ -161,12 +161,12 @@ export default function NewsDetail() {
         {/* Meta row */}
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-            <Tag className="w-3 h-3" />
+            <TagOutline className="w-3 h-3" />
             {CATEGORY_LABELS[post.category] ?? post.category}
           </span>
           {dateStr && (
             <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
-              <Calendar className="w-3 h-3" />
+              <CalendarOutline className="w-3 h-3" />
               {dateStr}
             </span>
           )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Pencil, ClipboardList } from 'lucide-react'
+import { ArrowLeftOutline, PenOutline, ClipboardListOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -92,13 +92,13 @@ export function OrgEventSummary() {
             onClick={() => navigate(-1)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeftOutline className="w-5 h-5 text-white" />
           </button>
           <button
             onClick={() => navigate(`/organizer/events/${id}/edit`)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <Pencil className="w-4 h-4 text-white" />
+            <PenOutline className="w-4 h-4 text-white" />
           </button>
         </div>
         <h1 className="text-xl font-bold text-white">{event.title}</h1>
@@ -187,7 +187,7 @@ export function OrgEventSummary() {
                 className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
               >
                 <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                  <ClipboardList className="w-7 h-7 text-slate-400" />
+                  <ClipboardListOutline className="w-7 h-7 text-slate-400" />
                 </div>
                 <p className="text-base font-bold text-slate-700">No registrants found</p>
                 <p className="text-sm text-slate-400 mt-1">

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 
 interface Props {
   password: string
@@ -74,8 +74,8 @@ export default function PasswordStrengthMeter({ password }: Props) {
           return (
             <div key={chipLabel} className="flex items-center gap-1">
               {ok
-                ? <CheckCircle2 className="w-3 h-3 text-green shrink-0" />
-                : <XCircle     className="w-3 h-3 text-slate-300 shrink-0" />
+                ? <CheckCircleOutline className="w-3 h-3 text-green shrink-0" />
+                : <CloseCircleOutline     className="w-3 h-3 text-slate-300 shrink-0" />
               }
               <span className={`text-xs ${ok ? 'text-slate-700' : 'text-slate-400'}`}>
                 {chipLabel}

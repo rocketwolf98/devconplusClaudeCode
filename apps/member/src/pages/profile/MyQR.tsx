@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, RefreshCw, QrCode, Star } from 'lucide-react'
+import { ArrowLeftOutline, RefreshOutline, QRCodeOutline, StarOutline } from 'solar-icon-set'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -126,7 +126,7 @@ export default function MyQR() {
         whileTap={{ scale: 0.92 }}
         className="fixed top-4 left-4 z-20 flex items-center gap-1.5 text-white/90 bg-white/20 backdrop-blur-md px-3.5 py-2 rounded-full text-sm font-medium border border-white/20"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeftOutline className="w-4 h-4" />
         Back
       </motion.button>
 
@@ -221,7 +221,7 @@ export default function MyQR() {
                   onClick={() => setRetryKey(k => k + 1)}
                   className="flex items-center gap-1.5 text-red text-xs font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
                 >
-                  <RefreshCw className="w-3 h-3" />
+                  <RefreshOutline className="w-3 h-3" />
                   Tap to retry
                 </motion.button>
               ) : (
@@ -241,7 +241,7 @@ export default function MyQR() {
               <div className="absolute -right-3 w-6 h-6 rounded-full bg-slate-100" />
             </div>
 
-            {/* Info rows */}
+            {/* InfoCircleOutline rows */}
             <div className="px-6 pt-4 pb-6 space-y-3">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Member</span>
@@ -250,7 +250,7 @@ export default function MyQR() {
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Points</span>
                 <span className="flex items-center gap-1 text-gold font-bold">
-                  <Star className="w-3 h-3 fill-gold text-gold" />
+                  <StarOutline className="w-3 h-3 fill-gold text-gold" />
                   {spendablePoints.toLocaleString()} XP
                 </span>
               </div>
@@ -272,7 +272,7 @@ export default function MyQR() {
           transition={{ delay: 0.5, duration: 0.3 }}
           className="flex items-start gap-2 w-full max-w-sm mt-4 bg-white/10 rounded-2xl px-4 py-3"
         >
-          <QrCode className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />
+          <QRCodeOutline className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />
           <p className="text-white/60 text-xs leading-relaxed">
             Show this QR at the venue entrance. Works for your next upcoming registered event at your chapter.
           </p>

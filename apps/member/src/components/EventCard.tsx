@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays } from 'lucide-react'
+import { CalendarOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import type { Event } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
@@ -32,7 +32,7 @@ function EventCard({ event, compact = false }: { event: Event; compact?: boolean
         />
       ) : (
         <div className={`w-full bg-primary flex items-center justify-center ${compact ? 'h-28' : 'h-36'}`}>
-          <CalendarDays className="w-12 h-12 text-white/20" />
+          <CalendarOutline className="w-12 h-12 text-white/20" />
         </div>
       )}
       <div className="p-4 pt-3">

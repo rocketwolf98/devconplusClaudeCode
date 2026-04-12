@@ -1,6 +1,6 @@
 // apps/member/src/components/AddToCalendarSheet.tsx
 import { AnimatePresence, motion } from 'framer-motion'
-import { CalendarDays, Download, ExternalLink } from 'lucide-react'
+import { CalendarOutline, DownloadOutline, ShareOutline } from 'solar-icon-set'
 import type { Event } from '@devcon-plus/supabase'
 
 interface Props {
@@ -16,7 +16,7 @@ function toManilaLocal(date: Date): string {
   return local.toISOString().replace(/[-:]/g, '').slice(0, 15)
 }
 
-/** Format a Date as YYYYMMDDTHHmmssZ (UTC, for Google Calendar) */
+/** Format a Date as YYYYMMDDTHHmmssZ (UTC, for Google CalendarOutline) */
 function toUTCCompact(date: Date): string {
   return date.toISOString().replace(/[:\-.]/g, '').slice(0, 15) + 'Z'
 }
@@ -104,13 +104,13 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                 className="w-full flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:bg-slate-100 transition-colors"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <CalendarDays className="w-5 h-5 text-primary" />
+                  <CalendarOutline className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-slate-900">Google Calendar</p>
                   <p className="text-xs text-slate-400">Opens in browser</p>
                 </div>
-                <ExternalLink className="w-4 h-4 text-slate-300" />
+                <ShareOutline className="w-4 h-4 text-slate-300" />
               </motion.button>
 
               <motion.button
@@ -119,11 +119,11 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                 className="w-full flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:bg-slate-100 transition-colors"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                  <Download className="w-5 h-5 text-slate-500" />
+                  <DownloadOutline className="w-5 h-5 text-slate-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-slate-900">iCal / Other Calendars</p>
-                  <p className="text-xs text-slate-400">Downloads .ics — Apple Calendar, Outlook</p>
+                  <p className="text-xs text-slate-400">Downloads .ics — Apple CalendarOutline, Outlook</p>
                 </div>
               </motion.button>
             </div>

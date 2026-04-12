@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Star, Zap } from 'lucide-react'
+import { ArrowLeftOutline, StarOutline, BoltOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -84,7 +84,7 @@ export default function PointsHistory() {
           whileTap={{ scale: 0.95 }}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </motion.button>
 
         <h1 className="text-white text-xl font-bold">Points History</h1>
@@ -93,7 +93,7 @@ export default function PointsHistory() {
         <div className="flex gap-2 mt-3">
           {/* Spendable */}
           <div className="flex-1 bg-white/15 rounded-2xl px-3 py-2.5 flex items-center gap-1.5">
-            <Star className="w-4 h-4 text-gold fill-gold shrink-0" />
+            <StarOutline className="w-4 h-4 text-gold fill-gold shrink-0" />
             <div>
               <p className="text-white font-black text-base leading-none">
                 {spendablePoints.toLocaleString()} pts
@@ -104,7 +104,7 @@ export default function PointsHistory() {
 
           {/* Lifetime */}
           <div className="flex-1 bg-white/15 rounded-2xl px-3 py-2.5 flex items-center gap-1.5">
-            <Zap className="w-4 h-4 text-white/70 shrink-0" />
+            <BoltOutline className="w-4 h-4 text-white/70 shrink-0" />
             <div>
               <p className="text-white font-black text-base leading-none">
                 {lifetimePoints.toLocaleString()} pts

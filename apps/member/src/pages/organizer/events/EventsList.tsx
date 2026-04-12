@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap, Archive } from 'lucide-react'
+import { MapPointOutline, BoltOutline, ArchiveOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
@@ -96,7 +96,7 @@ export function OrgEventsList() {
                     <div className="flex items-center gap-1.5 shrink-0">
                       {isEventArchived(event) && (
                         <span className="flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                          <Archive className="w-3 h-3" />
+                          <ArchiveOutline className="w-3 h-3" />
                           Past
                         </span>
                       )}
@@ -106,13 +106,13 @@ export function OrgEventsList() {
                   <p className="text-sm text-slate-400 mt-1">{formattedDate}</p>
                   {event.location && (
                     <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 shrink-0" />
+                      <MapPointOutline className="w-3 h-3 shrink-0" />
                       {event.location}
                     </p>
                   )}
                   <div className="flex items-center gap-3 mt-2">
                     <span className="text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
+                      <BoltOutline className="w-3 h-3" />
                       {event.points_value} XP
                     </span>
                     {event.requires_approval && (

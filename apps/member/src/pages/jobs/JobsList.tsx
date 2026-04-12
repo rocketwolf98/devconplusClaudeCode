@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Briefcase, ChevronDown, MapPin, ExternalLink,
-  Star, Users, FileText, Github, Trophy, Zap,
-} from 'lucide-react'
+import { CaseOutline, AltArrowDownOutline, MapPointOutline, ShareOutline, StarOutline, UsersGroupRoundedOutline, FileText, Github, Trophy, BoltOutline } from 'solar-icon-set'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { useMissionsStore } from '../../stores/useMissionsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -68,7 +65,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
   if (jobs.length === 0) return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Briefcase className="w-8 h-8 text-primary/50" />
+        <CaseOutline className="w-8 h-8 text-primary/50" />
       </div>
       <h2 className="text-base font-bold text-slate-900 mb-1">No listings yet</h2>
       <p className="text-sm text-slate-500">Check back soon for new opportunities.</p>
@@ -104,13 +101,13 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     </span>
                     {job.location && (
                       <span className="flex items-center gap-1 text-xs text-slate-400">
-                        <MapPin className="w-3 h-3 shrink-0" />{job.location}
+                        <MapPointOutline className="w-3 h-3 shrink-0" />{job.location}
                       </span>
                     )}
                   </div>
                 </div>
                 <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="shrink-0 mt-0.5">
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <AltArrowDownOutline className="w-4 h-4 text-slate-400" />
                 </motion.div>
               </div>
             </motion.button>
@@ -130,7 +127,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     {job.apply_url && (
                       <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 w-full bg-primary text-white font-semibold text-sm py-3 rounded-xl">
-                        Apply Now <ExternalLink className="w-4 h-4" />
+                        Apply Now <ShareOutline className="w-4 h-4" />
                       </a>
                     )}
                   </div>
@@ -222,7 +219,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
   if (missions.length === 0) return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Zap className="w-8 h-8 text-primary/50" />
+        <BoltOutline className="w-8 h-8 text-primary/50" />
       </div>
       <h2 className="text-base font-bold text-slate-900 mb-1">No missions yet</h2>
       <p className="text-sm text-slate-500">Check back soon for new bounties.</p>
@@ -282,7 +279,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     </span>
                     {/* XP */}
                     <span className="flex items-center gap-1 text-xs font-bold text-gold">
-                      <Star className="w-3 h-3 fill-gold text-gold" />
+                      <StarOutline className="w-3 h-3 fill-gold text-gold" />
                       +{mission.xp_reward} XP
                     </span>
                   </div>
@@ -290,7 +287,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                   {/* Live stats */}
                   <div className="flex items-center gap-3 mt-2">
                     <span className="flex items-center gap-1 text-xs text-slate-400">
-                      <Users className="w-3 h-3" />{participantCount} joined
+                      <UsersGroupRoundedOutline className="w-3 h-3" />{participantCount} joined
                     </span>
                     <span className="flex items-center gap-1 text-xs text-slate-400">
                       <FileText className="w-3 h-3" />{submissionCount} submitted
@@ -300,7 +297,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
 
                 {!isClaimed && (
                   <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="shrink-0 mt-1">
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <AltArrowDownOutline className="w-4 h-4 text-slate-400" />
                   </motion.div>
                 )}
               </div>
@@ -328,7 +325,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
                         <Github className="w-4 h-4 shrink-0" />
                         <span className="truncate text-xs">{mission.github_url}</span>
-                        <ExternalLink className="w-3 h-3 shrink-0 ml-auto" />
+                        <ShareOutline className="w-3 h-3 shrink-0 ml-auto" />
                       </a>
                     )}
 

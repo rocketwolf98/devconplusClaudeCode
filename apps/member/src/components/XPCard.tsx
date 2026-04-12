@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Star, Zap } from 'lucide-react'
+import { StarOutline, BoltOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { usePointsStore } from '../stores/usePointsStore'
 
@@ -16,7 +16,7 @@ export default function XPCard() {
 
       {/* Main points number */}
       <div className="flex items-end gap-2 mb-1">
-        <Star className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
+        <StarOutline className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
         <span className="text-4xl font-black text-slate-900 leading-none">
           {spendablePoints.toLocaleString()}
         </span>
@@ -25,7 +25,7 @@ export default function XPCard() {
 
       {/* Lifetime points */}
       <div className="flex items-center gap-1 mb-4">
-        <Zap className="w-3 h-3 text-slate-400 shrink-0" />
+        <BoltOutline className="w-3 h-3 text-slate-400 shrink-0" />
         <span className="text-xs text-slate-400">
           {lifetimePoints.toLocaleString()} lifetime pts
         </span>

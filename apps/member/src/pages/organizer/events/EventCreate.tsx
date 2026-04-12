@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ImagePlus, X } from 'lucide-react'
+import { ArrowLeftOutline, GalleryAddOutline, CloseSquareOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -126,7 +126,7 @@ export function OrgEventCreate() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // ── Tag handlers ──────────────────────────────────────────────────────────
+  // ── TagOutline handlers ──────────────────────────────────────────────────────────
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -214,7 +214,7 @@ export function OrgEventCreate() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <h1 className="text-xl font-bold text-white">Create Event</h1>
         <p className="text-white/60 text-sm mt-0.5">Fill in the details for your chapter event.</p>
@@ -275,7 +275,7 @@ export function OrgEventCreate() {
                 onClick={removeCover}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
               >
-                <X className="w-4 h-4 text-white" />
+                <CloseSquareOutline className="w-4 h-4 text-white" />
               </button>
             </div>
           ) : (
@@ -284,7 +284,7 @@ export function OrgEventCreate() {
               onClick={() => fileInputRef.current?.click()}
               className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue hover:text-blue transition-colors mb-3"
             >
-              <ImagePlus className="w-6 h-6" />
+              <GalleryAddOutline className="w-6 h-6" />
               <span className="text-xs font-medium">Tap to upload cover image</span>
               <span className="text-[10px] text-slate-300">JPG, PNG, WebP — optional</span>
             </button>
@@ -519,7 +519,7 @@ export function OrgEventCreate() {
               </div>
             </div>
 
-            {/* Ticket price toggle */}
+            {/* TicketOutline price toggle */}
             <div>
               <label className={labelClass}>Ticket Price</label>
               <div className="flex gap-3">

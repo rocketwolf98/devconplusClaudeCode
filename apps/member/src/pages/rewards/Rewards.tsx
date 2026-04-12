@@ -2,10 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
-import {
-  ArrowLeft, Star, Info, X, Loader2,
-  Award, Lock, Gift, CheckCircle,
-} from 'lucide-react'
+import { ArrowLeftOutline, StarOutline, InfoCircleOutline, CloseSquareOutline, RefreshCircleOutline, CupFirstOutline, Lock, GiftOutline, CheckCircleOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Reward } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -15,10 +12,10 @@ import { staggerContainer, cardItem, slideUp, backdrop } from '../../lib/animati
 
 // Unique gradient + icon per reward slot — cycles if there are more than 4
 const CARD_GRADIENTS = [
-  { gradient: 'from-navy to-primary',     Icon: Award  },
-  { gradient: 'from-purple-800 to-blue-600', Icon: Gift  },
-  { gradient: 'from-teal-700 to-emerald-500', Icon: Star },
-  { gradient: 'from-rose-700 to-promoted',  Icon: Award  },
+  { gradient: 'from-navy to-primary',     Icon: CupFirstOutline  },
+  { gradient: 'from-purple-800 to-blue-600', Icon: GiftOutline  },
+  { gradient: 'from-teal-700 to-emerald-500', Icon: StarOutline },
+  { gradient: 'from-rose-700 to-promoted',  Icon: CupFirstOutline  },
 ] as const satisfies ReadonlyArray<{ gradient: string; Icon: React.ElementType }>
 
 // ── Redemption bottom sheet ──────────────────────────────────────────────────
@@ -98,7 +95,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
                   className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
                   aria-label="Close"
                 >
-                  <X className="w-4 h-4 text-slate-500" />
+                  <CloseSquareOutline className="w-4 h-4 text-slate-500" />
                 </motion.button>
               )}
             </div>
@@ -111,12 +108,12 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
                   {/* Reward summary */}
                   <div className="bg-slate-50 rounded-2xl p-4 mb-5 flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
-                      <Award className="w-6 h-6 text-primary" />
+                      <CupFirstOutline className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <p className="font-semibold text-slate-900 text-sm">{reward.name}</p>
                       <p className="text-xs font-bold flex items-center gap-0.5 mt-0.5 text-gold">
-                        <Star className="w-3 h-3 fill-gold text-gold" />
+                        <StarOutline className="w-3 h-3 fill-gold text-gold" />
                         {reward.points_cost.toLocaleString()} pts
                       </p>
                     </div>
@@ -169,7 +166,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
 
               {sheetState === 'loading' && (
                 <div className="flex flex-col items-center py-10 gap-3">
-                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  <RefreshCircleOutline className="w-8 h-8 text-primary animate-spin" />
                   <p className="text-sm text-slate-500">Processing redemption…</p>
                 </div>
               )}
@@ -177,7 +174,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
               {sheetState === 'success' && (
                 <div className="flex flex-col items-center py-10 gap-3 text-center">
                   <div className="w-16 h-16 rounded-full bg-green/10 flex items-center justify-center">
-                    <CheckCircle className="w-8 h-8 text-green" />
+                    <CheckCircleOutline className="w-8 h-8 text-green" />
                   </div>
                   <p className="text-base font-bold text-slate-900">Redeemed!</p>
                   <p className="text-sm text-slate-500 leading-relaxed">
@@ -306,7 +303,7 @@ function RewardCard({ reward, index, spendablePoints, onRedeem }: RewardCardProp
         {/* Points + CTA row */}
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-slate-100">
           <div className="flex items-center gap-1.5">
-            <Star className="w-4 h-4 fill-gold text-gold shrink-0" />
+            <StarOutline className="w-4 h-4 fill-gold text-gold shrink-0" />
             <span className="text-base font-black text-slate-900 leading-none">
               {reward.points_cost.toLocaleString()}
             </span>
@@ -369,14 +366,14 @@ export default function Rewards() {
             className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0"
             aria-label="Go back"
           >
-            <ArrowLeft className="w-4 h-4 text-white" />
+            <ArrowLeftOutline className="w-4 h-4 text-white" />
           </motion.button>
           <h1 className="text-lg font-bold text-white">Rewards</h1>
         </div>
 
         {/* Spendable balance pill */}
         <div className="flex items-center gap-3 bg-white/15 rounded-2xl px-4 py-3">
-          <Star className="w-5 h-5 fill-gold text-gold shrink-0" />
+          <StarOutline className="w-5 h-5 fill-gold text-gold shrink-0" />
           <div>
             <p className="text-white/60 text-[10px] font-semibold uppercase tracking-wide leading-none mb-0.5">
               Available to Spend
@@ -398,7 +395,7 @@ export default function Rewards() {
         ) : rewards.length === 0 ? (
           <div className="flex flex-col items-center justify-center pt-20 px-8 text-center">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <Award className="w-8 h-8 text-primary/50" />
+              <CupFirstOutline className="w-8 h-8 text-primary/50" />
             </div>
             <h3 className="text-base font-bold text-slate-900 mb-1">No rewards yet</h3>
             <p className="text-sm text-slate-500">Check back soon — exciting rewards are coming!</p>
@@ -431,7 +428,7 @@ export default function Rewards() {
             >
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Info className="w-3.5 h-3.5 text-primary" />
+                  <InfoCircleOutline className="w-3.5 h-3.5 text-primary" />
                 </div>
                 <p className="text-sm font-bold text-slate-700">How Rewards Work</p>
               </div>

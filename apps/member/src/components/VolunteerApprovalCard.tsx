@@ -1,5 +1,5 @@
 import { memo, useState } from 'react'
-import { Check, X, RotateCcw, Heart, ChevronDown, ChevronUp, Phone, AtSign } from 'lucide-react'
+import { CheckCircleOutline, CloseSquareOutline, RestartOutline, HeartOutline, AltArrowDownOutline, AltArrowUpOutline, PhoneOutline, LetterOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { StatusBadge } from './StatusBadge'
 import type { OrgVolunteerApplication } from '../stores/useOrgVolunteerStore'
@@ -73,9 +73,9 @@ function VolunteerApprovalCardComponent({
             className="text-xs text-blue font-semibold mt-1 flex items-center gap-0.5"
           >
             {reasonExpanded ? (
-              <>Show less <ChevronUp className="w-3 h-3" /></>
+              <>Show less <AltArrowUpOutline className="w-3 h-3" /></>
             ) : (
-              <>Show more <ChevronDown className="w-3 h-3" /></>
+              <>Show more <AltArrowDownOutline className="w-3 h-3" /></>
             )}
           </button>
         )}
@@ -86,13 +86,13 @@ function VolunteerApprovalCardComponent({
         <div className="flex flex-wrap gap-2 mb-3">
           {application.phone_number && (
             <span className="flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded-full px-2.5 py-1">
-              <Phone className="w-3 h-3" />
+              <PhoneOutline className="w-3 h-3" />
               {application.phone_number}
             </span>
           )}
           {application.social_media_handle && (
             <span className="flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded-full px-2.5 py-1">
-              <AtSign className="w-3 h-3" />
+              <LetterOutline className="w-3 h-3" />
               {application.social_media_handle}
             </span>
           )}
@@ -108,7 +108,7 @@ function VolunteerApprovalCardComponent({
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <X className="w-3.5 h-3.5" />
+            <CloseSquareOutline className="w-3.5 h-3.5" />
             Reject
           </motion.button>
           <motion.button
@@ -117,7 +117,7 @@ function VolunteerApprovalCardComponent({
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <Check className="w-3.5 h-3.5" />
+            <CheckCircleOutline className="w-3.5 h-3.5" />
             Approve
           </motion.button>
         </div>
@@ -128,7 +128,7 @@ function VolunteerApprovalCardComponent({
           <p className={`text-xs font-semibold flex items-center gap-1 ${
             application.status === 'approved' ? 'text-green' : 'text-red'
           }`}>
-            <Heart className="w-3.5 h-3.5 shrink-0" />
+            <HeartOutline className="w-3.5 h-3.5 shrink-0" />
             {application.status === 'approved' ? 'Volunteer approved' : 'Application rejected'}
           </p>
           <motion.button
@@ -137,7 +137,7 @@ function VolunteerApprovalCardComponent({
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <RotateCcw className="w-3 h-3" />
+            <RestartOutline className="w-3 h-3" />
             Undo
           </motion.button>
         </div>

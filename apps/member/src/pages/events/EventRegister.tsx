@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeftOutline } from 'solar-icon-set'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { supabase } from '../../lib/supabase'
@@ -230,7 +230,7 @@ export default function EventRegister() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <h1 className="text-white text-xl font-bold">Register</h1>
         <p className="text-white/60 text-sm mt-1">{event.title}</p>

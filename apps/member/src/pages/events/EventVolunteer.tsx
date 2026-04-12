@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Heart, CheckCircle, Loader2, CalendarDays, MapPin } from 'lucide-react'
+import { ArrowLeftOutline, HeartOutline, CheckCircleOutline, RefreshCircleOutline, CalendarOutline, MapPointOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,7 +19,7 @@ function VolunteerPageHeader({ event, onBack }: { event: { title: string }; onBa
         onClick={onBack}
         className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
       >
-        <ArrowLeft className="w-5 h-5 text-white" />
+        <ArrowLeftOutline className="w-5 h-5 text-white" />
       </motion.button>
       <h1 className="text-white text-xl font-bold">Volunteer Application</h1>
       <p className="text-white/60 text-sm mt-1">{event.title}</p>
@@ -88,7 +88,7 @@ export default function EventVolunteer() {
             animate="visible"
             className="bg-white rounded-2xl p-5 shadow-card space-y-3 text-center"
           >
-            <Heart className="w-10 h-10 text-primary mx-auto" />
+            <HeartOutline className="w-10 h-10 text-primary mx-auto" />
             <p className="text-slate-700 font-semibold">Application Submitted</p>
             <p className="text-sm text-slate-500">
               Status:{' '}
@@ -140,7 +140,7 @@ export default function EventVolunteer() {
             animate="visible"
             className="bg-white rounded-2xl p-6 shadow-card text-center space-y-4"
           >
-            <CheckCircle className="w-14 h-14 text-green mx-auto" />
+            <CheckCircleOutline className="w-14 h-14 text-green mx-auto" />
             <div>
               <h2 className="text-slate-900 text-lg font-bold">Application Submitted!</h2>
               <p className="text-sm text-slate-500 mt-1 leading-relaxed">
@@ -191,14 +191,14 @@ export default function EventVolunteer() {
             />
           ) : (
             <div className="w-full h-32 bg-primary/10 rounded-xl mb-3 flex items-center justify-center">
-              <CalendarDays className="w-10 h-10 text-primary/30" />
+              <CalendarOutline className="w-10 h-10 text-primary/30" />
             </div>
           )}
           <h2 className="text-slate-900 font-bold text-base">{event.title}</h2>
           <p className="text-xs text-slate-400">{dateStr}</p>
           {event.location && (
             <p className="text-xs text-slate-500 flex items-center gap-1">
-              <MapPin className="w-3 h-3 shrink-0" />
+              <MapPointOutline className="w-3 h-3 shrink-0" />
               {event.location}
             </p>
           )}
@@ -222,10 +222,10 @@ export default function EventVolunteer() {
             )}
           </div>
 
-          {/* Phone number */}
+          {/* PhoneOutline number */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">
-              Phone Number <span className="text-slate-400 text-xs font-normal">(optional)</span>
+              PhoneOutline Number <span className="text-slate-400 text-xs font-normal">(optional)</span>
             </label>
             <input
               {...register('phone_number')}
@@ -264,12 +264,12 @@ export default function EventVolunteer() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <RefreshCircleOutline className="w-5 h-5 animate-spin" />
                 Submitting…
               </>
             ) : (
               <>
-                <Heart className="w-5 h-5" />
+                <HeartOutline className="w-5 h-5" />
                 Submit Volunteer Application
               </>
             )}

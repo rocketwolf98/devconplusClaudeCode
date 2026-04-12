@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { Home, CalendarDays, ScanLine, Gift, User } from 'lucide-react'
+import { HomeOutline, CalendarOutline, ScannerOutline, GiftOutline, UserOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import type { SolarIcon } from '../lib/icons'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -12,18 +12,18 @@ import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const LEFT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
-  { path: '/organizer',         label: 'Home',    Icon: Home, end: true  },
-  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
+  { path: '/organizer',         label: 'Home',    Icon: HomeOutline, end: true  },
+  { path: '/organizer/rewards', label: 'Rewards', Icon: GiftOutline, end: false },
 ]
 
 const RIGHT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
-  { path: '/organizer/events',  label: 'Events',  Icon: CalendarDays, end: false },
-  { path: '/organizer/profile', label: 'Profile', Icon: User,         end: false },
+  { path: '/organizer/events',  label: 'Events',  Icon: CalendarOutline, end: false },
+  { path: '/organizer/profile', label: 'Profile', Icon: UserOutline,         end: false },
 ]
 
 const ALL_TABS = [
   ...LEFT_TABS,
-  { path: '/organizer/scan', label: 'Scan', Icon: ScanLine, end: false },
+  { path: '/organizer/scan', label: 'Scan', Icon: ScannerOutline, end: false },
   ...RIGHT_TABS,
 ]
 
@@ -123,7 +123,7 @@ export default function OrganizerLayout() {
           <Outlet />
         </div>
 
-        {/* Floating pill bottom nav — Home | Rewards | ●Scan● | Events | Profile */}
+        {/* Floating pill bottom nav — HomeOutline | Rewards | ●Scan● | Events | Profile */}
         <div className="fixed bottom-4 left-4 right-4 z-50">
           <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-card border border-slate-100 px-2 py-2">
 
@@ -158,7 +158,7 @@ export default function OrganizerLayout() {
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <ScanLine className="w-6 h-6 text-white" />
+                  <ScannerOutline className="w-6 h-6 text-white" />
                 </motion.div>
               )}
             </NavLink>

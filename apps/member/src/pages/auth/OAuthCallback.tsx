@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { AlertCircle } from 'lucide-react'
+import { DangerTriangleOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import { callRateLimit } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
@@ -90,7 +90,7 @@ export default function OAuthCallback() {
         </div>
         <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-12 pb-10 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
-            <AlertCircle className="w-7 h-7 text-red" />
+            <DangerTriangleOutline className="w-7 h-7 text-red" />
           </div>
           <p className="text-base font-bold text-slate-800 mb-2">Sign-in failed</p>
           <p className="text-sm text-slate-500 mb-8 max-w-xs">{error}</p>

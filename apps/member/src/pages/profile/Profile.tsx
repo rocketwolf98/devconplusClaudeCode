@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Award, Check, ChevronRight, Download, LogOut, Shield, Star } from 'lucide-react'
+import { CupFirstOutline, CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, StarOutline } from 'solar-icon-set'
 import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
 import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -90,12 +90,12 @@ export default function Profile() {
             {ROLE_DISPLAY_NAMES[user?.role ?? 'member']}
           </span>
           <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1 text-white text-xs font-semibold">
-            <Star className="w-3 h-3 fill-gold text-gold" />
+            <StarOutline className="w-3 h-3 fill-gold text-gold" />
             {spendablePoints.toLocaleString()} XP
           </span>
           {prestigeUnlocked && (
             <span className="inline-flex items-center gap-1 bg-gold/10 text-gold border border-gold/30 rounded-full px-2 py-0.5 text-xs font-semibold">
-              <Award className="w-4 h-4 fill-gold text-gold" />
+              <CupFirstOutline className="w-4 h-4 fill-gold text-gold" />
               Prestige Access
             </span>
           )}
@@ -120,7 +120,7 @@ export default function Profile() {
                     boxShadow: isActive ? `0 0 0 2px white, 0 0 0 4px ${theme.hex}` : 'none',
                   }}
                 >
-                  {isActive && <Check className="w-4 h-4 text-white" />}
+                  {isActive && <CheckCircleOutline className="w-4 h-4 text-white" />}
                 </button>
               )
             })}
@@ -138,7 +138,7 @@ export default function Profile() {
               }`}
             >
               <span className="text-sm font-semibold text-slate-900">{item.label}</span>
-              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
             </button>
           ))}
           {!isInStandaloneMode && (canInstall || isIos) && (
@@ -148,16 +148,16 @@ export default function Profile() {
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Download className="w-4 h-4 text-primary" />
+                  <DownloadOutline className="w-4 h-4 text-primary" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-900">Add to Home Screen</p>
+                  <p className="text-sm font-semibold text-slate-900">Add to HomeOutline Screen</p>
                   {isIos && !canInstall && (
-                    <p className="text-xs text-slate-400 mt-0.5">Tap Share → "Add to Home Screen"</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Tap Share → "Add to HomeOutline Screen"</p>
                   )}
                 </div>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
             </button>
           )}
           <button
@@ -165,7 +165,7 @@ export default function Profile() {
             className="w-full px-4 py-4 flex items-center justify-between text-left border-t border-slate-100 hover:bg-slate-50 transition-colors"
           >
             <span className="text-sm font-semibold text-slate-900">Help & Support</span>
-            <ChevronRight className="w-4 h-4 text-slate-300" />
+            <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
           </button>
         </div>
 
@@ -175,7 +175,7 @@ export default function Profile() {
             onClick={() => navigate('/organizer')}
             className="w-full py-3.5 bg-blue/10 text-blue text-sm font-bold rounded-2xl hover:bg-blue/20 transition-colors flex items-center justify-center gap-2"
           >
-            <Shield className="w-4 h-4" />
+            <ShieldOutline className="w-4 h-4" />
             Officer Portal
           </button>
         )}
@@ -185,7 +185,7 @@ export default function Profile() {
           onClick={() => { signOut(); navigate('/sign-in') }}
           className="w-full py-3.5 bg-red/10 text-red text-sm font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
         >
-          <LogOut className="w-4 h-4" />
+          <LogoutOutline className="w-4 h-4" />
           Sign Out
         </button>
 

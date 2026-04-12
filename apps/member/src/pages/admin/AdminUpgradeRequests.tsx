@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 
@@ -164,7 +164,7 @@ export default function AdminUpgradeRequests() {
                           disabled={actionLoading === req.id}
                           className="flex items-center gap-1 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 disabled:opacity-50 transition-colors"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve
                         </button>
                         <button
@@ -172,7 +172,7 @@ export default function AdminUpgradeRequests() {
                           disabled={actionLoading === req.id}
                           className="flex items-center gap-1 px-3 py-1.5 bg-red/10 text-red text-xs font-bold rounded-lg hover:bg-red/20 disabled:opacity-50 transition-colors"
                         >
-                          <XCircle className="w-3.5 h-3.5" />
+                          <CloseCircleOutline className="w-3.5 h-3.5" />
                           Reject
                         </button>
                       </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { AddCircleOutline, TrashBinTrashOutline, CloseSquareOutline } from 'solar-icon-set'
 import { z } from 'zod'
 import type { DevconCategory } from '@devcon-plus/supabase'
 
@@ -203,7 +203,7 @@ export function CustomFieldsBuilder({
               onClick={() => removeField(field.id)}
               className="w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-red hover:bg-red/10 transition-colors"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <TrashBinTrashOutline className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -251,7 +251,7 @@ export function CustomFieldsBuilder({
                     onClick={() => removeOption(field.id, opt)}
                     className="w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-red hover:bg-red/10 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <CloseSquareOutline className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
@@ -268,7 +268,7 @@ export function CustomFieldsBuilder({
                   onClick={() => addOption(field.id)}
                   className="w-9 h-9 rounded-xl bg-blue text-white flex items-center justify-center shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  <AddCircleOutline className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -281,7 +281,7 @@ export function CustomFieldsBuilder({
         onClick={addField}
         className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-blue hover:text-blue text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
       >
-        <Plus className="w-3.5 h-3.5" />
+        <AddCircleOutline className="w-3.5 h-3.5" />
         Add Question
       </button>
     </div>

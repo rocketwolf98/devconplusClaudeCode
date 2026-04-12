@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { isValidUUID } from '../../../lib/validation'
-import { ArrowLeft, ImagePlus, X, Pencil, AlertTriangle } from 'lucide-react'
+import { ArrowLeftOutline, GalleryAddOutline, CloseSquareOutline, PenOutline, DangerTriangleOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -157,7 +157,7 @@ export function OrgEventEdit() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // ── Tag handlers ────────────────────────────────────────────────────────
+  // ── TagOutline handlers ────────────────────────────────────────────────────────
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
@@ -268,10 +268,10 @@ export function OrgEventEdit() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <div className="flex items-center gap-2">
-          <Pencil className="w-4 h-4 text-white/60" />
+          <PenOutline className="w-4 h-4 text-white/60" />
           <h1 className="text-xl font-bold text-white">Edit Event</h1>
         </div>
         <p className="text-white/60 text-sm mt-0.5">Update your event details.</p>
@@ -320,7 +320,7 @@ export function OrgEventEdit() {
                 onClick={removeCover}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
               >
-                <X className="w-4 h-4 text-white" />
+                <CloseSquareOutline className="w-4 h-4 text-white" />
               </button>
             </div>
           ) : (
@@ -329,7 +329,7 @@ export function OrgEventEdit() {
               onClick={() => fileInputRef.current?.click()}
               className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue hover:text-blue transition-colors mb-3"
             >
-              <ImagePlus className="w-6 h-6" />
+              <GalleryAddOutline className="w-6 h-6" />
               <span className="text-xs font-medium">Tap to upload cover image</span>
               <span className="text-[10px] text-slate-300">JPG, PNG, WebP — optional</span>
             </button>
@@ -727,7 +727,7 @@ export function OrgEventEdit() {
                 <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
                 <div className="flex flex-col items-center text-center mb-6">
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
-                    <AlertTriangle className="w-7 h-7 text-red" />
+                    <DangerTriangleOutline className="w-7 h-7 text-red" />
                   </div>
                   <h2 className="text-base font-bold text-slate-900 mb-1">Delete Event?</h2>
                   <p className="text-sm text-slate-500">
@@ -755,7 +755,7 @@ export function OrgEventEdit() {
                 <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
                 <div className="flex flex-col items-center text-center mb-6">
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
-                    <AlertTriangle className="w-7 h-7 text-red" />
+                    <DangerTriangleOutline className="w-7 h-7 text-red" />
                   </div>
                   <h2 className="text-base font-bold text-slate-900 mb-1">Are you sure?</h2>
                   <p className="text-sm text-slate-500">

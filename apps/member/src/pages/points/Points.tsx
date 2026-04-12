@@ -1,8 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import {
-  Ticket, Mic2, HandHeart, Coffee,
-  Heart, Share2, Users, Star, Zap, Copy, Check,
-} from 'lucide-react'
+import { TicketOutline, Mic2, HandHeart, Coffee, HeartOutline, Share2, UsersGroupRoundedOutline, StarOutline, BoltOutline, CopyOutline, CheckCircleOutline } from 'solar-icon-set'
 import type { SolarIcon } from '../../lib/icons'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -14,15 +11,15 @@ import { staggerContainer, cardItem } from '../../lib/animation'
 const PRESTIGE_THRESHOLD = 3000
 
 const EARN: { Icon: SolarIcon; label: string; pts: string; note?: string }[] = [
-  { Icon: Ticket,    label: 'Attend an Event',     pts: '5–10 pts',  note: '10 pts with boost' },
+  { Icon: TicketOutline,    label: 'Attend an Event',     pts: '5–10 pts',  note: '10 pts with boost' },
   { Icon: HandHeart, label: 'Volunteer at Event',  pts: '+35 pts',   note: '+30 bonus on top of attendance' },
-  { Icon: Users,     label: 'Refer a Friend',      pts: '+100 pts',  note: 'Max 1,000 pts/year' },
+  { Icon: UsersGroupRoundedOutline,     label: 'Refer a Friend',      pts: '+100 pts',  note: 'Max 1,000 pts/year' },
   { Icon: Mic2,      label: 'Speak at an Event',   pts: '700 pts'    },
   { Icon: Coffee,    label: 'Brown Bag Session',   pts: '250 pts'    },
 ]
 
 const SHARE: { Icon: SolarIcon; label: string; pts: string }[] = [
-  { Icon: Heart,  label: 'Like Content',        pts: '5 pts'     },
+  { Icon: HeartOutline,  label: 'Like Content',        pts: '5 pts'     },
   { Icon: Share2, label: 'Share + Submit Link', pts: '10–25 pts' },
 ]
 
@@ -69,7 +66,7 @@ export default function Points() {
         <div className="mt-3 space-y-1.5">
           {/* Spendable */}
           <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 text-gold fill-gold shrink-0" />
+            <StarOutline className="w-4 h-4 text-gold fill-gold shrink-0" />
             <span className="text-white font-black text-lg leading-none">
               {spendablePoints.toLocaleString()} pts
             </span>
@@ -78,7 +75,7 @@ export default function Points() {
 
           {/* Lifetime */}
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-white/70 shrink-0" />
+            <BoltOutline className="w-4 h-4 text-white/70 shrink-0" />
             <span className="text-white/90 font-semibold text-sm leading-none">
               {lifetimePoints.toLocaleString()} lifetime pts
             </span>
@@ -174,7 +171,7 @@ export default function Points() {
         {/* ── Share & Earn referral card (always visible) ──────── */}
         <div className="mt-4 bg-white rounded-2xl shadow-card p-4">
           <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-primary" />
+            <UsersGroupRoundedOutline className="w-4 h-4 text-primary" />
             <p className="font-bold text-slate-900 text-sm">Share & Earn</p>
           </div>
           <p className="text-xs text-slate-500 mb-3">
@@ -203,12 +200,12 @@ export default function Points() {
               >
                 {copied ? (
                   <>
-                    <Check className="w-4 h-4" />
+                    <CheckCircleOutline className="w-4 h-4" />
                     <span>Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4" />
+                    <CopyOutline className="w-4 h-4" />
                     <span>Copy</span>
                   </>
                 )}
@@ -222,7 +219,7 @@ export default function Points() {
 
           {!referralsLoading && (referralCode !== null || referralCount > 0) && (
             <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
-              <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <UsersGroupRoundedOutline className="w-3.5 h-3.5 text-slate-400 shrink-0" />
               <span>
                 Referred:{' '}
                 <span className="font-semibold text-slate-700">{referralCount} friend{referralCount !== 1 ? 's' : ''}</span>

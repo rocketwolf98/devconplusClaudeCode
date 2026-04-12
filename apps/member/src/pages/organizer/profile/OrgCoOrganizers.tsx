@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Copy, Check, Users, Clock, Trash2 } from 'lucide-react'
+import { ArrowLeftOutline, CopyOutline, CheckCircleOutline, UsersGroupRoundedOutline, ClockCircleOutline, TrashBinTrashOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -189,7 +189,7 @@ export function OrgCoOrganizers() {
           className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"
           whileTap={{ scale: 0.95 }}
         >
-          <ArrowLeft className="w-4 h-4 text-white" />
+          <ArrowLeftOutline className="w-4 h-4 text-white" />
         </motion.button>
         <h1 className="text-lg font-black text-white">Co-Organizers</h1>
       </div>
@@ -224,9 +224,9 @@ export function OrgCoOrganizers() {
                   }`}
                 >
                   {copied ? (
-                    <><Check className="w-3.5 h-3.5" /> Copied!</>
+                    <><CheckCircleOutline className="w-3.5 h-3.5" /> Copied!</>
                   ) : (
-                    <><Copy className="w-3.5 h-3.5" /> Copy</>
+                    <><CopyOutline className="w-3.5 h-3.5" /> Copy</>
                   )}
                 </button>
               </div>
@@ -344,7 +344,7 @@ export function OrgCoOrganizers() {
             ) : coOrganizers.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-4 py-10">
                 <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                  <Users className="w-6 h-6 text-slate-300" />
+                  <UsersGroupRoundedOutline className="w-6 h-6 text-slate-300" />
                 </div>
                 <p className="text-sm font-semibold text-slate-500">No co-organizers yet</p>
                 <p className="text-xs text-slate-400 mt-1 text-center">
@@ -375,7 +375,7 @@ export function OrgCoOrganizers() {
                           <p className="text-sm font-semibold text-slate-900 truncate">{coOrg.full_name}</p>
                           <p className="text-xs text-slate-400 truncate">{coOrg.email}</p>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <Clock className="w-2.5 h-2.5 text-slate-300" />
+                            <ClockCircleOutline className="w-2.5 h-2.5 text-slate-300" />
                             <p className="text-[10px] text-slate-300">
                               Officer since {formatDate.short(coOrg.created_at ?? '')}
                             </p>
@@ -386,7 +386,7 @@ export function OrgCoOrganizers() {
                           disabled={isRemoving}
                           className="w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <TrashBinTrashOutline className="w-4 h-4" />
                         </button>
                       </div>
 

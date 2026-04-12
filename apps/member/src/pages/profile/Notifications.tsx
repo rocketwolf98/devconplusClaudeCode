@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeftOutline } from 'solar-icon-set'
 
 const SETTINGS = [
   { key: 'event_updates', label: 'Event Updates', desc: 'Registration confirmations and reminders' },
@@ -22,7 +22,7 @@ export default function Notifications() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <h1 className="text-white text-xl font-bold">Notifications</h1>
       </div>

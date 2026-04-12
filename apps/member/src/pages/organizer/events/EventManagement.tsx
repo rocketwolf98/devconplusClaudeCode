@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap, Clock, Plus } from 'lucide-react'
+import { MapPointOutline, BoltOutline, ClockCircleOutline, AddCircleOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import type { Event } from '@devcon-plus/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -34,7 +34,7 @@ export function OrgEventManagement() {
             onClick={() => navigate('/organizer/events/create')}
             className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <AddCircleOutline className="w-4 h-4" />
             New Event
           </button>
         </div>
@@ -50,7 +50,7 @@ export function OrgEventManagement() {
         {upcomingEvents.length > 0 && (
           <motion.div variants={fadeUp}>
             <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-blue" />
+              <ClockCircleOutline className="w-4 h-4 text-blue" />
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
                 Upcoming ({upcomingEvents.length})
               </p>
@@ -81,13 +81,13 @@ export function OrgEventManagement() {
                   <p className="text-white font-bold text-base leading-snug">{currentEvent.title}</p>
                   {currentEvent.location && (
                     <p className="text-white/60 text-xs mt-1 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 shrink-0" />
+                      <MapPointOutline className="w-3 h-3 shrink-0" />
                       {currentEvent.location}
                     </p>
                   )}
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-xs font-semibold text-white/80 bg-white/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
+                      <BoltOutline className="w-3 h-3" />
                       {currentEvent.points_value} XP
                     </span>
                     <span className="text-xs text-white/60">
@@ -193,12 +193,12 @@ function EventRow({ event, onTap }: EventRowProps) {
           </div>
           {event.location && (
             <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-              <MapPin className="w-3 h-3 shrink-0" />
+              <MapPointOutline className="w-3 h-3 shrink-0" />
               {event.location}
             </p>
           )}
           <span className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full">
-            <Zap className="w-3 h-3" />
+            <BoltOutline className="w-3 h-3" />
             {event.points_value} XP
           </span>
         </div>

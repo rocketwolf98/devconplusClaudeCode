@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, Flame, Bell, CalendarX } from 'lucide-react'
+import { CaseOutline, HeartOutline, GiftOutline, AltArrowRightOutline, FireOutline, BellOutline, CalendarMarkOutline } from 'solar-icon-set'
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -176,7 +176,7 @@ export default function Dashboard() {
               className="relative bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
               style={{ width: bellSize, height: bellSize }}
             >
-              <Bell className="w-[18px] h-[18px] text-white" />
+              <BellOutline className="w-[18px] h-[18px] text-white" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-4
                                  bg-red text-white text-[9px] font-bold rounded-full
@@ -219,9 +219,9 @@ export default function Dashboard() {
         >
           <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: Briefcase, label: 'Find Jobs',  onClick: () => navigate('/jobs') },
-              { icon: Heart,     label: 'Volunteer',  onClick: () => navigate('/events') },
-              { icon: Gift,      label: 'Redeem',     onClick: () => navigate('/rewards') },
+              { icon: CaseOutline, label: 'Find Jobs',  onClick: () => navigate('/jobs') },
+              { icon: HeartOutline,     label: 'Volunteer',  onClick: () => navigate('/events') },
+              { icon: GiftOutline,      label: 'Redeem',     onClick: () => navigate('/rewards') },
             ].map(({ icon: Icon, label, onClick }) => (
               <motion.button
                 key={label}
@@ -303,7 +303,7 @@ export default function Dashboard() {
               onClick={() => navigate('/events')}
               className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
-              See All <ChevronRight className="w-3 h-3" />
+              See All <AltArrowRightOutline className="w-3 h-3" />
             </button>
           </div>
           {eventsLoading ? (
@@ -318,12 +318,12 @@ export default function Dashboard() {
               animate="visible"
             >
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <CalendarX className="w-6 h-6 text-primary" />
+                <CalendarMarkOutline className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-800">Events coming soon</p>
                 <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
-                  Your chapter is planning something. Check back soon or browse all events.
+                  Your chapter is planning something. CheckCircleOutline back soon or browse all events.
                 </p>
               </div>
               <button
@@ -354,13 +354,13 @@ export default function Dashboard() {
           <section>
             <div className="flex justify-between items-center px-4 mb-3">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
-                Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
+                Hot Jobs <FireOutline className="w-4 h-4 text-orange-500" />
               </h2>
               <button
                 onClick={() => navigate('/jobs')}
                 className="text-xs text-primary font-semibold flex items-center gap-0.5"
               >
-                See All <ChevronRight className="w-3 h-3" />
+                See All <AltArrowRightOutline className="w-3 h-3" />
               </button>
             </div>
 
@@ -467,7 +467,7 @@ export default function Dashboard() {
               onClick={() => navigate('/points/history')}
               className="text-xs text-primary font-semibold flex items-center gap-0.5"
             >
-              View All <ChevronRight className="w-3 h-3" />
+              View All <AltArrowRightOutline className="w-3 h-3" />
             </button>
           </div>
           <div className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">

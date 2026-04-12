@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import {
-  ArrowLeft, Camera, CheckCircle2, XCircle, Loader2,
-  Mail, Lock,
-} from 'lucide-react'
+import { ArrowLeftOutline, CameraOutline, CheckCircleOutline, CloseCircleOutline, RefreshCircleOutline, LetterOutline, Lock } from 'solar-icon-set'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import PasswordConfirmModal from '../../../components/PasswordConfirmModal'
@@ -148,7 +145,7 @@ export function OrgProfileEdit() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <h1 className="text-white text-xl font-bold">Edit Profile</h1>
       </div>
@@ -175,18 +172,18 @@ export function OrgProfileEdit() {
               </div>
               {avatarUploading && (
                 <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  <RefreshCircleOutline className="w-6 h-6 text-white animate-spin" />
                 </div>
               )}
               {!avatarUploading && (
                 <div className="absolute bottom-0 right-0 w-8 h-8 bg-blue rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                  <Camera className="w-4 h-4 text-white" />
+                  <CameraOutline className="w-4 h-4 text-white" />
                 </div>
               )}
             </button>
             {avatarError && (
               <p className="text-red text-xs flex items-center gap-1">
-                <XCircle className="w-3.5 h-3.5" />{avatarError}
+                <CloseCircleOutline className="w-3.5 h-3.5" />{avatarError}
               </p>
             )}
             {avatarUploading && (
@@ -217,12 +214,12 @@ export function OrgProfileEdit() {
                 className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
-                {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green" />}
+                {usernameStatus === 'checking' && <RefreshCircleOutline className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
                 {usernameStatus !== 'available' && usernameStatus !== 'checking' && watchedUsername === user?.username && (
-                  <CheckCircle2 className="w-4 h-4 text-slate-300" />
+                  <CheckCircleOutline className="w-4 h-4 text-slate-300" />
                 )}
-                {usernameStatus === 'taken' && watchedUsername !== user?.username && <XCircle className="w-4 h-4 text-red" />}
+                {usernameStatus === 'taken' && watchedUsername !== user?.username && <CloseCircleOutline className="w-4 h-4 text-red" />}
               </span>
             </div>
             {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
@@ -268,14 +265,14 @@ export function OrgProfileEdit() {
           {/* Change Email */}
           <div className="px-4 py-4 border-b border-slate-100">
             <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-slate-400" />
+              <LetterOutline className="w-4 h-4 text-slate-400" />
               Change Email
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires password</span>
             </p>
             <p className="text-xs text-slate-400 mb-3">Current: {orgUser?.email}</p>
             {emailSuccess ? (
               <p className="text-green text-xs flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Check your new email to confirm the change.
+                <CheckCircleOutline className="w-3.5 h-3.5" /> CheckCircleOutline your new email to confirm the change.
               </p>
             ) : (
               <form onSubmit={emailForm.handleSubmit(handleChangeEmail)} className="flex gap-2">
@@ -304,7 +301,7 @@ export function OrgProfileEdit() {
             </p>
             {passwordSuccess ? (
               <p className="text-green text-xs flex items-center gap-1 mt-2">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Password updated successfully.
+                <CheckCircleOutline className="w-3.5 h-3.5" /> Password updated successfully.
               </p>
             ) : (
               <form onSubmit={passwordForm.handleSubmit(handleChangePassword)} className="space-y-2 mt-3">

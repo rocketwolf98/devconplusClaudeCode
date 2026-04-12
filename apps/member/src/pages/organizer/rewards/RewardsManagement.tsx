@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Pencil, Trash2, Plus, Gift, Package } from 'lucide-react'
+import { PenOutline, TrashBinTrashOutline, AddCircleOutline, GiftOutline, BoxOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useRewardsStore } from '../../../stores/useRewardsStore'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
@@ -40,7 +40,7 @@ export function OrgRewardsManagement() {
             onClick={() => navigate('/organizer/rewards/create')}
             className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <AddCircleOutline className="w-4 h-4" />
             Add Reward
           </button>
         </div>
@@ -56,7 +56,7 @@ export function OrgRewardsManagement() {
         <motion.div variants={fadeUp} className="flex gap-3">
           <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-card px-4 py-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center">
-              <Gift className="w-4 h-4 text-blue" />
+              <GiftOutline className="w-4 h-4 text-blue" />
             </div>
             <div>
               <p className="text-xl font-black text-slate-900 leading-none">
@@ -67,7 +67,7 @@ export function OrgRewardsManagement() {
           </div>
           <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-card px-4 py-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-green/10 flex items-center justify-center">
-              <Package className="w-4 h-4 text-green" />
+              <BoxOutline className="w-4 h-4 text-green" />
             </div>
             <div>
               <p className="text-xl font-black text-slate-900 leading-none">
@@ -114,12 +114,12 @@ export function OrgRewardsManagement() {
                         />
                       ) : (
                         <div className="w-full h-full bg-blue/10 flex items-center justify-center">
-                          <Gift className="w-6 h-6 text-blue/30" />
+                          <GiftOutline className="w-6 h-6 text-blue/30" />
                         </div>
                       )}
                     </div>
 
-                    {/* Info */}
+                    {/* InfoCircleOutline */}
                     <div className="flex-1 min-w-0 p-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -138,13 +138,13 @@ export function OrgRewardsManagement() {
                               onClick={() => navigate(`/organizer/rewards/${reward.id}/edit`)}
                               className="w-7 h-7 rounded-lg bg-blue/10 flex items-center justify-center active:bg-blue/20 transition-colors"
                             >
-                              <Pencil className="w-3.5 h-3.5 text-blue" />
+                              <PenOutline className="w-3.5 h-3.5 text-blue" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(reward.id)}
                               className="w-7 h-7 rounded-lg bg-red/10 flex items-center justify-center active:bg-red/20 transition-colors"
                             >
-                              <Trash2 className="w-3.5 h-3.5 text-red" />
+                              <TrashBinTrashOutline className="w-3.5 h-3.5 text-red" />
                             </button>
                           </div>
                         )}

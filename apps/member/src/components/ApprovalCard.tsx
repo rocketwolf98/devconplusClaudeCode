@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Check, X, CheckCircle2, XCircle, RotateCcw, UserCheck } from 'lucide-react'
+import { CheckCircleOutline, CloseSquareOutline, CloseCircleOutline, RestartOutline, UserCheckOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { StatusBadge } from './StatusBadge'
 
@@ -66,7 +66,7 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <X className="w-3.5 h-3.5" />
+            <CloseSquareOutline className="w-3.5 h-3.5" />
             Reject
           </motion.button>
           <motion.button
@@ -75,7 +75,7 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <Check className="w-3.5 h-3.5" />
+            <CheckCircleOutline className="w-3.5 h-3.5" />
             Approve
           </motion.button>
         </div>
@@ -88,13 +88,13 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
           onClick={() => onCheckIn?.(registration.id)}
           className="w-full py-2 text-sm font-semibold rounded-xl bg-green/10 text-green border border-green/20 hover:bg-green/20 transition-colors flex items-center justify-center gap-1.5"
         >
-          <UserCheck className="w-3.5 h-3.5" />
-          Check In
+          <UserCheckOutline className="w-3.5 h-3.5" />
+          CheckCircleOutline In
         </motion.button>
       )}
       {registration.status === 'approved' && registration.checked_in && (
         <p className="text-xs text-green font-semibold text-center py-1 flex items-center justify-center gap-1">
-          <CheckCircle2 className="w-3.5 h-3.5" />
+          <CheckCircleOutline className="w-3.5 h-3.5" />
           Checked In
         </p>
       )}
@@ -102,7 +102,7 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
       {registration.status === 'rejected' && (
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-red font-semibold flex items-center gap-1">
-            <XCircle className="w-3.5 h-3.5 shrink-0" />
+            <CloseCircleOutline className="w-3.5 h-3.5 shrink-0" />
             Registration rejected
           </p>
           {!readOnly && (
@@ -112,7 +112,7 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <RotateCcw className="w-3 h-3" />
+              <RestartOutline className="w-3 h-3" />
               Undo
             </motion.button>
           )}

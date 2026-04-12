@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, SwitchCamera, CheckCircle2, Info, XCircle, Zap, Clock, UserCheck, UserX } from 'lucide-react'
+import { ArrowLeftOutline, CameraRotateOutline, CheckCircleOutline, InfoCircleOutline, CloseCircleOutline, BoltOutline, ClockCircleOutline, UserCheckOutline, UserCrossOutline } from 'solar-icon-set'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,7 +49,7 @@ const CornerBrackets = () => (
 export function OrgQRScanner() {
   const navigate = useNavigate()
 
-  // Camera lifecycle — independent of result display
+  // CameraOutline lifecycle — independent of result display
   const [cameraStatus, setCameraStatus] = useState<CameraStatus>('starting')
   const [retryAttempt, setRetryAttempt] = useState(1)   // 1–3, shown in spinner
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
@@ -68,7 +68,7 @@ export function OrgQRScanner() {
   const overlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const cameraAbortRef = useRef(false)
 
-  // ── Camera helpers ────────────────────────────────────────────────────────────
+  // ── CameraOutline helpers ────────────────────────────────────────────────────────────
 
   const stopCamera = useCallback(() => {
     controlsRef.current?.stop()
@@ -285,7 +285,7 @@ export function OrgQRScanner() {
     }
   }
 
-  // ── Camera switching helpers ──────────────────────────────────────────────────
+  // ── CameraOutline switching helpers ──────────────────────────────────────────────────
 
   const switchCamera = useCallback(async (nextDeviceId: string) => {
     if (isSwitching || nextDeviceId === selectedDeviceId || !videoEl) return
@@ -351,7 +351,7 @@ export function OrgQRScanner() {
           >
             <div className="bg-white rounded-2xl p-6 text-center w-full max-w-xs">
               <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-3">
-                <XCircle className="w-6 h-6 text-red" />
+                <CloseCircleOutline className="w-6 h-6 text-red" />
               </div>
               <p className="text-sm font-bold text-slate-900 mb-1">Camera access denied</p>
               <p className="text-xs text-slate-500">Enable camera access in your browser settings and reload the page.</p>
@@ -367,7 +367,7 @@ export function OrgQRScanner() {
           >
             <div className="bg-white rounded-2xl p-6 text-center w-full max-w-xs">
               <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-3">
-                <XCircle className="w-6 h-6 text-red" />
+                <CloseCircleOutline className="w-6 h-6 text-red" />
               </div>
               <p className="text-sm font-bold text-slate-900 mb-1">Camera unavailable</p>
               <p className="text-xs text-slate-500 mb-4">Check browser permissions and try again.</p>
@@ -405,7 +405,7 @@ export function OrgQRScanner() {
           onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </motion.button>
 
         {devices.length >= 2 && (
@@ -417,7 +417,7 @@ export function OrgQRScanner() {
             disabled={isSwitching}
             className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/40 backdrop-blur disabled:opacity-40"
           >
-            <SwitchCamera className="w-4 h-4 text-white" />
+            <CameraRotateOutline className="w-4 h-4 text-white" />
             <span className="text-white text-xs font-medium">Lens</span>
           </motion.button>
         )}
@@ -425,7 +425,7 @@ export function OrgQRScanner() {
 
       {/* ── iOS info chip ────────────────────────────────────────────────────── */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/30 backdrop-blur rounded-full px-3 py-1.5 pointer-events-none">
-        <Info className="w-3 h-3 text-amber-300 shrink-0" />
+        <InfoCircleOutline className="w-3 h-3 text-amber-300 shrink-0" />
         <p className="text-amber-200 text-[10px] font-medium whitespace-nowrap">
           For best results, use Chrome on Android
         </p>
@@ -447,14 +447,14 @@ export function OrgQRScanner() {
               <div className="bg-green rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-white" />
+                    <CheckCircleOutline className="w-5 h-5 text-white" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-white font-black text-base truncate">{overlayEntry.data.memberName}</p>
                     <p className="text-white/70 text-xs truncate">{overlayEntry.data.eventTitle}</p>
                   </div>
                   <div className="ml-auto flex items-center gap-1 shrink-0">
-                    <Zap className="w-4 h-4 text-white" />
+                    <BoltOutline className="w-4 h-4 text-white" />
                     <span className="text-white font-black text-lg">+{overlayEntry.data.pointsAwarded}</span>
                   </div>
                 </div>
@@ -479,7 +479,7 @@ export function OrgQRScanner() {
               <div className="bg-amber-500 rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <Info className="w-5 h-5 text-white" />
+                    <InfoCircleOutline className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
@@ -507,7 +507,7 @@ export function OrgQRScanner() {
               <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xl">
                 <div className="flex items-center gap-3 mb-1">
                   <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-                    <Clock className="w-5 h-5 text-yellow-500" />
+                    <ClockCircleOutline className="w-5 h-5 text-yellow-500" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-slate-900 font-black text-base truncate">{overlayEntry.data.memberName}</p>
@@ -530,7 +530,7 @@ export function OrgQRScanner() {
                     }}
                     className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-red/30 bg-red/5 text-red text-sm font-bold"
                   >
-                    <UserX className="w-4 h-4" />
+                    <UserCrossOutline className="w-4 h-4" />
                     Reject
                   </motion.button>
                   <motion.button
@@ -542,7 +542,7 @@ export function OrgQRScanner() {
                     }}
                     className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green text-white text-sm font-bold"
                   >
-                    <UserCheck className="w-4 h-4" />
+                    <UserCheckOutline className="w-4 h-4" />
                     Approve
                   </motion.button>
                 </div>
@@ -553,7 +553,7 @@ export function OrgQRScanner() {
               <div className="bg-slate-700 rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <UserX className="w-5 h-5 text-white" />
+                    <UserCrossOutline className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
@@ -581,7 +581,7 @@ export function OrgQRScanner() {
               <div className="bg-red rounded-2xl p-5">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                    <XCircle className="w-5 h-5 text-white" />
+                    <CloseCircleOutline className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="text-white font-black text-base">Scan Failed</p>

@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, ImagePlus, X } from 'lucide-react'
+import { ArrowLeftOutline, GalleryAddOutline, CloseSquareOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -168,7 +168,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <h1 className="text-xl font-bold text-white">
           {isEdit ? 'Edit Reward' : 'Add Reward'}
@@ -250,7 +250,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
                 onClick={removeCover}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
               >
-                <X className="w-4 h-4 text-white" />
+                <CloseSquareOutline className="w-4 h-4 text-white" />
               </button>
             </div>
           ) : (
@@ -259,7 +259,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
               onClick={() => fileInputRef.current?.click()}
               className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue hover:text-blue transition-colors mb-3"
             >
-              <ImagePlus className="w-6 h-6" />
+              <GalleryAddOutline className="w-6 h-6" />
               <span className="text-xs font-medium">Tap to upload image</span>
               <span className="text-[10px] text-slate-300">JPG, PNG, WebP — optional</span>
             </button>
@@ -377,7 +377,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
             </div>
             <div>
               <label className={labelClass}>
-                Max / User{' '}
+                Max / UserOutline{' '}
                 <span className="text-slate-300 normal-case font-normal">optional</span>
               </label>
               <input

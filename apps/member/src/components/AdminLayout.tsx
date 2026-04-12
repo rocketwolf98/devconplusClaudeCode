@@ -1,17 +1,17 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Users, KeyRound, CalendarDays, Building2, LayoutDashboard, LogOut, ShieldCheck, ScanLine, ArrowLeft } from 'lucide-react'
+import { UsersGroupRoundedOutline, KeyOutline, CalendarOutline, BuildingsOutline, WidgetOutline, LogoutOutline, ShieldCheckOutline, ScannerOutline, ArrowLeftOutline } from 'solar-icon-set'
 import { useAuthStore } from '../stores/useAuthStore'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const NAV_ITEMS = [
-  { path: '/admin',           label: 'Dashboard', Icon: LayoutDashboard, end: true,  superOnly: false },
-  { path: '/admin/users',     label: 'Users',      Icon: Users,           end: false, superOnly: false },
-  { path: '/admin/org-codes', label: 'Org Codes',  Icon: KeyRound,        end: false, superOnly: false },
-  { path: '/admin/events',    label: 'Events',     Icon: CalendarDays,    end: false, superOnly: false },
-  { path: '/admin/chapters',  label: 'Chapters',   Icon: Building2,       end: false, superOnly: false },
-  { path: '/admin/upgrades',  label: 'CMS',        Icon: ShieldCheck,     end: false, superOnly: false },
-  { path: '/admin/kiosk',     label: 'Kiosk',      Icon: ScanLine,        end: false, superOnly: true  },
+  { path: '/admin',           label: 'Dashboard', Icon: WidgetOutline, end: true,  superOnly: false },
+  { path: '/admin/users',     label: 'Users',      Icon: UsersGroupRoundedOutline,           end: false, superOnly: false },
+  { path: '/admin/org-codes', label: 'Org Codes',  Icon: KeyOutline,        end: false, superOnly: false },
+  { path: '/admin/events',    label: 'Events',     Icon: CalendarOutline,    end: false, superOnly: false },
+  { path: '/admin/chapters',  label: 'Chapters',   Icon: BuildingsOutline,       end: false, superOnly: false },
+  { path: '/admin/upgrades',  label: 'CMS',        Icon: ShieldCheckOutline,     end: false, superOnly: false },
+  { path: '/admin/kiosk',     label: 'Kiosk',      Icon: ScannerOutline,        end: false, superOnly: true  },
 ]
 
 const ADMIN_ROLES = ['super_admin', 'hq_admin'] as const
@@ -87,14 +87,14 @@ export default function AdminLayout() {
             onClick={() => navigate('/home')}
             className="mt-3 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeftOutline className="w-3.5 h-3.5" />
             Back to App
           </button>
           <button
             onClick={() => { void signOut(); navigate('/sign-in') }}
             className="mt-2 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
           >
-            <LogOut className="w-3.5 h-3.5" />
+            <LogoutOutline className="w-3.5 h-3.5" />
             Sign Out
           </button>
         </div>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Briefcase, MapPin, ExternalLink } from 'lucide-react'
+import { ArrowLeftOutline, CaseOutline, MapPointOutline, ShareOutline } from 'solar-icon-set'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import NotFound from '../NotFound'
@@ -41,11 +41,11 @@ export default function JobDetail() {
           className="flex items-center gap-1 text-white/80 text-sm mb-4"
           whileTap={{ scale: 0.95 }}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeftOutline className="w-4 h-4" />
           Back
         </motion.button>
         <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-          <Briefcase className="w-6 h-6 text-white" />
+          <CaseOutline className="w-6 h-6 text-white" />
         </div>
         <h1 className="text-xl font-bold text-white leading-tight">{job.title}</h1>
         <p className="text-white/70 text-sm mt-0.5">{job.company}</p>
@@ -59,7 +59,7 @@ export default function JobDetail() {
           </span>
           {job.location && (
             <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
+              <MapPointOutline className="w-3 h-3" />
               {job.location}
             </span>
           )}
@@ -82,7 +82,7 @@ export default function JobDetail() {
             className="w-full bg-primary text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
             whileTap={{ scale: 0.95 }}
           >
-            <ExternalLink className="w-5 h-5" />
+            <ShareOutline className="w-5 h-5" />
             View Opportunity
           </motion.a>
         )}

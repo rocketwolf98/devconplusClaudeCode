@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, Zap, Pencil, Megaphone } from 'lucide-react'
+import { ArrowLeftOutline, CalendarOutline, BoltOutline, PenOutline, UserSpeakOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
@@ -44,13 +44,13 @@ export function OrgEventDetail() {
             onClick={() => navigate(-1)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeftOutline className="w-5 h-5 text-white" />
           </button>
           <button
             onClick={() => navigate(`/organizer/events/${id}/edit`)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <Pencil className="w-4 h-4 text-white" />
+            <PenOutline className="w-4 h-4 text-white" />
           </button>
         </div>
         <h1 className="text-xl font-bold text-white">{event.title}</h1>
@@ -69,7 +69,7 @@ export function OrgEventDetail() {
             <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
           ) : (
             <div className="w-full h-48 bg-blue flex items-center justify-center">
-              <CalendarDays className="w-16 h-16 text-white/20" />
+              <CalendarOutline className="w-16 h-16 text-white/20" />
             </div>
           )}
         </motion.div>
@@ -96,7 +96,7 @@ export function OrgEventDetail() {
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
-              <Zap className="w-3 h-3" />
+              <BoltOutline className="w-3 h-3" />
               {event.points_value} XP
             </span>
             {event.requires_approval && (
@@ -130,7 +130,7 @@ export function OrgEventDetail() {
                      hover:bg-blue/5 transition-colors flex items-center justify-center gap-2"
           whileTap={{ scale: 0.98 }}
         >
-          <Megaphone className="w-4 h-4" />
+          <UserSpeakOutline className="w-4 h-4" />
           Send Announcement
         </motion.button>
 

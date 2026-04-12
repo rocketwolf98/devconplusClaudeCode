@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Loader2 } from 'lucide-react'
+import { CameraOutline, RefreshCircleOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
@@ -162,8 +162,8 @@ export default function OrganizerCodeGate() {
                   aria-label="Upload profile photo"
                 >
                   {avatarUploading
-                    ? <Loader2 className="w-3 h-3 text-white animate-spin" />
-                    : <Camera className="w-3 h-3 text-white" />
+                    ? <RefreshCircleOutline className="w-3 h-3 text-white animate-spin" />
+                    : <CameraOutline className="w-3 h-3 text-white" />
                   }
                 </button>
               </div>

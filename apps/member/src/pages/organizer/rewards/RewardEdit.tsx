@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { AlertTriangle } from 'lucide-react'
+import { DangerTriangleOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRewardsStore } from '../../../stores/useRewardsStore'
 import { RewardForm } from './RewardForm'
@@ -84,7 +84,7 @@ export function RewardEdit() {
               <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
               <div className="flex flex-col items-center text-center mb-6">
                 <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
-                  <AlertTriangle className="w-7 h-7 text-red" />
+                  <DangerTriangleOutline className="w-7 h-7 text-red" />
                 </div>
                 <h2 className="text-base font-bold text-slate-900 mb-1">
                   Remove from Catalog?

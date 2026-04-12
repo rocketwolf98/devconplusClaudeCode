@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, ChevronDown, ClipboardList, Megaphone, Users } from 'lucide-react'
+import { ArrowLeftOutline, CheckCircleOutline, AltArrowDownOutline, ClipboardListOutline, UserSpeakOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -56,7 +56,7 @@ function FormResponsesPanel({
         className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
       >
         <span className="flex items-center gap-1.5">
-          <ClipboardList className="w-3.5 h-3.5" />
+          <ClipboardListOutline className="w-3.5 h-3.5" />
           Registration Responses
           <span className="ml-1 bg-slate-100 text-slate-500 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
             {answeredCount}/{schema.length}
@@ -66,7 +66,7 @@ function FormResponsesPanel({
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-          <ChevronDown className="w-3.5 h-3.5" />
+          <AltArrowDownOutline className="w-3.5 h-3.5" />
         </motion.div>
       </button>
 
@@ -320,7 +320,7 @@ export function OrgEventRegistrants() {
             onClick={() => navigate(-1)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeftOutline className="w-5 h-5 text-white" />
           </button>
           {event && (
             <button
@@ -328,7 +328,7 @@ export function OrgEventRegistrants() {
               className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
                          text-white text-xs font-bold"
             >
-              <Megaphone className="w-3.5 h-3.5" />
+              <UserSpeakOutline className="w-3.5 h-3.5" />
               Announce
             </button>
           )}
@@ -355,8 +355,8 @@ export function OrgEventRegistrants() {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              {tab === 'volunteers' && <Users className="w-3.5 h-3.5" />}
-              {tab === 'registrants' && <ClipboardList className="w-3.5 h-3.5" />}
+              {tab === 'volunteers' && <UsersGroupRoundedOutline className="w-3.5 h-3.5" />}
+              {tab === 'registrants' && <ClipboardListOutline className="w-3.5 h-3.5" />}
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
@@ -399,7 +399,7 @@ export function OrgEventRegistrants() {
                     className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Check className="w-4 h-4" />
+                    <CheckCircleOutline className="w-4 h-4" />
                     Approve All Pending ({counts.pending})
                   </motion.button>
                 )}
@@ -431,7 +431,7 @@ export function OrgEventRegistrants() {
                       className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
                     >
                       <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                        <ClipboardList className="w-7 h-7 text-slate-400" />
+                        <ClipboardListOutline className="w-7 h-7 text-slate-400" />
                       </div>
                       <p className="text-base font-bold text-slate-700">No registrants found</p>
                       <p className="text-sm text-slate-400 mt-1">
@@ -501,7 +501,7 @@ export function OrgEventRegistrants() {
                   className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
                 >
                   <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                    <Users className="w-7 h-7 text-slate-400" />
+                    <UsersGroupRoundedOutline className="w-7 h-7 text-slate-400" />
                   </div>
                   <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
                   <p className="text-sm text-slate-400 mt-1">Applications will appear here once submitted.</p>
@@ -548,7 +548,7 @@ export function OrgEventRegistrants() {
                           onClick={() => handleApproveVolunteer(app.id)}
                           className="mt-3 w-full py-2 bg-green text-white text-xs font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center justify-center gap-1.5"
                         >
-                          <Check className="w-3.5 h-3.5" />
+                          <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve
                         </motion.button>
                       )}

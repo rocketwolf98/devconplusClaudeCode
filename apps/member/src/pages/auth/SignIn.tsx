@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { EyeOutline, EyeClosedOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
@@ -165,7 +165,7 @@ export default function SignIn() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeClosedOutline className="w-4 h-4" /> : <EyeOutline className="w-4 h-4" />}
               </button>
             </div>
             {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}

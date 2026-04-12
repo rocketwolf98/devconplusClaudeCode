@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Bell, Plus, Heart } from 'lucide-react'
+import { CheckCircleOutline, BellOutline, AddCircleOutline, HeartOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
@@ -149,7 +149,7 @@ export function OrgDashboard() {
             onClick={() => navigate('/organizer/notifications')}
             className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <Bell className="w-4 h-4 text-white" />
+            <BellOutline className="w-4 h-4 text-white" />
           </button>
         </div>
 
@@ -163,7 +163,7 @@ export function OrgDashboard() {
           onClick={() => navigate('/organizer/events/create')}
           className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           Add Event
         </button>
       </div>
@@ -218,7 +218,7 @@ export function OrgDashboard() {
               ) : pending.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                   <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle2 className="w-7 h-7 text-green" />
+                    <CheckCircleOutline className="w-7 h-7 text-green" />
                   </div>
                   <p className="text-base font-bold text-slate-700">All caught up!</p>
                   <p className="text-sm text-slate-400 mt-1">No pending registrations right now.</p>
@@ -279,7 +279,7 @@ export function OrgDashboard() {
               ) : volunteerApps.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                   <div className="w-14 h-14 rounded-full bg-blue/10 flex items-center justify-center mx-auto mb-3">
-                    <Heart className="w-7 h-7 text-blue" />
+                    <HeartOutline className="w-7 h-7 text-blue" />
                   </div>
                   <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
                   <p className="text-sm text-slate-400 mt-1">Applications will appear here when members apply.</p>

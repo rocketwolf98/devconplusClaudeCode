@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, ToggleLeft, ToggleRight, RefreshCw, Trash2 } from 'lucide-react'
+import { AddCircleOutline, PowerOutline, RefreshOutline, TrashBinTrashOutline } from 'solar-icon-set'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -165,7 +165,7 @@ export default function AdminOrgCodes() {
           onClick={() => { setValue('code', generateCode()); setShowForm((v) => !v) }}
           className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           New Code
         </button>
       </div>
@@ -196,7 +196,7 @@ export default function AdminOrgCodes() {
                 className="p-2 border border-slate-200 rounded-xl text-slate-500 hover:bg-blue/10 hover:text-blue hover:border-blue/30 transition-colors"
                 title="Regenerate"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshOutline className="w-4 h-4" />
               </button>
             </div>
             {errors.code && <p className="text-red text-[10px] mt-1">{errors.code.message}</p>}
@@ -345,7 +345,7 @@ export default function AdminOrgCodes() {
                         className="p-1 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue disabled:opacity-40 transition-colors"
                         title="Rotate code"
                       >
-                        <RefreshCw className={`w-4 h-4 ${rotatingId === c.id ? 'animate-spin' : ''}`} />
+                        <RefreshOutline className={`w-4 h-4 ${rotatingId === c.id ? 'animate-spin' : ''}`} />
                       </button>
                       <button
                         onClick={() => void handleToggle(c.id, c.is_active)}
@@ -353,8 +353,8 @@ export default function AdminOrgCodes() {
                         title={c.is_active ? 'Deactivate' : 'Activate'}
                       >
                         {c.is_active
-                          ? <ToggleRight className="w-5 h-5 text-green" />
-                          : <ToggleLeft className="w-5 h-5" />
+                          ? <PowerOutline className="w-5 h-5 text-green" />
+                          : <PowerOutline className="w-5 h-5" />
                         }
                       </button>
                       {confirmDeleteId === c.id ? (
@@ -374,7 +374,7 @@ export default function AdminOrgCodes() {
                           onClick={() => setConfirmDeleteId(c.id)}
                           className="p-1 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <TrashBinTrashOutline className="w-4 h-4" />
                         </button>
                       )}
                     </div>

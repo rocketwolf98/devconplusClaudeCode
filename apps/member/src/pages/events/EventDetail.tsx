@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, MapPin, Ticket, Heart } from 'lucide-react'
+import { ArrowLeftOutline, CalendarOutline, MapPointOutline, TicketOutline, HeartOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
@@ -58,7 +58,7 @@ export default function EventDetail() {
         <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
       ) : (
         <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <CalendarDays className="w-20 h-20 text-white/20" />
+          <CalendarOutline className="w-20 h-20 text-white/20" />
         </div>
       )}
 
@@ -68,7 +68,7 @@ export default function EventDetail() {
         whileTap={{ scale: 0.95 }}
         className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
       >
-        <ArrowLeft className="w-5 h-5" />
+        <ArrowLeftOutline className="w-5 h-5" />
       </motion.button>
 
       <div className="p-4 space-y-4">
@@ -77,7 +77,7 @@ export default function EventDetail() {
           <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
           {event.location && (
             <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
               {event.location}
             </p>
           )}
@@ -128,8 +128,8 @@ export default function EventDetail() {
               onClick={() => navigate(`/events/${slug}/ticket`)}
               className="w-full bg-green text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
             >
-              <Ticket className="w-5 h-5" />
-              View My Ticket
+              <TicketOutline className="w-5 h-5" />
+              View My TicketOutline
             </button>
           ) : (
             <div className="w-full bg-red/10 text-red font-semibold py-4 rounded-2xl text-center">
@@ -141,7 +141,7 @@ export default function EventDetail() {
           {event.status === 'upcoming' && (
             volunteerApp ? (
               <div className="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
-                <Heart className="w-4 h-4 text-slate-400" />
+                <HeartOutline className="w-4 h-4 text-slate-400" />
                 <span className="text-sm font-medium text-slate-500">
                   Volunteer Application:{' '}
                   <span
@@ -163,7 +163,7 @@ export default function EventDetail() {
                 onClick={() => navigate(`/events/${slug}/volunteer`)}
                 className="w-full border border-primary text-primary font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
               >
-                <Heart className="w-5 h-5" />
+                <HeartOutline className="w-5 h-5" />
                 Volunteer for this Event
               </motion.button>
             )

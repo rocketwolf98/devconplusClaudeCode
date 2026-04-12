@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { EyeOutline, EyeClosedOutline, CheckCircleOutline, CloseCircleOutline, RefreshCircleOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PasswordStrengthMeter from '../../components/PasswordStrengthMeter'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
@@ -204,9 +204,9 @@ export default function SignUp() {
                 className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === 'checking' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
-                {usernameStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-green" />}
-                {usernameStatus === 'taken' && <XCircle className="w-4 h-4 text-red" />}
+                {usernameStatus === 'checking' && <RefreshCircleOutline className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
+                {usernameStatus === 'taken' && <CloseCircleOutline className="w-4 h-4 text-red" />}
               </span>
             </div>
             {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
@@ -241,7 +241,7 @@ export default function SignUp() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeClosedOutline className="w-4 h-4" /> : <EyeOutline className="w-4 h-4" />}
               </button>
             </div>
             <PasswordStrengthMeter password={watchedPassword} />

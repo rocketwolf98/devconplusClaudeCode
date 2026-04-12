@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
+import { HomeOutline, GiftOutline, QRCodeOutline, CaseOutline, UserOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
@@ -199,7 +199,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Home className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <HomeOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Home</span>
                 </motion.div>
               )}
@@ -217,7 +217,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Gift className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <GiftOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Rewards</span>
                 </motion.div>
               )}
@@ -234,7 +234,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <QrCode className="w-6 h-6 text-white" />
+                  <QRCodeOutline className="w-6 h-6 text-white" />
                 </motion.div>
               )}
             </NavLink>
@@ -251,7 +251,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Briefcase className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CaseOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Jobs</span>
                 </motion.div>
               )}
@@ -269,7 +269,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <User className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <UserOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
                   <span className="text-[10px] font-medium">Profile</span>
                 </motion.div>
               )}
@@ -306,8 +306,8 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <Home className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
-                  Home
+                  <HomeOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  HomeOutline
                 </>
               )}
             </NavLink>
@@ -322,7 +322,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <Gift className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <GiftOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
                   Rewards
                 </>
               )}
@@ -342,7 +342,7 @@ export default function MemberLayout() {
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                     isActive ? 'bg-white/30' : 'bg-white/15'
                   }`}>
-                    <QrCode className="w-3.5 h-3.5 text-white" />
+                    <QRCodeOutline className="w-3.5 h-3.5 text-white" />
                   </div>
                   Events
                 </>
@@ -359,7 +359,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <Briefcase className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CaseOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
                   Jobs
                 </>
               )}
@@ -375,7 +375,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <User className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <UserOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
                   Profile
                 </>
               )}

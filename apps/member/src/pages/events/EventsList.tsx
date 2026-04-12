@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  TrendingUp, Users, MapPin, ChevronRight, Ticket, QrCode, Clock,
-  CalendarOff, SlidersHorizontal, Check, X,
-} from 'lucide-react'
+import { TrendingUp, UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, QRCodeOutline, ClockCircleOutline, CalendarMarkOutline, SlidersHorizontal, CheckCircleOutline, CloseSquareOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -160,11 +157,11 @@ export default function EventsList() {
             {!isLoading && events.length === 0 && (
               <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <CalendarOff className="w-8 h-8 text-primary/50" />
+                  <CalendarMarkOutline className="w-8 h-8 text-primary/50" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">Events coming soon</h3>
                 <p className="text-sm text-slate-500 text-center">
-                  Your chapter's next events will appear here. Check back shortly!
+                  Your chapter's next events will appear here. CheckCircleOutline back shortly!
                 </p>
               </div>
             )}
@@ -173,7 +170,7 @@ export default function EventsList() {
             {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
               <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <CalendarOff className="w-8 h-8 text-primary/50" />
+                  <CalendarMarkOutline className="w-8 h-8 text-primary/50" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">
                   No events in {selectedChapterName}
@@ -221,13 +218,13 @@ export default function EventsList() {
                     )}
                     {featuredEvent.location && (
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> {featuredEvent.location}
+                        <MapPointOutline className="w-3 h-3" /> {featuredEvent.location}
                       </span>
                     )}
                   </div>
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center gap-1.5 text-white/50 text-xs">
-                      <Users className="w-3.5 h-3.5" />
+                      <UsersGroupRoundedOutline className="w-3.5 h-3.5" />
                       <span>{(attendeeCounts[featuredEvent.id] ?? 0).toLocaleString()} attending</span>
                     </div>
                     <span className="text-gold text-xs font-bold">
@@ -275,7 +272,7 @@ export default function EventsList() {
                         <p className="text-sm font-bold text-slate-900 leading-tight">{event.title}</p>
                         {event.location && (
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3 shrink-0" /> {event.location}
+                            <MapPointOutline className="w-3 h-3 shrink-0" /> {event.location}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
@@ -284,13 +281,13 @@ export default function EventsList() {
                           </span>
                           {attendeeCounts[event.id] && (
                             <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
-                              <Users className="w-3 h-3" />
+                              <UsersGroupRoundedOutline className="w-3 h-3" />
                               {attendeeCounts[event.id]}
                             </span>
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
+                      <AltArrowRightOutline className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
                     </motion.button>
                   )
                 })}
@@ -313,7 +310,7 @@ export default function EventsList() {
             {myTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-8 pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Ticket className="w-8 h-8 text-primary/50" />
+                  <TicketOutline className="w-8 h-8 text-primary/50" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">No tickets yet</h3>
                 <p className="text-sm text-slate-500 text-center mb-5">
@@ -390,7 +387,7 @@ export default function EventsList() {
                         </div>
                         {ev.location && (
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3 shrink-0" /> {ev.location}
+                            <MapPointOutline className="w-3 h-3 shrink-0" /> {ev.location}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
@@ -403,20 +400,20 @@ export default function EventsList() {
                           </span>
                           {isExpired ? (
                             <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <Ticket className="w-3 h-3" /> Ticket expired
+                              <TicketOutline className="w-3 h-3" /> TicketOutline expired
                             </span>
                           ) : lifecycle === 'normal' && (isApproved ? (
                             <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <QrCode className="w-3 h-3" /> View Ticket
+                              <QRCodeOutline className="w-3 h-3" /> View TicketOutline
                             </span>
                           ) : (
                             <span className="text-[10px] text-yellow-600 flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> Awaiting approval
+                              <ClockCircleOutline className="w-3 h-3" /> Awaiting approval
                             </span>
                           ))}
                         </div>
                       </div>
-                      {!isExpired && <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />}
+                      {!isExpired && <AltArrowRightOutline className="w-4 h-4 text-slate-300 shrink-0 mt-1" />}
                     </motion.button>
                   )
                 })}
@@ -456,7 +453,7 @@ export default function EventsList() {
                   onClick={() => setShowChapterSheet(false)}
                   className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
                 >
-                  <X className="w-4 h-4 text-slate-500" />
+                  <CloseSquareOutline className="w-4 h-4 text-slate-500" />
                 </button>
               </div>
 
@@ -469,7 +466,7 @@ export default function EventsList() {
                   All Chapters
                 </span>
                 {selectedChapterId === null && (
-                  <Check className="w-4 h-4 text-primary" />
+                  <CheckCircleOutline className="w-4 h-4 text-primary" />
                 )}
               </button>
 
@@ -492,7 +489,7 @@ export default function EventsList() {
                           {ch.name}
                         </span>
                         {selectedChapterId === ch.id && (
-                          <Check className="w-4 h-4 text-primary" />
+                          <CheckCircleOutline className="w-4 h-4 text-primary" />
                         )}
                       </button>
                     ))}

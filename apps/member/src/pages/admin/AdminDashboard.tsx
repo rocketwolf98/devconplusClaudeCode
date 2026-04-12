@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, CalendarDays, Star, Building2 } from 'lucide-react'
+import { UsersGroupRoundedOutline, CalendarOutline, StarOutline, BuildingsOutline } from 'solar-icon-set'
 import {
   AreaChart,
   Area,
@@ -73,13 +73,13 @@ export default function AdminDashboard() {
     {
       label: 'Total Members',
       value: isLoading ? '—' : kpis.totalMembers.toLocaleString(),
-      Icon: Users,
+      Icon: UsersGroupRoundedOutline,
       color: 'bg-blue/10 text-blue',
     },
     {
       label: 'Total Events',
       value: isLoading ? '—' : kpis.totalEvents.toLocaleString(),
-      Icon: CalendarDays,
+      Icon: CalendarOutline,
       color: 'bg-green/10 text-green',
     },
     {
@@ -87,13 +87,13 @@ export default function AdminDashboard() {
       value: isLoading ? '—' : kpis.xpDistributed >= 1_000_000
         ? `${(kpis.xpDistributed / 1_000_000).toFixed(1)}M`
         : kpis.xpDistributed.toLocaleString(),
-      Icon: Star,
+      Icon: StarOutline,
       color: 'bg-gold/10 text-gold',
     },
     {
       label: 'Active Chapters',
       value: isLoading ? '—' : kpis.activeChapters.toLocaleString(),
-      Icon: Building2,
+      Icon: BuildingsOutline,
       color: 'bg-promoted/10 text-promoted',
     },
   ]

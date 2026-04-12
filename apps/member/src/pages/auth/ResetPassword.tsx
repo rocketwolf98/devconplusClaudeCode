@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { EyeOutline, EyeClosedOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
@@ -30,7 +30,7 @@ export default function ResetPassword() {
   })
 
   useEffect(() => {
-    // Check for an existing recovery session (e.g. user landed via reset link)
+    // CheckCircleOutline for an existing recovery session (e.g. user landed via reset link)
     void supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) { setPageState('ready'); return }
     })
@@ -119,7 +119,7 @@ export default function ResetPassword() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     tabIndex={-1}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeClosedOutline className="w-4 h-4" /> : <EyeOutline className="w-4 h-4" />}
                   </button>
                 </div>
                 {errors.password && (
@@ -142,7 +142,7 @@ export default function ResetPassword() {
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     tabIndex={-1}
                   >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirm ? <EyeClosedOutline className="w-4 h-4" /> : <EyeOutline className="w-4 h-4" />}
                   </button>
                 </div>
                 {errors.confirmPassword && (

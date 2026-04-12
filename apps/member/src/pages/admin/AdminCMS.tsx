@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, X, CheckCircle2, XCircle } from 'lucide-react'
+import { AddCircleOutline, PenOutline, TrashBinTrashOutline, CloseSquareOutline, CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 import type { Reward, Job, NewsPost, XpTier } from '@devcon-plus/supabase'
@@ -80,7 +80,7 @@ function SlideOver({ title, onClose, onSubmit, saving, children }: SlideOverProp
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 className="text-lg font-bold text-slate-900">{title}</h2>
           <button onClick={onClose}>
-            <X className="w-4 h-4 text-slate-500" />
+            <CloseSquareOutline className="w-4 h-4 text-slate-500" />
           </button>
         </div>
         <form
@@ -271,7 +271,7 @@ function UpgradeRequestsTab() {
                           disabled={actionLoading === req.id}
                           className="flex items-center gap-1 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 disabled:opacity-50 transition-colors"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve
                         </button>
                         <button
@@ -279,7 +279,7 @@ function UpgradeRequestsTab() {
                           disabled={actionLoading === req.id}
                           className="flex items-center gap-1 px-3 py-1.5 bg-red/10 text-red text-xs font-bold rounded-lg hover:bg-red/20 disabled:opacity-50 transition-colors"
                         >
-                          <XCircle className="w-3.5 h-3.5" />
+                          <CloseCircleOutline className="w-3.5 h-3.5" />
                           Reject
                         </button>
                       </div>
@@ -409,7 +409,7 @@ function RewardsTab() {
           onClick={openCreate}
           className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           Add Reward
         </button>
       </div>
@@ -454,10 +454,10 @@ function RewardsTab() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-2 justify-end">
                       <button onClick={() => openEdit(r)} className="p-1.5 text-slate-400 hover:text-blue transition-colors">
-                        <Pencil className="w-3.5 h-3.5" />
+                        <PenOutline className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => setConfirmDeleteId(r.id)} className="p-1.5 text-slate-400 hover:text-red transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <TrashBinTrashOutline className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>
@@ -635,7 +635,7 @@ function JobsTab() {
           onClick={openCreate}
           className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           Add Job
         </button>
       </div>
@@ -680,10 +680,10 @@ function JobsTab() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-2 justify-end">
                       <button onClick={() => openEdit(j)} className="p-1.5 text-slate-400 hover:text-blue transition-colors">
-                        <Pencil className="w-3.5 h-3.5" />
+                        <PenOutline className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => setConfirmDeleteId(j.id)} className="p-1.5 text-slate-400 hover:text-red transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <TrashBinTrashOutline className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>
@@ -868,7 +868,7 @@ function ArticlesTab() {
           onClick={openCreate}
           className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           Add Article
         </button>
       </div>
@@ -909,10 +909,10 @@ function ArticlesTab() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-2 justify-end">
                       <button onClick={() => openEdit(n)} className="p-1.5 text-slate-400 hover:text-blue transition-colors">
-                        <Pencil className="w-3.5 h-3.5" />
+                        <PenOutline className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => setConfirmDeleteId(n.id)} className="p-1.5 text-slate-400 hover:text-red transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <TrashBinTrashOutline className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>
@@ -1163,7 +1163,7 @@ function MissionsTab() {
             onClick={openCreate}
             className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
           >
-            <Plus className="w-4 h-4" />
+            <AddCircleOutline className="w-4 h-4" />
             Add Mission
           </button>
         )}
@@ -1216,10 +1216,10 @@ function MissionsTab() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => openEdit(m)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600">
-                    <Pencil className="w-3.5 h-3.5" />
+                    <PenOutline className="w-3.5 h-3.5" />
                   </button>
                   <button onClick={() => setConfirmDeleteId(m.id)} className="p-1.5 rounded-lg hover:bg-red/10 text-slate-400 hover:text-red">
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <TrashBinTrashOutline className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -1265,7 +1265,7 @@ function MissionsTab() {
                     disabled={approvingId === sub.id}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 transition-colors disabled:opacity-50 shrink-0"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <CheckCircleOutline className="w-3.5 h-3.5" />
                     {approvingId === sub.id ? 'Approving…' : 'Approve & Award'}
                   </button>
                 </div>
@@ -1420,7 +1420,7 @@ function XpTiersTab() {
           onClick={openCreate}
           className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           Add Tier
         </button>
       </div>
@@ -1465,10 +1465,10 @@ function XpTiersTab() {
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-2 justify-end">
                       <button onClick={() => openEdit(t)} className="p-1.5 text-slate-400 hover:text-blue transition-colors">
-                        <Pencil className="w-3.5 h-3.5" />
+                        <PenOutline className="w-3.5 h-3.5" />
                       </button>
                       <button onClick={() => setConfirmDeleteId(t.id)} className="p-1.5 text-slate-400 hover:text-red transition-colors">
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <TrashBinTrashOutline className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

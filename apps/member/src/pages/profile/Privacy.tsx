@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeftOutline } from 'solar-icon-set'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import { useAuthStore } from '../../stores/useAuthStore'
 
@@ -33,7 +33,7 @@ export default function Privacy() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5 text-white" />
         </button>
         <h1 className="text-white text-xl font-bold">Privacy & Security</h1>
       </div>

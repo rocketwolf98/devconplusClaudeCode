@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { Mail, RotateCcw } from 'lucide-react'
+import { LetterOutline, RestartOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
@@ -64,9 +64,9 @@ export default function EmailSent() {
 
       {/* Card */}
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 flex flex-col items-center text-center">
-        {/* Mail icon */}
+        {/* LetterOutline icon */}
         <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mb-5">
-          <Mail className="w-8 h-8 text-blue" />
+          <LetterOutline className="w-8 h-8 text-blue" />
         </div>
 
         <h2 className="text-xl font-black text-slate-900 mb-2">{heading}</h2>
@@ -89,7 +89,7 @@ export default function EmailSent() {
           disabled={cooldown > 0}
           className="flex items-center gap-2 text-sm font-semibold text-blue disabled:text-slate-400 disabled:cursor-not-allowed transition-colors mb-8"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RestartOutline className="w-4 h-4" />
           {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend email'}
         </button>
 
