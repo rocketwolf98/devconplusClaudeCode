@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, CalendarDays, ScanLine, Gift, User } from 'lucide-react'
 import { motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'
+import type { SolarIcon } from '../lib/icons'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
@@ -11,12 +11,12 @@ import { supabase } from '../lib/supabase'
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
-const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
+const LEFT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
   { path: '/organizer',         label: 'Home',    Icon: Home, end: true  },
   { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
 ]
 
-const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
+const RIGHT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
   { path: '/organizer/events',  label: 'Events',  Icon: CalendarDays, end: false },
   { path: '/organizer/profile', label: 'Profile', Icon: User,         end: false },
 ]

@@ -3,7 +3,7 @@ import {
   Ticket, Mic2, HandHeart, Coffee,
   Heart, Share2, Users, Star, Zap, Copy, Check,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import type { SolarIcon } from '../../lib/icons'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -13,7 +13,7 @@ import { staggerContainer, cardItem } from '../../lib/animation'
 
 const PRESTIGE_THRESHOLD = 3000
 
-const EARN: { Icon: LucideIcon; label: string; pts: string; note?: string }[] = [
+const EARN: { Icon: SolarIcon; label: string; pts: string; note?: string }[] = [
   { Icon: Ticket,    label: 'Attend an Event',     pts: '5–10 pts',  note: '10 pts with boost' },
   { Icon: HandHeart, label: 'Volunteer at Event',  pts: '+35 pts',   note: '+30 bonus on top of attendance' },
   { Icon: Users,     label: 'Refer a Friend',      pts: '+100 pts',  note: 'Max 1,000 pts/year' },
@@ -21,7 +21,7 @@ const EARN: { Icon: LucideIcon; label: string; pts: string; note?: string }[] = 
   { Icon: Coffee,    label: 'Brown Bag Session',   pts: '250 pts'    },
 ]
 
-const SHARE: { Icon: LucideIcon; label: string; pts: string }[] = [
+const SHARE: { Icon: SolarIcon; label: string; pts: string }[] = [
   { Icon: Heart,  label: 'Like Content',        pts: '5 pts'     },
   { Icon: Share2, label: 'Share + Submit Link', pts: '10–25 pts' },
 ]
