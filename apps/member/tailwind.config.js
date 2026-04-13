@@ -41,7 +41,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Geist', 'system-ui', 'sans-serif'],
+        sans: ['"Proxima Nova"', 'system-ui', 'sans-serif'],
+        proxima: ['"Proxima Nova"', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         xl: '20px',

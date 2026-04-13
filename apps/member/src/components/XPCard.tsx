@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { StarOutline, BoltOutline } from 'solar-icon-set'
+import { MedalStarCircleBoldDuotone, BoltBroken } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { usePointsStore } from '../stores/usePointsStore'
 
@@ -8,54 +8,55 @@ export default function XPCard() {
   const { spendablePoints, lifetimePoints, currentTier, nextTier, tierProgress } = usePointsStore()
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl p-5">
-      {/* Header row */}
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-slate-400 text-xs font-medium">Current DEVCON Points</p>
-      </div>
+    <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-[rgba(156,163,175,0.3)] p-[21px] flex flex-col gap-5">
 
-      {/* Main points number */}
-      <div className="flex items-end gap-2 mb-1">
-        <StarOutline className="w-8 h-8 text-gold fill-gold shrink-0 mb-0.5" />
-        <span className="text-4xl font-black text-slate-900 leading-none">
-          {spendablePoints.toLocaleString()}
-        </span>
-        <span className="text-slate-400 font-semibold text-base mb-0.5">pts</span>
-      </div>
-
-      {/* Lifetime points */}
-      <div className="flex items-center gap-1 mb-4">
-        <BoltOutline className="w-3 h-3 text-slate-400 shrink-0" />
-        <span className="text-xs text-slate-400">
-          {lifetimePoints.toLocaleString()} lifetime pts
+      {/* Tier badge — top, Proxima Nova Semibold 9px tracked */}
+      <div className="flex">
+        <span className="font-proxima font-semibold bg-[#1152d4] text-white text-[9px] tracking-[0.9px] uppercase px-3 py-1.5 rounded-full">
+          {currentTier.name}
         </span>
       </div>
 
-      {/* Tier badge row */}
-      <div className="flex items-center justify-between mb-4">
-        <span
-          className="text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ backgroundColor: currentTier.color + '20', color: currentTier.color }}
-        >
-          {currentTier.icon} {currentTier.name}
-        </span>
+      {/* Points section */}
+      <div className="flex flex-col gap-2">
+        {/* Medal + XP number */}
+        <div className="flex items-center gap-2">
+          <div className="w-12 h-12 relative">
+            <MedalStarCircleBoldDuotone className="w-full h-full text-[#EAB308] shrink-0" />
+          </div>
+          <p className="font-proxima leading-none text-[#464646] tracking-[-1.226px]">
+            <span className="font-extrabold text-[40.867px]">{spendablePoints.toLocaleString()}</span>
+            {' '}
+            <span className="font-semibold text-[24px]">XP</span>
+          </p>
+        </div>
+
+        {/* Lifetime + progress */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <BoltBroken className="w-4 h-4 text-[#6b7280] shrink-0" />
+            <span className="font-proxima text-[14px] text-[#6b7280]">
+              {lifetimePoints.toLocaleString()} lifetime points
+            </span>
+          </div>
+
+          {/* Progress bar — 8px track matching Figma */}
+          <div className="relative w-full h-2 bg-black/[0.16] rounded-full overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{ backgroundColor: '#eab308' }}
+              initial={{ width: 0 }}
+              animate={{ width: `${tierProgress}%` }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-4">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ backgroundColor: nextTier ? '#F8C630' : currentTier.color }}
-          initial={{ width: 0 }}
-          animate={{ width: `${tierProgress}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        />
-      </div>
-
-
+      {/* CTA — Proxima Nova Semibold 16px, 48px tall pill */}
       <motion.button
         onClick={() => navigate('/events')}
-        className="w-full bg-primary text-white font-bold py-3.5 rounded-2xl text-sm"
+        className="font-proxima font-semibold w-full bg-[#1152d4] text-white text-[16px] h-12 rounded-[80px]"
         whileTap={{ scale: 0.95 }}
       >
         Attend Our Events

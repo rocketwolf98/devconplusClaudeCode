@@ -175,7 +175,7 @@ export default function MemberLayout() {
     <DesktopGuard>
       {/* ── MOBILE layout (< md) ── */}
       <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden md:hidden">
-        <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24">
+        <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24 no-scrollbar">
           <Outlet />
         </div>
 
@@ -386,7 +386,7 @@ export default function MemberLayout() {
 
         {/* Main content card */}
         <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden flex flex-col">
-          <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto">
+          <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto no-scrollbar">
             <Outlet />
           </div>
         </main>
