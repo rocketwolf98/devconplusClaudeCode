@@ -711,10 +711,10 @@ whileTap={{ scale: 0.95 }}  — standard press feedback on all buttons/cards
 ### Icon Rules
 - Use `solar-icon-set` exclusively (outline variant) — no emoji icons in JSX. Import type `SolarIcon` from `lib/icons` for prop typing.
 - Icon in colored container: `<div className="w-10 h-10 rounded-xl bg-primary/10 ..."><Icon className="w-5 h-5 text-primary" /></div>`
-- Back navigation: `<ArrowLeft />`
-- Location: `<MapPin />`
-- Events center tab: `<QrCode />`
-- Points: `<Star className="fill-gold text-gold" />`
+- Back navigation: `<ArrowLeftOutline />`
+- Location: `<MapPointOutline />`
+- Events center tab: `<QRCodeOutline />`
+- Points: `<StarOutline className="fill-gold text-gold" />`
 
 ---
 
