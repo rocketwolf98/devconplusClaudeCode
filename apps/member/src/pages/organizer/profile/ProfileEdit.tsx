@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeftOutline, CameraOutline, CheckCircleOutline, CloseCircleOutline, RefreshCircleOutline, LetterOutline, Lock } from 'solar-icon-set'
+import { ArrowLeftOutline, CameraOutline, CheckCircleOutline, CloseCircleOutline, LetterOutline, LockOutline } from 'solar-icon-set'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import PasswordConfirmModal from '../../../components/PasswordConfirmModal'
@@ -172,7 +172,7 @@ export function OrgProfileEdit() {
               </div>
               {avatarUploading && (
                 <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-                  <RefreshCircleOutline className="w-6 h-6 text-white animate-spin" />
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 </div>
               )}
               {!avatarUploading && (
@@ -214,7 +214,7 @@ export function OrgProfileEdit() {
                 className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === 'checking' && <RefreshCircleOutline className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
                 {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
                 {usernameStatus !== 'available' && usernameStatus !== 'checking' && watchedUsername === user?.username && (
                   <CheckCircleOutline className="w-4 h-4 text-slate-300" />
@@ -295,7 +295,7 @@ export function OrgProfileEdit() {
           {/* Change Password */}
           <div className="px-4 py-4">
             <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-slate-400" />
+              <LockOutline className="w-4 h-4 text-slate-400" />
               Change Password
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires current password</span>
             </p>

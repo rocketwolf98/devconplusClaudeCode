@@ -123,7 +123,7 @@ export default function OrganizerLayout() {
           <Outlet />
         </div>
 
-        {/* Floating pill bottom nav — HomeOutline | Rewards | ●Scan● | Events | Profile */}
+        {/* Floating pill bottom nav — Home | Rewards | ●Scan● | Events | Profile */}
         <div className="fixed bottom-4 left-4 right-4 z-50">
           <div className="flex items-center justify-around bg-white/95 backdrop-blur rounded-2xl shadow-card border border-slate-100 px-2 py-2">
 
@@ -140,7 +140,7 @@ export default function OrganizerLayout() {
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                    <Icon className="w-5 h-5" />
                     <span className="text-[10px] font-medium">{label}</span>
                   </>
                 )}
@@ -176,7 +176,7 @@ export default function OrganizerLayout() {
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                    <Icon className="w-5 h-5" />
                     <span className="text-[10px] font-medium">{label}</span>
                   </>
                 )}
@@ -224,7 +224,7 @@ export default function OrganizerLayout() {
                           <Icon className="w-3.5 h-3.5 text-white" />
                         </div>
                       ) : (
-                        <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                        <Icon className="w-4 h-4 shrink-0" />
                       )}
                       {label}
                     </>

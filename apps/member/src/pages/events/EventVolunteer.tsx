@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeftOutline, HeartOutline, CheckCircleOutline, RefreshCircleOutline, CalendarOutline, MapPointOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, HeartOutline, CheckCircleOutline, CalendarOutline, MapPointOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -264,7 +264,7 @@ export default function EventVolunteer() {
           >
             {isSubmitting ? (
               <>
-                <RefreshCircleOutline className="w-5 h-5 animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Submitting…
               </>
             ) : (

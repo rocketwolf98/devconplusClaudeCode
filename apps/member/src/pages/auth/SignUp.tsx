@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { EyeOutline, EyeClosedOutline, CheckCircleOutline, CloseCircleOutline, RefreshCircleOutline } from 'solar-icon-set'
+import { EyeOutline, EyeClosedOutline, CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PasswordStrengthMeter from '../../components/PasswordStrengthMeter'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
@@ -204,7 +204,7 @@ export default function SignUp() {
                 className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === 'checking' && <RefreshCircleOutline className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
                 {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
                 {usernameStatus === 'taken' && <CloseCircleOutline className="w-4 h-4 text-red" />}
               </span>

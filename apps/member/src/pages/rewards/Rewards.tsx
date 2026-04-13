@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
-import { ArrowLeftOutline, StarOutline, InfoCircleOutline, CloseSquareOutline, RefreshCircleOutline, CupFirstOutline, Lock, GiftOutline, CheckCircleOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, StarOutline, InfoCircleOutline, CloseSquareOutline, CupFirstOutline, LockOutline, GiftOutline, CheckCircleOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Reward } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -166,7 +166,7 @@ function RedemptionSheet({ reward, spendablePoints, onClose }: RedemptionSheetPr
 
               {sheetState === 'loading' && (
                 <div className="flex flex-col items-center py-10 gap-3">
-                  <RefreshCircleOutline className="w-8 h-8 text-primary animate-spin" />
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                   <p className="text-sm text-slate-500">Processing redemption…</p>
                 </div>
               )}
@@ -262,7 +262,7 @@ function RewardCard({ reward, index, spendablePoints, onRedeem }: RewardCardProp
         {!canAfford && !isOutOfStock && (
           <div className="absolute inset-0 bg-black/55 flex flex-col items-center justify-center gap-2">
             <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-              <Lock className="w-5 h-5 text-white" />
+              <LockOutline className="w-5 h-5 text-white" />
             </div>
             <p className="text-white text-xs font-semibold drop-shadow-sm">
               {deficit.toLocaleString()} pts to unlock

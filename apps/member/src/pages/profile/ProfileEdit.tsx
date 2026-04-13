@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeftOutline, CameraOutline, CheckCircleOutline, CloseCircleOutline, RefreshCircleOutline, LetterOutline, Lock, MapPointOutline, ShieldCheckOutline, LinkOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, CameraOutline, CheckCircleOutline, CloseCircleOutline, LetterOutline, LockOutline, MapPointOutline, ShieldCheckOutline, LinkOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 import PasswordConfirmModal from '../../components/PasswordConfirmModal'
@@ -249,7 +249,7 @@ export default function ProfileEdit() {
               </div>
               {avatarUploading && (
                 <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-                  <RefreshCircleOutline className="w-6 h-6 text-white animate-spin" />
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 </div>
               )}
               {!avatarUploading && (
@@ -291,7 +291,7 @@ export default function ProfileEdit() {
                 className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                {usernameStatus === 'checking' && <RefreshCircleOutline className="w-4 h-4 text-slate-400 animate-spin" />}
+                {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
                 {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
                 {(usernameStatus === 'taken' || (watchedUsername === user?.username)) && usernameStatus !== 'available' && usernameStatus !== 'checking' && watchedUsername === user?.username && (
                   <CheckCircleOutline className="w-4 h-4 text-slate-300" />
@@ -426,7 +426,7 @@ export default function ProfileEdit() {
           {/* Change Password */}
           <div className="px-4 py-4">
             <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-slate-400" />
+              <LockOutline className="w-4 h-4 text-slate-400" />
               Change Password
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires current password</span>
             </p>
@@ -472,7 +472,7 @@ export default function ProfileEdit() {
             <div className="px-4 py-4">
               {upgradeStatus === 'already_pending' || upgradeStatus === 'submitted' ? (
                 <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-xl p-3">
-                  <RefreshCircleOutline className="w-4 h-4 text-primary mt-0.5 animate-spin shrink-0" />
+                  <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-primary">Upgrade request pending</p>
                     <p className="text-xs text-slate-500 mt-0.5">Awaiting super admin approval. You'll have organizer access once approved.</p>
@@ -496,7 +496,7 @@ export default function ProfileEdit() {
                       disabled={upgradeStatus === 'loading' || upgradeStatus === 'rate_limited' || !upgradeCode.trim()}
                       className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shrink-0 disabled:opacity-60"
                     >
-                      {upgradeStatus === 'loading' ? <RefreshCircleOutline className="w-4 h-4 animate-spin" /> : 'Submit'}
+                      {upgradeStatus === 'loading' ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Submit'}
                     </button>
                   </div>
                   {upgradeStatus === 'invalid_code' && (

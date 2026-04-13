@@ -199,7 +199,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <HomeOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <HomeOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Home</span>
                 </motion.div>
               )}
@@ -217,7 +217,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <GiftOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <GiftOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Rewards</span>
                 </motion.div>
               )}
@@ -251,7 +251,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <CaseOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CaseOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Jobs</span>
                 </motion.div>
               )}
@@ -269,7 +269,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <UserOutline className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <UserOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Profile</span>
                 </motion.div>
               )}
@@ -306,8 +306,8 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <HomeOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
-                  HomeOutline
+                  <HomeOutline className="w-4 h-4 shrink-0" />
+                  Home
                 </>
               )}
             </NavLink>
@@ -322,7 +322,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <GiftOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <GiftOutline className="w-4 h-4 shrink-0" />
                   Rewards
                 </>
               )}
@@ -359,7 +359,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <CaseOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CaseOutline className="w-4 h-4 shrink-0" />
                   Jobs
                 </>
               )}
@@ -375,7 +375,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <UserOutline className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <UserOutline className="w-4 h-4 shrink-0" />
                   Profile
                 </>
               )}
