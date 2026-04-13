@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { TicketOutline, Mic2, HandHeart, Coffee, HeartOutline, Share2, UsersGroupRoundedOutline, StarOutline, BoltOutline, CopyOutline, CheckCircleOutline } from 'solar-icon-set'
+import { TicketOutline, Microphone2Outline, HandHeartOutline, CupHotOutline, HeartOutline, ShareOutline, UsersGroupRoundedOutline, StarOutline, BoltOutline, CopyOutline, CheckCircleOutline } from 'solar-icon-set'
 import type { SolarIcon } from '../../lib/icons'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,15 +12,15 @@ const PRESTIGE_THRESHOLD = 3000
 
 const EARN: { Icon: SolarIcon; label: string; pts: string; note?: string }[] = [
   { Icon: TicketOutline,    label: 'Attend an Event',     pts: '5–10 pts',  note: '10 pts with boost' },
-  { Icon: HandHeart, label: 'Volunteer at Event',  pts: '+35 pts',   note: '+30 bonus on top of attendance' },
+  { Icon: HandHeartOutline, label: 'Volunteer at Event',  pts: '+35 pts',   note: '+30 bonus on top of attendance' },
   { Icon: UsersGroupRoundedOutline,     label: 'Refer a Friend',      pts: '+100 pts',  note: 'Max 1,000 pts/year' },
-  { Icon: Mic2,      label: 'Speak at an Event',   pts: '700 pts'    },
-  { Icon: Coffee,    label: 'Brown Bag Session',   pts: '250 pts'    },
+  { Icon: Microphone2Outline,      label: 'Speak at an Event',   pts: '700 pts'    },
+  { Icon: CupHotOutline,    label: 'Brown Bag Session',   pts: '250 pts'    },
 ]
 
 const SHARE: { Icon: SolarIcon; label: string; pts: string }[] = [
   { Icon: HeartOutline,  label: 'Like Content',        pts: '5 pts'     },
-  { Icon: Share2, label: 'Share + Submit Link', pts: '10–25 pts' },
+  { Icon: ShareOutline, label: 'Share + Submit Link', pts: '10–25 pts' },
 ]
 
 export default function Points() {

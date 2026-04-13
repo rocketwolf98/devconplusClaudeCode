@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CaseOutline, AltArrowDownOutline, MapPointOutline, ShareOutline, StarOutline, UsersGroupRoundedOutline, FileText, Github, Trophy, BoltOutline } from 'solar-icon-set'
+import { CaseOutline, AltArrowDownOutline, MapPointOutline, ShareOutline, StarOutline, UsersGroupRoundedOutline, FileTextOutline, CodeSquareOutline, CupFirstOutline, BoltOutline } from 'solar-icon-set'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { useMissionsStore } from '../../stores/useMissionsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -265,7 +265,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     )}
                     {hasWon && (
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-gold/20 text-amber-700 flex items-center gap-1">
-                        <Trophy className="w-2.5 h-2.5" /> You won!
+                        <CupFirstOutline className="w-2.5 h-2.5" /> You won!
                       </span>
                     )}
                   </div>
@@ -290,7 +290,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                       <UsersGroupRoundedOutline className="w-3 h-3" />{participantCount} joined
                     </span>
                     <span className="flex items-center gap-1 text-xs text-slate-400">
-                      <FileText className="w-3 h-3" />{submissionCount} submitted
+                      <FileTextOutline className="w-3 h-3" />{submissionCount} submitted
                     </span>
                   </div>
                 </div>
@@ -323,7 +323,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     {mission.github_url && (
                       <a href={mission.github_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
-                        <Github className="w-4 h-4 shrink-0" />
+                        <CodeSquareOutline className="w-4 h-4 shrink-0" />
                         <span className="truncate text-xs">{mission.github_url}</span>
                         <ShareOutline className="w-3 h-3 shrink-0 ml-auto" />
                       </a>
@@ -412,7 +412,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     {/* ── State D: Won ── */}
                     {hasWon && (
                       <div className="bg-gold/10 rounded-xl p-3 flex items-center gap-3">
-                        <Trophy className="w-5 h-5 text-amber-600 shrink-0" />
+                        <CupFirstOutline className="w-5 h-5 text-amber-600 shrink-0" />
                         <div>
                           <p className="text-sm font-bold text-amber-700">You won this mission!</p>
                           <p className="text-xs text-amber-600">+{mission.xp_reward} XP has been added to your account.</p>

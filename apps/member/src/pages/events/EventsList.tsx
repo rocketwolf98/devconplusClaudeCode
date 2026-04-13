@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TrendingUp, UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, QRCodeOutline, ClockCircleOutline, CalendarMarkOutline, SlidersHorizontal, CheckCircleOutline, CloseSquareOutline } from 'solar-icon-set'
+import { GraphUpOutline, UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, QRCodeOutline, ClockCircleOutline, CalendarMarkOutline, FiltersOutline, CheckCircleOutline, CloseSquareOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -106,7 +106,7 @@ export default function EventsList() {
               onClick={() => setShowChapterSheet(true)}
               className="flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <FiltersOutline className="w-3.5 h-3.5" />
               {selectedChapterName ?? 'All Chapters'}
             </motion.button>
           )}
@@ -200,7 +200,7 @@ export default function EventsList() {
                   className="w-full bg-navy rounded-2xl p-5 text-left"
                 >
                   <div className="flex items-center gap-1.5 mb-3">
-                    <TrendingUp className="w-3.5 h-3.5 text-gold" />
+                    <GraphUpOutline className="w-3.5 h-3.5 text-gold" />
                     <span className="text-[10px] font-bold text-gold uppercase tracking-wider">
                       Featured Event
                     </span>
