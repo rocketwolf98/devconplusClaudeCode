@@ -33,7 +33,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
           className="relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
-            backgroundColor: isOrganizer ? '#1d4ed8' : '#1152d4',
+            backgroundColor: isOrganizer ? '#1d4ed8' : 'rgb(var(--color-primary))',
             backgroundImage: PATTERN_BG,
             backgroundSize: '60px 60px',
             backgroundPosition: 'top center',
@@ -103,7 +103,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
                     <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
                   </motion.button>
                   <div className="flex items-center justify-between mb-2 pr-6">
-                    <span className="text-[10px] font-bold bg-[#1152d4]/10 text-[#1152d4] rounded-full px-2 py-0.5">
+                    <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
                       {n.event_title}
                     </span>
                     <span className="text-[10px] text-slate-400 font-proxima">

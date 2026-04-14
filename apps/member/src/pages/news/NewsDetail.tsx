@@ -146,7 +146,7 @@ export default function NewsDetail() {
           <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover" />
         ) : (
           <div
-            className="w-full h-full bg-[#1152d4]"
+            className="w-full h-full bg-primary"
             style={{ backgroundImage: PATTERN_BG, backgroundSize: '60px 60px' }}
           />
         )}
