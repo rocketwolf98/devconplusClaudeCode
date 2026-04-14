@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AltArrowRightOutline, CalendarMarkOutline, MapPointOutline, CheckSquareOutline, StarOutline } from 'solar-icon-set'
+import { AltArrowRightOutline, CalendarMarkOutline, MapPointOutline, CheckSquareOutline, StarOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -9,10 +9,12 @@ import { usePointsStore } from '../../stores/usePointsStore'
 import { useMissionsStore } from '../../stores/useMissionsStore'
 import { supabase } from '../../lib/supabase'
 import EventCard from '../../components/EventCard'
+import JobCard from '../../components/JobCard'
 import VolunteerXpCard from '../../components/VolunteerXpCard'
 import {
   SkeletonEventCard,
   SkeletonXPRow,
+  SkeletonJobCard,
 } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
@@ -163,7 +165,7 @@ useEffect(() => {
 
       {/* ── Main Content Area ── */}
       <motion.main 
-        className="relative z-10 flex flex-col gap-6 p-4 md:max-w-4xl md:mx-auto"
+        className="relative z-10 flex flex-col gap-6 px-[25px] pb-4 md:max-w-4xl md:mx-auto"
         initial={false}
         animate={{
           paddingTop: isScrolled ? 80 : 16 // pt-20 when scrolled for clearance, pt-4 when unscrolled for tight gap
@@ -316,7 +318,7 @@ useEffect(() => {
               <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">
                 MORE
               </p>
-              <AltArrowRightOutline className="w-3 h-3 text-[#464646]" />
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
             </button>
           </div>
           {eventsLoading ? (
@@ -331,7 +333,7 @@ useEffect(() => {
               animate="visible"
             >
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <CalendarMarkOutline className="w-6 h-6 text-primary" />
+                <CalendarMarkOutline className="w-6 h-6" color="rgb(var(--color-primary))" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-800">Events coming soon</p>
@@ -357,7 +359,6 @@ useEffect(() => {
                 <motion.div key={e.id} variants={cardItem}>
                   <EventCard 
                     event={e} 
-                    compact 
                     attendeeCount={attendeeCounts[e.id]} 
                     attendees={attendeeDetails[e.id]} 
                   />
@@ -370,17 +371,17 @@ useEffect(() => {
         {/* Hot Jobs */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <p className="font-proxima font-bold text-[18px] text-black">Hot Jobs</p>
+            <p className="font-proxima font-bold text-[18px] text-black">Jobs</p>
             <button onClick={() => navigate('/jobs')} className="flex gap-1 items-center">
               <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">MORE</p>
-              <AltArrowRightOutline className="w-3 h-3 text-[#464646]" />
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
             </button>
           </div>
 
           {jobsLoading ? (
             <div className="flex flex-col gap-3">
               {[1, 2].map((i) => (
-                <div key={i} className="h-[148px] rounded-2xl animate-pulse bg-slate-200" />
+                <SkeletonJobCard key={i} />
               ))}
             </div>
           ) : (
@@ -391,54 +392,9 @@ useEffect(() => {
               animate="visible"
             >
               {jobs.filter(j => j.is_active).slice(0, 3).map((job) => (
-                <motion.button
-                  key={job.id}
-                  variants={cardItem}
-                  onClick={() => navigate(`/jobs?id=${job.id}`)}
-                  className="w-full bg-white border border-[rgba(156,163,175,0.3)] rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] text-left"
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="px-[18px] py-4 flex flex-col gap-2">
-                    {/* Top: Promoted badge or spacer */}
-                    <div className="flex items-center min-h-[25px]">
-                      {job.is_promoted && (
-                        <span className="bg-[rgba(255,111,11,0.2)] text-[#ff6f0b] text-[9px] font-semibold tracking-[0.9px] uppercase px-2 py-0.5 rounded-full">
-                          PROMOTED
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Middle: Title + company + location + work type */}
-                    <div className="flex flex-col items-start gap-0.5">
-                      <p className="font-proxima font-bold text-[16px] text-black leading-snug w-full">
-                        {job.title}
-                      </p>
-                      <p className="font-proxima text-[#6b7280] text-[12px] py-1">
-                        Posted by {job.company}
-                      </p>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {job.location && (
-                          <div className="flex items-center gap-1">
-                            <MapPointOutline className="w-[10px] h-[10px] text-[#6b7280]" />
-                            <span className="font-proxima text-[#6b7280] text-[12px]">{job.location}</span>
-                          </div>
-                        )}
-                        {job.work_type && (
-                          <span className="bg-[rgba(102,102,102,0.2)] text-[#6b7280] text-[9px] font-semibold px-2 py-0.5 rounded-full">
-                            {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Bottom: Action button */}
-                    <div className="pt-1">
-                      <span className="bg-[#1152d4] text-white text-[12px] font-semibold px-[18px] py-[10px] rounded-full inline-block leading-none">
-                        Learn More
-                      </span>
-                    </div>
-                  </div>
-                </motion.button>
+                <motion.div key={job.id} variants={cardItem}>
+                  <JobCard job={job} />
+                </motion.div>
               ))}
             </motion.div>
           )}
@@ -451,7 +407,7 @@ useEffect(() => {
               <p className="font-proxima font-bold text-[18px] text-black">Missions</p>
               <button onClick={() => navigate('/jobs?tab=missions')} className="flex gap-1 items-center">
                 <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">MORE</p>
-                <AltArrowRightOutline className="w-3 h-3 text-[#464646]" />
+                <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
               </button>
             </div>
 
@@ -485,7 +441,7 @@ useEffect(() => {
                           {mission.difficulty?.toUpperCase() ?? 'EASY'}
                         </span>
                         <span className="bg-[rgba(254,248,209,0.9)] text-[#d2ad19] text-[9px] font-semibold tracking-[0.9px] uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <StarOutline className="w-[6px] h-[6px] text-[#d2ad19]" />
+                          <StarOutline className="w-[6px] h-[6px]" color="#F8C630" />
                           {mission.xp_reward} EXP
                         </span>
                       </div>
@@ -494,12 +450,15 @@ useEffect(() => {
                         <div className="flex items-center gap-3 py-1">
                           {submissionCount > 0 && (
                             <div className="flex items-center gap-1">
-                              <CheckSquareOutline className="w-[10px] h-[10px] text-[#6b7280]" />
+                              <CheckSquareOutline className="w-[10px] h-[10px]" color="#94A3B8" />
                               <span className="font-proxima text-[#6b7280] text-[12px]">{submissionCount} Submitted</span>
                             </div>
                           )}
                           {participantCount > 0 && (
-                            <span className="font-proxima text-[#6b7280] text-[12px]">{participantCount} joined</span>
+                            <div className="flex items-center gap-1">
+                              <UsersGroupRoundedOutline className="w-[10px] h-[10px]" color="#94A3B8" />
+                              <span className="font-proxima text-[#6b7280] text-[12px]">{participantCount} joined</span>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -521,26 +480,26 @@ useEffect(() => {
 
         {/* Switcher: Updates / Featured */}
         <section className="flex flex-col gap-4">
-          <div className="border border-[rgba(156,163,175,0.3)] flex gap-[10px] items-center justify-center p-[8px] rounded-[100px] w-full">
+          <div className="bg-[#eef4ff] inline-flex self-start items-center p-1 rounded-full">
             <button
               onClick={() => setActiveTab('updates')}
-              className={`flex-1 flex items-center justify-center p-[12px] rounded-[24px] transition-all duration-300 ${
-                activeTab === 'updates' ? 'bg-[#1152d4] text-white' : 'text-black active:bg-slate-100'
+              className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
+                activeTab === 'updates' ? 'bg-[#1152d4] text-white shadow-sm' : 'text-black hover:bg-[#dbeafe]/50'
               }`}
             >
-              <p className="font-proxima font-bold text-[18px]">
+              <span className="font-proxima font-bold text-[16px]">
                 Updates
-              </p>
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('featured')}
-              className={`flex-1 flex items-center justify-center p-[12px] rounded-[24px] transition-all duration-300 ${
-                activeTab === 'featured' ? 'bg-[#1152d4] text-white' : 'text-black active:bg-slate-100'
+              className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
+                activeTab === 'featured' ? 'bg-[#1152d4] text-white shadow-sm' : 'text-black hover:bg-[#dbeafe]/50'
               }`}
             >
-              <p className="font-proxima font-bold text-[18px]">
+              <span className="font-proxima font-bold text-[16px]">
                 Featured
-              </p>
+              </span>
             </button>
           </div>
 
@@ -549,7 +508,7 @@ useEffect(() => {
               <motion.button
                 key="updates"
                 onClick={() => navigate('/news/welcome')}
-                className="w-full bg-white rounded-2xl shadow-card overflow-hidden text-left"
+                className="w-full h-[220px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] overflow-hidden text-left flex flex-col"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -559,15 +518,23 @@ useEffect(() => {
                 <img
                   src="/photos/devcon-summit-group.jpg"
                   alt="DEVCON Summit"
-                  className="w-full h-36 object-cover"
+                  className="w-full h-[100px] object-cover shrink-0"
                 />
-                <div className="p-4">
-                  <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-1">DEVCON Philippines</p>
-                  <p className="font-bold text-slate-900 text-sm leading-snug mb-2">
+                <div className="p-4 flex flex-col flex-1 justify-center gap-1">
+                  <p className="font-proxima font-bold text-[18px] text-black leading-tight line-clamp-1">
                     Welcome to DEVCON+ — Your Tech Community Hub
                   </p>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Register for chapter events, earn Points+ for every activity, browse exclusive opportunities, and redeem rewards — all in one place. More updates coming soon!
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-proxima text-slate-400 text-[10px] uppercase tracking-wider">
+                      April 10, 2026
+                    </p>
+                    <div className="w-1 h-1 bg-slate-300 rounded-full shrink-0" />
+                    <p className="font-proxima text-slate-400 text-[10px] uppercase tracking-wider">
+                      By DEVCON Philippines
+                    </p>
+                  </div>
+                  <p className="font-proxima text-slate-500 text-[11px] leading-relaxed line-clamp-2 mt-1">
+                    Register for chapter events, earn Points+ for every activity, browse exclusive opportunities, and redeem rewards — all in one place. Your gateway to the DEVCON ecosystem is now live.
                   </p>
                 </div>
               </motion.button>
@@ -578,14 +545,15 @@ useEffect(() => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
+                className="w-full bg-white rounded-2xl shadow-card p-8 flex flex-col items-center justify-center text-center border border-dashed border-slate-200"
               >
-                {featuredEvent && (
-                  <EventCard 
-                    event={featuredEvent} 
-                    attendeeCount={attendeeCounts[featuredEvent.id]} 
-                    attendees={attendeeDetails[featuredEvent.id]} 
-                  />
-                )}
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <StarOutline className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">Featured Articles Coming Soon!</h3>
+                <p className="text-sm text-slate-500 max-w-[240px]">
+                  We're still "debugging" the best stories for you. Please stay "tuned" — it's going to be "code-tastic"!
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -604,7 +572,7 @@ useEffect(() => {
               <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">
                 MORE
               </p>
-              <AltArrowRightOutline className="w-3 h-3 text-[#464646]" />
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
             </button>
           </div>
           <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">

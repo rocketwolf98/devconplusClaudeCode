@@ -44,13 +44,13 @@ export function OrgEventDetail() {
             onClick={() => navigate(-1)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
           >
-            <ArrowLeftOutline className="w-5 h-5 text-white" />
+            <ArrowLeftOutline className="w-5 h-5" color="white" />
           </button>
           <button
             onClick={() => navigate(`/organizer/events/${id}/edit`)}
             className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors"
           >
-            <PenOutline className="w-4 h-4 text-white" />
+            <PenOutline className="w-4 h-4" color="white" />
           </button>
         </div>
         <h1 className="text-xl font-bold text-white">{event.title}</h1>
@@ -69,7 +69,7 @@ export function OrgEventDetail() {
             <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
           ) : (
             <div className="w-full h-48 bg-blue flex items-center justify-center">
-              <CalendarOutline className="w-16 h-16 text-white/20" />
+              <CalendarOutline className="w-16 h-16" color="rgba(255,255,255,0.2)" />
             </div>
           )}
         </motion.div>

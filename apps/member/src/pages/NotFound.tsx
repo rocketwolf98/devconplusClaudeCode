@@ -18,7 +18,7 @@ export default function NotFound() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
       >
-        <MagniferBugOutline className="w-8 h-8 text-white" />
+        <MagniferBugOutline className="w-8 h-8" color="white" />
       </motion.div>
 
       {/* 404 */}

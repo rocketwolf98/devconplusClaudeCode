@@ -22,7 +22,7 @@ export default function Notifications() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeftOutline className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
         </button>
         <h1 className="text-white text-xl font-bold">Notifications</h1>
       </div>

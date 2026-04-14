@@ -1,11 +1,14 @@
-// apps/member/src/pages/notifications/NotificationsInbox.tsx
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeftOutline, BellOffOutline, CloseSquareOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, BellOffOutline, CloseCircleLineDuotone, TrashBinTrashOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotificationsStore } from '../../stores/useNotificationsStore'
 import { formatDate } from '../../lib/dates'
-import { cardItem } from '../../lib/animation'
+import { cardItem, staggerContainer } from '../../lib/animation'
+
+// Flower-of-life pattern matching Rewards/Dashboard/Jobs
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 interface NotificationsInboxProps {
   /** Pass true when rendered inside the organizer layout so the header uses bg-blue instead of bg-primary */
@@ -22,39 +25,57 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className={`${isOrganizer ? 'bg-blue' : 'bg-primary'} px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl`}>
-        <motion.button
-          onClick={() => navigate(-1)}
-          whileTap={{ scale: 0.95 }}
-          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
-        >
-          <ArrowLeftOutline className="w-5 h-5 text-white" />
-        </motion.button>
-        <div className="flex items-end justify-between">
-          <div>
-            <h1 className="text-white text-xl font-bold">Notifications</h1>
-            <p className="text-white/60 text-sm mt-0.5">Event announcements from organizers</p>
-          </div>
-          {notifications.length > 0 && (
-            <motion.button
-              onClick={clearAll}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Clear all notifications"
-              className="text-xs text-white/70 active:text-white/50 pb-0.5"
-            >
-              Clear all
-            </motion.button>
-          )}
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
 
-      <div className="p-4">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundColor: isOrganizer ? '#1d4ed8' : '#1152d4',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Title + Back Button + Clear All */}
+          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+            <div className="flex items-center gap-[12px]">
+              <button 
+                onClick={() => navigate(-1)}
+                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                aria-label="Back"
+              >
+                <ArrowLeftOutline className="w-[18px] h-[18px]" color="white" />
+              </button>
+              <h1 className="font-proxima font-semibold text-[24px] text-white leading-none tracking-tight">
+                Notifications
+              </h1>
+            </div>
+
+            {notifications.length > 0 && (
+              <button 
+                onClick={clearAll}
+                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                aria-label="Clear all"
+              >
+                <TrashBinTrashOutline className="w-[18px] h-[18px]" color="white" />
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-8 pt-20 text-center">
             <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-5">
-              <BellOffOutline className="w-9 h-9 text-slate-300" />
+              <BellOffOutline className="w-9 h-9" color="#CBD5E1" />
             </div>
             <p className="text-base font-bold text-slate-700">No announcements yet</p>
             <p className="text-sm text-slate-400 mt-2 leading-relaxed">
@@ -62,36 +83,41 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
             </p>
           </div>
         ) : (
-          <AnimatePresence mode="popLayout">
-            {notifications.map((n) => (
-              <motion.div
-                key={n.id}
-                variants={cardItem}
-                initial="hidden"
-                animate="visible"
-                exit={{ x: 40, opacity: 0, transition: { duration: 0.2 } }}
-                className="relative bg-white rounded-2xl border border-slate-100 p-4 mb-3"
-              >
-                <motion.button
-                  onClick={() => dismiss(n.id)}
-                  whileTap={{ scale: 0.95 }}
-                  className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-slate-300 active:text-slate-500"
-                  aria-label="Dismiss notification"
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col"
+          >
+            <AnimatePresence mode="popLayout">
+              {notifications.map((n) => (
+                <motion.div
+                  key={n.id}
+                  variants={cardItem}
+                  exit={{ x: 40, opacity: 0, transition: { duration: 0.2 } }}
+                  className="relative bg-white rounded-2xl border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] p-4 mb-3 overflow-hidden"
                 >
-                  <CloseSquareOutline className="w-3.5 h-3.5" />
-                </motion.button>
-                <div className="flex items-center justify-between mb-2 pr-6">
-                  <span className="text-[10px] font-bold bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                    {n.event_title}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {formatDate.compact(n.created_at)}
-                  </span>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed">{n.message}</p>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                  <motion.button
+                    onClick={() => dismiss(n.id)}
+                    whileTap={{ scale: 0.95 }}
+                    className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center text-slate-300 active:text-slate-500"
+                    aria-label="Dismiss notification"
+                  >
+                    <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
+                  </motion.button>
+                  <div className="flex items-center justify-between mb-2 pr-6">
+                    <span className="text-[10px] font-bold bg-[#1152d4]/10 text-[#1152d4] rounded-full px-2 py-0.5">
+                      {n.event_title}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-proxima">
+                      {formatDate.compact(n.created_at)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed font-proxima">{n.message}</p>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </div>
     </div>

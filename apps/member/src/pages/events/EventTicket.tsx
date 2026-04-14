@@ -326,7 +326,7 @@ export default function EventTicket() {
                         transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
                         className="w-16 h-16 rounded-full bg-green/15 flex items-center justify-center"
                       >
-                        <CheckCircleOutline className="w-9 h-9 text-green" />
+                        <CheckCircleOutline className="w-9 h-9" color="#21C45D" />
                       </motion.div>
                       <motion.p
                         initial={{ opacity: 0, y: 6 }}
@@ -350,7 +350,7 @@ export default function EventTicket() {
                         transition={{ delay: 0.4, duration: 0.2 }}
                         className="flex items-center gap-1 bg-green/10 rounded-full px-3 py-1 border border-green/20"
                       >
-                        <BoltOutline className="w-3 h-3 text-green" />
+                        <BoltOutline className="w-3 h-3" color="#21C45D" />
                         <span className="text-xs font-bold text-green">+{event.points_value} XP earned!</span>
                       </motion.div>
                     </motion.div>
@@ -369,7 +369,7 @@ export default function EventTicket() {
                         transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
                         className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center"
                       >
-                        <CalendarMarkOutline className="w-9 h-9 text-slate-400" />
+                        <CalendarMarkOutline className="w-9 h-9" color="#94A3B8" />
                       </motion.div>
                       <motion.p
                         initial={{ opacity: 0, y: 6 }}
@@ -561,7 +561,7 @@ export default function EventTicket() {
               {cancelStep === 'first' ? (
                 <>
                   <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
-                    <DangerTriangleOutline className="w-6 h-6 text-red" />
+                    <DangerTriangleOutline className="w-6 h-6" color="#EF4444" />
                   </div>
                   <h3 className="text-lg font-black text-slate-900 text-center mb-1">
                     Cancel your registration?
@@ -589,7 +589,7 @@ export default function EventTicket() {
               ) : (
                 <>
                   <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
-                    <DangerTriangleOutline className="w-6 h-6 text-red" />
+                    <DangerTriangleOutline className="w-6 h-6" color="#EF4444" />
                   </div>
                   <h3 className="text-lg font-black text-slate-900 text-center mb-1">
                     Are you absolutely sure?

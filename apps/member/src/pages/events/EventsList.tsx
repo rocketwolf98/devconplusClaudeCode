@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraphUpOutline, UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, QRCodeOutline, ClockCircleOutline, CalendarMarkOutline, FiltersOutline, CheckCircleOutline, CloseSquareOutline } from 'solar-icon-set'
+import { UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, QRCodeOutline, ClockCircleOutline, CalendarMarkOutline, CheckCircleOutline, CloseCircleLineDuotone, FilterLinear } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import StatusPill from '../../components/StatusPill'
+import EventCard from '../../components/EventCard'
 import { SkeletonEventCard, SkeletonFeaturedEvent } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { isEventArchived } from '../../lib/dates'
 import { supabase } from '../../lib/supabase'
 import type { Event, EventRegistration, Chapter } from '@devcon-plus/supabase'
+
+// Flower-of-life pattern matching Rewards/Dashboard
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const
 
@@ -41,6 +46,7 @@ export default function EventsList() {
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(user?.chapter_id ?? null)
   const [showChapterSheet, setShowChapterSheet] = useState(false)
   const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({})
+  const [attendeeDetails, setAttendeeDetails] = useState<Record<string, { avatar_url: string | null; full_name: string }[]>>({})
 
   useEffect(() => {
     void fetchEvents()
@@ -48,15 +54,26 @@ export default function EventsList() {
 
     supabase
       .from('event_registrations')
-      .select('event_id')
+      .select('event_id, profiles(avatar_url, full_name)')
       .eq('status', 'approved')
+      .order('registered_at', { ascending: false })
       .then(({ data }) => {
         const counts: Record<string, number> = {}
+        const details: Record<string, { avatar_url: string | null; full_name: string }[]> = {}
+
         data?.forEach((row) => {
           if (row.event_id == null) return
           counts[row.event_id] = (counts[row.event_id] ?? 0) + 1
+
+          if (!details[row.event_id]) details[row.event_id] = []
+          if (row.profiles && details[row.event_id].length < 1) {
+            const p = row.profiles as unknown as { avatar_url: string | null; full_name: string }
+            details[row.event_id].push(p)
+          }
         })
+
         setAttendeeCounts(counts)
+        setAttendeeDetails(details)
       })
 
     // Try to fetch real chapters; fall back silently on error
@@ -95,43 +112,117 @@ export default function EventsList() {
   const ticketCount = myTickets.length
 
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50">
       {/* ── Header ── */}
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-white text-xl font-bold">Events</h1>
-          {tab === 'discover' && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowChapterSheet(true)}
-              className="flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full"
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
+
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+            <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+              Events
+            </h1>
+            
+            <div className="flex items-center gap-[8px]">
+              <button 
+                onClick={() => setShowChapterSheet(true)}
+                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                aria-label="Filter events"
+              >
+                <FilterLinear className="size-[20px]" color="white" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Points/Chapter Card Overlay ── */}
+        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+          {tab === 'discover' && selectedChapterName && (
+            <motion.div 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
             >
-              <FiltersOutline className="w-3.5 h-3.5" />
-              {selectedChapterName ?? 'All Chapters'}
-            </motion.button>
+              <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <MapPointOutline className="size-[24px]" color="#1152d4" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-px">
+                <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
+                  Current Chapter
+                </p>
+                <p className="font-proxima font-extrabold text-[24px] text-[#1A1A1A] leading-tight line-clamp-1">
+                  {selectedChapterName}
+                </p>
+              </div>
+            </motion.div>
+          )}
+          
+          {tab === 'tickets' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
+            >
+              <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <TicketOutline className="size-[24px]" color="#1152d4" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-px">
+                <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
+                  My Tickets
+                </p>
+                <div className="flex items-baseline gap-1.5">
+                  <p className="font-proxima font-extrabold text-[40px] text-[#1A1A1A] leading-none tracking-tight">
+                    {ticketCount}
+                  </p>
+                  <p className="font-proxima font-semibold text-[20px] text-[#1A1A1A] leading-none">
+                    Event{ticketCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           )}
         </div>
-        <div className="flex gap-2">
-          {(['discover', 'tickets'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
-                tab === t ? 'bg-white text-primary' : 'bg-white/20 text-white'
-              }`}
-            >
-              {t === 'discover' ? 'Discover' : 'My Tickets'}
-              {t === 'tickets' && ticketCount > 0 && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
-                  tab === 'tickets' ? 'bg-primary text-white' : 'bg-white/30 text-white'
-                }`}>
-                  {ticketCount}
+
+        {/* ── Tabs Wrapper ── */}
+        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+          <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
+            {(['discover', 'tickets'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
+                  tab === t
+                    ? 'bg-[#1152d4] text-white shadow-sm'
+                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  {t === 'discover' ? 'Discover' : 'My Tickets'}
+                  {t === 'tickets' && ticketCount > 0 && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                      tab === 'tickets' ? 'bg-white text-[#1152d4]' : 'bg-[#1152d4]/20 text-[#1152d4]'
+                    }`}>
+                      {ticketCount}
+                    </span>
+                  )}
                 </span>
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </header>
 
       <AnimatePresence mode="wait">
         {/* ── Discover tab ── */}
@@ -147,30 +238,33 @@ export default function EventsList() {
           <div className="md:max-w-4xl md:mx-auto">
             {/* Loading skeletons */}
             {isLoading && (
-              <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="px-[25px] pt-4 space-y-3">
                 <SkeletonFeaturedEvent />
-                {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <SkeletonEventCard />
+                  <SkeletonEventCard />
+                </div>
               </div>
             )}
 
             {/* Empty state — no events at all */}
             {!isLoading && events.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <CalendarMarkOutline className="w-8 h-8 text-primary/50" />
+                  <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">Events coming soon</h3>
                 <p className="text-sm text-slate-500 text-center">
-                  Your chapter's next events will appear here. CheckCircleOutline back shortly!
+                  Your chapter's next events will appear here. Check back shortly!
                 </p>
               </div>
             )}
 
             {/* Empty state — chapter filter yields nothing */}
             {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <CalendarMarkOutline className="w-8 h-8 text-primary/50" />
+                  <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">
                   No events in {selectedChapterName}
@@ -189,59 +283,26 @@ export default function EventsList() {
 
             {/* Featured hero card */}
             {!isLoading && featuredEvent && (
-              <motion.div
-                className="px-4 pt-4 pb-2"
-                variants={fadeUp}
-                initial="hidden"
-                animate="visible"
-              >
-                <button
-                  onClick={() => navigate(`/events/${featuredEvent.slug}`)}
-                  className="w-full bg-navy rounded-2xl p-5 text-left"
+              <div className="px-[25px] pt-4 pb-2">
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <GraphUpOutline className="w-3.5 h-3.5 text-gold" />
-                    <span className="text-[10px] font-bold text-gold uppercase tracking-wider">
-                      Featured Event
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white leading-tight">
-                    {featuredEvent.title}
-                  </h3>
-                  <div className="flex items-center gap-4 mt-3 text-white/60 text-xs">
-                    {featuredEvent.event_date && (
-                      <span>
-                        {new Date(featuredEvent.event_date).toLocaleDateString('en-PH', {
-                          month: 'short', day: 'numeric', year: 'numeric',
-                        })}
-                      </span>
-                    )}
-                    {featuredEvent.location && (
-                      <span className="flex items-center gap-1">
-                        <MapPointOutline className="w-3 h-3" /> {featuredEvent.location}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-1.5 text-white/50 text-xs">
-                      <UsersGroupRoundedOutline className="w-3.5 h-3.5" />
-                      <span>{(attendeeCounts[featuredEvent.id] ?? 0).toLocaleString()} attending</span>
-                    </div>
-                    <span className="text-gold text-xs font-bold">
-                      +{featuredEvent.points_value} pts
-                    </span>
-                  </div>
-                  <div className="mt-3 bg-primary rounded-xl py-2.5 text-center">
-                    <span className="text-white text-sm font-semibold">View Event</span>
-                  </div>
-                </button>
-              </motion.div>
+                  <EventCard 
+                    event={featuredEvent} 
+                    className="h-[300px]" 
+                    attendeeCount={attendeeCounts[featuredEvent.id]} 
+                    attendees={attendeeDetails[featuredEvent.id]}
+                  />
+                </motion.div>
+              </div>
             )}
 
             {/* Event list — staggered */}
             {!isLoading && filteredEvents.length > 0 && (
               <motion.div
-                className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
+                className="px-[25px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
@@ -272,22 +333,23 @@ export default function EventsList() {
                         <p className="text-sm font-bold text-slate-900 leading-tight">{event.title}</p>
                         {event.location && (
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPointOutline className="w-3 h-3 shrink-0" /> {event.location}
+                            <MapPointOutline className="w-3 h-3 shrink-0" color="#0b46a3" /> {event.location}
                           </p>
                         )}
+
                         <div className="flex items-center gap-2 mt-2">
                           <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                             +{event.points_value} pts
                           </span>
                           {attendeeCounts[event.id] && (
                             <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
-                              <UsersGroupRoundedOutline className="w-3 h-3" />
+                              <UsersGroupRoundedOutline className="w-3 h-3" color="#64748B" />
                               {attendeeCounts[event.id]}
                             </span>
                           )}
                         </div>
                       </div>
-                      <AltArrowRightOutline className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
+                      <AltArrowRightOutline className="w-4 h-4 shrink-0 mt-1" color="#CBD5E1" />
                     </motion.button>
                   )
                 })}
@@ -307,10 +369,11 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
+          <div className="md:max-w-4xl md:mx-auto">
             {myTickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center px-8 pt-24">
+              <div className="flex flex-col items-center justify-center px-[25px] pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <TicketOutline className="w-8 h-8 text-primary/50" />
+                  <TicketOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">No tickets yet</h3>
                 <p className="text-sm text-slate-500 text-center mb-5">
@@ -325,7 +388,7 @@ export default function EventsList() {
               </div>
             ) : (
               <motion.div
-                className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:max-w-4xl md:mx-auto"
+                className="px-[25px] pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
@@ -387,9 +450,10 @@ export default function EventsList() {
                         </div>
                         {ev.location && (
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPointOutline className="w-3 h-3 shrink-0" /> {ev.location}
+                            <MapPointOutline className="w-3 h-3 shrink-0" color="#0b46a3" /> {ev.location}
                           </p>
                         )}
+
                         <div className="flex items-center gap-2 mt-2">
                           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
                             isExpired
@@ -400,25 +464,26 @@ export default function EventsList() {
                           </span>
                           {isExpired ? (
                             <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <TicketOutline className="w-3 h-3" /> TicketOutline expired
+                              <TicketOutline className="w-3 h-3" color="#64748B" /> TicketOutline expired
                             </span>
                           ) : lifecycle === 'normal' && (isApproved ? (
                             <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <QRCodeOutline className="w-3 h-3" /> View TicketOutline
+                              <QRCodeOutline className="w-3 h-3" color="#0b46a3" /> View TicketOutline
                             </span>
                           ) : (
                             <span className="text-[10px] text-yellow-600 flex items-center gap-1">
-                              <ClockCircleOutline className="w-3 h-3" /> Awaiting approval
+                              <ClockCircleOutline className="w-3 h-3" color="#D97706" /> Awaiting approval
                             </span>
                           ))}
                         </div>
                       </div>
-                      {!isExpired && <AltArrowRightOutline className="w-4 h-4 text-slate-300 shrink-0 mt-1" />}
+                      {!isExpired && <AltArrowRightOutline className="w-4 h-4 shrink-0 mt-1" color="#CBD5E1" />}
                     </motion.button>
                   )
                 })}
               </motion.div>
             )}
+          </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -453,7 +518,7 @@ export default function EventsList() {
                   onClick={() => setShowChapterSheet(false)}
                   className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
                 >
-                  <CloseSquareOutline className="w-4 h-4 text-slate-500" />
+                  <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
                 </button>
               </div>
 
@@ -466,7 +531,7 @@ export default function EventsList() {
                   All Chapters
                 </span>
                 {selectedChapterId === null && (
-                  <CheckCircleOutline className="w-4 h-4 text-primary" />
+                  <CheckCircleOutline className="w-4 h-4" color="#0b46a3" />
                 )}
               </button>
 
@@ -489,7 +554,7 @@ export default function EventsList() {
                           {ch.name}
                         </span>
                         {selectedChapterId === ch.id && (
-                          <CheckCircleOutline className="w-4 h-4 text-primary" />
+                          <CheckCircleOutline className="w-4 h-4" color="#0b46a3" />
                         )}
                       </button>
                     ))}

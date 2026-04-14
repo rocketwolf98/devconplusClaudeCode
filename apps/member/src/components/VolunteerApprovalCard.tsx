@@ -1,5 +1,5 @@
 import { memo, useState } from 'react'
-import { CheckCircleOutline, CloseSquareOutline, RestartOutline, HeartOutline, AltArrowDownOutline, AltArrowUpOutline, PhoneOutline, LetterOutline } from 'solar-icon-set'
+import { CheckCircleOutline, CloseCircleLineDuotone, RestartOutline, HeartOutline, AltArrowDownOutline, AltArrowUpOutline, PhoneOutline, LetterOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { StatusBadge } from './StatusBadge'
 import type { OrgVolunteerApplication } from '../stores/useOrgVolunteerStore'
@@ -108,7 +108,7 @@ function VolunteerApprovalCardComponent({
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <CloseSquareOutline className="w-3.5 h-3.5" />
+            <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
             Reject
           </motion.button>
           <motion.button

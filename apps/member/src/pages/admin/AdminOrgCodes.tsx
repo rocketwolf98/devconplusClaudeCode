@@ -353,7 +353,7 @@ export default function AdminOrgCodes() {
                         title={c.is_active ? 'Deactivate' : 'Activate'}
                       >
                         {c.is_active
-                          ? <PowerOutline className="w-5 h-5 text-green" />
+                          ? <PowerOutline className="w-5 h-5" color="#21C45D" />
                           : <PowerOutline className="w-5 h-5" />
                         }
                       </button>

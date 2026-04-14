@@ -104,13 +104,13 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                 className="w-full flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:bg-slate-100 transition-colors"
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <CalendarOutline className="w-5 h-5 text-primary" />
+                  <CalendarOutline className="w-5 h-5" color="rgb(var(--color-primary))" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-slate-900">Google Calendar</p>
                   <p className="text-xs text-slate-400">Opens in browser</p>
                 </div>
-                <ShareOutline className="w-4 h-4 text-slate-300" />
+                <ShareOutline className="w-4 h-4" color="#CBD5E1" />
               </motion.button>
 
               <motion.button
@@ -119,7 +119,7 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                 className="w-full flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 hover:bg-slate-100 transition-colors"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                  <DownloadOutline className="w-5 h-5 text-slate-500" />
+                  <DownloadOutline className="w-5 h-5" color="#64748B" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-slate-900">iCal / Other Calendars</p>

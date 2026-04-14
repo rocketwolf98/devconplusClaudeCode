@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run:*)",
       "mcp__supabase__get_advisors",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Read(//c/Users/LENOVO/Documents/DEVCON+ with Claude Code/apps/member/src/components/**)"
     ],
     "deny": [
       "Bash(rm -rf*)",

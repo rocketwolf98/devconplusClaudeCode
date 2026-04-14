@@ -132,7 +132,7 @@ export default function NewsDetail() {
         />
       ) : (
         <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <DocumentTextOutline className="w-14 h-14 text-white/20" />
+          <DocumentTextOutline className="w-14 h-14" color="rgba(255,255,255,0.2)" />
         </div>
       )}
 

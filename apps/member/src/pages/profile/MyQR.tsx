@@ -250,7 +250,7 @@ export default function MyQR() {
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-400">Points</span>
                 <span className="flex items-center gap-1 text-gold font-bold">
-                  <StarOutline className="w-3 h-3 fill-gold text-gold" />
+                  <StarOutline className="w-3 h-3" color="#F8C630" />
                   {spendablePoints.toLocaleString()} XP
                 </span>
               </div>
@@ -272,7 +272,7 @@ export default function MyQR() {
           transition={{ delay: 0.5, duration: 0.3 }}
           className="flex items-start gap-2 w-full max-w-sm mt-4 bg-white/10 rounded-2xl px-4 py-3"
         >
-          <QRCodeOutline className="w-4 h-4 text-white/60 shrink-0 mt-0.5" />
+          <QRCodeOutline className="w-4 h-4 shrink-0 mt-0.5" color="rgba(255,255,255,0.6)" />
           <p className="text-white/60 text-xs leading-relaxed">
             Show this QR at the venue entrance. Works for your next upcoming registered event at your chapter.
           </p>

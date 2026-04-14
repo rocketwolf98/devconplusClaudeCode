@@ -45,7 +45,7 @@ export default function JobDetail() {
           Back
         </motion.button>
         <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-          <CaseOutline className="w-6 h-6 text-white" />
+          <CaseOutline className="w-6 h-6" color="white" />
         </div>
         <h1 className="text-xl font-bold text-white leading-tight">{job.title}</h1>
         <p className="text-white/70 text-sm mt-0.5">{job.company}</p>

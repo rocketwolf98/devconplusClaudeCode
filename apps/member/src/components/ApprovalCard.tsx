@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { CheckCircleOutline, CloseSquareOutline, CloseCircleOutline, RestartOutline, UserCheckOutline } from 'solar-icon-set'
+import { CheckCircleOutline, CloseCircleLineDuotone, CloseCircleOutline, RestartOutline, UserCheckOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { StatusBadge } from './StatusBadge'
 
@@ -66,7 +66,7 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <CloseSquareOutline className="w-3.5 h-3.5" />
+            <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
             Reject
           </motion.button>
           <motion.button

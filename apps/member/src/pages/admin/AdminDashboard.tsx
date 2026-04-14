@@ -129,7 +129,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Area dataKey="count" fill="#367BDD" stroke="#2962C4" fillOpacity={0.3} />
+              <Area dataKey="count" fill="#1152D4" stroke="#0D42AA" fillOpacity={0.3} />
             </AreaChart>
           </ResponsiveContainer>
         )}
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="event" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Line dataKey="attendance" stroke="#367BDD" strokeWidth={2} dot={{ r: 3 }} />
+              <Line dataKey="attendance" stroke="#1152D4" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         )}

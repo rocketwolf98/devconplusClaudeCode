@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AddCircleOutline, PenOutline, TrashBinTrashOutline, CloseSquareOutline, CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
+import { AddCircleOutline, PenOutline, TrashBinTrashOutline, CloseCircleLineDuotone, CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 import type { Reward, Job, NewsPost, XpTier } from '@devcon-plus/supabase'
@@ -80,7 +80,7 @@ function SlideOver({ title, onClose, onSubmit, saving, children }: SlideOverProp
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
           <h2 className="text-lg font-bold text-slate-900">{title}</h2>
           <button onClick={onClose}>
-            <CloseSquareOutline className="w-4 h-4 text-slate-500" />
+            <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
           </button>
         </div>
         <form

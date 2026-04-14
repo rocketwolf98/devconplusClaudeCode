@@ -205,8 +205,8 @@ export default function SignUp() {
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
-                {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
-                {usernameStatus === 'taken' && <CloseCircleOutline className="w-4 h-4 text-red" />}
+                {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4" color="#21C45D" />}
+                {usernameStatus === 'taken' && <CloseCircleOutline className="w-4 h-4" color="#EF4444" />}
               </span>
             </div>
             {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}

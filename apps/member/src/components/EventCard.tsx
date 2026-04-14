@@ -18,14 +18,14 @@ function getInitials(name: string): string {
 
 function EventCard({ 
   event, 
-  compact = false, 
   attendeeCount = 0,
-  attendees = []
+  attendees = [],
+  className = ''
 }: { 
   event: Event; 
-  compact?: boolean; 
   attendeeCount?: number;
   attendees?: { avatar_url: string | null; full_name: string }[];
+  className?: string;
 }) {
   const navigate = useNavigate()
   const dateStr = event.event_date
@@ -35,7 +35,7 @@ function EventCard({
   return (
     <motion.button
       onClick={() => navigate(`/events/${event.slug}`)}
-      className="w-full bg-slate-900 rounded-2xl shadow-card text-left relative overflow-hidden group h-[200px]"
+      className={`w-full bg-slate-900 rounded-2xl shadow-card text-left relative overflow-hidden group ${className || 'h-[200px]'}`}
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
@@ -49,7 +49,7 @@ function EventCard({
           />
         ) : (
           <div className="w-full h-full bg-primary flex items-center justify-center">
-            <CalendarOutline className="w-12 h-12 text-white/20" />
+            <CalendarOutline className="w-12 h-12" color="rgba(255,255,255,0.2)" />
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
@@ -79,7 +79,7 @@ function EventCard({
             <StatusPill status={event.status as any} />
             {event.is_promoted && <PromotedBadge />}
             <div className="backdrop-blur-[16px] bg-[rgba(254,248,209,0.9)] flex gap-1 items-center justify-center px-2 py-0.5 rounded-[100px] shrink-0">
-              <StarOutline className="w-[6px] h-[6px] text-[#d2ad19]" />
+              <StarOutline className="w-[6px] h-[6px]" color="#F8C630" />
               <span className="font-proxima font-semibold text-[#d2ad19] text-[9px] tracking-[0.9px] uppercase leading-[13.5px]">
                 {event.points_value} EXP
               </span>

@@ -58,7 +58,7 @@ export default function EventDetail() {
         <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
       ) : (
         <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <CalendarOutline className="w-20 h-20 text-white/20" />
+          <CalendarOutline className="w-20 h-20" color="rgba(255,255,255,0.2)" />
         </div>
       )}
 
@@ -141,7 +141,7 @@ export default function EventDetail() {
           {event.status === 'upcoming' && (
             volunteerApp ? (
               <div className="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
-                <HeartOutline className="w-4 h-4 text-slate-400" />
+                <HeartOutline className="w-4 h-4" color="#94A3B8" />
                 <span className="text-sm font-medium text-slate-500">
                   Volunteer Application:{' '}
                   <span

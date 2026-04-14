@@ -5,6 +5,10 @@ import { motion } from 'framer-motion'
 import { useRewardsStore } from '../../../stores/useRewardsStore'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export function OrgRewardsManagement() {
   const navigate = useNavigate()
   const { allRewards, isLoadingAll, fetchAllRewards, deleteReward } = useRewardsStore()
@@ -27,24 +31,80 @@ export function OrgRewardsManagement() {
     }
   }
 
+  const activeCount = allRewards.filter((r) => r.is_active).length
+
   return (
-    <div>
-      {/* Sticky header */}
-      <div className="bg-blue px-4 pt-12 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-black text-white">Rewards</h1>
-            <p className="text-white/60 text-sm mt-0.5">Manage the catalog</p>
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
+
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 flex items-center justify-between px-6 pt-6 pb-4">
+            <h1 className="text-white text-[28px] font-semibold font-proxima leading-none tracking-tight">
+              Rewards
+            </h1>
+            
+            <button
+              onClick={() => navigate('/organizer/rewards/create')}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
+            >
+              <AddCircleOutline className="w-4 h-4" />
+              Add Reward
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/organizer/rewards/create')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
-          >
-            <AddCircleOutline className="w-4 h-4" />
-            Add Reward
-          </button>
         </div>
-      </div>
+
+        {/* ── Stats Card Overlay ── */}
+        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+          <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 h-[100px] flex items-center pointer-events-auto">
+            {/* Total */}
+            <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
+              <div className="shrink-0 size-[40px] bg-blue/10 rounded-xl flex items-center justify-center">
+                <GiftOutline className="size-5" color="#1152d4" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-px">
+                <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px] uppercase tracking-wide">
+                  Total
+                </p>
+                <p className="font-proxima font-extrabold text-[24px] text-[#464646] leading-none tracking-tight">
+                  {allRewards.length}
+                </p>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-[50px] bg-slate-100" />
+
+            {/* Active */}
+            <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
+              <div className="shrink-0 size-[40px] bg-green/10 rounded-xl flex items-center justify-center">
+                <BoxOutline className="size-5" color="#21C45D" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-px">
+                <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px] uppercase tracking-wide">
+                  Active
+                </p>
+                <p className="font-proxima font-extrabold text-[24px] text-[#464646] leading-none tracking-tight">
+                  {activeCount}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
       <motion.div
         className="p-4 space-y-4"
@@ -52,32 +112,6 @@ export function OrgRewardsManagement() {
         initial="hidden"
         animate="visible"
       >
-        {/* Summary strip */}
-        <motion.div variants={fadeUp} className="flex gap-3">
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-card px-4 py-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center">
-              <GiftOutline className="w-4 h-4 text-blue" />
-            </div>
-            <div>
-              <p className="text-xl font-black text-slate-900 leading-none">
-                {allRewards.length}
-              </p>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">Total Rewards</p>
-            </div>
-          </div>
-          <div className="flex-1 bg-white rounded-2xl border border-slate-200 shadow-card px-4 py-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-green/10 flex items-center justify-center">
-              <BoxOutline className="w-4 h-4 text-green" />
-            </div>
-            <div>
-              <p className="text-xl font-black text-slate-900 leading-none">
-                {allRewards.filter((r) => r.is_active).length}
-              </p>
-              <p className="text-xs text-slate-400 font-medium mt-0.5">Active</p>
-            </div>
-          </div>
-        </motion.div>
-
         {deleteError && (
           <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
             {deleteError}
@@ -114,7 +148,7 @@ export function OrgRewardsManagement() {
                         />
                       ) : (
                         <div className="w-full h-full bg-blue/10 flex items-center justify-center">
-                          <GiftOutline className="w-6 h-6 text-blue/30" />
+                          <GiftOutline className="w-6 h-6" color="rgba(17,82,212,0.3)" />
                         </div>
                       )}
                     </div>
@@ -138,13 +172,13 @@ export function OrgRewardsManagement() {
                               onClick={() => navigate(`/organizer/rewards/${reward.id}/edit`)}
                               className="w-7 h-7 rounded-lg bg-blue/10 flex items-center justify-center active:bg-blue/20 transition-colors"
                             >
-                              <PenOutline className="w-3.5 h-3.5 text-blue" />
+                              <PenOutline className="w-3.5 h-3.5" color="#1152D4" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirmId(reward.id)}
                               className="w-7 h-7 rounded-lg bg-red/10 flex items-center justify-center active:bg-red/20 transition-colors"
                             >
-                              <TrashBinTrashOutline className="w-3.5 h-3.5 text-red" />
+                              <TrashBinTrashOutline className="w-3.5 h-3.5" color="#EF4444" />
                             </button>
                           </div>
                         )}

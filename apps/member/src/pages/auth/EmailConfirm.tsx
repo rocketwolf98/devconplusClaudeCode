@@ -76,7 +76,7 @@ export default function EmailConfirm() {
         {status === 'confirmed' && (
           <>
             <div className="w-16 h-16 rounded-2xl bg-green/10 flex items-center justify-center mb-5 mt-4">
-              <CheckCircleOutline className="w-8 h-8 text-green" />
+              <CheckCircleOutline className="w-8 h-8" color="#21C45D" />
             </div>
             <h2 className="text-xl font-black text-slate-900 mb-2">Email Confirmed!</h2>
             <p className="text-sm text-slate-500">Your account is ready. Redirecting you now…</p>
@@ -86,7 +86,7 @@ export default function EmailConfirm() {
         {status === 'error' && (
           <>
             <div className="w-16 h-16 rounded-2xl bg-red/10 flex items-center justify-center mb-5 mt-4">
-              <CloseCircleOutline className="w-8 h-8 text-red" />
+              <CloseCircleOutline className="w-8 h-8" color="#EF4444" />
             </div>
             <h2 className="text-xl font-black text-slate-900 mb-2">Confirmation Failed</h2>
             <p className="text-sm text-slate-500 mb-6 max-w-xs">{errorMsg}</p>

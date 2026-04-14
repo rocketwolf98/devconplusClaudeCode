@@ -12,7 +12,7 @@ export interface ProgramTheme {
 }
 
 export const PROGRAM_THEMES: ProgramTheme[] = [
-  { id: 'devcon', label: 'DEVCON+',       hex: '#367BDD', darkHex: '#2962C4', cssClass: 'theme-devcon'  },
+  { id: 'devcon', label: 'DEVCON+',       hex: '#1152D4', darkHex: '#0D42AA', cssClass: 'theme-devcon'  },
   { id: 'she',    label: 'She is DEVCON', hex: '#EC4899', darkHex: '#DB2777', cssClass: 'theme-she'     },
   { id: 'kids',   label: 'DEVCON Kids',   hex: '#21C45D', darkHex: '#16A34A', cssClass: 'theme-kids'    },
   { id: 'campus', label: 'Campus',        hex: '#F8C630', darkHex: '#EAB308', cssClass: 'theme-campus'  },

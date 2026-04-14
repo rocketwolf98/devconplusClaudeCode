@@ -9,6 +9,10 @@ import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
 import { isEventArchived } from '../../../lib/dates'
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export function OrgEventManagement() {
   const navigate = useNavigate()
   const { events, fetchEvents } = useEventsStore()
@@ -23,22 +27,38 @@ export function OrgEventManagement() {
 
   return (
     <div>
-      {/* Sticky header */}
-      <div className="bg-blue px-4 pt-12 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-black text-white">Events</h1>
-            <p className="text-white/60 text-sm mt-0.5">History &amp; performance</p>
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
+
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 flex items-center justify-between px-6 pt-6 pb-4">
+            <h1 className="text-white text-[28px] font-semibold font-proxima leading-none tracking-tight">
+              Events
+            </h1>
+            
+            <button
+              onClick={() => navigate('/organizer/events/create')}
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
+            >
+              <AddCircleOutline className="w-4 h-4" />
+              New Event
+            </button>
           </div>
-          <button
-            onClick={() => navigate('/organizer/events/create')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
-          >
-            <AddCircleOutline className="w-4 h-4" />
-            New Event
-          </button>
         </div>
-      </div>
+      </header>
 
       <motion.div
         className="p-4 space-y-5"
@@ -50,7 +70,7 @@ export function OrgEventManagement() {
         {upcomingEvents.length > 0 && (
           <motion.div variants={fadeUp}>
             <div className="flex items-center gap-2 mb-3">
-              <ClockCircleOutline className="w-4 h-4 text-blue" />
+              <ClockCircleOutline className="w-4 h-4" color="#1152D4" />
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
                 Upcoming ({upcomingEvents.length})
               </p>

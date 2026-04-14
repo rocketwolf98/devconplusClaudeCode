@@ -209,7 +209,7 @@ export default function AdminKiosk() {
       {/* Footer — daily count */}
       <div className="shrink-0 px-8 pb-7 pt-3 flex justify-center">
         <div className="inline-flex items-center gap-3 bg-white/[0.07] border border-white/10 rounded-2xl px-7 py-4">
-          <ScannerOutline className="w-5 h-5 text-white/40" />
+          <ScannerOutline className="w-5 h-5" color="rgba(255,255,255,0.4)" />
           <div className="flex items-baseline gap-2">
             <span className="text-white text-3xl font-black tabular-nums leading-none">{dailyCount}</span>
             <span className="text-white/40 text-sm">checked in today</span>

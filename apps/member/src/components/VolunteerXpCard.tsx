@@ -81,7 +81,7 @@ export default function VolunteerXpCard() {
 
       {/* ── Collapsing Wrapper: Card ONLY ── */}
       <motion.div 
-        className="relative z-10 flex flex-col overflow-hidden px-4"
+        className="relative z-10 flex flex-col overflow-hidden px-[25px]"
         initial={false}
         animate={{
           maxHeight: isScrolled ? 0 : 300, // Reduced height since grid is gone
@@ -104,7 +104,7 @@ export default function VolunteerXpCard() {
                 <img src={imgSolarMedalStarCircleBoldDuotone} alt="Medal" className="absolute block inset-0 max-w-none size-full" />
               </div>
               <p className="font-proxima leading-none text-[#464646] tracking-[-1.226px]">
-                <span className="font-bold text-[40.867px]">{spendablePoints.toLocaleString()}</span>
+                <span className="font-extrabold text-[40.867px]">{spendablePoints.toLocaleString()}</span>
                 {' '}
                 <span className="font-semibold text-[24px]">XP</span>
               </p>

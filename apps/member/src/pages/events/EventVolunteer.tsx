@@ -19,7 +19,7 @@ function VolunteerPageHeader({ event, onBack }: { event: { title: string }; onBa
         onClick={onBack}
         className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
       >
-        <ArrowLeftOutline className="w-5 h-5 text-white" />
+        <ArrowLeftOutline className="w-5 h-5" color="white" />
       </motion.button>
       <h1 className="text-white text-xl font-bold">Volunteer Application</h1>
       <p className="text-white/60 text-sm mt-1">{event.title}</p>
@@ -88,7 +88,7 @@ export default function EventVolunteer() {
             animate="visible"
             className="bg-white rounded-2xl p-5 shadow-card space-y-3 text-center"
           >
-            <HeartOutline className="w-10 h-10 text-primary mx-auto" />
+            <HeartOutline className="w-10 h-10 mx-auto" color="rgb(var(--color-primary))" />
             <p className="text-slate-700 font-semibold">Application Submitted</p>
             <p className="text-sm text-slate-500">
               Status:{' '}
@@ -140,7 +140,7 @@ export default function EventVolunteer() {
             animate="visible"
             className="bg-white rounded-2xl p-6 shadow-card text-center space-y-4"
           >
-            <CheckCircleOutline className="w-14 h-14 text-green mx-auto" />
+            <CheckCircleOutline className="w-14 h-14 mx-auto" color="#21C45D" />
             <div>
               <h2 className="text-slate-900 text-lg font-bold">Application Submitted!</h2>
               <p className="text-sm text-slate-500 mt-1 leading-relaxed">
@@ -191,7 +191,7 @@ export default function EventVolunteer() {
             />
           ) : (
             <div className="w-full h-32 bg-primary/10 rounded-xl mb-3 flex items-center justify-center">
-              <CalendarOutline className="w-10 h-10 text-primary/30" />
+              <CalendarOutline className="w-10 h-10" color="rgba(var(--color-primary), 0.3)" />
             </div>
           )}
           <h2 className="text-slate-900 font-bold text-base">{event.title}</h2>

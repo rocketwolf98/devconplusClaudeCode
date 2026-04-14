@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeftOutline, GalleryAddOutline, CloseSquareOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, GalleryAddOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,7 +17,7 @@ import {
   CATEGORY_OPTIONS,
   DEVCON_PROGRAM_OPTIONS,
   VISIBILITY_OPTIONS,
-  ATTENDANCE_POINTS_BY_CATEGORY,
+  ATTENDANCE_PTS,
   DEFAULT_VOLUNTEER_POINTS,
   TAG_MAX_LENGTH,
   SectionHeader,
@@ -87,7 +87,7 @@ export function OrgEventCreate() {
   const prevCategoryRef = useRef<string | undefined>(undefined)
   if (category && category !== prevCategoryRef.current) {
     prevCategoryRef.current = category
-    setValue('points_value', ATTENDANCE_POINTS_BY_CATEGORY[category], { shouldValidate: false })
+    setValue('points_value', ATTENDANCE_PTS[category], { shouldValidate: false })
   }
 
   // ── Cover image handlers ─────────────────────────────────────────────────
@@ -214,7 +214,7 @@ export function OrgEventCreate() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeftOutline className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
         </button>
         <h1 className="text-xl font-bold text-white">Create Event</h1>
         <p className="text-white/60 text-sm mt-0.5">Fill in the details for your chapter event.</p>
@@ -275,7 +275,7 @@ export function OrgEventCreate() {
                 onClick={removeCover}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
               >
-                <CloseSquareOutline className="w-4 h-4 text-white" />
+                <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
               </button>
             </div>
           ) : (

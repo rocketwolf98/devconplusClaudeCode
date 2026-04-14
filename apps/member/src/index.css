@@ -81,9 +81,9 @@ body {
 @layer base {
   :root,
   .theme-devcon {
-    --color-primary:      54 123 221;   /* #367BDD */
-    --color-primary-dark: 41 98 196;    /* #2962C4 */
-    --shadow-primary: 0 4px 24px rgba(54, 123, 221, 0.12);
+    --color-primary:      17 82 212;   /* #1152D4 */
+    --color-primary-dark: 13 66 170;    /* #0D42AA */
+    --shadow-primary: 0 4px 24px rgba(17, 82, 212, 0.12);
   }
 
   .theme-she {

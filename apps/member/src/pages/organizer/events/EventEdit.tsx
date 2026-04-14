@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { isValidUUID } from '../../../lib/validation'
-import { ArrowLeftOutline, GalleryAddOutline, CloseSquareOutline, PenOutline, DangerTriangleOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, GalleryAddOutline, CloseCircleLineDuotone, PenOutline, DangerTriangleOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -19,7 +19,7 @@ import {
   CATEGORY_OPTIONS,
   DEVCON_PROGRAM_OPTIONS,
   VISIBILITY_OPTIONS,
-  ATTENDANCE_POINTS_BY_CATEGORY,
+  ATTENDANCE_PTS,
   DEFAULT_VOLUNTEER_POINTS,
   TAG_MAX_LENGTH,
   SectionHeader,
@@ -126,7 +126,7 @@ export function OrgEventEdit() {
     prevCategoryRef.current = category
     // Only auto-set if the event isn't locked AND the category actually changed from stored value
     if (!isLocked && category !== event?.category) {
-      setValue('points_value', ATTENDANCE_POINTS_BY_CATEGORY[category], { shouldValidate: false })
+      setValue('points_value', ATTENDANCE_PTS[category], { shouldValidate: false })
     }
   }
 
@@ -268,10 +268,10 @@ export function OrgEventEdit() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeftOutline className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
         </button>
         <div className="flex items-center gap-2">
-          <PenOutline className="w-4 h-4 text-white/60" />
+          <PenOutline className="w-4 h-4" color="rgba(255,255,255,0.6)" />
           <h1 className="text-xl font-bold text-white">Edit Event</h1>
         </div>
         <p className="text-white/60 text-sm mt-0.5">Update your event details.</p>
@@ -320,7 +320,7 @@ export function OrgEventEdit() {
                 onClick={removeCover}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
               >
-                <CloseSquareOutline className="w-4 h-4 text-white" />
+                <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
               </button>
             </div>
           ) : (
@@ -727,7 +727,7 @@ export function OrgEventEdit() {
                 <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
                 <div className="flex flex-col items-center text-center mb-6">
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
-                    <DangerTriangleOutline className="w-7 h-7 text-red" />
+                    <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
                   </div>
                   <h2 className="text-base font-bold text-slate-900 mb-1">Delete Event?</h2>
                   <p className="text-sm text-slate-500">
@@ -755,7 +755,7 @@ export function OrgEventEdit() {
                 <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
                 <div className="flex flex-col items-center text-center mb-6">
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
-                    <DangerTriangleOutline className="w-7 h-7 text-red" />
+                    <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
                   </div>
                   <h2 className="text-base font-bold text-slate-900 mb-1">Are you sure?</h2>
                   <p className="text-sm text-slate-500">

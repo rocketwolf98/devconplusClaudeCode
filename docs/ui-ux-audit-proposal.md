@@ -122,7 +122,7 @@ M3 Expressive uses **vibrant tonal surfaces** — not flat white cards on gray b
 | Problem | Where | Impact |
 |---------|-------|--------|
 | Flat white cards on `slate-50` bg | Everywhere | No depth, no tonal surface tinting |
-| Hardcoded `#367BDD` bypassing CSS vars | ApprovalCard, OrgDashboard, OrgEventDetail (7-10 instances) | Theme switching breaks in organizer |
+| Hardcoded `#1152D4` bypassing CSS vars | ApprovalCard, OrgDashboard, OrgEventDetail (7-10 instances) | Theme switching breaks in organizer |
 | Inline `backgroundColor` styles | Dashboard banner dots | Breaks Tailwind conventions |
 | No tonal elevation | Cards use drop shadows only | Doesn't match M3 Expressive depth model |
 | Gold (#F8C630) under-used | Only XP bar + star | Could accent more celebratory moments |
@@ -166,7 +166,7 @@ M3 Expressive uses **vibrant tonal surfaces** — not flat white cards on gray b
 
 | Issue | Impact |
 |-------|--------|
-| Organizer headers use hardcoded `#367BDD` not CSS vars | Won't theme with program selector |
+| Organizer headers use hardcoded `#1152D4` not CSS vars | Won't theme with program selector |
 | Organizer cards have different shadow model | Feels like a different product |
 | No spring animations on organizer approval actions | Approve/Reject feel stiff |
 
@@ -208,7 +208,7 @@ export const DURATION = {
 ```
 
 #### QW-3: Fix All Hardcoded Colors
-Replace 7-10 instances of `from-[#367BDD] to-[#2962C4]` with `from-[rgb(var(--color-primary))] to-[rgb(var(--color-primary-dark))]`.
+Replace 7-10 instances of `from-[#1152D4] to-[#0D42AA]` with `from-[rgb(var(--color-primary))] to-[rgb(var(--color-primary-dark))]`.
 
 #### QW-4: Standardize Card Padding
 - NewsCard: `p-3` → `p-4` (match EventCard, JobCard)

@@ -32,7 +32,7 @@ function baseLayout(content: string): string {
     .detail-label { color: #94A3B8; min-width: 72px; font-size: 12px; }
     .detail-value { color: #0F172A; font-weight: 600; }
     .points-badge { display: inline-block; background: #DCFCE7; color: #16A34A; font-weight: 700; font-size: 13px; padding: 4px 12px; border-radius: 99px; border: 1px solid #BBF7D0; }
-    .cta { display: block; background: #367BDD; color: #FFFFFF; font-weight: 700; font-size: 15px; text-align: center; text-decoration: none; padding: 14px 24px; border-radius: 14px; margin-top: 24px; }
+    .cta { display: block; background: #1152D4; color: #FFFFFF; font-weight: 700; font-size: 15px; text-align: center; text-decoration: none; padding: 14px 24px; border-radius: 14px; margin-top: 24px; }
     .divider { border: none; border-top: 1px solid #E2E8F0; margin: 20px 0; }
   </style>
 </head>

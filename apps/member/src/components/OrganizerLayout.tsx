@@ -139,10 +139,10 @@ export default function OrganizerLayout() {
                 }
               >
                 {({ isActive }) => (
-                  <>
+                  <div className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-blue' : 'text-slate-400'}`}>
                     <Icon className="w-5 h-5" />
                     <span className="text-[10px] font-medium">{label}</span>
-                  </>
+                  </div>
                 )}
               </NavLink>
             ))}
@@ -158,7 +158,7 @@ export default function OrganizerLayout() {
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <ScannerOutline className="w-6 h-6 text-white" />
+                  <ScannerOutline className="w-6 h-6" color="white" />
                 </motion.div>
               )}
             </NavLink>
@@ -175,10 +175,10 @@ export default function OrganizerLayout() {
                 }
               >
                 {({ isActive }) => (
-                  <>
+                  <div className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-blue' : 'text-slate-400'}`}>
                     <Icon className="w-5 h-5" />
                     <span className="text-[10px] font-medium">{label}</span>
-                  </>
+                  </div>
                 )}
               </NavLink>
             ))}

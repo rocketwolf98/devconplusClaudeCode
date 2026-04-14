@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MapPointOutline, TrashBinTrashOutline, BoltOutline, AddCircleOutline, PenOutline, CloseSquareOutline } from 'solar-icon-set'
+import { MapPointOutline, TrashBinTrashOutline, BoltOutline, AddCircleOutline, PenOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -240,7 +240,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           onClick={onClose}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
         >
-          <CloseSquareOutline className="w-4 h-4" />
+          <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
         </button>
       </div>
 
@@ -616,7 +616,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                             onClick={() => removeOption(field.id, i)}
                             className="text-slate-400 hover:text-red transition-colors"
                           >
-                            <CloseSquareOutline className="w-2.5 h-2.5" />
+                            <CloseCircleLineDuotone className="w-2.5 h-2.5" color="#EF4444" />
                           </button>
                         </span>
                       ))}

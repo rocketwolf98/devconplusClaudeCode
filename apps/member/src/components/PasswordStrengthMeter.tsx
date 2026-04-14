@@ -74,8 +74,8 @@ export default function PasswordStrengthMeter({ password }: Props) {
           return (
             <div key={chipLabel} className="flex items-center gap-1">
               {ok
-                ? <CheckCircleOutline className="w-3 h-3 text-green shrink-0" />
-                : <CloseCircleOutline     className="w-3 h-3 text-slate-300 shrink-0" />
+                ? <CheckCircleOutline className="w-3 h-3 shrink-0" color="#21C45D" />
+                : <CloseCircleOutline     className="w-3 h-3 shrink-0" color="#CBD5E1" />
               }
               <span className={`text-xs ${ok ? 'text-slate-700' : 'text-slate-400'}`}>
                 {chipLabel}

@@ -222,7 +222,7 @@ export default function ProfileEdit() {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeftOutline className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
         </button>
         <h1 className="text-white text-xl font-bold">Edit Profile</h1>
       </div>
@@ -254,7 +254,7 @@ export default function ProfileEdit() {
               )}
               {!avatarUploading && (
                 <div className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center border-2 border-white shadow-sm">
-                  <CameraOutline className="w-4 h-4 text-white" />
+                  <CameraOutline className="w-4 h-4" color="white" />
                 </div>
               )}
             </button>
@@ -292,11 +292,11 @@ export default function ProfileEdit() {
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
-                {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4 text-green" />}
+                {usernameStatus === 'available' && <CheckCircleOutline className="w-4 h-4" color="#21C45D" />}
                 {(usernameStatus === 'taken' || (watchedUsername === user?.username)) && usernameStatus !== 'available' && usernameStatus !== 'checking' && watchedUsername === user?.username && (
-                  <CheckCircleOutline className="w-4 h-4 text-slate-300" />
+                  <CheckCircleOutline className="w-4 h-4" color="#CBD5E1" />
                 )}
-                {usernameStatus === 'taken' && watchedUsername !== user?.username && <CloseCircleOutline className="w-4 h-4 text-red" />}
+                {usernameStatus === 'taken' && watchedUsername !== user?.username && <CloseCircleOutline className="w-4 h-4" color="#EF4444" />}
               </span>
             </div>
             {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
@@ -319,7 +319,7 @@ export default function ProfileEdit() {
           {/* Social Links */}
           <div className="space-y-3">
             <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-              <LinkOutline className="w-4 h-4 text-slate-400" />
+              <LinkOutline className="w-4 h-4" color="#94A3B8" />
               Social Links <span className="text-slate-400 font-normal">(optional)</span>
             </p>
             <div>
@@ -398,7 +398,7 @@ export default function ProfileEdit() {
           {/* Change Email */}
           <div className="px-4 py-4 border-b border-slate-100">
             <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
-              <LetterOutline className="w-4 h-4 text-slate-400" />
+              <LetterOutline className="w-4 h-4" color="#94A3B8" />
               Change Email
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires password</span>
             </p>
@@ -426,7 +426,7 @@ export default function ProfileEdit() {
           {/* Change Password */}
           <div className="px-4 py-4">
             <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
-              <LockOutline className="w-4 h-4 text-slate-400" />
+              <LockOutline className="w-4 h-4" color="#94A3B8" />
               Change Password
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires current password</span>
             </p>

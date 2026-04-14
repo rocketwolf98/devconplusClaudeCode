@@ -64,7 +64,7 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
           >
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
             <div className="flex items-center gap-2 mb-1">
-              <UserSpeakOutline className="w-4 h-4 text-blue" />
+              <UserSpeakOutline className="w-4 h-4" color="#1152D4" />
               <h3 className="text-base font-bold text-slate-900">Send Announcement</h3>
             </div>
             <p className="text-xs text-slate-400 mb-4">{eventTitle}</p>

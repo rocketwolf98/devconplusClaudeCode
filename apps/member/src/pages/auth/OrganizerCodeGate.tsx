@@ -163,7 +163,7 @@ export default function OrganizerCodeGate() {
                 >
                   {avatarUploading
                     ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    : <CameraOutline className="w-3 h-3 text-white" />
+                    : <CameraOutline className="w-3 h-3" color="white" />
                   }
                 </button>
               </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PenOutline, CheckCircleOutline, CloseSquareOutline, AddCircleOutline, TrashBinTrashOutline, AltArrowDownOutline } from 'solar-icon-set'
+import { PenOutline, CheckCircleOutline, CloseCircleLineDuotone, AddCircleOutline, TrashBinTrashOutline, AltArrowDownOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import type { Chapter, Region } from '@devcon-plus/supabase'
 
@@ -91,7 +91,7 @@ function ChapterCard({
                 onClick={onCancelEdit}
                 className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"
               >
-                <CloseSquareOutline className="w-4 h-4" />
+                <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
               </button>
             </div>
           ) : (

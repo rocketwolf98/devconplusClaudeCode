@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeftOutline, GalleryAddOutline, CloseSquareOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, GalleryAddOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -168,7 +168,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
           onClick={() => navigate(-1)}
           className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
         >
-          <ArrowLeftOutline className="w-5 h-5 text-white" />
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
         </button>
         <h1 className="text-xl font-bold text-white">
           {isEdit ? 'Edit Reward' : 'Add Reward'}
@@ -250,7 +250,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
                 onClick={removeCover}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/60 flex items-center justify-center"
               >
-                <CloseSquareOutline className="w-4 h-4 text-white" />
+                <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
               </button>
             </div>
           ) : (

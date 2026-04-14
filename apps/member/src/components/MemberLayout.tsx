@@ -195,7 +195,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
@@ -213,7 +213,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
@@ -234,7 +234,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <QRCodeOutline className="w-6 h-6 text-white" />
+                  <QRCodeOutline className="w-6 h-6" color="white" />
                 </motion.div>
               )}
             </NavLink>
@@ -247,7 +247,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
@@ -265,7 +265,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
@@ -342,7 +342,7 @@ export default function MemberLayout() {
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                     isActive ? 'bg-white/30' : 'bg-white/15'
                   }`}>
-                    <QRCodeOutline className="w-3.5 h-3.5 text-white" />
+                    <QRCodeOutline className="w-3.5 h-3.5" color="white" />
                   </div>
                   Events
                 </>

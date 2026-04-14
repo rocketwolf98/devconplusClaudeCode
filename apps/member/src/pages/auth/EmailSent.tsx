@@ -66,7 +66,7 @@ export default function EmailSent() {
       <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 flex flex-col items-center text-center">
         {/* LetterOutline icon */}
         <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mb-5">
-          <LetterOutline className="w-8 h-8 text-blue" />
+          <LetterOutline className="w-8 h-8" color="#1152D4" />
         </div>
 
         <h2 className="text-xl font-black text-slate-900 mb-2">{heading}</h2>

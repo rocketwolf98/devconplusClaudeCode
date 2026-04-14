@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TrashBinTrashOutline, CloseSquareOutline, LetterOutline, CaseOutline, CalendarOutline, StarOutline } from 'solar-icon-set'
+import { TrashBinTrashOutline, CloseCircleLineDuotone, LetterOutline, CaseOutline, CalendarOutline, StarOutline } from 'solar-icon-set'
 import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import type { Profile, UserRole, PointTransaction } from '@devcon-plus/supabase'
@@ -196,7 +196,7 @@ export default function AdminUsers() {
                   onClick={() => setSelectedUser(null)}
                   className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-colors"
                 >
-                  <CloseSquareOutline className="w-4 h-4" />
+                  <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
                 </button>
 
                 <div className="flex items-center gap-4 pr-8">
@@ -215,17 +215,17 @@ export default function AdminUsers() {
               {/* InfoCircleOutline section */}
               <div className="p-5 space-y-3">
                 <div className="flex items-center gap-3">
-                  <LetterOutline className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <LetterOutline className="w-4 h-4 flex-shrink-0" color="#94A3B8" />
                   <span className="text-sm text-slate-700 truncate">{selectedUser.email}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CaseOutline className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <CaseOutline className="w-4 h-4 flex-shrink-0" color="#94A3B8" />
                   <span className="text-sm text-slate-700">
                     {selectedUser.school_or_company ?? '—'}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CalendarOutline className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                  <CalendarOutline className="w-4 h-4 flex-shrink-0" color="#94A3B8" />
                   <span className="text-sm text-slate-700">
                     {selectedUser.created_at
                       ? new Date(selectedUser.created_at).toLocaleDateString('en-PH', {
@@ -237,7 +237,7 @@ export default function AdminUsers() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <StarOutline className="w-4 h-4 fill-gold text-gold flex-shrink-0" />
+                  <StarOutline className="w-4 h-4 flex-shrink-0" color="#F8C630" />
                   <span className="text-sm font-bold text-gold">
                     {(selectedUser.spendable_points ?? 0).toLocaleString()} pts
                   </span>

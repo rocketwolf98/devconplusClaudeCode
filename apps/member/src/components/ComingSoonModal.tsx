@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { RocketOutline } from 'solar-icon-set'
+import { RocketOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { backdrop, slideUp } from '../lib/animation'
 
@@ -40,10 +40,15 @@ export default function ComingSoonModal({ onClose, feature = 'This feature' }: P
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-6" />
+            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-2" />
+            <div className="flex justify-end mb-2">
+              <button onClick={handleClose} className="p-1">
+                <CloseCircleLineDuotone className="w-6 h-6" color="#EF4444" />
+              </button>
+            </div>
             <div className="text-center">
               <div className="flex justify-center mb-3">
-                <RocketOutline className="w-12 h-12 text-primary" />
+                <RocketOutline className="w-12 h-12" color="rgb(var(--color-primary))" />
               </div>
               <h2 className="text-lg font-bold text-slate-900 mb-1">Coming Soon</h2>
               <p className="text-sm text-slate-500 mb-6">{feature} is launching soon. Stay tuned!</p>

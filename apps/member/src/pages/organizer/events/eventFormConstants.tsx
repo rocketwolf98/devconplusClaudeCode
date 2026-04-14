@@ -1,7 +1,20 @@
 import { useState } from 'react'
-import { AddCircleOutline, TrashBinTrashOutline, CloseSquareOutline } from 'solar-icon-set'
+import { AddCircleOutline, TrashBinTrashOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { z } from 'zod'
 import type { DevconCategory } from '@devcon-plus/supabase'
+
+// ── Points defaults by category ───────────────────────────────────────────────
+export const ATTENDANCE_PTS = {
+  tech_talk:   5,
+  networking:  5,
+  social:      5,
+  summit:      500,
+  workshop:    150,
+  brown_bag:   150,
+  hackathon:   150,
+} as const
+
+export const DEFAULT_VOLUNTEER_POINTS = 500
 
 // ── Custom form field types ───────────────────────────────────────────────────
 
@@ -94,29 +107,11 @@ export const DEVCON_PROGRAM_OPTIONS: {
   hex: string
   darkText?: boolean
 }[] = [
-  { value: 'devcon', label: 'DEVCON',        hex: '#367BDD' },
+  { value: 'devcon', label: 'DEVCON',        hex: '#1152D4' },
   { value: 'she',    label: '#SheIsDEVCON',  hex: '#EC4899' },
   { value: 'kids',   label: 'DEVCON Kids',   hex: '#21C45D' },
   { value: 'campus', label: 'Campus DEVCON', hex: '#F8C630', darkText: true },
 ]
-
-// ── Points defaults by category ───────────────────────────────────────────────
-// Standard (non-boosted) values from the DEVCON+ points system spec.
-// - Event Attendance (Physical): +5 pts
-// - Technical Training Attendance: +150 pts
-// Volunteer points default follows Code Camp Volunteering standard (+500 pts).
-
-export const ATTENDANCE_POINTS_BY_CATEGORY: Record<NonNullable<FormData['category']>, number> = {
-  tech_talk:   5,
-  networking:  5,
-  social:      5,
-  summit:      500,
-  workshop:    150,
-  brown_bag:   150,
-  hackathon:   150,
-}
-
-export const DEFAULT_VOLUNTEER_POINTS = 500
 
 export const VISIBILITY_OPTIONS: { value: FormData['visibility']; label: string }[] = [
   { value: 'public',   label: 'Public'   },
@@ -159,7 +154,7 @@ export function CustomFieldsBuilder({
   const addField = () => {
     setCustomFields(prev => [
       ...prev,
-      { id: crypto.randomUUID(), label: '', type: 'text', required: false, options: [] },
+      { id: Math.random().toString(36).substring(2, 11), label: '', type: 'text', required: false, options: [] },
     ])
   }
 
@@ -251,7 +246,7 @@ export function CustomFieldsBuilder({
                     onClick={() => removeOption(field.id, opt)}
                     className="w-6 h-6 rounded-full flex items-center justify-center text-slate-400 hover:text-red hover:bg-red/10 transition-colors"
                   >
-                    <CloseSquareOutline className="w-3.5 h-3.5" />
+                    <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
                   </button>
                 </div>
               ))}
