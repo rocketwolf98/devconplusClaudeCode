@@ -68,7 +68,7 @@ export default function KonamiModal({ open, onClose }: Props) {
                   <>
                     <div className="flex justify-center mb-4">
                       <div className="w-14 h-14 rounded-2xl bg-blue/10 flex items-center justify-center">
-                        <ShieldCheckOutline className="w-7 h-7" color="#1152D4" />
+                        <ShieldCheckOutline className="w-7 h-7" color="rgb(var(--color-primary))" />
                       </div>
                     </div>
                     <h2 className="text-lg font-bold text-slate-900 mb-2">Admin Access</h2>
