@@ -75,7 +75,7 @@ export default function EventDetail() {
           <img src={event.cover_image_url} alt={event.title} className="w-full h-full object-cover" />
         ) : (
           <div
-            className="w-full h-full bg-[#1152d4]"
+            className="w-full h-full bg-primary"
             style={{ backgroundImage: PATTERN_BG, backgroundSize: '60px 60px' }}
           />
         )}

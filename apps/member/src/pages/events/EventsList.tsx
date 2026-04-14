@@ -120,7 +120,7 @@ export default function EventsList() {
 
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -156,7 +156,7 @@ export default function EventsList() {
               className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
             >
               <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <MapPointOutline className="size-[24px]" color="#1152d4" />
+                <MapPointOutline className="size-[24px]" color="rgb(var(--color-primary))" />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
                 <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
@@ -176,7 +176,7 @@ export default function EventsList() {
               className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
             >
               <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <TicketOutline className="size-[24px]" color="#1152d4" />
+                <TicketOutline className="size-[24px]" color="rgb(var(--color-primary))" />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
                 <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
@@ -204,15 +204,15 @@ export default function EventsList() {
                 onClick={() => setTab(t)}
                 className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
                   tab === t
-                    ? 'bg-[#1152d4] text-white shadow-sm'
-                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-primary/10 text-primary'
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   {t === 'discover' ? 'Discover' : 'My Tickets'}
                   {t === 'tickets' && ticketCount > 0 && (
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
-                      tab === 'tickets' ? 'bg-white text-[#1152d4]' : 'bg-[#1152d4]/20 text-[#1152d4]'
+                      tab === 'tickets' ? 'bg-white text-primary' : 'bg-primary/20 text-primary'
                     }`}>
                       {ticketCount}
                     </span>
