@@ -38,7 +38,7 @@ export default function VolunteerXpCard() {
     <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
       {/* ── Blue Background Container ── */}
       <motion.div 
-        className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto"
+        className="bg-primary relative overflow-hidden z-0 pointer-events-auto"
         initial={false}
         animate={{
           paddingBottom: isScrolled ? 16 : 64 
@@ -156,7 +156,7 @@ export default function VolunteerXpCard() {
 
           <motion.button
             onClick={() => navigate('/events')}
-            className="font-proxima font-semibold w-full bg-[#1152d4] text-white text-[16px] h-12 rounded-[80px]"
+            className="font-proxima font-semibold w-full bg-primary text-white text-[16px] h-12 rounded-[80px]"
             whileTap={{ scale: 0.95 }}
           >
             Attend Our Events

@@ -53,7 +53,7 @@ export function SkeletonFeaturedEvent() {
 export function SkeletonJobCardCompact() {
   return (
     <div className="flex-shrink-0 w-52 bg-white rounded-[24px] border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] p-[18px] py-[12px] space-y-2">
-      <div className="w-10 h-10 rounded-full bg-[#1152d4]/20 animate-pulse" />
+      <div className="w-10 h-10 rounded-full bg-primary/20 animate-pulse" />
       <div className="space-y-1.5">
         <S className="h-4 w-full" />
         <S className="h-3 w-2/3" />
@@ -69,7 +69,7 @@ export function SkeletonJobCardCompact() {
 export function SkeletonJobCard() {
   return (
     <div className="bg-white rounded-[24px] border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] p-[18px] py-[12px] space-y-2">
-      <div className="w-12 h-12 rounded-full bg-[#1152d4]/20 animate-pulse shrink-0" />
+      <div className="w-12 h-12 rounded-full bg-primary/20 animate-pulse shrink-0" />
       <div className="flex flex-col gap-1">
         <div className="flex flex-col gap-[2px]">
           <S className="h-4 w-3/4" />

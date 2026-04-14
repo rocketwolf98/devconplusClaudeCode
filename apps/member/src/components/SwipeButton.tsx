@@ -55,13 +55,13 @@ export function SwipeButton({ onConfirm, disabled, isLoading }: SwipeButtonProps
       ref={containerRef} 
       className="h-[56px] relative w-full bg-[#eef4ff] rounded-[36px] overflow-hidden flex items-center justify-center"
     >
-      <p className="font-proxima font-semibold text-[#1152d4] text-[14px] z-10 select-none pointer-events-none transition-opacity duration-300">
+      <p className="font-proxima font-semibold text-primary text-[14px] z-10 select-none pointer-events-none transition-opacity duration-300">
         {isLoading ? 'Processing...' : isSuccess ? 'Redeemed!' : 'Swipe to Redeem'}
       </p>
       
       {/* Background fill */}
       <motion.div 
-        className="absolute left-0 top-0 bottom-0 bg-[#1152d4]/10 rounded-[36px] z-0"
+        className="absolute left-0 top-0 bottom-0 bg-primary/10 rounded-[36px] z-0"
         style={{ width: progressWidth }}
       />
 
@@ -73,7 +73,7 @@ export function SwipeButton({ onConfirm, disabled, isLoading }: SwipeButtonProps
         animate={controls}
         style={{ x }}
         whileTap={!disabled && !isLoading && !isSuccess ? { scale: 0.95 } : {}}
-        className={`absolute left-[4px] top-[4px] size-[48px] bg-[#1152d4] rounded-full flex items-center justify-center z-20 ${disabled || isLoading || isSuccess ? 'opacity-50 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
+        className={`absolute left-[4px] top-[4px] size-[48px] bg-primary rounded-full flex items-center justify-center z-20 ${disabled || isLoading || isSuccess ? 'opacity-50 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M11 7L16 12L11 17M6 7L11 12L6 17" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
