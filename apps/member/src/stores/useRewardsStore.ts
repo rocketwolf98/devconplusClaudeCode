@@ -1,13 +1,13 @@
 import { create } from 'zustand'
 import type { Reward, RewardRedemption } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
-
-let _chanSeq = 0
-const nextChan = (base: string) => `${base}-${++_chanSeq}`
 import { toast } from 'sonner'
 import { useAuthStore } from './useAuthStore'
 import { usePointsStore } from './usePointsStore'
 import type { RewardFormData } from '../pages/organizer/rewards/rewardFormConstants'
+
+let _chanSeq = 0
+const nextChan = (base: string) => `${base}-${++_chanSeq}`
 
 export interface RewardRedemptionWithDetails extends RewardRedemption {
   member_name: string
@@ -262,7 +262,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
       })
       set({ allRedemptions: mapped })
     } catch (err) {
-      set({ error: err instanceof Error ? err.message : String(err) })
+      set({ allRedemptions: [], error: err instanceof Error ? err.message : String(err) })
     } finally {
       set({ isLoadingClaims: false })
     }
@@ -272,6 +272,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
   approveClaim: async (redemptionId) => {
     const organizer = useAuthStore.getState().user
     if (!organizer) return { success: false, error: 'Not authenticated' }
+    // approve_reward_claim / refund_reward_claim not yet in generated types — cast is intentional
     const { data, error } = await supabase.rpc('approve_reward_claim' as never, {
       p_redemption_id: redemptionId,
       p_organizer_id: organizer.id,
@@ -293,6 +294,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
   refundClaim: async (redemptionId) => {
     const organizer = useAuthStore.getState().user
     if (!organizer) return { success: false, error: 'Not authenticated' }
+    // approve_reward_claim / refund_reward_claim not yet in generated types — cast is intentional
     const { data, error } = await supabase.rpc('refund_reward_claim' as never, {
       p_redemption_id: redemptionId,
       p_organizer_id: organizer.id,
@@ -363,8 +365,10 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
         }
       )
       .subscribe((status, err) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn('[reward-redemptions-realtime] channel error', status, err)
+        if (status === 'CHANNEL_ERROR') {
+          console.error('[reward-redemptions-realtime] channel error:', err)
+        } else if (status === 'TIMED_OUT') {
+          console.warn('[reward-redemptions-realtime] timed out — Supabase will retry')
         }
       })
     return () => { void supabase.removeChannel(channel) }
