@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { useFormDraft } from '../../../hooks/useFormDraft'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeftOutline, GalleryAddOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { motion } from 'framer-motion'
@@ -31,10 +32,21 @@ const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+type EventCreateDraft = FormData & {
+  tags: string[]
+  visibility: 'public' | 'unlisted' | 'draft'
+  customFields: CustomFormField[]
+}
+
 export function OrgEventCreate() {
   const navigate = useNavigate()
   const { createEvent } = useEventsStore()
   const { user } = useAuthStore()
+
+  const { draft, saveDraft, clearDraft } = useFormDraft<EventCreateDraft>(
+    'org-event-create',
+    'local',
+  )
 
   // Cover image (managed outside RHF)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -52,14 +64,18 @@ export function OrgEventCreate() {
   }, [])
 
   // Tags (managed outside RHF)
-  const [tags, setTags] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>((draft.tags as string[]) ?? [])
   const [tagInput, setTagInput] = useState('')
 
   // Visibility (managed outside RHF for segmented control feel)
-  const [visibility, setVisibility] = useState<'public' | 'unlisted' | 'draft'>('public')
+  const [visibility, setVisibility] = useState<'public' | 'unlisted' | 'draft'>(
+    (draft.visibility as 'public' | 'unlisted' | 'draft') ?? 'public',
+  )
 
   // Custom registration form fields
-  const [customFields, setCustomFields] = useState<CustomFormField[]>([])
+  const [customFields, setCustomFields] = useState<CustomFormField[]>(
+    (draft.customFields as CustomFormField[]) ?? [],
+  )
 
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -69,16 +85,25 @@ export function OrgEventCreate() {
     watch,
     setValue,
     control,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      points_value:      5,
-      volunteer_points:  DEFAULT_VOLUNTEER_POINTS,
-      requires_approval: false,
-      is_chapter_locked: true,
-      is_free:           true,
-      ticket_price_php:  0,
+      title:             (draft.title             as string)  ?? '',
+      description:       (draft.description       as string)  ?? '',
+      location:          (draft.location          as string)  ?? '',
+      event_date:        (draft.event_date         as string)  ?? '',
+      end_date:          (draft.end_date           as string)  ?? '',
+      category:          (draft.category           as FormData['category']) ?? undefined,
+      devcon_category:   (draft.devcon_category    as FormData['devcon_category']) ?? undefined,
+      points_value:      (draft.points_value       as number)  ?? 5,
+      volunteer_points:  (draft.volunteer_points   as number)  ?? DEFAULT_VOLUNTEER_POINTS,
+      requires_approval: (draft.requires_approval  as boolean) ?? false,
+      is_chapter_locked: (draft.is_chapter_locked  as boolean) ?? true,
+      is_free:           (draft.is_free            as boolean) ?? true,
+      ticket_price_php:  (draft.ticket_price_php   as number)  ?? 0,
+      capacity:          (draft.capacity           as number)  ?? undefined,
       visibility:        'public',
       tags:              [],
     },
@@ -93,6 +118,20 @@ export function OrgEventCreate() {
     prevCategoryRef.current = category
     setValue('points_value', ATTENDANCE_PTS[category], { shouldValidate: false })
   }
+
+  // Save RHF fields → draft whenever any field changes
+  useEffect(() => {
+    const { unsubscribe } = watch((values) => {
+      saveDraft({ ...(values as Partial<FormData>), tags, visibility, customFields })
+    })
+    return unsubscribe
+  }, [watch, saveDraft, tags, visibility, customFields])
+
+  // Save outside-RHF state → draft whenever tags/visibility/customFields change
+  useEffect(() => {
+    saveDraft({ ...getValues(), tags, visibility, customFields })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tags, visibility, customFields])
 
   // ── Cover image handlers ─────────────────────────────────────────────────
 
@@ -202,6 +241,7 @@ export function OrgEventCreate() {
         created_by:          user.id,
         custom_form_schema:  customFields.length > 0 ? customFields as unknown as Json : null,
       })
+      clearDraft()
       navigate('/organizer/events')
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to create event. Please try again.')
