@@ -42,7 +42,7 @@ BEGIN
   END IF;
 
   IF v_redemption.status != 'pending' THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Claim is not in pending state');
+    RAISE EXCEPTION 'Claim is not in pending state';
   END IF;
 
   UPDATE reward_redemptions SET

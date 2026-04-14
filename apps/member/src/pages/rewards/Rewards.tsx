@@ -212,7 +212,7 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
 
                 <motion.button
                   onClick={handleClose}
-                  className="w-full py-4 bg-[#1152d4] text-white rounded-[16px] font-proxima font-bold text-[16px] hover:bg-[#0b46a3] transition-colors"
+                  className="w-full py-4 bg-primary text-white rounded-[16px] font-proxima font-bold text-[16px] hover:opacity-90 transition-opacity"
                   whileTap={{ scale: 0.97 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
@@ -372,7 +372,7 @@ function ClaimReceiptSheet({ redemption, reward, onClose }: ClaimReceiptSheetPro
 
               <motion.button
                 onClick={handleClose}
-                className="mt-2 w-full py-3.5 bg-[#1152d4] text-white rounded-[14px] font-proxima font-bold text-[15px]"
+                className="mt-2 w-full py-3.5 bg-primary text-white rounded-[14px] font-proxima font-bold text-[15px]"
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
@@ -448,9 +448,9 @@ function ClaimReceiptsTab({ onSelectReceipt }: ClaimReceiptsTabProps) {
           <motion.div
             key={redemption.id}
             variants={cardItem}
-            className={`bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 ${isPending ? 'cursor-pointer active:bg-slate-50' : ''}`}
-            onClick={isPending ? () => onSelectReceipt(redemption) : undefined}
-            whileTap={isPending ? { scale: 0.98 } : undefined}
+            className="bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 cursor-pointer active:bg-slate-50"
+            onClick={() => onSelectReceipt(redemption)}
+            whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
             <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0">
@@ -475,11 +475,9 @@ function ClaimReceiptsTab({ onSelectReceipt }: ClaimReceiptsTabProps) {
                 <p className={`text-[10px] font-proxima font-bold ${pill.text}`}>{pill.label}</p>
               </div>
             </div>
-            {isPending && (
-              <div className="shrink-0">
-                <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
-              </div>
-            )}
+            <div className="shrink-0">
+              <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
+            </div>
           </motion.div>
         )
       })}
@@ -534,7 +532,7 @@ export default function Rewards() {
 
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -588,8 +586,8 @@ export default function Rewards() {
                 onClick={() => handleTabClick(tab.id, tab.label)}
                 className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
                   activeTab === tab.id
-                    ? 'bg-[#1152d4] text-white shadow-sm'
-                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-primary/10 text-primary'
                 }`}
               >
                 {tab.label}

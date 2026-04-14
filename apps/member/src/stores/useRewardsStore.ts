@@ -17,6 +17,7 @@ export interface RewardRedemptionWithDetails extends RewardRedemption {
   reward_points_cost: number
   reviewed_by: string | null
   reviewed_at: string | null
+  claim_pin: string | null
 }
 
 interface RewardsState {
@@ -253,6 +254,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
           claimed_at: row.claimed_at,
           reviewed_by: (row as Record<string, unknown>).reviewed_by as string | null ?? null,
           reviewed_at: (row as Record<string, unknown>).reviewed_at as string | null ?? null,
+          claim_pin: (row as Record<string, unknown>).claim_pin as string | null ?? null,
           member_name: profile?.full_name ?? 'Unknown',
           member_email: profile?.email ?? '',
           reward_name: reward?.name ?? 'Unknown Reward',
@@ -260,7 +262,10 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
           reward_points_cost: reward?.points_cost ?? 0,
         }
       })
-      set({ allRedemptions: mapped })
+      set({
+        allRedemptions: mapped,
+        unseenClaimCount: mapped.filter((r) => r.status === 'pending').length,
+      })
     } catch (err) {
       set({ allRedemptions: [], error: err instanceof Error ? err.message : String(err) })
     } finally {
@@ -348,6 +353,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
                 claimed_at: data.claimed_at,
                 reviewed_by: (data as Record<string, unknown>).reviewed_by as string | null ?? null,
                 reviewed_at: (data as Record<string, unknown>).reviewed_at as string | null ?? null,
+                claim_pin: (data as Record<string, unknown>).claim_pin as string | null ?? null,
                 member_name: profile?.full_name ?? 'Unknown',
                 member_email: profile?.email ?? '',
                 reward_name: reward?.name ?? 'Unknown Reward',
