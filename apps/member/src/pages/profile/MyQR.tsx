@@ -124,7 +124,7 @@ export default function MyQR() {
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none mb-8">
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14 text-center"
+          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14 text-center"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
