@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { EyeOutline, EyeClosedOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { useFormDraft } from '../../hooks/useFormDraft'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
 const MAX_ATTEMPTS = 5
@@ -46,6 +47,12 @@ export default function SignIn() {
   const navigate = useNavigate()
   const location = useLocation()
   const { signIn, signInWithGoogle } = useAuthStore()
+  const { draft, saveDraft, clearDraft } = useFormDraft<{ email: string }>(
+    'sign-in',
+    'session',
+    { exclude: ['password'] },
+  )
+
   const [googleLoading, setGoogleLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
@@ -57,9 +64,17 @@ export default function SignIn() {
 
   const passwordReset = (location.state as { passwordReset?: boolean } | null)?.passwordReset
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: { email: (draft.email as string) ?? '' },
   })
+
+  useEffect(() => {
+    const { unsubscribe } = watch((values) => {
+      saveDraft({ email: values.email as string })
+    })
+    return unsubscribe
+  }, [watch, saveDraft])
 
   const onSubmit = async (data: FormData) => {
     const now = Date.now()
@@ -73,6 +88,7 @@ export default function SignIn() {
     try {
       await signIn(data.email, data.password, turnstileToken ?? undefined)
       failedAttempts.current = 0
+      clearDraft()
       navigate('/home')
     } catch (err) {
       turnstileRef.current?.reset()
