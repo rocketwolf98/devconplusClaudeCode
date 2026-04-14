@@ -751,6 +751,7 @@ export type Database = {
       }
       reward_redemptions: {
         Row: {
+          claim_pin: string | null
           claimed_at: string | null
           id: string
           redeemed_at: string | null
@@ -761,6 +762,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          claim_pin?: string | null
           claimed_at?: string | null
           id?: string
           redeemed_at?: string | null
@@ -771,6 +773,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          claim_pin?: string | null
           claimed_at?: string | null
           id?: string
           redeemed_at?: string | null
