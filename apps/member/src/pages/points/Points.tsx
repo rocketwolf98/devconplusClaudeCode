@@ -68,7 +68,7 @@ export default function Points() {
 
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px] pt-14"
+          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[64px] pt-14"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -106,7 +106,7 @@ export default function Points() {
               {/* Lifetime */}
               <div className="flex items-center gap-3 pt-1">
                 <div className="w-10 h-10 rounded-full bg-blue/5 flex items-center justify-center shrink-0">
-                  <BoltOutline className="w-5 h-5" color="#1152d4" />
+                  <BoltOutline className="w-5 h-5" color="rgb(var(--color-primary))" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-slate-600 font-bold text-sm leading-none">
@@ -126,7 +126,7 @@ export default function Points() {
               {!prestigeUnlocked && (
                 <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
                   <motion.div
-                    className="h-full bg-[#1152d4]"
+                    className="h-full bg-primary"
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPct}%` }}
                     transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }}
@@ -146,8 +146,8 @@ export default function Points() {
                 onClick={() => setTab(t)}
                 className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
                   tab === t
-                    ? 'bg-[#1152d4] text-white shadow-sm'
-                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-primary/10 text-primary'
                 }`}
               >
                 {t === 'earn' ? 'Ways to Earn' : 'Share & Earn'}
