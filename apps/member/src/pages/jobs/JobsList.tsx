@@ -97,7 +97,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                   {/* Logo */}
-                  <div className="w-12 h-12 bg-[#1152d4] rounded-full shrink-0 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-primary rounded-full shrink-0 flex items-center justify-center">
                     <span className="text-white font-proxima font-bold text-xl uppercase">
                       {job.company?.[0] ?? 'J'}
                     </span>
@@ -169,7 +169,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     }
                     {job.apply_url && (
                       <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full bg-[#1152d4] text-white font-bold text-sm py-3 rounded-full shadow-sm">
+                        className="flex items-center justify-center gap-2 w-full bg-primary text-white font-bold text-sm py-3 rounded-full shadow-sm">
                         Apply Now <ShareOutline className="w-4 h-4" />
                       </a>
                     )}
@@ -386,7 +386,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                       <motion.button
                         whileTap={{ scale: 0.97 }}
                         onClick={() => void handleStart(mission.id)}
-                        className="w-full bg-[#1152d4] text-white font-bold text-sm py-3 rounded-full shadow-sm"
+                        className="w-full bg-primary text-white font-bold text-sm py-3 rounded-full shadow-sm"
                       >
                         Start Mission
                       </motion.button>
@@ -419,7 +419,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                                 value={prDrafts[mission.id] ?? ''}
                                 onChange={(e) => setPrDrafts((p) => ({ ...p, [mission.id]: e.target.value }))}
                                 placeholder="https://github.com/your/repo/pull/123"
-                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-[#1152d4] focus:ring-1 focus:ring-[#1152d4]/20"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
                               />
                               {submitErrors[mission.id] && (
                                 <p className="text-xs text-red">{submitErrors[mission.id]}</p>
@@ -435,7 +435,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                                   whileTap={{ scale: 0.97 }}
                                   onClick={() => void handleSubmit(mission.id)}
                                   disabled={submitting[mission.id]}
-                                  className="flex-1 py-2.5 rounded-full bg-[#1152d4] text-white text-sm font-bold disabled:opacity-50 shadow-sm"
+                                  className="flex-1 py-2.5 rounded-full bg-primary text-white text-sm font-bold disabled:opacity-50 shadow-sm"
                                 >
                                   {submitting[mission.id] ? 'Submitting…' : mySubmission ? 'Update Link' : 'Submit PR'}
                                 </motion.button>
@@ -452,7 +452,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                             className={`w-full font-bold text-sm py-3 rounded-full shadow-sm ${
                               mySubmission
                                 ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                : 'bg-[#1152d4] text-white'
+                                : 'bg-primary text-white'
                             }`}
                           >
                             {mySubmission ? 'Update PR Link' : 'Submit PR Link'}
@@ -508,7 +508,7 @@ export default function JobsList() {
 
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
+          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -543,8 +543,8 @@ export default function JobsList() {
                 onClick={() => switchTab(tab)}
                 className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
                   activeTab === tab
-                    ? 'bg-[#1152d4] text-white shadow-sm'
-                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-primary/10 text-primary'
                 }`}
               >
                 {tab === 'jobs' ? 'Jobs' : 'Missions'}
