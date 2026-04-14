@@ -7,6 +7,7 @@ import { usePointsStore } from '../../stores/usePointsStore'
 import { useThemeStore, PROGRAM_THEMES } from '../../stores/useThemeStore'
 import { ROLE_DISPLAY_NAMES } from '../../lib/constants'
 import ComingSoonModal from '../../components/ComingSoonModal'
+import ProfileExpCard from '../../components/ProfileExpCard'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -97,6 +98,9 @@ export default function Profile() {
             <p className="text-white/70 text-sm font-proxima mt-0.5">{user?.email}</p>
             
             <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
+              <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                Volunteer
+              </span>
               {chapterName && (
                 <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
                   {chapterName} Chapter
@@ -105,10 +109,6 @@ export default function Profile() {
               <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
                 {ROLE_DISPLAY_NAMES[user?.role ?? 'member']}
               </span>
-              <span className="inline-flex items-center gap-1.5 bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-                <StarOutline className="w-3 h-3" color="#F8C630" />
-                {spendablePoints.toLocaleString()} XP
-              </span>
             </div>
           </div>
         </div>
@@ -116,8 +116,10 @@ export default function Profile() {
 
       <div className="px-[25px] pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
 
+        <ProfileExpCard />
+
         {/* Theme */}
-        <div className="bg-white rounded-2xl border border-slate-100 p-4">
+        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
           <p className="text-sm font-bold text-slate-900 mb-3">Theme</p>
           <div className="flex gap-3">
             {PROGRAM_THEMES.map((theme) => {
@@ -140,7 +142,7 @@ export default function Profile() {
         </div>
 
         {/* Menu */}
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
           {MENU_ITEMS.map((item, i) => (
             <button
               key={item.path}

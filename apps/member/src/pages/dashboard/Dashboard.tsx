@@ -15,6 +15,7 @@ import {
   SkeletonEventCard,
   SkeletonXPRow,
   SkeletonJobCard,
+  SkeletonMissionCard,
 } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
@@ -38,7 +39,7 @@ export default function Dashboard() {
   const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
   const { jobs, isLoading: jobsLoading, fetchJobs } = useJobsStore()
   const { transactions, loadTotalPoints, loadTransactions, isLoading: pointsLoading } = usePointsStore()
-  const { missions, participants, submissions, fetchAll: fetchMissions } = useMissionsStore()
+  const { missions, participants, submissions, fetchAll: fetchMissions, isLoading: missionsLoading } = useMissionsStore()
   const [regionChapterIds, setRegionChapterIds] = useState<Set<string>>(new Set())
   const [bannerIdx, setBannerIdx] = useState(0)
   const [isScrolled, setIsScrolled] = useState(false)
@@ -411,7 +412,13 @@ useEffect(() => {
             </button>
           </div>
 
-          {unclaimedMissions.length === 0 ? (
+          {missionsLoading && unclaimedMissions.length === 0 ? (
+            <div className="flex flex-col gap-3">
+              {[1, 2].map((i) => (
+                <SkeletonMissionCard key={i} />
+              ))}
+            </div>
+          ) : unclaimedMissions.length === 0 ? (
             <motion.div
               className="flex flex-col items-center gap-3 py-8 px-6 rounded-2xl bg-white border border-slate-200 shadow-card text-center"
               variants={fadeUp}

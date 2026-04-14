@@ -85,6 +85,28 @@ export function SkeletonJobCard() {
   )
 }
 
+/** Mission card skeleton */
+export function SkeletonMissionCard() {
+  return (
+    <div className="bg-white border border-[rgba(156,163,175,0.3)] rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] p-[18px] py-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <S className="h-4 w-16 rounded-full" />
+        <S className="h-4 w-20 rounded-full" />
+      </div>
+      <div className="space-y-2">
+        <S className="h-5 w-3/4" />
+        <div className="flex items-center gap-3">
+          <S className="h-3 w-20" />
+          <S className="h-3 w-20" />
+        </div>
+      </div>
+      <div className="pt-1">
+        <S className="h-[34px] w-32 rounded-full" />
+      </div>
+    </div>
+  )
+}
+
 /** News card */
 export function SkeletonNewsCard() {
   return (

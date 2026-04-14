@@ -93,7 +93,7 @@ export function OrgProfile() {
       <div className="p-4 space-y-3 pb-24">
 
         {/* Event History */}
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
             <p className="text-sm font-bold text-slate-900">Event History</p>
             <button
@@ -163,7 +163,7 @@ export function OrgProfile() {
         </div>
 
         {/* Settings menu */}
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
           {MENU_ITEMS.map((item, i) => (
             <button
               key={item.label}
