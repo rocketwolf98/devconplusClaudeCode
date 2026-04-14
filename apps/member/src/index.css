@@ -133,21 +133,21 @@ body {
   }
 
   .theme-she {
-    --color-primary:      236 72 153;   /* #EC4899 pink-500 */
-    --color-primary-dark: 219 39 119;   /* #DB2777 pink-600 */
-    --shadow-primary: 0 4px 24px rgba(236, 72, 153, 0.12);
+    --color-primary:      190 24 93;    /* #BE185D pink-700 */
+    --color-primary-dark: 157 23 77;    /* #9D174D pink-800 */
+    --shadow-primary: 0 4px 24px rgba(190, 24, 93, 0.12);
   }
 
   .theme-kids {
-    --color-primary:      33 196 93;    /* #21C45D */
-    --color-primary-dark: 22 163 74;    /* #16A34A */
-    --shadow-primary: 0 4px 24px rgba(33, 196, 93, 0.12);
+    --color-primary:      5 150 105;    /* #059669 emerald-600 */
+    --color-primary-dark: 4 120 87;     /* #047857 emerald-700 */
+    --shadow-primary: 0 4px 24px rgba(5, 150, 105, 0.12);
   }
 
   .theme-campus {
-    --color-primary:      248 198 48;   /* #F8C630 */
-    --color-primary-dark: 234 179 8;    /* #EAB308 */
-    --shadow-primary: 0 4px 24px rgba(248, 198, 48, 0.12);
+    --color-primary:      217 119 6;    /* #D97706 amber-600 */
+    --color-primary-dark: 180 83 9;     /* #B45309 amber-700 */
+    --shadow-primary: 0 4px 24px rgba(217, 119, 6, 0.12);
   }
 
   .theme-purple {

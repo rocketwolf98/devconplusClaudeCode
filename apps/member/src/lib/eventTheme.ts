@@ -6,9 +6,9 @@ import type { DevconCategory } from '@devcon-plus/supabase'
 // CSS custom property overrides — for components that use Tailwind text-primary/bg-primary
 const CATEGORY_CSS_VARS: Record<DevconCategory, React.CSSProperties> = {
   devcon: { '--color-primary': '17 82 212',  '--color-primary-dark': '13 66 170'  } as React.CSSProperties,
-  she:    { '--color-primary': '236 72 153',  '--color-primary-dark': '219 39 119' } as React.CSSProperties,
-  kids:   { '--color-primary': '33 196 93',   '--color-primary-dark': '22 163 74'  } as React.CSSProperties,
-  campus: { '--color-primary': '248 198 48',  '--color-primary-dark': '234 179 8'  } as React.CSSProperties,
+  she:    { '--color-primary': '190 24 93',   '--color-primary-dark': '157 23 77'  } as React.CSSProperties,
+  kids:   { '--color-primary': '5 150 105',   '--color-primary-dark': '4 120 87'   } as React.CSSProperties,
+  campus: { '--color-primary': '217 119 6',   '--color-primary-dark': '180 83 9'   } as React.CSSProperties,
 }
 
 /**

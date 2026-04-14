@@ -14,9 +14,9 @@ export interface ProgramTheme {
 
 export const PROGRAM_THEMES: ProgramTheme[] = [
   { id: 'devcon', label: 'DEVCON+',       hex: '#1152D4', darkHex: '#0D42AA', cssClass: 'theme-devcon'  },
-  { id: 'she',    label: 'She is DEVCON', hex: '#EC4899', darkHex: '#DB2777', cssClass: 'theme-she'     },
-  { id: 'kids',   label: 'DEVCON Kids',   hex: '#21C45D', darkHex: '#16A34A', cssClass: 'theme-kids'    },
-  { id: 'campus', label: 'Campus',        hex: '#F8C630', darkHex: '#EAB308', cssClass: 'theme-campus'  },
+  { id: 'she',    label: 'She is DEVCON', hex: '#BE185D', darkHex: '#9D174D', cssClass: 'theme-she'     },
+  { id: 'kids',   label: 'DEVCON Kids',   hex: '#059669', darkHex: '#047857', cssClass: 'theme-kids'    },
+  { id: 'campus', label: 'Campus',        hex: '#D97706', darkHex: '#B45309', cssClass: 'theme-campus'  },
   { id: 'purple', label: 'Elite Purple',  hex: '#7C3AED', darkHex: '#6D28D9', cssClass: 'theme-purple', unlockPoints: 3000 },
 ]
 
