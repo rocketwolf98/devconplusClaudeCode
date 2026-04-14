@@ -26,6 +26,13 @@ import {
   CustomFieldsBuilder,
 } from './eventFormConstants'
 import type { Json } from '@devcon-plus/supabase'
+import { useFormDraft } from '../../../hooks/useFormDraft'
+
+type EventEditDraft = FormData & {
+  tags: string[]
+  visibility: 'public' | 'unlisted' | 'draft'
+  customFields: CustomFormField[]
+}
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -36,6 +43,11 @@ export function OrgEventEdit() {
   const navigate = useNavigate()
   const { events, fetchEvents, isLoading, updateEvent, deleteEvent } = useEventsStore()
   const { user } = useAuthStore()
+  const { draft, saveDraft, clearDraft } = useFormDraft<EventEditDraft>(
+    `org-event-edit:${id ?? ''}`,
+    'local',
+  )
+  const hasDraft = Object.keys(draft).length > 0
 
   // ── Load events if store is empty ────────────────────────────────────────
   useEffect(() => {
@@ -54,16 +66,24 @@ export function OrgEventEdit() {
 
   // ── Custom registration fields ───────────────────────────────────────────
   const [customFields, setCustomFields] = useState<CustomFormField[]>(
-    Array.isArray(event?.custom_form_schema) ? (event.custom_form_schema as CustomFormField[]) : []
+    hasDraft
+      ? ((draft.customFields as CustomFormField[]) ?? [])
+      : Array.isArray(event?.custom_form_schema)
+        ? (event.custom_form_schema as CustomFormField[])
+        : [],
   )
 
   // ── Tags ─────────────────────────────────────────────────────────────────
-  const [tags, setTags] = useState<string[]>(event?.tags ?? [])
+  const [tags, setTags] = useState<string[]>(
+    hasDraft ? ((draft.tags as string[]) ?? []) : (event?.tags ?? []),
+  )
   const [tagInput, setTagInput] = useState('')
 
   // ── Visibility ───────────────────────────────────────────────────────────
   const [visibility, setVisibility] = useState<'public' | 'unlisted' | 'draft'>(
-    (event?.visibility as 'public' | 'unlisted' | 'draft') ?? 'public'
+    hasDraft
+      ? ((draft.visibility as 'public' | 'unlisted' | 'draft') ?? 'public')
+      : ((event?.visibility as 'public' | 'unlisted' | 'draft') ?? 'public'),
   )
 
   // ── Delete flow ──────────────────────────────────────────────────────────
@@ -84,29 +104,30 @@ export function OrgEventEdit() {
     watch,
     setValue,
     control,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: event
       ? {
-          title:             event.title,
-          description:       event.description ?? '',
-          location:          event.location ?? '',
-          event_date:        event.event_date
-            ? new Date(event.event_date).toISOString().slice(0, 16)
-            : '',
-          end_date:          event.end_date
-            ? new Date(event.end_date).toISOString().slice(0, 16)
-            : '',
-          category:          event.category as FormData['category'],
-          devcon_category:   (event.devcon_category ?? null) as FormData['devcon_category'],
-          points_value:      event.points_value ?? 5,
-          volunteer_points:  event.volunteer_points ?? DEFAULT_VOLUNTEER_POINTS,
-          requires_approval: event.requires_approval ?? false,
-          is_chapter_locked: event.is_chapter_locked ?? false,
-          is_free:           event.is_free ?? true,
-          ticket_price_php:  event.ticket_price_php ?? 0,
-          capacity:          event.capacity ?? undefined,
+          title:             hasDraft ? (draft.title             as string)  ?? event.title             : event.title,
+          description:       hasDraft ? (draft.description       as string)  ?? event.description ?? '' : event.description ?? '',
+          location:          hasDraft ? (draft.location          as string)  ?? event.location ?? ''    : event.location ?? '',
+          event_date:        hasDraft
+            ? (draft.event_date as string) ?? (event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '')
+            : event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '',
+          end_date:          hasDraft
+            ? (draft.end_date as string) ?? (event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : '')
+            : event.end_date ? new Date(event.end_date).toISOString().slice(0, 16) : '',
+          category:          hasDraft ? (draft.category        as FormData['category'])       ?? (event.category as FormData['category'])       : event.category as FormData['category'],
+          devcon_category:   hasDraft ? (draft.devcon_category as FormData['devcon_category']) ?? (event.devcon_category ?? null) as FormData['devcon_category'] : (event.devcon_category ?? null) as FormData['devcon_category'],
+          points_value:      hasDraft ? (draft.points_value      as number)  ?? (event.points_value      ?? 5)                     : event.points_value      ?? 5,
+          volunteer_points:  hasDraft ? (draft.volunteer_points  as number)  ?? (event.volunteer_points  ?? DEFAULT_VOLUNTEER_POINTS) : event.volunteer_points  ?? DEFAULT_VOLUNTEER_POINTS,
+          requires_approval: hasDraft ? (draft.requires_approval as boolean) ?? (event.requires_approval ?? false)                  : event.requires_approval ?? false,
+          is_chapter_locked: hasDraft ? (draft.is_chapter_locked as boolean) ?? (event.is_chapter_locked ?? false)                  : event.is_chapter_locked ?? false,
+          is_free:           hasDraft ? (draft.is_free           as boolean) ?? (event.is_free           ?? true)                   : event.is_free           ?? true,
+          ticket_price_php:  hasDraft ? (draft.ticket_price_php  as number)  ?? (event.ticket_price_php  ?? 0)                     : event.ticket_price_php  ?? 0,
+          capacity:          hasDraft ? (draft.capacity          as number | undefined) ?? event.capacity ?? undefined               : event.capacity          ?? undefined,
           visibility:        (event.visibility ?? 'public') as 'public' | 'unlisted' | 'draft',
         }
       : {
@@ -133,6 +154,20 @@ export function OrgEventEdit() {
       setValue('points_value', ATTENDANCE_PTS[category], { shouldValidate: false })
     }
   }
+
+  // Save RHF fields → draft
+  useEffect(() => {
+    const { unsubscribe } = watch((values) => {
+      saveDraft({ ...(values as Partial<FormData>), tags, visibility, customFields })
+    })
+    return unsubscribe
+  }, [watch, saveDraft, tags, visibility, customFields])
+
+  // Save outside-RHF state → draft
+  useEffect(() => {
+    saveDraft({ ...getValues(), tags, visibility, customFields })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tags, visibility, customFields])
 
   // ── Cover image handlers ────────────────────────────────────────────────
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -182,6 +217,7 @@ export function OrgEventEdit() {
     setDeleteError(null)
     try {
       await deleteEvent(event.id)
+      clearDraft()
       navigate('/organizer/events', { replace: true })
     } catch {
       setDeleteError('Failed to delete event. Please try again.')
@@ -244,6 +280,7 @@ export function OrgEventEdit() {
         cover_image_url,
         custom_form_schema: customFields.length > 0 ? customFields as unknown as Json : null,
       })
+      clearDraft()
       navigate(`/organizer/events/${event.id}`)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Failed to save event. Please try again.')
