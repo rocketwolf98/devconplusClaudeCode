@@ -38,6 +38,8 @@ export default function OrganizerLayout() {
   const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
   const fetchAllRewards = useRewardsStore((s) => s.fetchAllRewards)
   const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
+  const subscribeToRedemptions = useRewardsStore((s) => s.subscribeToRedemptions)
+  const fetchAllRedemptions = useRewardsStore((s) => s.fetchAllRedemptions)
   const loadOrgVolunteerApps = useOrgVolunteerStore((s) => s.loadApplications)
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function OrganizerLayout() {
   // on visibility/online/idle-timeout events.
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
+  const unsubRedemptionsRef = useRef<(() => void) | null>(null)
   const recoverRef = useRef<(() => void) | null>(null)
   const resubscribeRef = useRef<(() => void) | null>(null)
 
@@ -76,6 +79,7 @@ export default function OrganizerLayout() {
     const recover = () => {
       void fetchEvents()
       void fetchAllRewards()
+      void fetchAllRedemptions()
       if (user?.chapter_id) void loadOrgVolunteerApps(user.chapter_id)
     }
     recoverRef.current = recover
@@ -83,8 +87,10 @@ export default function OrganizerLayout() {
     const resubscribe = () => {
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
+      unsubRedemptionsRef.current?.()
       unsubEventsRef.current = subscribeToEventChanges()
       unsubRewardsRef.current = subscribeToRewardChanges()
+      unsubRedemptionsRef.current = subscribeToRedemptions()
     }
     resubscribeRef.current = resubscribe
 
@@ -110,6 +116,7 @@ export default function OrganizerLayout() {
       clearInterval(pollInterval)
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
+      unsubRedemptionsRef.current?.()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
