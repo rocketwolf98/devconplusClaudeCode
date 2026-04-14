@@ -65,7 +65,7 @@ export default function XPCard() {
       {/* CTA — Proxima Nova Semibold 16px, 48px tall pill */}
       <motion.button
         onClick={() => navigate('/events')}
-        className="font-proxima font-semibold w-full bg-[#1152d4] text-white text-[16px] h-12 rounded-[80px]"
+        className="font-proxima font-semibold w-full bg-primary text-white text-[16px] h-12 rounded-[80px]"
         whileTap={{ scale: 0.95 }}
       >
         Attend Our Events

@@ -89,7 +89,7 @@ function EventCard({
 
         {/* Footer Actions */}
         <div className="flex items-center justify-between gap-3">
-          <div className="bg-[#1152d4] text-white text-[12px] font-semibold px-[18px] py-[12px] rounded-[24px] flex items-center justify-center shrink-0 leading-none shadow-sm">
+          <div className="bg-primary text-white text-[12px] font-semibold px-[18px] py-[12px] rounded-[24px] flex items-center justify-center shrink-0 leading-none shadow-sm">
             Register Now
           </div>
 
