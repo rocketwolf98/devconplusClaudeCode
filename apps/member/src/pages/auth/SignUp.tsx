@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { EyeOutline, EyeClosedOutline, CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
+import { useFormDraft } from '../../hooks/useFormDraft'
 import PasswordStrengthMeter from '../../components/PasswordStrengthMeter'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 import { supabase } from '../../lib/supabase'
@@ -78,6 +79,12 @@ export default function SignUp() {
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [chapters, setChapters] = useState<Chapter[]>([])
 
+  const { draft, saveDraft, clearDraft } = useFormDraft<Omit<FormData, 'password'>>(
+    'sign-up',
+    'session',
+    { exclude: ['password'] },
+  )
+
   useEffect(() => {
     supabase.from('chapters').select('id, name, region').order('name').then(({ data }) => {
       if (data) setChapters(data as Chapter[])
@@ -86,8 +93,26 @@ export default function SignUp() {
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      full_name:         (draft.full_name         as string) ?? '',
+      username:          (draft.username           as string) ?? '',
+      email:             (draft.email              as string) ?? '',
+      school_or_company: (draft.school_or_company  as string) ?? '',
+      chapter_id:        (draft.chapter_id         as string) ?? '',
+      linkedin_url:      (draft.linkedin_url        as string) ?? '',
+      github_url:        (draft.github_url          as string) ?? '',
+      portfolio_url:     (draft.portfolio_url       as string) ?? '',
+    },
   })
   const watchedPassword = watch('password') ?? ''
+
+  useEffect(() => {
+    const { unsubscribe } = watch((values) => {
+      const { password: _omit, ...rest } = values
+      saveDraft(rest as Omit<FormData, 'password'>)
+    })
+    return unsubscribe
+  }, [watch, saveDraft])
 
   const handleUsernameChange = useCallback((value: string) => {
     if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
@@ -138,8 +163,10 @@ export default function SignUp() {
       }
 
       if (emailConfirmationPending) {
+        clearDraft()
         navigate('/email-sent', { state: { email: data.email, type: 'signup' } })
       } else {
+        clearDraft()
         navigate(getPostAuthRoute())
       }
     } catch (err) {
