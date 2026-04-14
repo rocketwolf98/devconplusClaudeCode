@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const NAMESPACE = 'devcon-draft:'
+const DRAFT_DEBOUNCE_MS = 400
 
 function readStorage(storage: Storage, key: string): Record<string, unknown> {
   try {
@@ -39,7 +40,7 @@ export function useFormDraft<T extends Record<string, unknown>>(
   const storage = storageType === 'session' ? sessionStorage : localStorage
   const exclude = options?.exclude ?? []
 
-  const [draft] = useState<Partial<T>>(() => {
+  const [draft, setDraft] = useState<Partial<T>>(() => {
     const raw = readStorage(storage, key)
     // Strip internal metadata before returning to caller
     const { _savedAt: _omit, ...rest } = raw
@@ -56,7 +57,7 @@ export function useFormDraft<T extends Record<string, unknown>>(
           Object.entries(values).filter(([k]) => !(exclude as string[]).includes(k)),
         )
         writeStorage(storage, key, { ...filtered, _savedAt: new Date().toISOString() })
-      }, 400)
+      }, DRAFT_DEBOUNCE_MS)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [storage, key],
@@ -65,6 +66,7 @@ export function useFormDraft<T extends Record<string, unknown>>(
   const clearDraft = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
     removeStorage(storage, key)
+    setDraft({})
   }, [storage, key])
 
   useEffect(() => {
