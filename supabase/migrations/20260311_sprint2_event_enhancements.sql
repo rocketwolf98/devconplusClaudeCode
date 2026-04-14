@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS xp_tiers (
 
 INSERT INTO xp_tiers (name, label, min_points, max_points, badge_color) VALUES
   ('Newcomer', 'Newcomer',  0,     499,   '#94A3B8'),
-  ('Member',   'Member',    500,   1999,  '#367BDD'),
+  ('Member',   'Member',    500,   1999,  '#1152D4'),
   ('Advocate', 'Advocate',  2000,  4999,  '#21C45D'),
   ('Champion', 'Champion',  5000,  9999,  '#F8C630'),
   ('Legend',   'Legend',    10000, null,  '#F97316')

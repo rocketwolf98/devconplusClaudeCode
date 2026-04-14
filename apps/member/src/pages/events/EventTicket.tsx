@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, RefreshCw, CheckCircle2, Zap, AlertTriangle, CalendarOff, CalendarPlus } from 'lucide-react'
+import { ArrowLeftOutline, MapPointOutline, RefreshOutline, CheckCircleOutline, BoltOutline, DangerTriangleOutline, CalendarMarkOutline, CalendarAddOutline } from 'solar-icon-set'
 import { QRCodeSVG } from 'qrcode.react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Variants } from 'framer-motion'
@@ -34,6 +34,10 @@ const rowItem: Variants = {
 const RECT_SIZE = 220   // slightly larger than the 204px QR container
 const RECT_RX   = 24   // rounded-3xl to match the card aesthetic
 const RECT_CIRCUMFERENCE = 4 * (RECT_SIZE - 2 * RECT_RX) + 2 * Math.PI * RECT_RX
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 // Inline horizontal logo — white text paths + multicolor ICON
 function LogoHorizontalWhite({ width = 132 }: { width?: number }) {
@@ -236,7 +240,11 @@ export default function EventTicket() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: `linear-gradient(160deg, ${effectiveTheme.darkHex} 0%, ${effectiveTheme.hex} 100%)` }}
+      style={{ 
+        background: `${PATTERN_BG}, linear-gradient(160deg, ${effectiveTheme.darkHex} 0%, ${effectiveTheme.hex} 100%)`,
+        backgroundSize: '60px 60px, auto',
+        backgroundRepeat: 'repeat, no-repeat'
+      }}
     >
 
       {/* Floating back button */}
@@ -248,14 +256,14 @@ export default function EventTicket() {
         whileTap={{ scale: 0.92 }}
         className="fixed top-4 left-4 z-20 flex items-center gap-1.5 text-white/90 bg-white/20 backdrop-blur-md px-3.5 py-2 rounded-full text-sm font-medium border border-white/20"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeftOutline className="w-4 h-4" />
         Back
       </motion.button>
 
       {/* Scrollable content */}
       <div className="flex flex-col items-center px-5 pt-20 pb-12">
 
-        {/* Ticket card */}
+        {/* TicketOutline card */}
         <motion.div
           variants={cardVariants}
           initial="hidden"
@@ -291,7 +299,7 @@ export default function EventTicket() {
               <p className="text-white/75 text-xs mt-1.5">{dateStr}</p>
               {event.location && (
                 <p className="text-white/60 text-xs flex items-center justify-center gap-1 mt-0.5">
-                  <MapPin className="w-3 h-3 shrink-0" />
+                  <MapPointOutline className="w-3 h-3 shrink-0" />
                   {event.location}
                 </p>
               )}
@@ -326,7 +334,7 @@ export default function EventTicket() {
                         transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
                         className="w-16 h-16 rounded-full bg-green/15 flex items-center justify-center"
                       >
-                        <CheckCircle2 className="w-9 h-9 text-green" />
+                        <CheckCircleOutline className="w-9 h-9" color="#21C45D" />
                       </motion.div>
                       <motion.p
                         initial={{ opacity: 0, y: 6 }}
@@ -350,7 +358,7 @@ export default function EventTicket() {
                         transition={{ delay: 0.4, duration: 0.2 }}
                         className="flex items-center gap-1 bg-green/10 rounded-full px-3 py-1 border border-green/20"
                       >
-                        <Zap className="w-3 h-3 text-green" />
+                        <BoltOutline className="w-3 h-3" color="#21C45D" />
                         <span className="text-xs font-bold text-green">+{event.points_value} XP earned!</span>
                       </motion.div>
                     </motion.div>
@@ -369,7 +377,7 @@ export default function EventTicket() {
                         transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
                         className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center"
                       >
-                        <CalendarOff className="w-9 h-9 text-slate-400" />
+                        <CalendarMarkOutline className="w-9 h-9" color="#94A3B8" />
                       </motion.div>
                       <motion.p
                         initial={{ opacity: 0, y: 6 }}
@@ -457,7 +465,7 @@ export default function EventTicket() {
                     onClick={() => setRetryKey(k => k + 1)}
                     className="flex items-center gap-1.5 text-red text-xs font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
                   >
-                    <RefreshCw className="w-3 h-3" />
+                    <RefreshOutline className="w-3 h-3" />
                     Tap to retry
                   </motion.button>
                 ) : (
@@ -506,7 +514,7 @@ export default function EventTicket() {
           </div>
         </motion.div>
 
-        {/* Add to Calendar — hidden when no date or event is past */}
+        {/* Add to CalendarOutline — hidden when no date or event is past */}
         {event.event_date && event.status !== 'past' && (
           <motion.button
             initial={{ opacity: 0 }}
@@ -518,7 +526,7 @@ export default function EventTicket() {
                        bg-white/[0.18] border border-white/30 text-white
                        rounded-2xl py-3 text-sm font-semibold backdrop-blur-sm mt-4"
           >
-            <CalendarPlus className="w-4 h-4" />
+            <CalendarAddOutline className="w-4 h-4" />
             Add to Calendar
           </motion.button>
         )}
@@ -561,7 +569,7 @@ export default function EventTicket() {
               {cancelStep === 'first' ? (
                 <>
                   <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle className="w-6 h-6 text-red" />
+                    <DangerTriangleOutline className="w-6 h-6" color="#EF4444" />
                   </div>
                   <h3 className="text-lg font-black text-slate-900 text-center mb-1">
                     Cancel your registration?
@@ -589,7 +597,7 @@ export default function EventTicket() {
               ) : (
                 <>
                   <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle className="w-6 h-6 text-red" />
+                    <DangerTriangleOutline className="w-6 h-6" color="#EF4444" />
                   </div>
                   <h3 className="text-lg font-black text-slate-900 text-center mb-1">
                     Are you absolutely sure?

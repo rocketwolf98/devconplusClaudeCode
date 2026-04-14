@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Users, CalendarDays, Star, Building2 } from 'lucide-react'
+import { UsersGroupRoundedOutline, CalendarOutline, StarOutline, BuildingsOutline } from 'solar-icon-set'
 import {
   AreaChart,
   Area,
@@ -73,13 +73,13 @@ export default function AdminDashboard() {
     {
       label: 'Total Members',
       value: isLoading ? '—' : kpis.totalMembers.toLocaleString(),
-      Icon: Users,
+      Icon: UsersGroupRoundedOutline,
       color: 'bg-blue/10 text-blue',
     },
     {
       label: 'Total Events',
       value: isLoading ? '—' : kpis.totalEvents.toLocaleString(),
-      Icon: CalendarDays,
+      Icon: CalendarOutline,
       color: 'bg-green/10 text-green',
     },
     {
@@ -87,13 +87,13 @@ export default function AdminDashboard() {
       value: isLoading ? '—' : kpis.xpDistributed >= 1_000_000
         ? `${(kpis.xpDistributed / 1_000_000).toFixed(1)}M`
         : kpis.xpDistributed.toLocaleString(),
-      Icon: Star,
+      Icon: StarOutline,
       color: 'bg-gold/10 text-gold',
     },
     {
       label: 'Active Chapters',
       value: isLoading ? '—' : kpis.activeChapters.toLocaleString(),
-      Icon: Building2,
+      Icon: BuildingsOutline,
       color: 'bg-promoted/10 text-promoted',
     },
   ]
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Area dataKey="count" fill="#367BDD" stroke="#2962C4" fillOpacity={0.3} />
+              <Area dataKey="count" fill="#1152D4" stroke="#0D42AA" fillOpacity={0.3} />
             </AreaChart>
           </ResponsiveContainer>
         )}
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
               <XAxis dataKey="event" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Line dataKey="attendance" stroke="#367BDD" strokeWidth={2} dot={{ r: 3 }} />
+              <Line dataKey="attendance" stroke="#1152D4" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         )}

@@ -1,23 +1,25 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Briefcase, Heart, Gift, ChevronRight, Flame, Bell, CalendarX } from 'lucide-react'
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+import { AltArrowRightOutline, CalendarMarkOutline, MapPointOutline, CheckSquareOutline, StarOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
+import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { usePointsStore } from '../../stores/usePointsStore'
-import { useNotificationsStore } from '../../stores/useNotificationsStore'
+import { useMissionsStore } from '../../stores/useMissionsStore'
 import { supabase } from '../../lib/supabase'
 import EventCard from '../../components/EventCard'
-import XPCard from '../../components/XPCard'
+import JobCard from '../../components/JobCard'
+import VolunteerXpCard from '../../components/VolunteerXpCard'
 import {
   SkeletonEventCard,
   SkeletonXPRow,
+  SkeletonJobCard,
+  SkeletonMissionCard,
 } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
-
+import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { formatDate, isEventArchived } from '../../lib/dates'
-import logoMark from '../../assets/logos/logo-mark.svg'
 
 const WELCOME_BANNER = {
   title: 'Welcome to DEVCON+',
@@ -26,6 +28,10 @@ const WELCOME_BANNER = {
   image: '/photos/devcon-summit-group.jpg',
 } as const
 
+// High-fidelity image assets for Quick Actions from Figma
+const imgJobsIcon = "https://www.figma.com/api/mcp/asset/7b48b817-a2d2-4482-85fe-66f2e3b75e47";
+const imgVolunteerIcon = "https://www.figma.com/api/mcp/asset/ab164d19-c141-42dd-b45e-3e1c9fd495aa";
+const imgRedeemIcon = "https://www.figma.com/api/mcp/asset/ea2da9dc-90d7-4b9c-b2bc-34d722113aa0";
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -33,40 +39,56 @@ export default function Dashboard() {
   const { events, fetchEvents, isLoading: eventsLoading } = useEventsStore()
   const { jobs, isLoading: jobsLoading, fetchJobs } = useJobsStore()
   const { transactions, loadTotalPoints, loadTransactions, isLoading: pointsLoading } = usePointsStore()
-  const unreadCount = useNotificationsStore((s) => s.unreadCount)
-  // IDs of all chapters in the user's region (including their own). Used to filter nearby events.
+  const { missions, participants, submissions, fetchAll: fetchMissions, isLoading: missionsLoading } = useMissionsStore()
   const [regionChapterIds, setRegionChapterIds] = useState<Set<string>>(new Set())
   const [bannerIdx, setBannerIdx] = useState(0)
-  const [jobBannerIdx, setJobBannerIdx] = useState(0)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({})
+  const [attendeeDetails, setAttendeeDetails] = useState<Record<string, { avatar_url: string | null; full_name: string }[]>>({})
+  const [activeTab, setActiveTab] = useState<'updates' | 'featured'>('updates')
 
   const bannersLengthRef = useRef(1)
-  const jobsLengthRef    = useRef(0)
 
   const scrollYMV      = useMotionValue(0)
-  const cradleOpacity  = useTransform(scrollYMV, [0,  110], [1, 0])
-  const cradleHeight   = useTransform(scrollYMV, [60, 180], [280, 0])
-  const gradientOpacity = useTransform(scrollYMV, [30, 140], [0, 1])
-
-  const headerPaddingTop    = useTransform(scrollYMV, [0, 80], [56, 16])
-  const headerPaddingBottom = useTransform(scrollYMV, [0, 80], [16, 8])
-  const greetingFontSize    = useTransform(scrollYMV, [0, 80], [30, 18])
-  const logoHeight          = useTransform(scrollYMV, [0, 80], [32, 22])
-  const bellSize            = useTransform(scrollYMV, [0, 80], [36, 28])
 
   useEffect(() => {
     void fetchEvents()
     void fetchJobs()
     void loadTotalPoints()
     void loadTransactions()
+    void fetchMissions()
+
+    // Fetch approved registration counts and some profiles for all events
+    supabase
+      .from('event_registrations')
+      .select('event_id, profiles(avatar_url, full_name)')
+      .eq('status', 'approved')
+      .order('registered_at', { ascending: false })
+      .then(({ data }) => {
+        const counts: Record<string, number> = {}
+        const details: Record<string, { avatar_url: string | null; full_name: string }[]> = {}
+
+        data?.forEach((row) => {
+          if (row.event_id == null) return
+          counts[row.event_id] = (counts[row.event_id] ?? 0) + 1
+          
+          if (!details[row.event_id]) details[row.event_id] = []
+          if (row.profiles && details[row.event_id].length < 1) {
+            const p = row.profiles as unknown as { avatar_url: string | null; full_name: string }
+            details[row.event_id].push(p)
+          }
+        })
+
+        setAttendeeCounts(counts)
+        setAttendeeDetails(details)
+      })
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resolve the user's region and sibling chapter IDs for "Events near you" filtering.
   useEffect(() => {
     const chapterId = user?.chapter_id
     if (!chapterId) return
 
     void (async () => {
-      // Fetch the user's own chapter to get their region
       const { data: ownChapter } = await supabase
         .from('chapters')
         .select('region')
@@ -74,7 +96,6 @@ export default function Dashboard() {
         .single()
       if (!ownChapter?.region) return
 
-      // Then fetch all chapters in the same region
       const { data: siblings } = await supabase
         .from('chapters')
         .select('id')
@@ -90,24 +111,17 @@ export default function Dashboard() {
     return () => clearInterval(t)
   }, [])
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      if (jobsLengthRef.current > 1) {
-        setJobBannerIdx(i => (i + 1) % jobsLengthRef.current)
-      }
-    }, 4000)
-    return () => clearInterval(t)
-  }, [])
-
-  useEffect(() => {
+useEffect(() => {
     const el = document.querySelector('[data-scroll-container]') as HTMLElement
     if (!el) return
-    const handler = () => scrollYMV.set(el.scrollTop)
+    const handler = () => {
+      scrollYMV.set(el.scrollTop)
+      setIsScrolled(el.scrollTop > 50)
+    }
     el.addEventListener('scroll', handler, { passive: true })
     return () => el.removeEventListener('scroll', handler)
   }, [scrollYMV])
 
-  // Build carousel: welcome article + up to 2 nearest upcoming events (max 3 total)
   const upcomingByDate = events
     .filter((e) => e.status === 'upcoming' && !isEventArchived(e))
     .sort((a, b) => new Date(a.event_date ?? 0).getTime() - new Date(b.event_date ?? 0).getTime())
@@ -117,6 +131,7 @@ export default function Dashboard() {
     ...upcomingByDate.slice(0, 2).map((e) => ({
       title: e.title,
       sub:   e.location ?? 'DEVCON Philippines',
+      date:  e.event_date ? formatDate.compact(e.event_date) : undefined,
       cta:   'Register Now',
       image: e.cover_image_url ?? '/photos/devcon-certificate-ceremony.jpg',
       onClick: () => navigate(`/events/${e.slug}`),
@@ -126,126 +141,105 @@ export default function Dashboard() {
   bannersLengthRef.current = banners.length
   const safeIdx = bannerIdx % Math.max(banners.length, 1)
   const banner = banners[safeIdx] ?? banners[0]
-  const firstName = user?.full_name?.split(' ')[0] ?? 'Member'
   const userChapterId = user?.chapter_id ?? null
   const nearbyEvents = events
     .filter((e) => {
       if (e.status !== 'upcoming' || isEventArchived(e)) return false
-      // Chapter-locked events are only visible to members of that chapter
       if (e.is_chapter_locked && e.chapter_id !== userChapterId) return false
-      // Show events from the user's region (or all events if region hasn't loaded yet)
       if (regionChapterIds.size > 0 && e.chapter_id && !regionChapterIds.has(e.chapter_id)) return false
       return true
     })
     .sort((a, b) => {
-      // Own chapter floats to the top; within each group sort by date
       const aOwn = a.chapter_id === userChapterId ? 0 : 1
       const bOwn = b.chapter_id === userChapterId ? 0 : 1
       if (aOwn !== bOwn) return aOwn - bOwn
       return new Date(a.event_date ?? 0).getTime() - new Date(b.event_date ?? 0).getTime()
     })
     .slice(0, 3)
-  const promotedJobs = jobs
-    .filter(j => j.is_promoted)
-    .sort((a, b) => new Date(b.posted_at).getTime() - new Date(a.posted_at).getTime())
-    .slice(0, 5)
-  jobsLengthRef.current = promotedJobs.length
-  const safeJobIdx = jobBannerIdx % Math.max(promotedJobs.length, 1)
-  const currentJob = promotedJobs[safeJobIdx]
   const recentTxns = transactions.slice(0, 4)
 
+  const featuredEvent = events.find((e) => e.is_featured) ?? upcomingByDate[0]
+  const unclaimedMissions = missions.filter(m => m.status !== 'claimed')
+
   return (
-    <div>
-      {/* ── Sticky greeting bar + gradient tail ── */}
-      <div className="sticky top-0 z-40 relative">
-        <motion.div className="bg-primary px-6" style={{ paddingTop: headerPaddingTop, paddingBottom: headerPaddingBottom }}>
-          <div className="flex items-center justify-between">
-            {/* Logomark + greeting */}
-            <div className="flex items-center gap-2.5">
-              <motion.img src={logoMark} alt="DEVCON+" className="w-auto" style={{ height: logoHeight }} />
-              <motion.h1
-                className="text-white font-black"
-                style={{ fontSize: greetingFontSize, lineHeight: 1.1 }}
-              >
-                Hi, {firstName}!
-              </motion.h1>
-            </div>
-            {/* Notification bell */}
-            <motion.button
-              onClick={() => navigate('/notifications')}
-              className="relative bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
-              style={{ width: bellSize, height: bellSize }}
-            >
-              <Bell className="w-[18px] h-[18px] text-white" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[16px] h-4
-                                 bg-red text-white text-[9px] font-bold rounded-full
-                                 flex items-center justify-center px-1 leading-none">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </motion.button>
-          </div>
-        </motion.div>
-        {/* Gradient: absolutely positioned — no layout impact, overlaps cradle top */}
-        <motion.div
-          className="absolute left-0 right-0 h-10 pointer-events-none"
-          style={{
-            top: '100%',
-            background: 'linear-gradient(to bottom, rgb(var(--color-primary)), transparent)',
-            opacity: gradientOpacity,
-          }}
-        />
-      </div>
+    <div className="relative min-h-screen bg-slate-50">
+      <VolunteerXpCard />
 
-      {/* ── Blue cradle — fades and collapses on scroll ── */}
-      <motion.div
-        className="bg-primary px-4 pb-10 overflow-hidden"
-        style={{ borderRadius: '0 0 100% 100% / 0 0 40px 40px', opacity: cradleOpacity, maxHeight: cradleHeight }}
+      {/* ── Main Content Area ── */}
+      <motion.main 
+        className="relative z-10 flex flex-col gap-6 px-[25px] pb-4 md:max-w-4xl md:mx-auto"
+        initial={false}
+        animate={{
+          paddingTop: isScrolled ? 80 : 16 // pt-20 when scrolled for clearance, pt-4 when unscrolled for tight gap
+        }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
-        <XPCard />
-      </motion.div>
-
-      {/* ── Scrollable feed ── */}
-      <div className="bg-slate-50 pb-8">
-      <div className="space-y-6 md:max-w-4xl md:mx-auto">
-
-        {/* Quick Actions */}
-        <motion.section
-          className="pt-5 px-4"
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
+        
+        {/* Quick Actions Wrapper for Scroll Collapse */}
+        <motion.div
+          animate={{
+            maxHeight: isScrolled ? 0 : 200,
+            opacity: isScrolled ? 0 : 1,
+            marginBottom: isScrolled ? 0 : 0
+          }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="overflow-hidden"
         >
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { icon: Briefcase, label: 'Find Jobs',  onClick: () => navigate('/jobs') },
-              { icon: Heart,     label: 'Volunteer',  onClick: () => navigate('/events') },
-              { icon: Gift,      label: 'Redeem',     onClick: () => navigate('/rewards') },
-            ].map(({ icon: Icon, label, onClick }) => (
+          <motion.section
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+          >
+            <div className="grid grid-cols-3 gap-3">
+              {/* Find Jobs Card */}
               <motion.button
-                key={label}
                 variants={cardItem}
-                onClick={onClick}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl bg-white border border-slate-200 shadow-card"
+                onClick={() => navigate('/jobs')}
+                className="bg-[rgba(127,8,255,0.15)] border border-[rgba(127,8,255,0.1)] flex flex-col gap-2 items-center justify-center rounded-[16px] shadow-[0px_0px_8px_0px_rgba(27,0,56,0.1)] w-full py-4"
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-primary" />
+                <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
+                  <img src={imgJobsIcon} alt="" className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-semibold text-slate-700">{label}</span>
+                <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Find Jobs</span>
               </motion.button>
-            ))}
-          </div>
-        </motion.section>
 
-        {/* Rotating banner — crossfade between slides */}
-        <div className="px-4">
+              {/* Volunteer Card */}
+              <motion.button
+                variants={cardItem}
+                onClick={() => navigate('/events')}
+                className="bg-[rgba(115,178,9,0.15)] border border-[rgba(70,144,17,0.1)] flex flex-col gap-2 items-center justify-center rounded-[16px] shadow-[0px_0px_8px_0px_rgba(25,39,0,0.1)] w-full py-4"
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
+                  <img src={imgVolunteerIcon} alt="" className="size-6" />
+                </div>
+                <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Volunteer</span>
+              </motion.button>
+
+              {/* Redeem Card */}
+              <motion.button
+                variants={cardItem}
+                onClick={() => navigate('/rewards')}
+                className="bg-[rgba(234,179,8,0.15)] border border-[rgba(210,173,25,0.1)] flex flex-col gap-2 items-center justify-center rounded-[16px] shadow-[0px_0px_8px_0px_rgba(75,60,0,0.1)] w-full py-4"
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
+                  <img src={imgRedeemIcon} alt="" className="size-6" />
+                </div>
+                <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Redeem</span>
+              </motion.button>
+            </div>
+          </motion.section>
+        </motion.div>
+
+        {/* Rotating banner */}
+        <div>
           <div
-            className="relative h-52 rounded-2xl overflow-hidden cursor-pointer bg-primary"
+            className="relative h-[300px] rounded-2xl overflow-hidden cursor-pointer bg-primary"
             onClick={() => setBannerIdx((i) => (i + 1) % Math.max(banners.length, 1))}
           >
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               <motion.img
                 key={`img-${safeIdx}`}
                 src={banners[safeIdx]?.image ?? ''}
@@ -261,22 +255,40 @@ export default function Dashboard() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={safeIdx}
-                className="absolute inset-0 flex flex-col justify-between p-5"
+                className="absolute inset-0 flex flex-col p-[20px] pt-[24px] pb-[18px]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35 }}
               >
-                <div>
-                  <p className="text-white/70 text-[11px] font-medium uppercase tracking-widest mb-1">{banner.sub}</p>
-                  <p className="text-white text-xl font-semibold leading-tight max-w-[70%] line-clamp-2">{banner.title}</p>
+                <div className="flex flex-col flex-1 gap-1 items-start w-full">
+                  <p className="font-proxima font-bold text-2xl text-white leading-normal line-clamp-2 w-full">
+                    {banner.title}
+                  </p>
+                  
+                  <div className="flex flex-1 items-start w-full">
+                    <div className="flex gap-1 items-center flex-wrap">
+                      {'date' in banner && banner.date && (
+                        <>
+                          <p className="font-proxima text-[#dfdfdf] text-xs tracking-[0.48px] uppercase">
+                            {banner.date}
+                          </p>
+                          <div className="w-1 h-1 bg-[#dfdfdf] rounded-full shrink-0" />
+                        </>
+                      )}
+                      <p className="font-proxima text-[#dfdfdf] text-xs tracking-[0.48px] uppercase line-clamp-1">
+                        {banner.sub}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); banner?.onClick() }}
+                    className="bg-[#1152d4] text-white text-xs font-semibold px-[18px] py-[12px] rounded-full flex items-center justify-center shrink-0 leading-none shadow-sm"
+                  >
+                    {banner.cta}
+                  </button>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); banner?.onClick() }}
-                  className="self-start bg-primary text-white text-xs font-bold px-4 py-2 rounded-full shadow"
-                >
-                  {banner.cta}
-                </button>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -297,28 +309,33 @@ export default function Dashboard() {
 
         {/* Events For You */}
         <section>
-          <div className="flex justify-between items-center px-4 mb-3">
-            <h2 className="text-base font-bold text-slate-900">Events Near You</h2>
-            <button
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-proxima font-bold text-[18px] text-black">
+              Events Near You
+            </p>
+            <button 
               onClick={() => navigate('/events')}
-              className="text-xs text-primary font-semibold flex items-center gap-0.5"
+              className="flex gap-1 items-center"
             >
-              See All <ChevronRight className="w-3 h-3" />
+              <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">
+                MORE
+              </p>
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
             </button>
           </div>
           {eventsLoading ? (
-            <div className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
             </div>
           ) : nearbyEvents.length === 0 ? (
             <motion.div
-              className="mx-4 flex flex-col items-center gap-3 py-8 px-6 rounded-2xl bg-white border border-slate-200 shadow-card text-center"
+              className="flex flex-col items-center gap-3 py-8 px-6 rounded-2xl bg-white border border-slate-200 shadow-card text-center"
               variants={fadeUp}
               initial="hidden"
               animate="visible"
             >
               <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <CalendarX className="w-6 h-6 text-primary" />
+                <CalendarMarkOutline className="w-6 h-6" color="rgb(var(--color-primary))" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-800">Events coming soon</p>
@@ -335,142 +352,262 @@ export default function Dashboard() {
             </motion.div>
           ) : (
             <motion.div
-              className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
             >
               {nearbyEvents.map((e) => (
                 <motion.div key={e.id} variants={cardItem}>
-                  <EventCard event={e} compact />
+                  <EventCard 
+                    event={e} 
+                    attendeeCount={attendeeCounts[e.id]} 
+                    attendees={attendeeDetails[e.id]} 
+                  />
                 </motion.div>
               ))}
             </motion.div>
           )}
         </section>
 
-        {/* Hot Jobs — auto-rotating crossfade banner, swipeable */}
-        {(jobsLoading || promotedJobs.length > 0) && (
-          <section>
-            <div className="flex justify-between items-center px-4 mb-3">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
-                Hot Jobs <Flame className="w-4 h-4 text-orange-500" />
-              </h2>
-              <button
-                onClick={() => navigate('/jobs')}
-                className="text-xs text-primary font-semibold flex items-center gap-0.5"
-              >
-                See All <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            {jobsLoading ? (
-              <div className="mx-4 h-44 rounded-2xl animate-pulse bg-slate-200" />
-            ) : (
-              <div className="px-4">
-                <motion.div
-                  className="relative h-44 rounded-2xl overflow-hidden bg-gradient-to-br from-navy to-slate-900 cursor-pointer select-none"
-                  onPanEnd={(_, info) => {
-                    if (info.offset.x < -50) {
-                      setJobBannerIdx(i => (i + 1) % Math.max(promotedJobs.length, 1))
-                    } else if (info.offset.x > 50) {
-                      setJobBannerIdx(i => (i - 1 + Math.max(promotedJobs.length, 1)) % Math.max(promotedJobs.length, 1))
-                    }
-                  }}
-                >
-                  <AnimatePresence mode="wait">
-                    {currentJob && (
-                      <motion.div
-                        key={safeJobIdx}
-                        className="absolute inset-0 flex flex-col justify-between p-5"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.35 }}
-                      >
-                        <div>
-                          <p className="text-white/50 text-[10px] font-semibold uppercase tracking-widest mb-1.5">
-                            {currentJob.company}{currentJob.location ? ` · ${currentJob.location}` : ''}
-                          </p>
-                          <p className="text-white text-xl font-bold leading-snug line-clamp-2 max-w-[85%]">
-                            {currentJob.title}
-                          </p>
-                        </div>
-                        <motion.button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigate(`/jobs?id=${currentJob.id}`)
-                          }}
-                          className="self-start bg-blue text-white text-xs font-bold px-4 py-2 rounded-full shadow"
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Apply Now
-                        </motion.button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-
-                <div className="flex justify-center gap-1.5 mt-2.5">
-                  {promotedJobs.map((_, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{
-                        width:           i === safeJobIdx ? 16 : 6,
-                        backgroundColor: i === safeJobIdx ? '#1E2A56' : '#CBD5E1',
-                      }}
-                      transition={{ duration: 0.25 }}
-                      className="h-1.5 rounded-full"
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* Updates — welcome card */}
+        {/* Hot Jobs */}
         <section>
-          <div className="flex items-center justify-between px-4 mb-3">
-            <h2 className="text-base font-bold text-slate-900">Updates</h2>
-          </div>
-          <motion.button
-            onClick={() => navigate('/news/welcome')}
-            className="mx-4 w-[calc(100%-2rem)] bg-white rounded-2xl shadow-card overflow-hidden text-left"
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            whileTap={{ scale: 0.98 }}
-          >
-            <img
-              src="/photos/devcon-summit-group.jpg"
-              alt="DEVCON Summit"
-              className="w-full h-36 object-cover"
-            />
-            <div className="p-4">
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-1">DEVCON Philippines</p>
-              <p className="font-bold text-slate-900 text-sm leading-snug mb-2">
-                Welcome to DEVCON+ — Your Tech Community Hub
-              </p>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Register for chapter events, earn Points+ for every activity, browse exclusive opportunities, and redeem rewards — all in one place. More updates coming soon!
-              </p>
-            </div>
-          </motion.button>
-        </section>
-
-        {/* XP History preview */}
-        <section>
-          <div className="flex justify-between items-center px-4 mb-3">
-            <h2 className="text-base font-bold text-slate-900">XP History</h2>
-            <button
-              onClick={() => navigate('/points/history')}
-              className="text-xs text-primary font-semibold flex items-center gap-0.5"
-            >
-              View All <ChevronRight className="w-3 h-3" />
+          <div className="flex items-center justify-between mb-4">
+            <p className="font-proxima font-bold text-[18px] text-black">Jobs</p>
+            <button onClick={() => navigate('/jobs')} className="flex gap-1 items-center">
+              <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">MORE</p>
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
             </button>
           </div>
-          <div className="mx-4 bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
+
+          {jobsLoading ? (
+            <div className="flex flex-col gap-3">
+              {[1, 2].map((i) => (
+                <SkeletonJobCard key={i} />
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="flex flex-col gap-3"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
+              {jobs.filter(j => j.is_active).slice(0, 3).map((job) => (
+                <motion.div key={job.id} variants={cardItem}>
+                  <JobCard job={job} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </section>
+
+        {/* Missions */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <p className="font-proxima font-bold text-[18px] text-black">Missions</p>
+            <button onClick={() => navigate('/jobs?tab=missions')} className="flex gap-1 items-center">
+              <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">MORE</p>
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
+            </button>
+          </div>
+
+          {missionsLoading && unclaimedMissions.length === 0 ? (
+            <div className="flex flex-col gap-3">
+              {[1, 2].map((i) => (
+                <SkeletonMissionCard key={i} />
+              ))}
+            </div>
+          ) : unclaimedMissions.length === 0 ? (
+            <motion.div
+              className="flex flex-col items-center gap-3 py-8 px-6 rounded-2xl bg-white border border-slate-200 shadow-card text-center"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center">
+                <StarOutline className="w-6 h-6 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Missions are coming your way!</p>
+                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                  You've cleared the board! We're "deploying" more challenges soon. 
+                  Stay "synchronized" and keep your "cache" ready!
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/events')}
+                className="text-xs font-semibold text-primary"
+              >
+                Volunteer for events to earn more
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div className="flex flex-col gap-3" variants={staggerContainer} initial="hidden" animate="visible">
+              {unclaimedMissions.slice(0, 2).map((mission) => {
+                const submissionCount = submissions.filter(s => s.mission_id === mission.id).length
+                const participantCount = participants.filter(p => p.mission_id === mission.id).length
+                const isClaimed = mission.status === 'claimed'
+
+                const difficultyStyle: Record<string, { bg: string; text: string }> = {
+                  easy:   { bg: 'rgba(115,178,9,0.2)',   text: '#4a8c05' },
+                  medium: { bg: 'rgba(255,111,11,0.2)',  text: '#ff6f0b' },
+                  hard:   { bg: 'rgba(127,8,255,0.2)',   text: '#7f08ff' },
+                }
+                const diff = difficultyStyle[mission.difficulty ?? 'easy']
+
+                return (
+                  <motion.button
+                    key={mission.id}
+                    variants={cardItem}
+                    onClick={() => navigate('/jobs?tab=missions')}
+                    className="w-full bg-white border border-[rgba(156,163,175,0.3)] rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] text-left"
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="px-[18px] py-4 flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="text-[9px] font-semibold tracking-[0.9px] uppercase px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: diff.bg, color: diff.text }}
+                        >
+                          {mission.difficulty?.toUpperCase() ?? 'EASY'}
+                        </span>
+                        <span className="bg-[rgba(254,248,209,0.9)] text-[#d2ad19] text-[9px] font-semibold tracking-[0.9px] uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <StarOutline className="w-[6px] h-[6px]" color="#F8C630" />
+                          {mission.xp_reward} EXP
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-start">
+                        <p className="font-proxima font-bold text-[16px] text-black w-full leading-snug">{mission.title}</p>
+                        <div className="flex items-center gap-3 py-1">
+                          {submissionCount > 0 && (
+                            <div className="flex items-center gap-1">
+                              <CheckSquareOutline className="w-[10px] h-[10px]" color="#94A3B8" />
+                              <span className="font-proxima text-[#6b7280] text-[12px]">{submissionCount} Submitted</span>
+                            </div>
+                          )}
+                          {participantCount > 0 && (
+                            <div className="flex items-center gap-1">
+                              <UsersGroupRoundedOutline className="w-[10px] h-[10px]" color="#94A3B8" />
+                              <span className="font-proxima text-[#6b7280] text-[12px]">{participantCount} joined</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="pt-1">
+                        <span
+                          className="text-white text-[12px] font-semibold px-[18px] py-[10px] rounded-full inline-block leading-none"
+                          style={{ backgroundColor: isClaimed ? '#868686' : '#1152d4' }}
+                        >
+                          {isClaimed ? 'Claimed' : 'Start Mission'}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.button>
+                )
+              })}
+            </motion.div>
+          )}
+        </section>
+
+        {/* Switcher: Updates / Featured */}
+        <section className="flex flex-col gap-4">
+          <div className="bg-[#eef4ff] inline-flex self-start items-center p-1 rounded-full">
+            <button
+              onClick={() => setActiveTab('updates')}
+              className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
+                activeTab === 'updates' ? 'bg-[#1152d4] text-white shadow-sm' : 'text-black hover:bg-[#dbeafe]/50'
+              }`}
+            >
+              <span className="font-proxima font-bold text-[16px]">
+                Updates
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('featured')}
+              className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
+                activeTab === 'featured' ? 'bg-[#1152d4] text-white shadow-sm' : 'text-black hover:bg-[#dbeafe]/50'
+              }`}
+            >
+              <span className="font-proxima font-bold text-[16px]">
+                Featured
+              </span>
+            </button>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {activeTab === 'updates' ? (
+              <motion.button
+                key="updates"
+                onClick={() => navigate('/news/welcome')}
+                className="w-full h-[220px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] overflow-hidden text-left flex flex-col"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <img
+                  src="/photos/devcon-summit-group.jpg"
+                  alt="DEVCON Summit"
+                  className="w-full h-[100px] object-cover shrink-0"
+                />
+                <div className="p-4 flex flex-col flex-1 justify-center gap-1">
+                  <p className="font-proxima font-bold text-[18px] text-black leading-tight line-clamp-1">
+                    Welcome to DEVCON+ — Your Tech Community Hub
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-proxima text-slate-400 text-[10px] uppercase tracking-wider">
+                      April 10, 2026
+                    </p>
+                    <div className="w-1 h-1 bg-slate-300 rounded-full shrink-0" />
+                    <p className="font-proxima text-slate-400 text-[10px] uppercase tracking-wider">
+                      By DEVCON Philippines
+                    </p>
+                  </div>
+                  <p className="font-proxima text-slate-500 text-[11px] leading-relaxed line-clamp-2 mt-1">
+                    Register for chapter events, earn Points+ for every activity, browse exclusive opportunities, and redeem rewards — all in one place. Your gateway to the DEVCON ecosystem is now live.
+                  </p>
+                </div>
+              </motion.button>
+            ) : (
+              <motion.div
+                key="featured"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="w-full bg-white rounded-2xl shadow-card p-8 flex flex-col items-center justify-center text-center border border-dashed border-slate-200"
+              >
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                  <StarOutline className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-1">Featured Articles Coming Soon!</h3>
+                <p className="text-sm text-slate-500 max-w-[240px]">
+                  We're still "debugging" the best stories for you. Please stay "tuned" — it's going to be "code-tastic"!
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </section>
+
+        {/* Points History */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <p className="font-proxima font-bold text-[18px] text-black">
+              Points History
+            </p>
+            <button 
+              onClick={() => navigate('/points/history')}
+              className="flex gap-1 items-center"
+            >
+              <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">
+                MORE
+              </p>
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
+            </button>
+          </div>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
             {pointsLoading ? (
               <>
                 {[1, 2, 3, 4].map((i) => (
@@ -511,9 +648,7 @@ export default function Dashboard() {
             )}
           </div>
         </section>
-      </div>
-      </div>
-
+      </motion.main>
     </div>
   )
 }

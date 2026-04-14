@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, LogOut, User, CalendarDays, MapPin } from 'lucide-react'
+import { AltArrowRightOutline, LogoutOutline, UserOutline, CalendarOutline, MapPointOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useOrgAuthStore, useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { useAuthStore } from '../../../stores/useAuthStore'
@@ -22,6 +22,10 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }>
   ongoing:  { bg: 'bg-green/10',   text: 'text-green',      label: 'Ongoing'  },
   past:     { bg: 'bg-slate-100',  text: 'text-slate-500',  label: 'Past'     },
 }
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export function OrgProfile() {
   const user = useOrganizerUser()
@@ -50,32 +54,46 @@ export function OrgProfile() {
     .slice(0, 5)
 
   return (
-    <div>
-      {/* Header */}
-      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl text-center">
-        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
-          {user.avatar_url ? (
-            <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
-          ) : (
-            user.initials
-          )}
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[40px] pt-14 text-center"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+              ) : (
+                user.initials
+              )}
+            </div>
+            <h1 className="text-xl font-bold text-white font-proxima tracking-tight">{user.full_name}</h1>
+            <p className="text-white/70 text-sm font-proxima mt-0.5">{user.email}</p>
+            
+            <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
+              <span className="text-[10px] font-bold bg-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                {user.chapter} Chapter
+              </span>
+              <span className="text-[10px] font-bold bg-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                {ROLE_DISPLAY_NAMES[user.role] ?? 'Chapter Officer'}
+              </span>
+            </div>
+          </div>
         </div>
-        <h1 className="text-xl font-black text-white">{user.full_name}</h1>
-        <p className="text-white/60 text-sm mt-0.5">{user.email}</p>
-        <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
-          <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {user.chapter} Chapter
-          </span>
-          <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {ROLE_DISPLAY_NAMES[user.role] ?? 'Chapter Officer'}
-          </span>
-        </div>
-      </div>
+      </header>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8">
+      <div className="p-4 space-y-3 pb-24">
 
         {/* Event History */}
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
             <p className="text-sm font-bold text-slate-900">Event History</p>
             <button
@@ -89,7 +107,7 @@ export function OrgProfile() {
           {chapterEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-8">
               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-2">
-                <CalendarDays className="w-5 h-5 text-slate-300" />
+                <CalendarOutline className="w-5 h-5" color="#CBD5E1" />
               </div>
               <p className="text-sm font-semibold text-slate-500">No events yet</p>
               <p className="text-xs text-slate-400 mt-0.5">Events you create will appear here.</p>
@@ -118,7 +136,7 @@ export function OrgProfile() {
                     whileTap={{ scale: 0.98 }}
                   >
                     <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center shrink-0">
-                      <CalendarDays className="w-5 h-5 text-blue" />
+                      <CalendarOutline className="w-5 h-5" color="#1152D4" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-900 leading-tight truncate">
@@ -128,7 +146,7 @@ export function OrgProfile() {
                         <p className="text-xs text-slate-400">{dateStr}</p>
                         {event.location && (
                           <p className="text-xs text-slate-400 flex items-center gap-0.5 truncate">
-                            <MapPin className="w-2.5 h-2.5 shrink-0" />
+                            <MapPointOutline className="w-2.5 h-2.5 shrink-0" />
                             {event.location}
                           </p>
                         )}
@@ -145,7 +163,7 @@ export function OrgProfile() {
         </div>
 
         {/* Settings menu */}
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
           {MENU_ITEMS.map((item, i) => (
             <button
               key={item.label}
@@ -158,7 +176,7 @@ export function OrgProfile() {
                 {item.icon && <item.icon className="w-4 h-4 text-slate-400" />}
                 {item.label}
               </span>
-              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <AltArrowRightOutline className="w-4 h-4" color="#CBD5E1" />
             </button>
           ))}
         </div>
@@ -168,7 +186,7 @@ export function OrgProfile() {
           onClick={() => navigate('/home')}
           className="w-full py-3.5 bg-primary/10 text-primary text-sm font-bold rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
         >
-          <User className="w-4 h-4" />
+          <UserOutline className="w-4 h-4" />
           Switch to Member View
         </button>
 
@@ -177,7 +195,7 @@ export function OrgProfile() {
           onClick={handleLogout}
           className="w-full py-3.5 bg-red/10 text-red text-sm font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
         >
-          <LogOut className="w-4 h-4" />
+          <LogoutOutline className="w-4 h-4" />
           Sign Out
         </button>
 

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Newspaper } from 'lucide-react'
+import { DocumentTextOutline } from 'solar-icon-set'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import type { NewsPost } from '@devcon-plus/supabase'
@@ -26,7 +26,7 @@ function NewsCard({ post }: { post: NewsPost }) {
         <img src={post.cover_image_url} alt={post.title} className="w-full h-32 object-cover" />
       ) : (
         <div className="w-full h-32 bg-primary flex items-center justify-center">
-          <Newspaper className="w-10 h-10 text-white/20" />
+          <DocumentTextOutline className="w-10 h-10" color="rgba(255,255,255,0.2)" />
         </div>
       )}
       <div className="p-3">

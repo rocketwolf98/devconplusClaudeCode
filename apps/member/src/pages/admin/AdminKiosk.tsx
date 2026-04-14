@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ScanLine } from 'lucide-react'
+import { ScannerOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BrowserQRCodeReader, type IScannerControls } from '@zxing/browser'
 import { toast } from 'sonner'
@@ -72,7 +72,7 @@ export default function AdminKiosk() {
       controlsRef.current = controls
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Camera access failed.'
-      console.error('[Kiosk] Camera init failed:', e)
+      console.error('[Kiosk] CameraOutline init failed:', e)
       toast.error(`Camera error: ${msg}`, { duration: 6000 })
     }
   }
@@ -167,7 +167,7 @@ export default function AdminKiosk() {
         <p className="text-white text-2xl font-mono font-semibold mt-0.5 tabular-nums">{timeStr}</p>
       </div>
 
-      {/* Camera viewfinder */}
+      {/* CameraOutline viewfinder */}
       <div className="flex-1 flex items-center justify-center px-8 min-h-0 py-2">
         <div className="relative w-full max-w-xl aspect-square bg-black rounded-2xl overflow-hidden shadow-2xl">
           <video
@@ -209,7 +209,7 @@ export default function AdminKiosk() {
       {/* Footer — daily count */}
       <div className="shrink-0 px-8 pb-7 pt-3 flex justify-center">
         <div className="inline-flex items-center gap-3 bg-white/[0.07] border border-white/10 rounded-2xl px-7 py-4">
-          <ScanLine className="w-5 h-5 text-white/40" />
+          <ScannerOutline className="w-5 h-5" color="rgba(255,255,255,0.4)" />
           <div className="flex items-baseline gap-2">
             <span className="text-white text-3xl font-black tabular-nums leading-none">{dailyCount}</span>
             <span className="text-white/40 text-sm">checked in today</span>

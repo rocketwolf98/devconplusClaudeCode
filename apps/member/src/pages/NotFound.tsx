@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { SearchX } from 'lucide-react'
+import { MagniferBugOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 
 export default function NotFound() {
@@ -18,7 +18,7 @@ export default function NotFound() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
       >
-        <SearchX className="w-8 h-8 text-white" />
+        <MagniferBugOutline className="w-8 h-8" color="white" />
       </motion.div>
 
       {/* 404 */}
@@ -55,7 +55,7 @@ export default function NotFound() {
           className="bg-white text-primary font-bold text-sm px-6 py-3 rounded-full shadow-md"
           whileTap={{ scale: 0.95 }}
         >
-          Go Home
+          Go HomeOutline
         </motion.button>
         <motion.button
           onClick={() => navigate(-1)}

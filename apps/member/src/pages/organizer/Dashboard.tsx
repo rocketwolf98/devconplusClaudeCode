@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, Bell, Plus, Heart } from 'lucide-react'
+import { CheckCircleOutline, BellOutline, AddCircleOutline, HeartOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
@@ -13,6 +13,13 @@ import { supabase } from '../../lib/supabase'
 import { fadeUp, staggerContainer, cardItem } from '../../lib/animation'
 
 type TabId = 'approvals' | 'volunteers'
+
+// Flower-of-life / Clover pattern matching Figma branding
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
+const imgGroup15 = "https://www.figma.com/api/mcp/asset/d47034ec-4ca5-47ee-b161-341ef687371e";
+const imgGroup = "https://www.figma.com/api/mcp/asset/4f38ea26-2090-4384-84ef-85435cf69538";
 
 export function OrgDashboard() {
   const user = useOrganizerUser()
@@ -95,14 +102,9 @@ export function OrgDashboard() {
   if (!user) return null
 
   const chapterEvents = events.filter((e) => e.chapter_id === chapterId)
-  const pending = registrations.filter((r) => r.status === 'pending')
+  const pendingRegistrations = registrations.filter((r) => r.status === 'pending')
   const pendingVolunteers = volunteerApps.filter((a) => a.status === 'pending')
-
-  const stats = [
-    { label: 'Events',  value: chapterEvents.length },
-    { label: 'Members', value: membersCount },
-    { label: 'Pending', value: pending.length + pendingVolunteers.length },
-  ]
+  const totalPending = pendingRegistrations.length + pendingVolunteers.length
 
   const handleApprove = async (id: string) => {
     const qrToken = 'DCN-' + crypto.randomUUID().slice(0, 8).toUpperCase()
@@ -142,31 +144,94 @@ export function OrgDashboard() {
   }
 
   return (
-    <div>
-      <div className="bg-blue px-4 pt-12 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <div className="flex justify-end mb-3">
-          <button
-            onClick={() => navigate('/organizer/notifications')}
-            className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center active:bg-white/30 transition-colors"
-          >
-            <Bell className="w-4 h-4 text-white" />
-          </button>
+    <div className="flex flex-col min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 bg-transparent pointer-events-auto -z-10" />
+
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Logo + Greeting + Notifications */}
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+            <div className="flex items-center gap-2">
+              <div className="h-[26px] w-[44px] relative">
+                <img src={imgGroup15} alt="DEVCON+" className="absolute inset-0 size-full" />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-white text-[24px] font-bold font-proxima leading-none tracking-[0.4px]">
+                  DEVCON
+                </h1>
+                <p className="text-white text-[14px] font-semibold font-proxima leading-none mt-1">
+                  {user.chapter}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('/organizer/notifications')}
+              className="relative flex items-center justify-center w-[42px] h-[42px] rounded-full bg-white/20 backdrop-blur-md border border-white/20 active:bg-white/30 transition-colors pointer-events-auto shadow-lg"
+            >
+              <BellOutline className="w-[20px] h-[20px]" color="white" />
+              {totalPending > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#EF4444] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 leading-none border border-white/20 shadow-sm">
+                  {totalPending > 9 ? '9+' : totalPending}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        <OrgBanner
-          chapterName={user.chapter}
-          role={user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
-          stats={stats}
-        />
+        {/* ── Stats Card Overlay ── */}
+        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+          <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 p-[24px] flex flex-col gap-5 pointer-events-auto">
+            <div className="flex">
+              <span className="font-proxima font-bold bg-[#1152d4] text-white text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full">
+                {user.role === 'hq_admin' ? 'HQ Admin' : 'Chapter Officer'}
+              </span>
+            </div>
 
-        <button
-          onClick={() => navigate('/organizer/events/create')}
-          className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Event
-        </button>
-      </div>
+            {/* Stats Grid with Dividers */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1 flex flex-col">
+                <span className="font-proxima text-[12px] text-[#6b7280] uppercase tracking-wide">Events</span>
+                <span className="font-proxima font-extrabold text-[28px] text-[#464646]">{chapterEvents.length}</span>
+              </div>
+              
+              <div className="w-px h-10 bg-slate-100 mx-4" />
+              
+              <div className="flex-1 flex flex-col">
+                <span className="font-proxima text-[12px] text-[#6b7280] uppercase tracking-wide">Members</span>
+                <span className="font-proxima font-extrabold text-[28px] text-[#464646]">{membersCount}</span>
+              </div>
+              
+              <div className="w-px h-10 bg-slate-100 mx-4" />
+              
+              <div className="flex-1 flex flex-col">
+                <span className="font-proxima text-[12px] text-[#6b7280] uppercase tracking-wide">Pending</span>
+                <span className="font-proxima font-extrabold text-[28px] text-[#464646]">{totalPending}</span>
+              </div>
+            </div>
+
+            <motion.button
+              onClick={() => navigate('/organizer/events/create')}
+              className="font-proxima font-semibold w-full bg-[#1152d4] text-white text-[16px] h-12 rounded-[80px] flex items-center justify-center gap-2"
+              whileTap={{ scale: 0.95 }}
+            >
+              <AddCircleOutline className="w-5 h-5" color="white" />
+              Create Event
+            </motion.button>
+          </div>
+        </div>
+      </header>
 
       <motion.div
         className="p-4"
@@ -174,20 +239,22 @@ export function OrgDashboard() {
         initial="hidden"
         animate="visible"
       >
-        <motion.div variants={fadeUp} className="flex gap-1 mt-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
+        <motion.div variants={fadeUp} className="bg-[#eef4ff] inline-flex self-start items-center p-1 rounded-full mb-4">
           {(['approvals', 'volunteers'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                activeTab === tab
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+              className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
+                activeTab === tab 
+                  ? 'bg-[#1152d4] text-white shadow-sm' 
+                  : 'text-black hover:bg-[#dbeafe]/50'
               }`}
             >
-              {tab === 'approvals'
-                ? `Approvals${pending.length > 0 ? ` (${pending.length})` : ''}`
-                : `Volunteers${pendingVolunteers.length > 0 ? ` (${pendingVolunteers.length})` : ''}`}
+              <span className="font-proxima font-bold text-[16px]">
+                {tab === 'approvals'
+                  ? `Approvals${pendingRegistrations.length > 0 ? ` (${pendingRegistrations.length})` : ''}`
+                  : `Volunteers${pendingVolunteers.length > 0 ? ` (${pendingVolunteers.length})` : ''}`}
+              </span>
             </button>
           ))}
         </motion.div>
@@ -215,10 +282,10 @@ export function OrgDashboard() {
                     </div>
                   ))}
                 </div>
-              ) : pending.length === 0 ? (
+              ) : pendingRegistrations.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                   <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle2 className="w-7 h-7 text-green" />
+                    <CheckCircleOutline className="w-7 h-7" color="#21C45D" />
                   </div>
                   <p className="text-base font-bold text-slate-700">All caught up!</p>
                   <p className="text-sm text-slate-400 mt-1">No pending registrations right now.</p>
@@ -231,7 +298,7 @@ export function OrgDashboard() {
                   animate="visible"
                 >
                   <p className="text-sm text-slate-500 mb-2">
-                    {pending.length} registration{pending.length !== 1 ? 's' : ''} awaiting approval
+                    {pendingRegistrations.length} registration{pendingRegistrations.length !== 1 ? 's' : ''} awaiting approval
                   </p>
                   {registrations.map((reg) => (
                     <motion.div key={reg.id} variants={cardItem}>
@@ -279,7 +346,7 @@ export function OrgDashboard() {
               ) : volunteerApps.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
                   <div className="w-14 h-14 rounded-full bg-blue/10 flex items-center justify-center mx-auto mb-3">
-                    <Heart className="w-7 h-7 text-blue" />
+                    <HeartOutline className="w-7 h-7" color="#1152D4" />
                   </div>
                   <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
                   <p className="text-sm text-slate-400 mt-1">Applications will appear here when members apply.</p>

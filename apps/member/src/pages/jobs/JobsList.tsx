@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Briefcase, ChevronDown, MapPin, ExternalLink,
-  Star, Users, FileText, Github, Trophy, Zap,
-} from 'lucide-react'
+import { CaseOutline, AltArrowDownOutline, MapPointOutline, ShareOutline, StarOutline, UsersGroupRoundedOutline, FileTextOutline, CodeSquareOutline, CupFirstOutline, BoltOutline, MagniferOutline } from 'solar-icon-set'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { useMissionsStore } from '../../stores/useMissionsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -14,12 +11,18 @@ import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { staggerContainer, cardItem } from '../../lib/animation'
 import type { MissionDifficulty } from '@devcon-plus/supabase'
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 // ── Difficulty styling ────────────────────────────────────────────────────────
 
-const DIFF_CONFIG: Record<MissionDifficulty, { label: string; cls: string; dot: string }> = {
-  easy:   { label: 'Easy',   cls: 'bg-green/10 text-green',       dot: 'bg-green'       },
-  medium: { label: 'Medium', cls: 'bg-amber-100 text-amber-700',  dot: 'bg-amber-400'   },
-  hard:   { label: 'Hard',   cls: 'bg-red/10 text-red',           dot: 'bg-red'         },
+const DIFF_CONFIG: Record<MissionDifficulty, { label: string; bg: string; text: string }> = {
+  easy:   { label: 'Easy',   bg: 'rgba(115,178,9,0.2)',   text: '#4a8c05' },
+  medium: { label: 'Medium', bg: 'rgba(255,111,11,0.2)',  text: '#ff6f0b' },
+  hard:   { label: 'Hard',   bg: 'rgba(127,8,255,0.2)',   text: '#7f08ff' },
 }
 
 // ── Jobs tab ──────────────────────────────────────────────────────────────────
@@ -68,7 +71,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
   if (jobs.length === 0) return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Briefcase className="w-8 h-8 text-primary/50" />
+        <CaseOutline className="w-8 h-8" color="rgba(var(--color-primary), 0.5)" />
       </div>
       <h2 className="text-base font-bold text-slate-900 mb-1">No listings yet</h2>
       <p className="text-sm text-slate-500">Check back soon for new opportunities.</p>
@@ -84,33 +87,70 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
             key={job.id}
             variants={cardItem}
             ref={(el) => { cardRefs.current[job.id] = el }}
-            className="bg-white rounded-2xl shadow-card overflow-hidden"
+            className="bg-white border border-[rgba(156,163,175,0.3)] rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] overflow-hidden"
           >
             <motion.button
               onClick={() => setExpandedId(prev => prev === job.id ? null : job.id)}
-              className="w-full p-4 text-left"
+              className="w-full px-[18px] py-[12px] text-left"
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2 flex-wrap">
-                    <p className="font-semibold text-slate-900 text-sm leading-snug">{job.title}</p>
-                    {job.is_promoted && <PromotedBadge />}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-0.5">{job.company}</p>
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-                      {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
+                <div className="flex flex-col gap-2 flex-1 min-w-0">
+                  {/* Logo */}
+                  <div className="w-12 h-12 bg-[#1152d4] rounded-full shrink-0 flex items-center justify-center">
+                    <span className="text-white font-proxima font-bold text-xl uppercase">
+                      {job.company?.[0] ?? 'J'}
                     </span>
-                    {job.location && (
-                      <span className="flex items-center gap-1 text-xs text-slate-400">
-                        <MapPin className="w-3 h-3 shrink-0" />{job.location}
-                      </span>
-                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-[2px]">
+                      {/* Title */}
+                      <p className="font-proxima font-bold text-[16px] text-black leading-snug">
+                        {job.title}
+                      </p>
+                      
+                      {/* Company */}
+                      <p className="font-proxima text-[#6b7280] text-[12px]">
+                        Posted by {job.company}
+                      </p>
+                    </div>
+                    
+                    {/* Badges & Location */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        {job.work_type && (
+                          <div className="bg-[rgba(102,102,102,0.2)] px-[12px] py-[6px] rounded-[100px] flex items-center justify-center shrink-0">
+                            <span className="text-[#6b7280] text-[9px] font-bold tracking-[0.9px] uppercase leading-none">
+                              {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {job.is_promoted && (
+                          <div className="bg-[rgba(255,111,11,0.2)] px-[12px] py-[6px] rounded-[100px] flex items-center justify-center shrink-0">
+                            <span className="text-[#ff6f0b] text-[9px] font-bold tracking-[0.9px] uppercase leading-none">
+                              PROMOTED
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {job.location && (
+                        <div className="flex items-center gap-1 py-[6px]">
+                          <MapPointOutline className="w-[10px] h-[10px]" color="#6b7280" />
+                          <span className="font-proxima text-[#6b7280] text-[12px]">{job.location}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="shrink-0 mt-0.5">
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                <motion.div 
+                  animate={{ rotate: isExpanded ? 180 : 0 }} 
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }} 
+                  className="shrink-0 mt-2"
+                >
+                  <AltArrowDownOutline className="w-4 h-4" color="#94A3B8" />
                 </motion.div>
               </div>
             </motion.button>
@@ -122,15 +162,15 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                   exit={{ height: 0, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 pb-4 pt-3 border-t border-slate-100 space-y-4">
+                  <div className="px-[18px] pb-4 pt-3 border-t border-slate-100 space-y-4">
                     {job.description
                       ? <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{job.description}</p>
                       : <p className="text-sm text-slate-400 italic">No description provided.</p>
                     }
                     {job.apply_url && (
                       <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full bg-primary text-white font-semibold text-sm py-3 rounded-xl">
-                        Apply Now <ExternalLink className="w-4 h-4" />
+                        className="flex items-center justify-center gap-2 w-full bg-[#1152d4] text-white font-bold text-sm py-3 rounded-full shadow-sm">
+                        Apply Now <ShareOutline className="w-4 h-4" />
                       </a>
                     )}
                   </div>
@@ -222,7 +262,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
   if (missions.length === 0) return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-        <Zap className="w-8 h-8 text-primary/50" />
+        <BoltOutline className="w-8 h-8" color="rgba(var(--color-primary), 0.5)" />
       </div>
       <h2 className="text-base font-bold text-slate-900 mb-1">No missions yet</h2>
       <p className="text-sm text-slate-500">Check back soon for new bounties.</p>
@@ -248,59 +288,68 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
             key={mission.id}
             variants={cardItem}
             ref={(el) => { cardRefs.current[mission.id] = el }}
-            className={`bg-white rounded-2xl shadow-card overflow-hidden transition-opacity ${isClaimed && !hasWon ? 'opacity-60' : ''}`}
+            className={`bg-white border border-[rgba(156,163,175,0.3)] rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] overflow-hidden transition-opacity ${isClaimed && !hasWon ? 'opacity-60' : ''}`}
           >
             {/* Card header — tap to expand */}
             <motion.button
               onClick={() => !isClaimed && setExpandedId(prev => prev === mission.id ? null : mission.id)}
-              className={`w-full p-4 text-left ${isClaimed && !hasWon ? 'cursor-default' : ''}`}
+              className={`w-full px-[18px] py-4 text-left ${isClaimed && !hasWon ? 'cursor-default' : ''}`}
               whileTap={isClaimed && !hasWon ? {} : { scale: 0.98 }}
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
+                  {/* Difficulty & XP row */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="text-[9px] font-semibold tracking-[0.9px] uppercase px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: diff.bg, color: diff.text }}
+                    >
+                      {mission.difficulty?.toUpperCase() ?? 'EASY'}
+                    </span>
+                    <span className="bg-[rgba(254,248,209,0.9)] text-[#d2ad19] text-[9px] font-semibold tracking-[0.9px] uppercase px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <StarOutline className="w-[10px] h-[10px]" color="#F8C630" />
+                      {mission.xp_reward} EXP
+                    </span>
+                  </div>
+
                   {/* Title row */}
-                  <div className="flex items-start gap-2 flex-wrap">
-                    <p className="font-bold text-slate-900 text-sm leading-snug">{mission.title}</p>
+                  <div className="flex flex-col items-start">
+                    <p className="font-proxima font-bold text-[16px] text-black w-full leading-snug">
+                      {mission.title}
+                    </p>
+                    
                     {isClaimed && !hasWon && (
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-400">
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 mt-1">
                         Claimed
                       </span>
                     )}
                     {hasWon && (
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-gold/20 text-amber-700 flex items-center gap-1">
-                        <Trophy className="w-2.5 h-2.5" /> You won!
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-gold/20 text-amber-700 flex items-center gap-1 mt-1">
+                        <CupFirstOutline className="w-2.5 h-2.5" /> You won!
                       </span>
                     )}
                   </div>
 
-                  {/* Meta row */}
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    {/* Difficulty */}
-                    <span className={`flex items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${diff.cls}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${diff.dot}`} />
-                      {diff.label}
-                    </span>
-                    {/* XP */}
-                    <span className="flex items-center gap-1 text-xs font-bold text-gold">
-                      <Star className="w-3 h-3 fill-gold text-gold" />
-                      +{mission.xp_reward} XP
-                    </span>
-                  </div>
-
                   {/* Live stats */}
-                  <div className="flex items-center gap-3 mt-2">
-                    <span className="flex items-center gap-1 text-xs text-slate-400">
-                      <Users className="w-3 h-3" />{participantCount} joined
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-slate-400">
-                      <FileText className="w-3 h-3" />{submissionCount} submitted
-                    </span>
+                  <div className="flex items-center gap-3 py-1 mt-1">
+                    <div className="flex items-center gap-1">
+                      <UsersGroupRoundedOutline className="w-[10px] h-[10px]" color="#94A3B8" />
+                      <span className="font-proxima text-[#6b7280] text-[12px]">{participantCount} joined</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FileTextOutline className="w-[10px] h-[10px]" color="#94A3B8" />
+                      <span className="font-proxima text-[#6b7280] text-[12px]">{submissionCount} submitted</span>
+                    </div>
                   </div>
                 </div>
 
                 {!isClaimed && (
-                  <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }} className="shrink-0 mt-1">
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  <motion.div 
+                    animate={{ rotate: isExpanded ? 180 : 0 }} 
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }} 
+                    className="shrink-0 mt-8"
+                  >
+                    <AltArrowDownOutline className="w-4 h-4" color="#94A3B8" />
                   </motion.div>
                 )}
               </div>
@@ -314,7 +363,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                   exit={{ height: 0, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   className="overflow-hidden"
                 >
-                  <div className="px-4 pb-5 pt-3 border-t border-slate-100 space-y-4">
+                  <div className="px-[18px] pb-5 pt-3 border-t border-slate-100 space-y-4">
                     {/* Description */}
                     {mission.description && (
                       <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
@@ -326,9 +375,9 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     {mission.github_url && (
                       <a href={mission.github_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
-                        <Github className="w-4 h-4 shrink-0" />
+                        <CodeSquareOutline className="w-4 h-4 shrink-0" />
                         <span className="truncate text-xs">{mission.github_url}</span>
-                        <ExternalLink className="w-3 h-3 shrink-0 ml-auto" />
+                        <ShareOutline className="w-3 h-3 shrink-0 ml-auto" />
                       </a>
                     )}
 
@@ -337,7 +386,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                       <motion.button
                         whileTap={{ scale: 0.97 }}
                         onClick={() => void handleStart(mission.id)}
-                        className="w-full bg-primary text-white font-bold text-sm py-3 rounded-xl"
+                        className="w-full bg-[#1152d4] text-white font-bold text-sm py-3 rounded-full shadow-sm"
                       >
                         Start Mission
                       </motion.button>
@@ -370,7 +419,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                                 value={prDrafts[mission.id] ?? ''}
                                 onChange={(e) => setPrDrafts((p) => ({ ...p, [mission.id]: e.target.value }))}
                                 placeholder="https://github.com/your/repo/pull/123"
-                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-[#1152d4] focus:ring-1 focus:ring-[#1152d4]/20"
                               />
                               {submitErrors[mission.id] && (
                                 <p className="text-xs text-red">{submitErrors[mission.id]}</p>
@@ -378,7 +427,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => setSubmitOpen((p) => ({ ...p, [mission.id]: false }))}
-                                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold"
+                                  className="flex-1 py-2.5 rounded-full border border-slate-200 text-slate-600 text-sm font-semibold"
                                 >
                                   Cancel
                                 </button>
@@ -386,7 +435,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                                   whileTap={{ scale: 0.97 }}
                                   onClick={() => void handleSubmit(mission.id)}
                                   disabled={submitting[mission.id]}
-                                  className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50"
+                                  className="flex-1 py-2.5 rounded-full bg-[#1152d4] text-white text-sm font-bold disabled:opacity-50 shadow-sm"
                                 >
                                   {submitting[mission.id] ? 'Submitting…' : mySubmission ? 'Update Link' : 'Submit PR'}
                                 </motion.button>
@@ -400,10 +449,10 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                           <motion.button
                             whileTap={{ scale: 0.97 }}
                             onClick={() => openSubmit(mission.id, mySubmission?.pr_link)}
-                            className={`w-full font-bold text-sm py-3 rounded-xl ${
+                            className={`w-full font-bold text-sm py-3 rounded-full shadow-sm ${
                               mySubmission
                                 ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                                : 'bg-primary text-white'
+                                : 'bg-[#1152d4] text-white'
                             }`}
                           >
                             {mySubmission ? 'Update PR Link' : 'Submit PR Link'}
@@ -415,7 +464,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     {/* ── State D: Won ── */}
                     {hasWon && (
                       <div className="bg-gold/10 rounded-xl p-3 flex items-center gap-3">
-                        <Trophy className="w-5 h-5 text-amber-600 shrink-0" />
+                        <CupFirstOutline className="w-5 h-5 shrink-0" color="#D97706" />
                         <div>
                           <p className="text-sm font-bold text-amber-700">You won this mission!</p>
                           <p className="text-xs text-amber-600">+{mission.xp_reward} XP has been added to your account.</p>
@@ -452,28 +501,58 @@ export default function JobsList() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-primary px-4 pt-14 pb-5 rounded-b-3xl">
-        <h1 className="text-white text-xl font-bold">Opportunity Hub</h1>
-        <p className="text-white/70 text-sm mt-0.5">Jobs &amp; bounty missions for Filipino devs</p>
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
 
-        {/* Tab switcher */}
-        <div className="flex gap-2 mt-4">
-          {(['jobs', 'missions'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => switchTab(tab)}
-              className={`flex-1 py-2 rounded-xl text-sm font-bold transition-colors ${
-                activeTab === tab
-                  ? 'bg-white text-primary'
-                  : 'bg-white/20 text-white/80 hover:bg-white/30'
-              }`}
-            >
-              {tab === 'jobs' ? 'Jobs Board' : 'Missions'}
-            </button>
-          ))}
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+            <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+              Jobs and Missions
+            </h1>
+            
+            <div className="flex items-center gap-[8px]">
+              <button 
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
+                aria-label="Search"
+              >
+                <MagniferOutline className="w-[18px] h-[18px]" color="white" />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* ── Tabs Wrapper ── */}
+        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+          <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
+            {(['jobs', 'missions'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => switchTab(tab)}
+                className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
+                  activeTab === tab
+                    ? 'bg-[#1152d4] text-white shadow-sm'
+                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                }`}
+              >
+                {tab === 'jobs' ? 'Jobs' : 'Missions'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
 
       <div className="flex-1">
         {activeTab === 'jobs'     && <JobsTab     initialExpandId={activeTab === 'jobs'     ? idParam : null} />}

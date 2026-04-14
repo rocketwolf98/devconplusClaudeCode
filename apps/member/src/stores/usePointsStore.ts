@@ -1,8 +1,12 @@
 import { create } from 'zustand'
-import type { PointTransaction } from '@devcon-plus/supabase'
+import type { PointTransaction, Profile } from '@devcon-plus/supabase'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from './useAuthStore'
 import { getTier, getNextTier, getTierProgress, TIERS, type Tier } from '../lib/tiers'
+
+// Monotonic counter to generate unique channel names on every subscribe call.
+let _chanSeq = 0
+const nextChan = (base: string) => `${base}-${++_chanSeq}`
 
 interface PointsState {
   spendablePoints: number
@@ -17,9 +21,10 @@ interface PointsState {
 
   loadTransactions: () => Promise<void>
   loadTotalPoints: () => Promise<void>
+  subscribeToChanges: () => () => void
 }
 
-export const usePointsStore = create<PointsState>((set) => ({
+export const usePointsStore = create<PointsState>((set, get) => ({
   spendablePoints: 0,
   lifetimePoints: 0,
   prestigeUnlocked: false,
@@ -62,6 +67,8 @@ export const usePointsStore = create<PointsState>((set) => ({
       if (error) throw error
       const spendablePoints = data?.spendable_points ?? 0
       const lifetimePoints = data?.lifetime_points ?? 0
+      
+      // Update local state
       set({
         spendablePoints,
         lifetimePoints,
@@ -70,10 +77,69 @@ export const usePointsStore = create<PointsState>((set) => ({
         nextTier:     getNextTier(lifetimePoints),
         tierProgress: getTierProgress(lifetimePoints),
       })
+
+      // Sync with useAuthStore so components using useAuthStore.user see the new points
+      const authUser = useAuthStore.getState().user
+      if (authUser && authUser.id === user.id) {
+        useAuthStore.setState({
+          user: {
+            ...authUser,
+            spendable_points: spendablePoints,
+            lifetime_points: lifetimePoints,
+          } as Profile
+        })
+      }
     } catch (err) {
       set({ error: err instanceof Error ? err.message : String(err) })
     } finally {
       set({ isLoading: false })
     }
+  },
+
+  subscribeToChanges: () => {
+    const user = useAuthStore.getState().user
+    if (!user) return () => {}
+
+    const channel = supabase
+      .channel(nextChan('points-realtime'))
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'point_transactions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          // New transaction — refresh both list and totals
+          void get().loadTransactions()
+          void get().loadTotalPoints()
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          // Profile updated (points changed via trigger or admin)
+          const updated = payload.new as Profile
+          if (updated.spendable_points !== undefined || updated.lifetime_points !== undefined) {
+            void get().loadTotalPoints()
+          }
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.error('[points-realtime] channel error:', err)
+        } else if (status === 'TIMED_OUT') {
+          console.warn('[points-realtime] timed out — Supabase will retry')
+        }
+      })
+
+    return () => { void supabase.removeChannel(channel) }
   },
 }))

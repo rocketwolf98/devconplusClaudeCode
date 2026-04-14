@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Zap, Archive } from 'lucide-react'
+import { MapPointOutline, BoltOutline, ClockCircleOutline, AddCircleOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
-import { staggerContainer, cardItem } from '../../../lib/animation'
+import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
 import { isEventArchived } from '../../../lib/dates'
+import FrostedActionButton from '../../../components/FrostedActionButton'
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export function OrgEventsList() {
   const navigate = useNavigate()
@@ -19,58 +24,73 @@ export function OrgEventsList() {
   useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-black text-white">Events</h1>
-            <p className="text-white/60 text-sm mt-0.5">Manage your chapter events</p>
-          </div>
-          <button
-            onClick={() => navigate('/organizer/events/create')}
-            className="px-4 py-2 bg-white/20 text-white text-sm font-bold rounded-xl hover:bg-white/30 transition-colors shrink-0"
-          >
-            + New Event
-          </button>
-        </div>
+    <div className="min-h-screen bg-slate-50">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+            <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+              Manage Events
+            </h1>
 
-        {/* Upcoming / Past tabs */}
-        <div className="flex gap-1 bg-white/20 p-1 rounded-xl w-fit mt-3">
-          {(['upcoming', 'past'] as const).map((tab) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition-colors ${
-                activeTab === tab
-                  ? 'bg-white text-blue'
-                  : 'text-white/70 hover:text-white'
-              }`}
+              onClick={() => navigate('/organizer/events/create')}
+              className="flex items-center gap-2 bg-white/25 border border-white/50 px-3.5 py-2 rounded-full text-white text-sm font-bold font-proxima active:bg-white/40 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.35)]"
             >
-              {tab} ({tab === 'upcoming' ? upcomingEvents.length : pastEvents.length})
+              <AddCircleOutline className="w-[18px] h-[18px]" color="white" />
+              New Event
             </button>
-          ))}
+          </div>
         </div>
-      </div>
+      </header>
 
       <motion.div
-        key={activeTab}
-        className="p-4 space-y-3"
+        className="px-[25px] pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-24"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
+        {/* Upcoming / Past tabs */}
+        <motion.div variants={fadeUp} className="bg-[#eef4ff] inline-flex self-start items-center p-1 rounded-full mb-2">
+          {(['upcoming', 'past'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
+                activeTab === tab 
+                  ? 'bg-[#1152d4] text-white shadow-sm' 
+                  : 'text-black hover:bg-[#dbeafe]/50'
+              }`}
+            >
+              <span className="font-proxima font-bold text-[16px] capitalize">
+                {tab} ({tab === 'upcoming' ? upcomingEvents.length : pastEvents.length})
+              </span>
+            </button>
+          ))}
+        </motion.div>
+
         {displayEvents.map((event) => {
-          const formattedDate = event.event_date
-            ? new Date(event.event_date).toLocaleDateString('en-US', {
-                weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
-              })
-            : 'TBA'
+          const dateParts = event.event_date ? {
+            month: new Date(event.event_date).toLocaleDateString('en-PH', { month: 'short' }).toUpperCase(),
+            day: String(new Date(event.event_date).getDate()),
+          } : null
 
           return (
-            <motion.div
+            <motion.button
               key={event.id}
               variants={cardItem}
-              className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card hover:border-blue hover:shadow-blue transition-all cursor-pointer"
+              className="w-full bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 text-left"
               onClick={() => navigate(
                 isEventArchived(event)
                   ? `/organizer/events/${event.id}/summary`
@@ -78,50 +98,81 @@ export function OrgEventsList() {
               )}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="flex items-start gap-4">
-                <div className="w-12 shrink-0 bg-blue/10 rounded-xl px-2 py-2 text-center">
-                  <p className="text-xs font-bold text-blue uppercase leading-none">
-                    {event.event_date
-                      ? new Date(event.event_date).toLocaleDateString('en-US', { month: 'short' })
-                      : '—'}
-                  </p>
-                  <p className="text-xl font-black text-blue leading-none mt-1">
-                    {event.event_date ? new Date(event.event_date).getDate() : '—'}
-                  </p>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-base font-bold text-slate-900 truncate">{event.title}</p>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {isEventArchived(event) && (
-                        <span className="flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                          <Archive className="w-3 h-3" />
-                          Past
+              {/* Left Side: Image or Date Placeholder */}
+              <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0 relative">
+                {event.cover_image_url ? (
+                  <>
+                    <img src={event.cover_image_url} alt={event.title} className="w-full h-full object-cover" />
+                    {dateParts && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                        <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
+                          {dateParts.month}
                         </span>
-                      )}
-                      <StatusBadge status={event.status === 'upcoming' ? 'pending' : event.status === 'ongoing' ? 'approved' : 'rejected'} />
-                    </div>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-1">{formattedDate}</p>
-                  {event.location && (
-                    <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 shrink-0" />
-                      {event.location}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-3 mt-2">
-                    <span className="text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
-                      {event.points_value} XP
-                    </span>
-                    {event.requires_approval && (
-                      <span className="text-xs text-slate-400">Approval required</span>
+                        <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                          {dateParts.day}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-blue/10">
+                    {dateParts ? (
+                      <>
+                        <span className="text-[10px] font-bold leading-none text-blue/60 uppercase">
+                          {dateParts.month}
+                        </span>
+                        <span className="text-2xl font-black leading-tight text-blue">
+                          {dateParts.day}
+                        </span>
+                      </>
+                    ) : (
+                      <ClockCircleOutline className="size-8 text-blue/40" />
                     )}
                   </div>
+                )}
+              </div>
+
+              {/* Right Side: Details */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-0.5">
+                  <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
+                    {event.title}
+                  </p>
+                  <StatusBadge
+                    status={
+                      event.status === 'upcoming'
+                        ? 'pending'
+                        : event.status === 'ongoing'
+                        ? 'approved'
+                        : 'rejected'
+                    }
+                  />
+                </div>
+
+                <p className="text-[11px] text-slate-500 mb-0.5">
+                  {event.event_date ? new Date(event.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'No date set'}
+                </p>
+
+                {event.location && (
+                  <p className="text-[11px] text-slate-400 truncate mb-1.5 flex items-center gap-1">
+                    <MapPointOutline className="w-2.5 h-2.5" color="#94A3B8" />
+                    {event.location}
+                  </p>
+                )}
+
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-bold text-blue bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <BoltOutline className="w-2.5 h-2.5" color="#1152d4" />
+                    {event.points_value} XP
+                  </span>
+                  {isEventArchived(event) && (
+                    <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                      Archived
+                    </span>
+                  )}
                 </div>
               </div>
-            </motion.div>
+            </motion.button>
           )
         })}
       </motion.div>

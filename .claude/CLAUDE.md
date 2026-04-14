@@ -78,7 +78,7 @@ devcon-plus/
 | Backend client | `@supabase/supabase-js` (live — wired to production project) |
 | QR Display | `qrcode.react` |
 | QR Scanning | `@zxing/browser` + `@zxing/library` |
-| Icons | `lucide-react` (only — no emoji icons in JSX) |
+| Icons | `solar-icon-set` outline variant (only — no emoji icons in JSX) |
 | Auth | Supabase Auth (Google OAuth + email/password) |
 | Language | TypeScript (strict) |
 | Font | **Geist** (loaded in `index.css`) |
@@ -709,12 +709,12 @@ whileTap={{ scale: 0.95 }}  — standard press feedback on all buttons/cards
 ```
 
 ### Icon Rules
-- Use `lucide-react` exclusively — no emoji icons in JSX
+- Use `solar-icon-set` exclusively (outline variant) — no emoji icons in JSX. Import type `SolarIcon` from `lib/icons` for prop typing.
 - Icon in colored container: `<div className="w-10 h-10 rounded-xl bg-primary/10 ..."><Icon className="w-5 h-5 text-primary" /></div>`
-- Back navigation: `<ArrowLeft />`
-- Location: `<MapPin />`
-- Events center tab: `<QrCode />`
-- Points: `<Star className="fill-gold text-gold" />`
+- Back navigation: `<ArrowLeftOutline />`
+- Location: `<MapPointOutline />`
+- Events center tab: `<QRCodeOutline />`
+- Points: `<StarOutline className="fill-gold text-gold" />`
 
 ---
 

@@ -48,7 +48,7 @@ Add a **"DEVCON Program"** field to the CATEGORIZATION section of `OrgEventCreat
 
 | Option | Selected bg | Selected text |
 |--------|-------------|---------------|
-| DEVCON | `#367BDD` | white |
+| DEVCON | `#1152D4` | white |
 | DEVCON Kids | `#21C45D` | white |
 | #SheIsDEVCON | `#EC4899` | white |
 | Campus DEVCON | `#F8C630` | slate-900 (dark text on gold) |
@@ -71,7 +71,7 @@ Returns space-separated RGB triplets matching the existing `--color-primary` / `
 
 | devcon_category | `--color-primary` | `--color-primary-dark` |
 |---|---|---|
-| `'devcon'` | `'54 123 221'` | `'41 98 196'` |
+| `'devcon'` | `'17 82 212'` | `'13 66 170'` |
 | `'she'` | `'236 72 153'` | `'219 39 119'` |
 | `'kids'` | `'33 196 93'` | `'22 163 74'` |
 | `'campus'` | `'248 198 48'` | `'234 179 8'` |

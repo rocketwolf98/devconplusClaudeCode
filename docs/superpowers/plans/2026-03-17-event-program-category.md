@@ -203,7 +203,7 @@ git commit -m "feat(store): add devcon_category to CreateEventPayload"
 **Files:**
 - Create: `apps/member/src/lib/eventTheme.ts`
 
-Context: Two pure functions. `getEventThemeStyle` returns CSS custom property overrides as an inline style object — used by EventDetail which relies on Tailwind `text-primary`/`bg-primary` classes. `resolveEventTheme` returns the full `ProgramTheme` object (with `hex`/`darkHex` fields) — used by EventTicket which has hardcoded hex values in inline gradient/background styles. CSS var values are space-separated RGB triplets matching how `--color-primary` is defined in `index.css` (e.g. `'54 123 221'` for `#367BDD`).
+Context: Two pure functions. `getEventThemeStyle` returns CSS custom property overrides as an inline style object — used by EventDetail which relies on Tailwind `text-primary`/`bg-primary` classes. `resolveEventTheme` returns the full `ProgramTheme` object (with `hex`/`darkHex` fields) — used by EventTicket which has hardcoded hex values in inline gradient/background styles. CSS var values are space-separated RGB triplets matching how `--color-primary` is defined in `index.css` (e.g. `'17 82 212'` for `#1152D4`).
 
 - [ ] **Step 1: Create `apps/member/src/lib/eventTheme.ts`**
 
@@ -215,7 +215,7 @@ import type { DevconCategory } from '@devcon-plus/supabase'
 
 // CSS custom property overrides — for components that use Tailwind text-primary/bg-primary
 const CATEGORY_CSS_VARS: Record<DevconCategory, React.CSSProperties> = {
-  devcon: { '--color-primary': '54 123 221',  '--color-primary-dark': '41 98 196'  } as React.CSSProperties,
+  devcon: { '--color-primary': '17 82 212',  '--color-primary-dark': '13 66 170'  } as React.CSSProperties,
   she:    { '--color-primary': '236 72 153',  '--color-primary-dark': '219 39 119' } as React.CSSProperties,
   kids:   { '--color-primary': '33 196 93',   '--color-primary-dark': '22 163 74'  } as React.CSSProperties,
   campus: { '--color-primary': '248 198 48',  '--color-primary-dark': '234 179 8'  } as React.CSSProperties,
@@ -309,7 +309,7 @@ const DEVCON_PROGRAM_OPTIONS: {
   hex: string
   darkText?: boolean
 }[] = [
-  { value: 'devcon',  label: 'DEVCON',         hex: '#367BDD' },
+  { value: 'devcon',  label: 'DEVCON',         hex: '#1152D4' },
   { value: 'she',     label: '#SheIsDEVCON',   hex: '#EC4899' },
   { value: 'kids',    label: 'DEVCON Kids',     hex: '#21C45D' },
   { value: 'campus',  label: 'Campus DEVCON',   hex: '#F8C630', darkText: true },
@@ -528,7 +528,7 @@ npm run typecheck
 ```
 
 Verify manually:
-- Open EventDetail for `ev-1` (DEVCON Summit) → header, points chip, and CTA button should be blue (`#367BDD`)
+- Open EventDetail for `ev-1` (DEVCON Summit) → header, points chip, and CTA button should be blue (`#1152D4`)
 - Open EventDetail for `ev-3` (AI/ML Workshop, `devcon_category: 'she'`) → should be pink (`#EC4899`)
 - Open EventDetail for `ev-5` (DEVCON Kids, `devcon_category: 'kids'`) → should be green (`#21C45D`)
 - Open EventDetail for `ev-2` (Code Camp Visayas, `devcon_category: 'campus'`) → should be gold (`#F8C630`)

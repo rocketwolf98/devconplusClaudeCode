@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Check, X, Plus, Trash2, ChevronDown } from 'lucide-react'
+import { PenOutline, CheckCircleOutline, CloseCircleLineDuotone, AddCircleOutline, TrashBinTrashOutline, AltArrowDownOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import type { Chapter, Region } from '@devcon-plus/supabase'
 
@@ -85,13 +85,13 @@ function ChapterCard({
                 disabled={saving || !editName.trim()}
                 className="p-1.5 rounded-lg bg-green/10 text-green hover:bg-green/20 disabled:opacity-50"
               >
-                <Check className="w-4 h-4" />
+                <CheckCircleOutline className="w-4 h-4" />
               </button>
               <button
                 onClick={onCancelEdit}
                 className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200"
               >
-                <X className="w-4 h-4" />
+                <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
               </button>
             </div>
           ) : (
@@ -156,17 +156,17 @@ function ChapterCard({
                   onClick={() => onEdit(chapter)}
                   className="p-1.5 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue transition-colors"
                 >
-                  <Pencil className="w-4 h-4" />
+                  <PenOutline className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => onDelete(chapter.id)}
                   className="p-1.5 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <TrashBinTrashOutline className="w-4 h-4" />
                 </button>
               </>
             )}
-            <ChevronDown
+            <AltArrowDownOutline
               className={`w-4 h-4 text-slate-400 ml-2 transition-transform duration-200 ${
                 isExpanded ? 'rotate-180' : ''
               }`}
@@ -367,7 +367,7 @@ export default function AdminChapters() {
           disabled={adding || !addName.trim()}
           className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark disabled:opacity-60 transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           {adding ? 'Adding…' : 'Add Chapter'}
         </button>
       </div>

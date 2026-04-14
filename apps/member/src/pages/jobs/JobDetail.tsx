@@ -1,10 +1,14 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Briefcase, MapPin, ExternalLink } from 'lucide-react'
+import { ArrowLeftOutline, CaseOutline, MapPointOutline, ShareOutline } from 'solar-icon-set'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import NotFound from '../NotFound'
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>()
@@ -34,22 +38,38 @@ export default function JobDetail() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      {/* Header */}
-      <div className="bg-primary px-4 pt-14 pb-6 rounded-b-3xl">
-        <motion.button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1 text-white/80 text-sm mb-4"
-          whileTap={{ scale: 0.95 }}
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[32px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </motion.button>
-        <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center mb-3">
-          <Briefcase className="w-6 h-6 text-white" />
+          {/* Header Row: Back + Title */}
+          <div className="relative z-10 flex items-center gap-3 px-6 pb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+            >
+              <ArrowLeftOutline className="w-5 h-5" color="white" />
+            </button>
+            <h1 className="text-white text-[22px] font-semibold font-proxima leading-none tracking-tight flex-1 truncate">
+              {job.title}
+            </h1>
+          </div>
+          <div className="px-[76px]">
+            <p className="text-white/70 text-[13px] font-proxima uppercase tracking-widest font-bold">
+              {job.company}
+            </p>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-white leading-tight">{job.title}</h1>
-        <p className="text-white/70 text-sm mt-0.5">{job.company}</p>
-      </div>
+      </header>
 
       <div className="p-4 space-y-4 pb-24">
         {/* Meta chips */}
@@ -59,7 +79,7 @@ export default function JobDetail() {
           </span>
           {job.location && (
             <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
+              <MapPointOutline className="w-3 h-3" />
               {job.location}
             </span>
           )}
@@ -82,7 +102,7 @@ export default function JobDetail() {
             className="w-full bg-primary text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
             whileTap={{ scale: 0.95 }}
           >
-            <ExternalLink className="w-5 h-5" />
+            <ShareOutline className="w-5 h-5" />
             View Opportunity
           </motion.a>
         )}

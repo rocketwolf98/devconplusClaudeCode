@@ -158,7 +158,7 @@ Users can switch their app theme from the Profile screen. The primary color driv
 
 | Theme | Color |
 |-------|-------|
-| DEVCON+ (default) | `#367BDD` blue |
+| DEVCON+ (default) | `#1152D4` blue |
 | She is DEVCON | `#EC4899` pink |
 | DEVCON Kids | `#21C45D` green |
 | Campus | `#F8C630` gold |
@@ -181,7 +181,7 @@ Users can switch their app theme from the Profile screen. The primary color driv
 | Token | Hex | Usage |
 |-------|-----|-------|
 | `primary` | CSS var (theme-driven) | Buttons, active nav, headers |
-| `blue` | `#367BDD` | Non-themed blue alias |
+| `blue` | `#1152D4` | Non-themed blue alias |
 | `navy` | `#1E2A56` | Dark text, indicator dots |
 | `gold` | `#F8C630` | XP bar fill, star icon |
 | `promoted` | `#F97316` | PROMOTED badge only |

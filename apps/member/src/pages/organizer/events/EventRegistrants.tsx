@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Check, ChevronDown, ClipboardList, Megaphone, Users } from 'lucide-react'
+import { ArrowLeftOutline, CheckCircleOutline, AltArrowDownOutline, ClipboardListOutline, UserSpeakOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -12,7 +12,7 @@ import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
 
 interface EmailParams { memberName: string; eventTitle: string; eventDate: string; eventLocation?: string; pointsValue: number; ticketUrl: string }
 function buildApprovedEmail({ memberName, eventTitle, eventDate, eventLocation, pointsValue, ticketUrl }: EmailParams): string {
-  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><style>body{margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.w{max-width:390px;margin:0 auto}.hd{background:#1E2A56;padding:28px 24px;text-align:center;color:#fff;font-size:22px;font-weight:900}.bd{background:#fff;padding:28px 24px}.ft{background:#1E2A56;padding:20px 24px;text-align:center}h2{color:#0F172A;font-size:20px;font-weight:800;margin:0 0 8px}p{color:#334155;font-size:14px;line-height:1.65;margin:0 0 16px}.row{font-size:13px;margin-bottom:10px}.lbl{color:#94A3B8;font-size:12px;margin-right:8px}.val{color:#0F172A;font-weight:600}.badge{display:inline-block;background:#DCFCE7;color:#16A34A;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}.cta{display:block;background:#367BDD;color:#fff;font-weight:700;font-size:15px;text-align:center;text-decoration:none;padding:14px 24px;border-radius:14px;margin-top:24px}.ft p{color:rgba(255,255,255,.45);font-size:11px;margin:0}hr{border:none;border-top:1px solid #E2E8F0;margin:20px 0}</style></head><body><div class="w"><div class="hd">DEVCON<span style="color:#EA641D">+</span></div><div class="bd"><h2>You're approved! ✅</h2><p>Hi ${memberName},</p><p>Great news — your registration for <strong>${eventTitle}</strong> has been approved by the organizer.</p><hr/><div class="row"><span class="lbl">Event</span><span class="val">${eventTitle}</span></div><div class="row"><span class="lbl">Date</span><span class="val">${eventDate}</span></div>${eventLocation ? `<div class="row"><span class="lbl">Location</span><span class="val">${eventLocation}</span></div>` : ''}<div class="row"><span class="lbl">Points</span><span class="badge">+${pointsValue} XP on attendance</span></div><hr/><p style="font-size:13px;color:#64748B">Your QR ticket is ready. Show it at the venue entrance to check in.</p><a href="${ticketUrl}" class="cta">View My Ticket</a></div><div class="ft"><p>DEVCON Philippines — Sync. Support. Succeed.</p></div></div></body></html>`
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><style>body{margin:0;padding:0;background:#F8FAFC;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.w{max-width:390px;margin:0 auto}.hd{background:#1E2A56;padding:28px 24px;text-align:center;color:#fff;font-size:22px;font-weight:900}.bd{background:#fff;padding:28px 24px}.ft{background:#1E2A56;padding:20px 24px;text-align:center}h2{color:#0F172A;font-size:20px;font-weight:800;margin:0 0 8px}p{color:#334155;font-size:14px;line-height:1.65;margin:0 0 16px}.row{font-size:13px;margin-bottom:10px}.lbl{color:#94A3B8;font-size:12px;margin-right:8px}.val{color:#0F172A;font-weight:600}.badge{display:inline-block;background:#DCFCE7;color:#16A34A;font-weight:700;font-size:13px;padding:4px 12px;border-radius:99px}.cta{display:block;background:#1152D4;color:#fff;font-weight:700;font-size:15px;text-align:center;text-decoration:none;padding:14px 24px;border-radius:14px;margin-top:24px}.ft p{color:rgba(255,255,255,.45);font-size:11px;margin:0}hr{border:none;border-top:1px solid #E2E8F0;margin:20px 0}</style></head><body><div class="w"><div class="hd">DEVCON<span style="color:#EA641D">+</span></div><div class="bd"><h2>You're approved! ✅</h2><p>Hi ${memberName},</p><p>Great news — your registration for <strong>${eventTitle}</strong> has been approved by the organizer.</p><hr/><div class="row"><span class="lbl">Event</span><span class="val">${eventTitle}</span></div><div class="row"><span class="lbl">Date</span><span class="val">${eventDate}</span></div>${eventLocation ? `<div class="row"><span class="lbl">Location</span><span class="val">${eventLocation}</span></div>` : ''}<div class="row"><span class="lbl">Points</span><span class="badge">+${pointsValue} XP on attendance</span></div><hr/><p style="font-size:13px;color:#64748B">Your QR ticket is ready. Show it at the venue entrance to check in.</p><a href="${ticketUrl}" class="cta">View My Ticket</a></div><div class="ft"><p>DEVCON Philippines — Sync. Support. Succeed.</p></div></div></body></html>`
 }
 
 // ── Custom form field types ───────────────────────────────────────────────────
@@ -56,7 +56,7 @@ function FormResponsesPanel({
         className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
       >
         <span className="flex items-center gap-1.5">
-          <ClipboardList className="w-3.5 h-3.5" />
+          <ClipboardListOutline className="w-3.5 h-3.5" />
           Registration Responses
           <span className="ml-1 bg-slate-100 text-slate-500 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
             {answeredCount}/{schema.length}
@@ -66,7 +66,7 @@ function FormResponsesPanel({
           animate={{ rotate: isExpanded ? 180 : 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         >
-          <ChevronDown className="w-3.5 h-3.5" />
+          <AltArrowDownOutline className="w-3.5 h-3.5" />
         </motion.div>
       </button>
 
@@ -116,6 +116,10 @@ interface VolunteerApplication {
   created_at: string
   profiles: { full_name: string | null } | null
 }
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export function OrgEventRegistrants() {
   const { id } = useParams<{ id: string }>()
@@ -313,29 +317,50 @@ export function OrgEventRegistrants() {
   }
 
   return (
-    <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl relative">
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          {event && (
-            <button
-              onClick={() => setShowAnnounce(true)}
-              className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
-                         text-white text-xs font-bold"
-            >
-              <Megaphone className="w-3.5 h-3.5" />
-              Announce
-            </button>
-          )}
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 px-6 pb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate(-1)}
+                className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+              >
+                <ArrowLeftOutline className="w-5 h-5" color="white" />
+              </button>
+              <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+                Attendees
+              </h1>
+            </div>
+            {event && (
+              <button
+                onClick={() => setShowAnnounce(true)}
+                className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
+                           text-white text-xs font-bold active:bg-white/30 transition-colors shrink-0"
+              >
+                <UserSpeakOutline className="w-3.5 h-3.5" color="white" />
+                Announce
+              </button>
+            )}
+          </div>
+          <div className="px-[76px] pb-4">
+            <p className="text-white/70 text-[13px] font-proxima truncate leading-none">
+              {event?.title ?? 'Event'}
+            </p>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-white">Attendees</h1>
-        <p className="text-white/60 text-sm mt-0.5">{event?.title ?? 'Event'}</p>
-      </div>
+      </header>
 
       <motion.div
         className="p-4"
@@ -355,8 +380,8 @@ export function OrgEventRegistrants() {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              {tab === 'volunteers' && <Users className="w-3.5 h-3.5" />}
-              {tab === 'registrants' && <ClipboardList className="w-3.5 h-3.5" />}
+              {tab === 'volunteers' && <UsersGroupRoundedOutline className="w-3.5 h-3.5" />}
+              {tab === 'registrants' && <ClipboardListOutline className="w-3.5 h-3.5" />}
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
@@ -399,7 +424,7 @@ export function OrgEventRegistrants() {
                     className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Check className="w-4 h-4" />
+                    <CheckCircleOutline className="w-4 h-4" />
                     Approve All Pending ({counts.pending})
                   </motion.button>
                 )}
@@ -431,7 +456,7 @@ export function OrgEventRegistrants() {
                       className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
                     >
                       <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                        <ClipboardList className="w-7 h-7 text-slate-400" />
+                        <ClipboardListOutline className="w-7 h-7" color="#94A3B8" />
                       </div>
                       <p className="text-base font-bold text-slate-700">No registrants found</p>
                       <p className="text-sm text-slate-400 mt-1">
@@ -501,7 +526,7 @@ export function OrgEventRegistrants() {
                   className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
                 >
                   <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                    <Users className="w-7 h-7 text-slate-400" />
+                    <UsersGroupRoundedOutline className="w-7 h-7" color="#94A3B8" />
                   </div>
                   <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
                   <p className="text-sm text-slate-400 mt-1">Applications will appear here once submitted.</p>
@@ -548,7 +573,7 @@ export function OrgEventRegistrants() {
                           onClick={() => handleApproveVolunteer(app.id)}
                           className="mt-3 w-full py-2 bg-green text-white text-xs font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center justify-center gap-1.5"
                         >
-                          <Check className="w-3.5 h-3.5" />
+                          <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve
                         </motion.button>
                       )}

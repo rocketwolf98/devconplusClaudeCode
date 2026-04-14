@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  TrendingUp, Users, MapPin, ChevronRight, Ticket, QrCode, Clock,
-  CalendarOff, SlidersHorizontal, Check, X,
-} from 'lucide-react'
+import { UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, QRCodeOutline, ClockCircleOutline, CalendarMarkOutline, CheckCircleOutline, CloseCircleLineDuotone, FilterLinear } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
 import StatusPill from '../../components/StatusPill'
+import EventCard from '../../components/EventCard'
 import { SkeletonEventCard, SkeletonFeaturedEvent } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { isEventArchived } from '../../lib/dates'
 import { supabase } from '../../lib/supabase'
 import type { Event, EventRegistration, Chapter } from '@devcon-plus/supabase'
+
+// Flower-of-life pattern matching Rewards/Dashboard
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 const REGIONS = ['Luzon', 'Visayas', 'Mindanao'] as const
 
@@ -44,6 +46,7 @@ export default function EventsList() {
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(user?.chapter_id ?? null)
   const [showChapterSheet, setShowChapterSheet] = useState(false)
   const [attendeeCounts, setAttendeeCounts] = useState<Record<string, number>>({})
+  const [attendeeDetails, setAttendeeDetails] = useState<Record<string, { avatar_url: string | null; full_name: string }[]>>({})
 
   useEffect(() => {
     void fetchEvents()
@@ -51,15 +54,26 @@ export default function EventsList() {
 
     supabase
       .from('event_registrations')
-      .select('event_id')
+      .select('event_id, profiles(avatar_url, full_name)')
       .eq('status', 'approved')
+      .order('registered_at', { ascending: false })
       .then(({ data }) => {
         const counts: Record<string, number> = {}
+        const details: Record<string, { avatar_url: string | null; full_name: string }[]> = {}
+
         data?.forEach((row) => {
           if (row.event_id == null) return
           counts[row.event_id] = (counts[row.event_id] ?? 0) + 1
+
+          if (!details[row.event_id]) details[row.event_id] = []
+          if (row.profiles && details[row.event_id].length < 1) {
+            const p = row.profiles as unknown as { avatar_url: string | null; full_name: string }
+            details[row.event_id].push(p)
+          }
         })
+
         setAttendeeCounts(counts)
+        setAttendeeDetails(details)
       })
 
     // Try to fetch real chapters; fall back silently on error
@@ -85,8 +99,8 @@ export default function EventsList() {
   const listEvents = filteredEvents.filter((e) => e.id !== featuredEvent?.id)
 
   const selectedChapterName = selectedChapterId
-    ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? 'Chapter')
-    : null
+    ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? null)
+    : 'All Chapters'
 
   // My Tickets: approved first, then pending; exclude rejected
   const myTickets: TicketEntry[] = registrations
@@ -98,43 +112,117 @@ export default function EventsList() {
   const ticketCount = myTickets.length
 
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50">
       {/* ── Header ── */}
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-4 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-white text-xl font-bold">Events</h1>
-          {tab === 'discover' && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowChapterSheet(true)}
-              className="flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full"
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
+
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+            <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+              Events
+            </h1>
+            
+            <div className="flex items-center gap-[8px]">
+              <button 
+                onClick={() => setShowChapterSheet(true)}
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
+                aria-label="Filter events"
+              >
+                <FilterLinear className="size-[20px]" color="white" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Points/Chapter Card Overlay ── */}
+        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+          {tab === 'discover' && selectedChapterName && (
+            <motion.div 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              {selectedChapterName ?? 'All Chapters'}
-            </motion.button>
+              <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <MapPointOutline className="size-[24px]" color="#1152d4" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-px">
+                <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
+                  Current Chapter
+                </p>
+                <p className="font-proxima font-extrabold text-[24px] text-[#1A1A1A] leading-tight line-clamp-1">
+                  {selectedChapterName}
+                </p>
+              </div>
+            </motion.div>
+          )}
+          
+          {tab === 'tickets' && (
+            <motion.div 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
+            >
+              <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <TicketOutline className="size-[24px]" color="#1152d4" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-px">
+                <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
+                  My Tickets
+                </p>
+                <div className="flex items-baseline gap-1.5">
+                  <p className="font-proxima font-extrabold text-[40px] text-[#1A1A1A] leading-none tracking-tight">
+                    {ticketCount}
+                  </p>
+                  <p className="font-proxima font-semibold text-[20px] text-[#1A1A1A] leading-none">
+                    Event{ticketCount !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           )}
         </div>
-        <div className="flex gap-2">
-          {(['discover', 'tickets'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
-                tab === t ? 'bg-white text-primary' : 'bg-white/20 text-white'
-              }`}
-            >
-              {t === 'discover' ? 'Discover' : 'My Tickets'}
-              {t === 'tickets' && ticketCount > 0 && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
-                  tab === 'tickets' ? 'bg-primary text-white' : 'bg-white/30 text-white'
-                }`}>
-                  {ticketCount}
+
+        {/* ── Tabs Wrapper ── */}
+        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+          <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
+            {(['discover', 'tickets'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
+                  tab === t
+                    ? 'bg-[#1152d4] text-white shadow-sm'
+                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  {t === 'discover' ? 'Discover' : 'My Tickets'}
+                  {t === 'tickets' && ticketCount > 0 && (
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none ${
+                      tab === 'tickets' ? 'bg-white text-[#1152d4]' : 'bg-[#1152d4]/20 text-[#1152d4]'
+                    }`}>
+                      {ticketCount}
+                    </span>
+                  )}
                 </span>
-              )}
-            </button>
-          ))}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </header>
 
       <AnimatePresence mode="wait">
         {/* ── Discover tab ── */}
@@ -147,20 +235,23 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto">
+          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
             {/* Loading skeletons */}
             {isLoading && (
-              <div className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="pt-4 space-y-3">
                 <SkeletonFeaturedEvent />
-                {[1, 2, 3].map((i) => <SkeletonEventCard key={i} />)}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <SkeletonEventCard />
+                  <SkeletonEventCard />
+                </div>
               </div>
             )}
 
             {/* Empty state — no events at all */}
             {!isLoading && events.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <CalendarOff className="w-8 h-8 text-primary/50" />
+                  <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">Events coming soon</h3>
                 <p className="text-sm text-slate-500 text-center">
@@ -171,9 +262,9 @@ export default function EventsList() {
 
             {/* Empty state — chapter filter yields nothing */}
             {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-8 pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <CalendarOff className="w-8 h-8 text-primary/50" />
+                  <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">
                   No events in {selectedChapterName}
@@ -192,59 +283,26 @@ export default function EventsList() {
 
             {/* Featured hero card */}
             {!isLoading && featuredEvent && (
-              <motion.div
-                className="px-4 pt-4 pb-2"
-                variants={fadeUp}
-                initial="hidden"
-                animate="visible"
-              >
-                <button
-                  onClick={() => navigate(`/events/${featuredEvent.slug}`)}
-                  className="w-full bg-navy rounded-2xl p-5 text-left"
+              <div className="pt-4 pb-2">
+                <motion.div
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="visible"
                 >
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <TrendingUp className="w-3.5 h-3.5 text-gold" />
-                    <span className="text-[10px] font-bold text-gold uppercase tracking-wider">
-                      Featured Event
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white leading-tight">
-                    {featuredEvent.title}
-                  </h3>
-                  <div className="flex items-center gap-4 mt-3 text-white/60 text-xs">
-                    {featuredEvent.event_date && (
-                      <span>
-                        {new Date(featuredEvent.event_date).toLocaleDateString('en-PH', {
-                          month: 'short', day: 'numeric', year: 'numeric',
-                        })}
-                      </span>
-                    )}
-                    {featuredEvent.location && (
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> {featuredEvent.location}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="flex items-center gap-1.5 text-white/50 text-xs">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{(attendeeCounts[featuredEvent.id] ?? 0).toLocaleString()} attending</span>
-                    </div>
-                    <span className="text-gold text-xs font-bold">
-                      +{featuredEvent.points_value} pts
-                    </span>
-                  </div>
-                  <div className="mt-3 bg-primary rounded-xl py-2.5 text-center">
-                    <span className="text-white text-sm font-semibold">View Event</span>
-                  </div>
-                </button>
-              </motion.div>
+                  <EventCard 
+                    event={featuredEvent} 
+                    className="h-[300px]" 
+                    attendeeCount={attendeeCounts[featuredEvent.id]} 
+                    attendees={attendeeDetails[featuredEvent.id]}
+                  />
+                </motion.div>
+              </div>
             )}
 
             {/* Event list — staggered */}
             {!isLoading && filteredEvents.length > 0 && (
               <motion.div
-                className="px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
@@ -275,22 +333,23 @@ export default function EventsList() {
                         <p className="text-sm font-bold text-slate-900 leading-tight">{event.title}</p>
                         {event.location && (
                           <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3 shrink-0" /> {event.location}
+                            <MapPointOutline className="w-3 h-3 shrink-0" color="#0b46a3" /> {event.location}
                           </p>
                         )}
+
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] bg-primary/10 text-primary px-2 py-0.5 rounded-[100px]">
                             +{event.points_value} pts
                           </span>
                           {attendeeCounts[event.id] && (
                             <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
-                              <Users className="w-3 h-3" />
+                              <UsersGroupRoundedOutline className="w-3 h-3" color="#64748B" />
                               {attendeeCounts[event.id]}
                             </span>
                           )}
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />
+                      <AltArrowRightOutline className="w-4 h-4 shrink-0 mt-1" color="#CBD5E1" />
                     </motion.button>
                   )
                 })}
@@ -310,10 +369,11 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
+          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
             {myTickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center px-8 pt-24">
+              <div className="flex flex-col items-center justify-center px-[25px] pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Ticket className="w-8 h-8 text-primary/50" />
+                  <TicketOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">No tickets yet</h3>
                 <p className="text-sm text-slate-500 text-center mb-5">
@@ -328,21 +388,20 @@ export default function EventsList() {
               </div>
             ) : (
               <motion.div
-                className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:max-w-4xl md:mx-auto"
+                className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
               >
                 {myTickets.map(({ reg, event: ev }) => {
-                  const dateParts = ev.event_date ? formatEventDate(ev.event_date) : null
                   const isApproved = reg.status === 'approved'
                   const destination = isApproved
                     ? `/events/${ev.slug}/ticket`
                     : `/events/${ev.slug}/pending`
                   // Checked-in ticket is always "Done" regardless of event date
                   const lifecycle = reg.checked_in ? 'done' : getEventLifecycleState(ev)
-
                   const isExpired = lifecycle === 'done'
+                  const dateParts = ev.event_date ? formatEventDate(ev.event_date) : null
 
                   return (
                     <motion.button
@@ -350,78 +409,96 @@ export default function EventsList() {
                       variants={cardItem}
                       onClick={isExpired ? undefined : () => navigate(destination)}
                       whileTap={isExpired ? undefined : { scale: 0.98 }}
-                      className={`w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3 ${
+                      className={`w-full bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 text-left ${
                         isExpired ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
-                      {dateParts ? (
-                        <div className="w-12 h-14 rounded-xl bg-slate-100 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold leading-none text-slate-400">
-                            {dateParts.month}
-                          </span>
-                          <span className={`text-xl font-black leading-tight ${
-                            isExpired ? 'text-slate-400' : 'text-navy'
-                          }`}>
-                            {dateParts.day}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="w-12 h-14 rounded-xl bg-slate-100 shrink-0" />
-                      )}
+                      {/* Left Side: Image or Date Placeholder */}
+                      <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0 relative">
+                        {ev.cover_image_url ? (
+                          <>
+                            <img src={ev.cover_image_url} alt={ev.title} className="w-full h-full object-cover" />
+                            {/* Date Overlay for Images */}
+                            {dateParts && (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                                <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
+                                  {dateParts.month}
+                                </span>
+                                <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                                  {dateParts.day}
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-primary/10">
+                            {dateParts ? (
+                              <>
+                                <span className="text-[10px] font-bold leading-none text-primary/60 uppercase">
+                                  {dateParts.month}
+                                </span>
+                                <span className="text-2xl font-black leading-tight text-primary">
+                                  {dateParts.day}
+                                </span>
+                              </>
+                            ) : (
+                              <TicketOutline className="size-8 text-primary/40" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Side: Details */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className={`text-sm font-bold leading-tight flex-1 truncate ${
-                            isExpired ? 'text-slate-400' : 'text-slate-900'
-                          }`}>
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
                             {ev.title}
                           </p>
+                          <AltArrowRightOutline className="w-3.5 h-3.5 shrink-0 text-slate-300 mt-0.5" />
+                        </div>
+
+                        {/* Date Text */}
+                        <p className="text-[11px] text-slate-500 mb-0.5">
+                          {ev.event_date ? new Date(ev.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'No date set'}
+                        </p>
+
+                        {/* Location */}
+                        {ev.location && (
+                          <p className="text-[11px] text-slate-400 truncate mb-1.5 flex items-center gap-1">
+                            <MapPointOutline className="w-2.5 h-2.5" color="#94A3B8" />
+                            {ev.location}
+                          </p>
+                        )}
+
+                        <div className="flex items-center gap-1.5">
                           {lifecycle === 'in_progress' ? (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-green bg-green/10 px-2 py-0.5 rounded-full shrink-0">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green animate-ping" />
-                              In Progress
+                            <span className="backdrop-blur-[16px] flex items-center gap-1 font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-green bg-green/10 px-2 py-0.5 rounded-[100px] shrink-0">
+                              <span className="w-1 h-1 rounded-full bg-green animate-ping" />
+                              Live
                             </span>
                           ) : isExpired ? (
-                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                            <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-[100px] shrink-0">
                               Expired
                             </span>
                           ) : (
-                            <StatusPill status={reg.status as 'approved' | 'pending'} />
+                            <span className={`backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] px-2 py-0.5 rounded-[100px] whitespace-nowrap ${
+                              isApproved ? 'bg-[rgba(208,224,255,0.9)] text-[#0b46a3]' : 'bg-yellow-100/90 text-yellow-700'
+                            }`}>
+                              {isApproved ? 'Approved' : 'Pending'}
+                            </span>
                           )}
-                        </div>
-                        {ev.location && (
-                          <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3 shrink-0" /> {ev.location}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                            isExpired
-                              ? 'bg-slate-100 text-slate-400 line-through'
-                              : 'bg-primary/10 text-primary'
-                          }`}>
+
+                          <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-[100px]">
                             +{ev.points_value} pts
                           </span>
-                          {isExpired ? (
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <Ticket className="w-3 h-3" /> Ticket expired
-                            </span>
-                          ) : lifecycle === 'normal' && (isApproved ? (
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <QrCode className="w-3 h-3" /> View Ticket
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-yellow-600 flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> Awaiting approval
-                            </span>
-                          ))}
                         </div>
                       </div>
-                      {!isExpired && <ChevronRight className="w-4 h-4 text-slate-300 shrink-0 mt-1" />}
                     </motion.button>
                   )
                 })}
               </motion.div>
             )}
+          </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -454,9 +531,9 @@ export default function EventsList() {
                 <h2 className="text-base font-bold text-slate-900">Filter by Chapter</h2>
                 <button
                   onClick={() => setShowChapterSheet(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-slate-100/50 backdrop-blur-md border border-slate-200/50 flex items-center justify-center transition-colors active:bg-slate-200"
                 >
-                  <X className="w-4 h-4 text-slate-500" />
+                  <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
                 </button>
               </div>
 
@@ -469,7 +546,7 @@ export default function EventsList() {
                   All Chapters
                 </span>
                 {selectedChapterId === null && (
-                  <Check className="w-4 h-4 text-primary" />
+                  <CheckCircleOutline className="w-4 h-4" color="#0b46a3" />
                 )}
               </button>
 
@@ -492,7 +569,7 @@ export default function EventsList() {
                           {ch.name}
                         </span>
                         {selectedChapterId === ch.id && (
-                          <Check className="w-4 h-4 text-primary" />
+                          <CheckCircleOutline className="w-4 h-4" color="#0b46a3" />
                         )}
                       </button>
                     ))}

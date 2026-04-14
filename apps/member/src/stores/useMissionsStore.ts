@@ -11,8 +11,9 @@ interface MissionsState {
   submissions: MissionSubmission[]
   isLoading: boolean
   error: string | null
+  lastFetched: number | null
 
-  fetchAll: () => Promise<void>
+  fetchAll: (force?: boolean) => Promise<void>
   startMission: (missionId: string, userId: string) => Promise<void>
   submitMission: (missionId: string, userId: string, prLink: string) => Promise<void>
   subscribeToChanges: () => () => void
@@ -24,8 +25,15 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
   submissions: [],
   isLoading: false,
   error: null,
+  lastFetched: null,
 
-  fetchAll: async () => {
+  fetchAll: async (force = false) => {
+    const { isLoading, lastFetched, missions } = get()
+    
+    // Cache-first: if already loading, or if we have data and it's fresh (< 5 mins), skip
+    const isFresh = lastFetched && (Date.now() - lastFetched < 300000)
+    if (isLoading || (isFresh && missions.length > 0 && !force)) return
+
     set({ isLoading: true, error: null })
     try {
       const [mRes, pRes, sRes] = await Promise.all([
@@ -38,12 +46,10 @@ export const useMissionsStore = create<MissionsState>((set, get) => ({
         missions:     (mRes.data ?? []) as Mission[],
         participants: (pRes.data ?? []) as MissionParticipant[],
         submissions:  (sRes.data ?? []) as MissionSubmission[],
+        lastFetched:  Date.now(),
       })
     } catch (err) {
       set({
-        missions: [],
-        participants: [],
-        submissions: [],
         error: err instanceof Error ? err.message : String(err),
       })
     } finally {

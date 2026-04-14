@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Pencil, ClipboardList } from 'lucide-react'
+import { ArrowLeftOutline, PenOutline, ClipboardListOutline, MapPointOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -10,6 +10,10 @@ import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected'
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export function OrgEventSummary() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -18,9 +22,12 @@ export function OrgEventSummary() {
   const [registrants, setRegistrants] = useState<Registration[]>([])
   const [isLoading, setIsLoading]     = useState(true)
   const [filter, setFilter]           = useState<FilterStatus>('all')
-  // Declared before useEffect so it is in scope inside the fetch closure.
-  // (Same pattern as OrgEventRegistrants.tsx line 20.)
+  
   const event = events.find((e) => e.id === id)
+
+  const dateStr = event?.event_date
+    ? new Date(event.event_date).toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+    : 'Date TBA'
 
   // Guard: load events if store is empty
   useEffect(() => {
@@ -84,29 +91,42 @@ export function OrgEventSummary() {
   const filtered = filter === 'all' ? registrants : registrants.filter((r) => r.status === filter)
 
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50">
       {/* ── Header ── */}
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          <button
-            onClick={() => navigate(`/organizer/events/${id}/edit`)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors"
-          >
-            <Pencil className="w-4 h-4 text-white" />
-          </button>
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 px-6 pb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate(-1)}
+                className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+              >
+                <ArrowLeftOutline className="w-5 h-5" color="white" />
+              </button>
+              <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+                Event Summary
+              </h1>
+            </div>
+            <button
+              onClick={() => navigate(`/organizer/events/${id}/edit`)}
+              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+            >
+              <PenOutline className="w-4 h-4" color="white" />
+            </button>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-white">{event.title}</h1>
-        <p className="text-white/60 text-sm mt-0.5">
-          Post-Event Summary
-          {event.event_date ? ` • ${formatDate.full(event.event_date)}` : ''}
-        </p>
-      </div>
+      </header>
 
       <motion.div
         className="p-4 pb-24"
@@ -114,6 +134,20 @@ export function OrgEventSummary() {
         initial="hidden"
         animate="visible"
       >
+        {/* ── Event Info (Styled like EventDetail) ── */}
+        <motion.div variants={fadeUp} className="mb-6 px-1">
+          <p className="text-xs text-slate-400 mb-1">{dateStr}</p>
+          <h2 className="text-xl font-bold text-slate-900 leading-tight">
+            {event.title}
+          </h2>
+          {event.location && (
+            <p className="text-sm text-slate-500 mt-1.5 flex items-center gap-1.5">
+              <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
+              {event.location}
+            </p>
+          )}
+        </motion.div>
+
         {/* ── Funnel Stats ── */}
         <motion.div variants={fadeUp} className="mb-6 space-y-3">
           {/* Row 1: Total Registered + Checked In */}
@@ -187,7 +221,7 @@ export function OrgEventSummary() {
                 className="bg-white rounded-2xl border border-slate-200 p-12 text-center"
               >
                 <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                  <ClipboardList className="w-7 h-7 text-slate-400" />
+                  <ClipboardListOutline className="w-7 h-7" color="#94A3B8" />
                 </div>
                 <p className="text-base font-bold text-slate-700">No registrants found</p>
                 <p className="text-sm text-slate-400 mt-1">

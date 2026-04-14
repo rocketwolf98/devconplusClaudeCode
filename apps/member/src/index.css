@@ -1,5 +1,56 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
 
+/* ── Proxima Nova — self-hosted woff2 ───────────────────────────────── */
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Black.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('./assets/fonts/ProximaNova-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +61,7 @@
 
 body {
   background-color: #F8FAFC;
-  font-family: 'Geist', system-ui, sans-serif;
+  font-family: 'Proxima Nova', system-ui, sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -30,9 +81,9 @@ body {
 @layer base {
   :root,
   .theme-devcon {
-    --color-primary:      54 123 221;   /* #367BDD */
-    --color-primary-dark: 41 98 196;    /* #2962C4 */
-    --shadow-primary: 0 4px 24px rgba(54, 123, 221, 0.12);
+    --color-primary:      17 82 212;   /* #1152D4 */
+    --color-primary-dark: 13 66 170;    /* #0D42AA */
+    --shadow-primary: 0 4px 24px rgba(17, 82, 212, 0.12);
   }
 
   .theme-she {
@@ -51,5 +102,14 @@ body {
     --color-primary:      248 198 48;   /* #F8C630 */
     --color-primary-dark: 234 179 8;    /* #EAB308 */
     --shadow-primary: 0 4px 24px rgba(248, 198, 48, 0.12);
+  }
+
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }

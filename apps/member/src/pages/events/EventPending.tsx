@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Clock, XCircle } from 'lucide-react'
+import { ClockCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
@@ -50,7 +50,7 @@ export default function EventPending() {
           transition={{ type: 'spring', stiffness: 260, damping: 20 }}
           className="w-20 h-20 rounded-full bg-red/10 flex items-center justify-center mb-4"
         >
-          <XCircle className="w-10 h-10 text-red" />
+          <CloseCircleOutline className="w-10 h-10" color="#EF4444" />
         </motion.div>
         <h1 className="text-xl font-bold text-slate-900 mb-2">Registration Declined</h1>
         <p className="text-sm text-slate-500 mb-8">
@@ -77,7 +77,7 @@ export default function EventPending() {
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
         className="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mb-5"
       >
-        <Clock className="w-9 h-9 text-yellow-500" />
+        <ClockCircleOutline className="w-9 h-9" color="#EAB308" />
       </motion.div>
 
       <motion.div

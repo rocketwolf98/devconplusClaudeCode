@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, MapPin, Ticket, Heart } from 'lucide-react'
+import { ArrowLeftOutline, CalendarOutline, MapPointOutline, TicketOutline, HeartOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
@@ -8,6 +8,10 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import { supabase } from '../../lib/supabase'
 import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export default function EventDetail() {
   const { slug } = useParams<{ slug: string }>()
@@ -48,28 +52,34 @@ export default function EventDetail() {
   return (
     <motion.div
       className="min-h-screen bg-slate-50"
-      style={getEventThemeStyle(event.devcon_category)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      {/* Cover image */}
-      {event.cover_image_url ? (
-        <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
-      ) : (
-        <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <CalendarDays className="w-20 h-20 text-white/20" />
-        </div>
-      )}
+      {/* Floating back button (Sticky/Fixed) */}
+      <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-4 pt-12 pointer-events-none">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center active:bg-white/40 transition-colors shadow-lg pointer-events-auto"
+        >
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
+        </button>
+      </div>
 
-      {/* Back button — fixed so it stays visible over the cover image */}
-      <motion.button
-        onClick={() => navigate(-1)}
-        whileTap={{ scale: 0.95 }}
-        className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+      {/* ── Header ── */}
+      <header 
+        className="relative z-50 h-60 bg-slate-200 overflow-hidden"
+        style={{ clipPath: 'ellipse(100% 100% at 50% 0%)' }}
       >
-        <ArrowLeft className="w-5 h-5" />
-      </motion.button>
+        {event.cover_image_url ? (
+          <img src={event.cover_image_url} alt={event.title} className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full bg-[#1152d4]"
+            style={{ backgroundImage: PATTERN_BG, backgroundSize: '60px 60px' }}
+          />
+        )}
+      </header>
 
       <div className="p-4 space-y-4">
         <div>
@@ -77,7 +87,7 @@ export default function EventDetail() {
           <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
           {event.location && (
             <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
               {event.location}
             </p>
           )}
@@ -128,7 +138,7 @@ export default function EventDetail() {
               onClick={() => navigate(`/events/${slug}/ticket`)}
               className="w-full bg-green text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
             >
-              <Ticket className="w-5 h-5" />
+              <TicketOutline className="w-5 h-5" />
               View My Ticket
             </button>
           ) : (
@@ -141,7 +151,7 @@ export default function EventDetail() {
           {event.status === 'upcoming' && (
             volunteerApp ? (
               <div className="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
-                <Heart className="w-4 h-4 text-slate-400" />
+                <HeartOutline className="w-4 h-4" color="#94A3B8" />
                 <span className="text-sm font-medium text-slate-500">
                   Volunteer Application:{' '}
                   <span
@@ -163,7 +173,7 @@ export default function EventDetail() {
                 onClick={() => navigate(`/events/${slug}/volunteer`)}
                 className="w-full border border-primary text-primary font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
               >
-                <Heart className="w-5 h-5" />
+                <HeartOutline className="w-5 h-5" />
                 Volunteer for this Event
               </motion.button>
             )

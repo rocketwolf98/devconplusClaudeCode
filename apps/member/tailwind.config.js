@@ -20,9 +20,9 @@ export default {
         },
         // Legacy alias — kept for explicit non-themed blue usage
         blue: {
-          DEFAULT: '#367BDD',
-          dark: '#2962C4',
-          light: '#5A9AEA',
+          DEFAULT: '#1152D4',
+          dark: '#0D42AA',
+          light: '#6099F4',
         },
         navy: '#1E2A56',
         gold: '#F8C630',
@@ -41,7 +41,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Geist', 'system-ui', 'sans-serif'],
+        sans: ['"Proxima Nova"', 'system-ui', 'sans-serif'],
+        proxima: ['"Proxima Nova"', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         xl: '20px',
@@ -49,7 +50,7 @@ export default {
       },
       boxShadow: {
         card: '0 1px 4px rgba(0,0,0,0.07)',
-        blue: '0 4px 24px rgba(54,123,221,0.12)',
+        blue: '0 4px 24px rgba(17,82,212,0.12)',
         primary: 'var(--shadow-primary)',
       },
     },

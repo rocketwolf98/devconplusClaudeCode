@@ -1,31 +1,68 @@
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { MapPointOutline } from 'solar-icon-set'
 import type { Job } from '@devcon-plus/supabase'
-import PromotedBadge from './PromotedBadge'
 import { WORK_TYPE_LABELS } from '../lib/constants'
 
 function JobCard({ job }: { job: Job }) {
   const navigate = useNavigate()
+  
   return (
     <motion.button
-      onClick={() => navigate(`/jobs/${job.id}`)}
-      className="w-full bg-white rounded-2xl shadow-card p-4 text-left relative"
-      whileTap={{ scale: 0.97 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      onClick={() => navigate(`/jobs?id=${job.id}`)}
+      className="w-full bg-white border border-[rgba(156,163,175,0.3)] rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] text-left overflow-hidden"
+      whileTap={{ scale: 0.98 }}
     >
-      {job.is_promoted && (
-        <div className="absolute top-3 right-3 z-10">
-          <PromotedBadge />
+      <div className="px-[18px] py-[12px] flex flex-col gap-2">
+        {/* Logo */}
+        <div className="w-12 h-12 bg-[#1152d4] rounded-full shrink-0 flex items-center justify-center">
+          <span className="text-white font-proxima font-bold text-xl uppercase">
+            {job.company?.[0] ?? 'J'}
+          </span>
         </div>
-      )}
-      <p className="font-semibold text-slate-900 text-sm pr-16">{job.title}</p>
-      <p className="text-xs text-slate-500 mt-0.5">{job.company}</p>
-      <div className="flex items-center gap-2 mt-2">
-        <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-          {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
-        </span>
-        {job.location && <span className="text-xs text-slate-400">{job.location}</span>}
+        
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-[2px]">
+            {/* Title */}
+            <p className="font-proxima font-bold text-[16px] text-black leading-snug">
+              {job.title}
+            </p>
+            
+            {/* Company */}
+            <p className="font-proxima text-[#6b7280] text-[12px]">
+              Posted by {job.company}
+            </p>
+          </div>
+          
+          {/* Badges & Location */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              {job.work_type && (
+                <div className="backdrop-blur-[16px] bg-[rgba(102,102,102,0.2)] px-[12px] py-[6px] rounded-[100px] inline-flex items-center justify-center shrink-0">
+                  <span className="font-proxima font-semibold text-[#6b7280] text-[9px] tracking-[0.9px] uppercase leading-[13.5px]">
+                    {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
+                  </span>
+                </div>
+              )}
+              
+              {job.is_promoted && (
+                <div className="backdrop-blur-[16px] bg-[rgba(255,225,205,0.9)] px-[12px] py-[6px] rounded-[100px] inline-flex items-center justify-center shrink-0">
+                  <span className="font-proxima font-semibold text-[#ff6f0b] text-[9px] tracking-[0.9px] uppercase leading-[13.5px]">
+                    Promoted
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {job.location && (
+              <div className="flex items-center gap-1 py-[6px]">
+                <MapPointOutline className="w-[10px] h-[10px]" color="#6b7280" />
+                <span className="font-proxima text-[#6b7280] text-[12px]">{job.location}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </motion.button>
   )

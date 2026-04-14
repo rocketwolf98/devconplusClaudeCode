@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CheckCircleOutline, CloseCircleOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
@@ -38,7 +38,7 @@ export default function EmailConfirm() {
     }
 
     // Implicit flow — detectSessionInUrl:true has already exchanged the hash fragment.
-    // Check for an immediate session; otherwise wait for SIGNED_IN event.
+    // CheckCircleOutline for an immediate session; otherwise wait for SIGNED_IN event.
     void supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) { onConfirmed(); return }
 
@@ -57,15 +57,33 @@ export default function EmailConfirm() {
     })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Flower-of-life pattern matching Rewards/Dashboard/Events
+  const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+  const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
   return (
-    <div className="min-h-screen bg-blue flex flex-col">
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
-        <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
-        <p className="text-white/60 mt-3 text-sm">Email Confirmation</p>
-      </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* ── Header ── */}
+      <header className="flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[48px] pt-16 text-center"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
+          <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+            Email Confirmation
+          </p>
+        </div>
+      </header>
 
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 flex flex-col items-center text-center">
-
+      <div className="flex-1 px-6 pt-10 pb-10 flex flex-col items-center text-center">
         {status === 'verifying' && (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <div className="w-6 h-6 border-2 border-blue/30 border-t-blue rounded-full animate-spin" />
@@ -76,7 +94,7 @@ export default function EmailConfirm() {
         {status === 'confirmed' && (
           <>
             <div className="w-16 h-16 rounded-2xl bg-green/10 flex items-center justify-center mb-5 mt-4">
-              <CheckCircle2 className="w-8 h-8 text-green" />
+              <CheckCircleOutline className="w-8 h-8" color="#21C45D" />
             </div>
             <h2 className="text-xl font-black text-slate-900 mb-2">Email Confirmed!</h2>
             <p className="text-sm text-slate-500">Your account is ready. Redirecting you now…</p>
@@ -86,7 +104,7 @@ export default function EmailConfirm() {
         {status === 'error' && (
           <>
             <div className="w-16 h-16 rounded-2xl bg-red/10 flex items-center justify-center mb-5 mt-4">
-              <XCircle className="w-8 h-8 text-red" />
+              <CloseCircleOutline className="w-8 h-8" color="#EF4444" />
             </div>
             <h2 className="text-xl font-black text-slate-900 mb-2">Confirmation Failed</h2>
             <p className="text-sm text-slate-500 mb-6 max-w-xs">{errorMsg}</p>

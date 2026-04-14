@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { Home, CalendarDays, ScanLine, Gift, User } from 'lucide-react'
+import { HomeOutline, CalendarOutline, ScannerOutline, GiftOutline, UserOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'
+import type { SolarIcon } from '../lib/icons'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
 import { useRewardsStore } from '../stores/useRewardsStore'
@@ -11,19 +11,19 @@ import { supabase } from '../lib/supabase'
 import DesktopGuard from './DesktopGuard'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
-const LEFT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer',         label: 'Home',    Icon: Home, end: true  },
-  { path: '/organizer/rewards', label: 'Rewards', Icon: Gift, end: false },
+const LEFT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
+  { path: '/organizer',         label: 'Home',    Icon: HomeOutline, end: true  },
+  { path: '/organizer/rewards', label: 'Rewards', Icon: GiftOutline, end: false },
 ]
 
-const RIGHT_TABS: { path: string; label: string; Icon: LucideIcon; end: boolean }[] = [
-  { path: '/organizer/events',  label: 'Events',  Icon: CalendarDays, end: false },
-  { path: '/organizer/profile', label: 'Profile', Icon: User,         end: false },
+const RIGHT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
+  { path: '/organizer/events',  label: 'Events',  Icon: CalendarOutline, end: false },
+  { path: '/organizer/profile', label: 'Profile', Icon: UserOutline,         end: false },
 ]
 
 const ALL_TABS = [
   ...LEFT_TABS,
-  { path: '/organizer/scan', label: 'Scan', Icon: ScanLine, end: false },
+  { path: '/organizer/scan', label: 'Scan', Icon: ScannerOutline, end: false },
   ...RIGHT_TABS,
 ]
 
@@ -139,10 +139,10 @@ export default function OrganizerLayout() {
                 }
               >
                 {({ isActive }) => (
-                  <>
-                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <div className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-blue' : 'text-slate-400'}`}>
+                    <Icon className="w-5 h-5" />
                     <span className="text-[10px] font-medium">{label}</span>
-                  </>
+                  </div>
                 )}
               </NavLink>
             ))}
@@ -158,7 +158,7 @@ export default function OrganizerLayout() {
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <ScanLine className="w-6 h-6 text-white" />
+                  <ScannerOutline className="w-6 h-6" color="white" />
                 </motion.div>
               )}
             </NavLink>
@@ -175,10 +175,10 @@ export default function OrganizerLayout() {
                 }
               >
                 {({ isActive }) => (
-                  <>
-                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <div className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-blue' : 'text-slate-400'}`}>
+                    <Icon className="w-5 h-5" />
                     <span className="text-[10px] font-medium">{label}</span>
-                  </>
+                  </div>
                 )}
               </NavLink>
             ))}
@@ -224,7 +224,7 @@ export default function OrganizerLayout() {
                           <Icon className="w-3.5 h-3.5 text-white" />
                         </div>
                       ) : (
-                        <Icon className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                        <Icon className="w-4 h-4 shrink-0" />
                       )}
                       {label}
                     </>

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
-import { Home, Gift, QrCode, Briefcase, User } from 'lucide-react'
+import { HomeOutline, GiftOutline, QRCodeOutline, CaseOutline, UserOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useEventsStore } from '../stores/useEventsStore'
@@ -24,6 +24,7 @@ export default function MemberLayout() {
   const scrollRef = useRef<HTMLDivElement>(null)
   const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
   const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
+  const subscribeToPointsChanges = usePointsStore((s) => s.subscribeToChanges)
   const fetchEvents = useEventsStore((s) => s.fetchEvents)
   const fetchRegistrations = useEventsStore((s) => s.fetchRegistrations)
   const registrations = useEventsStore((s) => s.registrations)
@@ -37,7 +38,7 @@ export default function MemberLayout() {
   const loadReferralData = useReferralsStore((s) => s.loadReferralData)
   const fetchMissions = useMissionsStore((s) => s.fetchAll)
   const subscribeMissions = useMissionsStore((s) => s.subscribeToChanges)
-  const { fetchRecent, subscribe } = useNotificationsStore()
+  const { fetchRecent, subscribe: subscribeNotifications } = useNotificationsStore()
 
 
   useEffect(() => {
@@ -57,14 +58,14 @@ export default function MemberLayout() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Unified data + realtime management for the member session.
-  // On mount: immediately fetches data and subscribes to realtime changes.
-  // On visibility/online/poll: refetches data AND re-subscribes (WebSocket channels
-  // may transition to CLOSED during device sleep or browser throttling).
   const unsubEventsRef = useRef<(() => void) | null>(null)
   const unsubRewardsRef = useRef<(() => void) | null>(null)
   const unsubMissionsRef = useRef<(() => void) | null>(null)
-  // Stable refs so the onAuthStateChange effect (empty deps) always calls the
-  // current recover() / resubscribe() without a stale closure.
+  const unsubPointsRef = useRef<(() => void) | null>(null)
+  const unsubNotifsRef = useRef<(() => void) | null>(null)
+
+  // Stable refs so async handlers/event listeners (empty deps or stale closures)
+  // always call the current store-aware logic.
   const recoverRef = useRef<(() => void) | null>(null)
   const resubscribeRef = useRef<(() => void) | null>(null)
 
@@ -72,13 +73,13 @@ export default function MemberLayout() {
     if (!user) return
 
     const recover = () => {
-      // Critical — needed for first paint of Dashboard and Events screens.
+      // Primary HTTP fetches — critical for dashboard/events
       void fetchEvents()
       void loadTotalPoints()
       void fetchRegistrations(user.id)
       void fetchNews()
-      // Deferred — yields to the browser frame so critical queries claim
-      // PostgREST connections first on Supabase's free-tier connection pool.
+      
+      // Secondary fetches — deferred to yield to browser frame
       setTimeout(() => {
         void loadTransactions()
         void fetchJobs()
@@ -86,88 +87,107 @@ export default function MemberLayout() {
         void loadVolunteerApplications()
         void loadReferralData()
         void fetchMissions()
+        
+        // Fetch recent notifications using the latest store state
+        const regs = useEventsStore.getState().registrations
+        const evs = useEventsStore.getState().events
+        const approvedIds = regs.filter(r => r.status === 'approved').map(r => r.event_id)
+        const eventTitles = Object.fromEntries(evs.map(e => [e.id, e.title]))
+        if (approvedIds.length > 0) {
+          void fetchRecent(approvedIds, eventTitles)
+        }
       }, 0)
     }
     recoverRef.current = recover
 
     const resubscribe = () => {
-      // Only call connect() when the socket is truly CLOSED (conn=null or
-      // readyState=3). If connectionState() is 'connecting', the library's
-      // reconnectTimer already started a socket — calling connect() again
-      // would replace it with a duplicate, orphan the first, and create an
-      // infinite reconnect loop that only a page reload can break.
-      if (supabase.realtime.connectionState() === 'closed') {
+      // Force reconnect if the socket is truly closed
+      const state = supabase.realtime.connectionState()
+      if (state === 'closed') {
         supabase.realtime.connect()
       }
+      
+      // Cleanup existing subscriptions
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
       unsubMissionsRef.current?.()
+      unsubPointsRef.current?.()
+      unsubNotifsRef.current?.()
+      
+      // Re-establish general subscriptions
       unsubEventsRef.current = subscribeToEventChanges()
       unsubRewardsRef.current = subscribeToRewardChanges()
       unsubMissionsRef.current = subscribeMissions()
+      unsubPointsRef.current = subscribeToPointsChanges()
+      
+      // Re-establish notification subscription using the latest store state
+      const regs = useEventsStore.getState().registrations
+      const evs = useEventsStore.getState().events
+      const approvedIds = regs.filter(r => r.status === 'approved').map(r => r.event_id)
+      const eventTitles = Object.fromEntries(evs.map(e => [e.id, e.title]))
+      if (approvedIds.length > 0) {
+        unsubNotifsRef.current = subscribeNotifications(approvedIds, eventTitles)
+      }
     }
     resubscribeRef.current = resubscribe
 
-    // Initial load on mount — mirrors OrganizerLayout's pattern
+    // Initial load on mount
     recover()
     resubscribe()
 
     const handleVisibility = () => {
+      // When the tab becomes visible or focused, we must ensure data is fresh.
       if (document.visibilityState === 'visible') {
-        // Always refetch HTTP data — store may be stale regardless of socket state.
         recover()
-        // Resubscribe only if socket is closed (not 'connecting' — the reconnect
-        // timer is already working). If 'open', channels are still live.
+        // Resubscribe if not already connecting to catch silent channel drops.
         const state = supabase.realtime.connectionState()
-        if (state === 'closed') {
+        if (state !== 'connecting') {
           resubscribe()
         }
       }
     }
+    
     const handleOnline = () => { recover(); resubscribe() }
-    // Socket-level disconnect: fires immediately when the Phoenix WebSocket
-    // closes (network drop, server timeout) — no need to wait for the tab to
-    // regain focus.
-    const unregisterDisconnect = onRealtimeDisconnect(() => { recover(); resubscribe() })
+    
+    // Socket-level disconnect handler (heartbeat/network loss)
+    const unregisterDisconnect = onRealtimeDisconnect(() => { 
+      recover()
+      resubscribe() 
+    })
 
     document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('focus', handleVisibility)
     window.addEventListener('online', handleOnline)
-    // Polling fallback: refetch + re-subscribe every 5 minutes — channels can
-    // silently die during idle even without a full network drop
+    
+    // Polling fallback: refetch + re-subscribe every 5 minutes
     const pollInterval = setInterval(() => { recover(); resubscribe() }, 5 * 60 * 1000)
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
+      window.removeEventListener('focus', handleVisibility)
       window.removeEventListener('online', handleOnline)
       unregisterDisconnect()
       clearInterval(pollInterval)
       unsubEventsRef.current?.()
       unsubRewardsRef.current?.()
       unsubMissionsRef.current?.()
+      unsubPointsRef.current?.()
+      unsubNotifsRef.current?.()
     }
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Specialized effect for notifications that re-runs when registration status
+  // changes (e.g. pending -> approved), which happens without a full resubscribe call.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
-  }, [location.pathname])
-
-  // Derive a stable key from the sorted approved event IDs — re-runs when a
-  // registration status changes (e.g. pending → approved) even if the array
-  // length stays the same.
-  const approvedKey = registrations
-    .filter((r) => r.status === 'approved')
-    .map((r) => r.event_id)
-    .sort()
-    .join(',')
-
-  useEffect(() => {
-    if (!approvedKey) return
-    const approvedIds = approvedKey.split(',')
-    const eventTitles = Object.fromEntries(events.map((e) => [e.id, e.title]))
+    if (!user) return
+    const approvedIds = registrations.filter(r => r.status === 'approved').map(r => r.event_id)
+    if (approvedIds.length === 0) return
+    
+    const eventTitles = Object.fromEntries(events.map(e => [e.id, e.title]))
     void fetchRecent(approvedIds, eventTitles)
-    const unsub = subscribe(approvedIds, eventTitles)
-    return unsub
-  }, [approvedKey]) // eslint-disable-line react-hooks/exhaustive-deps
+    unsubNotifsRef.current?.()
+    unsubNotifsRef.current = subscribeNotifications(approvedIds, eventTitles)
+  }, [registrations, events, user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) return null
 
@@ -175,7 +195,7 @@ export default function MemberLayout() {
     <DesktopGuard>
       {/* ── MOBILE layout (< md) ── */}
       <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden md:hidden">
-        <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24">
+        <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24 no-scrollbar">
           <Outlet />
         </div>
 
@@ -195,11 +215,11 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Home className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <HomeOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Home</span>
                 </motion.div>
               )}
@@ -213,11 +233,11 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Gift className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <GiftOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Rewards</span>
                 </motion.div>
               )}
@@ -234,7 +254,7 @@ export default function MemberLayout() {
                   whileTap={{ scale: 0.92 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <QrCode className="w-6 h-6 text-white" />
+                  <QRCodeOutline className="w-6 h-6" color="white" />
                 </motion.div>
               )}
             </NavLink>
@@ -247,11 +267,11 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Briefcase className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CaseOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Jobs</span>
                 </motion.div>
               )}
@@ -265,11 +285,11 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <motion.div
-                  className="flex flex-col items-center gap-0.5"
+                  className={`flex flex-col items-center gap-0.5 ${isActive ? 'text-primary' : 'text-slate-400'}`}
                   whileTap={{ scale: 0.88 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <User className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <UserOutline className="w-5 h-5" />
                   <span className="text-[10px] font-medium">Profile</span>
                 </motion.div>
               )}
@@ -306,7 +326,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <Home className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <HomeOutline className="w-4 h-4 shrink-0" />
                   Home
                 </>
               )}
@@ -322,7 +342,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <Gift className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <GiftOutline className="w-4 h-4 shrink-0" />
                   Rewards
                 </>
               )}
@@ -342,7 +362,7 @@ export default function MemberLayout() {
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                     isActive ? 'bg-white/30' : 'bg-white/15'
                   }`}>
-                    <QrCode className="w-3.5 h-3.5 text-white" />
+                    <QRCodeOutline className="w-3.5 h-3.5" color="white" />
                   </div>
                   Events
                 </>
@@ -359,7 +379,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <Briefcase className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <CaseOutline className="w-4 h-4 shrink-0" />
                   Jobs
                 </>
               )}
@@ -375,7 +395,7 @@ export default function MemberLayout() {
             >
               {({ isActive }) => (
                 <>
-                  <User className="w-4 h-4 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                  <UserOutline className="w-4 h-4 shrink-0" />
                   Profile
                 </>
               )}
@@ -386,7 +406,7 @@ export default function MemberLayout() {
 
         {/* Main content card */}
         <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden flex flex-col">
-          <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto">
+          <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto no-scrollbar">
             <Outlet />
           </div>
         </main>

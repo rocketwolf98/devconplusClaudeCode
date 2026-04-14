@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MapPin, Trash2, Zap, Plus, Pencil, X } from 'lucide-react'
+import { MapPointOutline, TrashBinTrashOutline, BoltOutline, AddCircleOutline, PenOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -240,7 +240,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           onClick={onClose}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
         >
-          <X className="w-4 h-4" />
+          <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
         </button>
       </div>
 
@@ -415,7 +415,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           </div>
         </div>
 
-        {/* ── Ticket Price ── */}
+        {/* ── TicketOutline Price ── */}
         <div className="border-t border-slate-100 pt-4 mt-4">
           <label className={labelClass}>Ticket Price</label>
           <div className="flex gap-3">
@@ -526,7 +526,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
               onClick={addField}
               className="flex items-center gap-1.5 text-xs font-bold text-blue bg-blue/10 hover:bg-blue/20 px-3 py-1.5 rounded-xl transition-colors shrink-0"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <AddCircleOutline className="w-3.5 h-3.5" />
               Add Question
             </button>
           </div>
@@ -550,7 +550,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                     onClick={() => removeField(field.id)}
                     className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <TrashBinTrashOutline className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
@@ -616,7 +616,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                             onClick={() => removeOption(field.id, i)}
                             className="text-slate-400 hover:text-red transition-colors"
                           >
-                            <X className="w-2.5 h-2.5" />
+                            <CloseCircleLineDuotone className="w-2.5 h-2.5" color="#EF4444" />
                           </button>
                         </span>
                       ))}
@@ -744,7 +744,7 @@ export default function AdminEvents() {
           onClick={() => setSlideOver({ mode: 'create' })}
           className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <AddCircleOutline className="w-4 h-4" />
           Create Event
         </button>
       </div>
@@ -775,7 +775,7 @@ export default function AdminEvents() {
                     <p className="font-semibold text-slate-900">{event.title}</p>
                     {event.location && (
                       <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3 shrink-0" />
+                        <MapPointOutline className="w-3 h-3 shrink-0" />
                         {event.location}
                       </p>
                     )}
@@ -788,7 +788,7 @@ export default function AdminEvents() {
                   </td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full">
-                      <Zap className="w-3 h-3" />
+                      <BoltOutline className="w-3 h-3" />
                       {event.points_value}
                     </span>
                   </td>
@@ -825,13 +825,13 @@ export default function AdminEvents() {
                           onClick={() => setSlideOver({ mode: 'edit', event })}
                           className="p-1.5 rounded-lg text-slate-400 hover:bg-blue/10 hover:text-blue transition-colors"
                         >
-                          <Pencil className="w-4 h-4" />
+                          <PenOutline className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setConfirmDeleteId(event.id)}
                           className="p-1.5 rounded-lg text-slate-400 hover:bg-red/10 hover:text-red transition-colors"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <TrashBinTrashOutline className="w-4 h-4" />
                         </button>
                       </div>
                     )}

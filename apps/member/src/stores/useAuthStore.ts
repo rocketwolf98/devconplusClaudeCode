@@ -474,7 +474,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       )
     }
 
-    // Check for existing pending request
+    // CheckCircleOutline for existing pending request
     const { data: existing } = await supabase
       .from('organizer_upgrade_requests')
       .select('id, status')

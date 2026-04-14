@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff } from 'lucide-react'
+import { EyeOutline, EyeClosedOutline } from 'solar-icon-set'
 import { backdrop, slideUp } from '../lib/animation'
 
 interface Props {
@@ -88,7 +88,7 @@ export default function PasswordConfirmModal({
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeClosedOutline className="w-4 h-4" /> : <EyeOutline className="w-4 h-4" />}
               </button>
             </div>
 

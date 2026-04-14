@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, Zap, Pencil, Megaphone } from 'lucide-react'
+import { ArrowLeftOutline, CalendarOutline, BoltOutline, PenOutline, UserSpeakOutline, MapPointOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
+
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export function OrgEventDetail() {
   const { id } = useParams<{ id: string }>()
@@ -26,36 +30,46 @@ export function OrgEventDetail() {
   }
 
   const formattedDate = event.event_date
-    ? new Date(event.event_date).toLocaleDateString('en-US', {
+    ? new Date(event.event_date).toLocaleDateString('en-PH', {
         weekday: 'long',
         month: 'long',
         day: 'numeric',
         year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
       })
-    : 'TBA'
+    : 'Date TBA'
 
   return (
-    <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
-          <button
-            onClick={() => navigate(`/organizer/events/${id}/edit`)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center active:bg-white/30 transition-colors"
-          >
-            <Pencil className="w-4 h-4 text-white" />
-          </button>
-        </div>
-        <h1 className="text-xl font-bold text-white">{event.title}</h1>
-        <p className="text-white/60 text-sm mt-0.5 capitalize">{event.status}</p>
+    <div className="min-h-screen bg-slate-50">
+      {/* Floating back + edit buttons (Sticky/Fixed) */}
+      <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-4 pt-12 pointer-events-none">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md border border-white/20 flex items-center justify-center active:bg-black/40 transition-colors shadow-lg pointer-events-auto"
+        >
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
+        </button>
+        <button
+          onClick={() => navigate(`/organizer/events/${id}/edit`)}
+          className="w-10 h-10 rounded-full bg-black/20 backdrop-blur-md border border-white/20 flex items-center justify-center active:bg-black/40 transition-colors shadow-lg pointer-events-auto"
+        >
+          <PenOutline className="w-4 h-4" color="white" />
+        </button>
       </div>
+
+      {/* ── Header ── */}
+      <header 
+        className="relative z-50 h-60 bg-slate-200 overflow-hidden"
+        style={{ clipPath: 'ellipse(100% 100% at 50% 0%)' }}
+      >
+        {event.cover_image_url ? (
+          <img src={event.cover_image_url} alt={event.title} className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full bg-[#1152d4]"
+            style={{ backgroundImage: PATTERN_BG, backgroundSize: '60px 60px' }}
+          />
+        )}
+      </header>
 
       <motion.div
         className="p-4"
@@ -63,14 +77,15 @@ export function OrgEventDetail() {
         initial="hidden"
         animate="visible"
       >
-        {/* Banner */}
-        <motion.div variants={fadeUp} className="rounded-2xl overflow-hidden mb-6">
-          {event.cover_image_url ? (
-            <img src={event.cover_image_url} alt={event.title} className="w-full h-48 object-cover" />
-          ) : (
-            <div className="w-full h-48 bg-blue flex items-center justify-center">
-              <CalendarDays className="w-16 h-16 text-white/20" />
-            </div>
+        {/* Title & Info section (Similar to Member Side) */}
+        <motion.div variants={fadeUp} className="mb-6">
+          <p className="text-xs text-slate-400 mb-1">{formattedDate}</p>
+          <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
+          {event.location && (
+            <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
+              <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
+              {event.location}
+            </p>
           )}
         </motion.div>
 
@@ -96,7 +111,7 @@ export function OrgEventDetail() {
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
-              <Zap className="w-3 h-3" />
+              <BoltOutline className="w-3 h-3" />
               {event.points_value} XP
             </span>
             {event.requires_approval && (
@@ -104,17 +119,6 @@ export function OrgEventDetail() {
                 Approval Required
               </span>
             )}
-          </div>
-
-          <div className="space-y-3 mb-5">
-            <div className="flex gap-3 text-sm">
-              <span className="text-slate-400 w-24 shrink-0">Date</span>
-              <span className="text-slate-700 font-medium">{formattedDate}</span>
-            </div>
-            <div className="flex gap-3 text-sm">
-              <span className="text-slate-400 w-24 shrink-0">Location</span>
-              <span className="text-slate-700 font-medium">{event.location ?? 'TBA'}</span>
-            </div>
           </div>
 
           <div className="border-t border-slate-100 pt-4">
@@ -130,7 +134,7 @@ export function OrgEventDetail() {
                      hover:bg-blue/5 transition-colors flex items-center justify-center gap-2"
           whileTap={{ scale: 0.98 }}
         >
-          <Megaphone className="w-4 h-4" />
+          <UserSpeakOutline className="w-4 h-4" />
           Send Announcement
         </motion.button>
 

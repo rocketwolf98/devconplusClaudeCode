@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, ShieldCheck, Monitor } from 'lucide-react'
+import { CloseCircleLineDuotone, ShieldCheckOutline, MonitorOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { backdrop, fadeUp } from '../lib/animation'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -59,7 +59,7 @@ export default function KonamiModal({ open, onClose }: Props) {
                 className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
                 aria-label="Close"
               >
-                <X className="w-5 h-5" />
+                <CloseCircleLineDuotone className="w-5 h-5" color="#EF4444" />
               </button>
 
               <div className="text-center">
@@ -68,7 +68,7 @@ export default function KonamiModal({ open, onClose }: Props) {
                   <>
                     <div className="flex justify-center mb-4">
                       <div className="w-14 h-14 rounded-2xl bg-blue/10 flex items-center justify-center">
-                        <ShieldCheck className="w-7 h-7 text-blue" />
+                        <ShieldCheckOutline className="w-7 h-7" color="#1152D4" />
                       </div>
                     </div>
                     <h2 className="text-lg font-bold text-slate-900 mb-2">Admin Access</h2>
@@ -88,7 +88,7 @@ export default function KonamiModal({ open, onClose }: Props) {
                   <>
                     <div className="flex justify-center mb-4">
                       <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
-                        <Monitor className="w-7 h-7 text-slate-400" />
+                        <MonitorOutline className="w-7 h-7" color="#94A3B8" />
                       </div>
                     </div>
                     <h2 className="text-lg font-bold text-slate-900 mb-2">Desktop Required</h2>
