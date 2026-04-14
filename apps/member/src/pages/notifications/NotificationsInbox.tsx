@@ -28,12 +28,9 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
-        {/* ── Glassmorphism Background ── */}
-        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
-
         {/* ── Blue Background Container ── */}
         <div 
-          className="relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
+          className="relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundColor: isOrganizer ? '#1d4ed8' : '#1152d4',
@@ -44,11 +41,11 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
           }}
         >
           {/* Title + Back Button + Clear All */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
-            <div className="flex items-center gap-[12px]">
+          <div className="relative z-10 flex items-center justify-between px-6 pb-4">
+            <div className="flex items-center gap-3">
               <button 
                 onClick={() => navigate(-1)}
-                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/40 shadow-lg shrink-0"
                 aria-label="Back"
               >
                 <ArrowLeftOutline className="w-[18px] h-[18px]" color="white" />
@@ -61,7 +58,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
             {notifications.length > 0 && (
               <button 
                 onClick={clearAll}
-                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/40 shadow-lg"
                 aria-label="Clear all"
               >
                 <TrashBinTrashOutline className="w-[18px] h-[18px]" color="white" />

@@ -99,8 +99,8 @@ export default function EventsList() {
   const listEvents = filteredEvents.filter((e) => e.id !== featuredEvent?.id)
 
   const selectedChapterName = selectedChapterId
-    ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? 'Chapter')
-    : null
+    ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? null)
+    : 'All Chapters'
 
   // My Tickets: approved first, then pending; exclude rejected
   const myTickets: TicketEntry[] = registrations
@@ -130,7 +130,7 @@ export default function EventsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Events
             </h1>
@@ -138,7 +138,7 @@ export default function EventsList() {
             <div className="flex items-center gap-[8px]">
               <button 
                 onClick={() => setShowChapterSheet(true)}
-                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
                 aria-label="Filter events"
               >
                 <FilterLinear className="size-[20px]" color="white" />
@@ -235,10 +235,10 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto">
+          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
             {/* Loading skeletons */}
             {isLoading && (
-              <div className="px-[25px] pt-4 space-y-3">
+              <div className="pt-4 space-y-3">
                 <SkeletonFeaturedEvent />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   <SkeletonEventCard />
@@ -283,7 +283,7 @@ export default function EventsList() {
 
             {/* Featured hero card */}
             {!isLoading && featuredEvent && (
-              <div className="px-[25px] pt-4 pb-2">
+              <div className="pt-4 pb-2">
                 <motion.div
                   variants={fadeUp}
                   initial="hidden"
@@ -302,7 +302,7 @@ export default function EventsList() {
             {/* Event list — staggered */}
             {!isLoading && filteredEvents.length > 0 && (
               <motion.div
-                className="px-[25px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
@@ -338,7 +338,7 @@ export default function EventsList() {
                         )}
 
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] bg-primary/10 text-primary px-2 py-0.5 rounded-[100px]">
                             +{event.points_value} pts
                           </span>
                           {attendeeCounts[event.id] && (
@@ -369,7 +369,7 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto">
+          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
             {myTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-[25px] pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
@@ -388,21 +388,20 @@ export default function EventsList() {
               </div>
             ) : (
               <motion.div
-                className="px-[25px] pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+                className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
               >
                 {myTickets.map(({ reg, event: ev }) => {
-                  const dateParts = ev.event_date ? formatEventDate(ev.event_date) : null
                   const isApproved = reg.status === 'approved'
                   const destination = isApproved
                     ? `/events/${ev.slug}/ticket`
                     : `/events/${ev.slug}/pending`
                   // Checked-in ticket is always "Done" regardless of event date
                   const lifecycle = reg.checked_in ? 'done' : getEventLifecycleState(ev)
-
                   const isExpired = lifecycle === 'done'
+                  const dateParts = ev.event_date ? formatEventDate(ev.event_date) : null
 
                   return (
                     <motion.button
@@ -410,74 +409,90 @@ export default function EventsList() {
                       variants={cardItem}
                       onClick={isExpired ? undefined : () => navigate(destination)}
                       whileTap={isExpired ? undefined : { scale: 0.98 }}
-                      className={`w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3 ${
+                      className={`w-full bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 text-left ${
                         isExpired ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                     >
-                      {dateParts ? (
-                        <div className="w-12 h-14 rounded-xl bg-slate-100 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold leading-none text-slate-400">
-                            {dateParts.month}
-                          </span>
-                          <span className={`text-xl font-black leading-tight ${
-                            isExpired ? 'text-slate-400' : 'text-navy'
-                          }`}>
-                            {dateParts.day}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="w-12 h-14 rounded-xl bg-slate-100 shrink-0" />
-                      )}
+                      {/* Left Side: Image or Date Placeholder */}
+                      <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0 relative">
+                        {ev.cover_image_url ? (
+                          <>
+                            <img src={ev.cover_image_url} alt={ev.title} className="w-full h-full object-cover" />
+                            {/* Date Overlay for Images */}
+                            {dateParts && (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                                <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
+                                  {dateParts.month}
+                                </span>
+                                <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                                  {dateParts.day}
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-primary/10">
+                            {dateParts ? (
+                              <>
+                                <span className="text-[10px] font-bold leading-none text-primary/60 uppercase">
+                                  {dateParts.month}
+                                </span>
+                                <span className="text-2xl font-black leading-tight text-primary">
+                                  {dateParts.day}
+                                </span>
+                              </>
+                            ) : (
+                              <TicketOutline className="size-8 text-primary/40" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Side: Details */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className={`text-sm font-bold leading-tight flex-1 truncate ${
-                            isExpired ? 'text-slate-400' : 'text-slate-900'
-                          }`}>
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
                             {ev.title}
                           </p>
-                          {lifecycle === 'in_progress' ? (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-green bg-green/10 px-2 py-0.5 rounded-full shrink-0">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green animate-ping" />
-                              In Progress
-                            </span>
-                          ) : isExpired ? (
-                            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
-                              Expired
-                            </span>
-                          ) : (
-                            <StatusPill status={reg.status as 'approved' | 'pending'} />
-                          )}
+                          <AltArrowRightOutline className="w-3.5 h-3.5 shrink-0 text-slate-300 mt-0.5" />
                         </div>
+
+                        {/* Date Text */}
+                        <p className="text-[11px] text-slate-500 mb-0.5">
+                          {ev.event_date ? new Date(ev.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'No date set'}
+                        </p>
+
+                        {/* Location */}
                         {ev.location && (
-                          <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPointOutline className="w-3 h-3 shrink-0" color="#0b46a3" /> {ev.location}
+                          <p className="text-[11px] text-slate-400 truncate mb-1.5 flex items-center gap-1">
+                            <MapPointOutline className="w-2.5 h-2.5" color="#94A3B8" />
+                            {ev.location}
                           </p>
                         )}
 
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                            isExpired
-                              ? 'bg-slate-100 text-slate-400 line-through'
-                              : 'bg-primary/10 text-primary'
-                          }`}>
-                            +{ev.points_value} pts
-                          </span>
-                          {isExpired ? (
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <TicketOutline className="w-3 h-3" color="#64748B" /> TicketOutline expired
+                        <div className="flex items-center gap-1.5">
+                          {lifecycle === 'in_progress' ? (
+                            <span className="backdrop-blur-[16px] flex items-center gap-1 font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-green bg-green/10 px-2 py-0.5 rounded-[100px] shrink-0">
+                              <span className="w-1 h-1 rounded-full bg-green animate-ping" />
+                              Live
                             </span>
-                          ) : lifecycle === 'normal' && (isApproved ? (
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <QRCodeOutline className="w-3 h-3" color="#0b46a3" /> View TicketOutline
+                          ) : isExpired ? (
+                            <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-[100px] shrink-0">
+                              Expired
                             </span>
                           ) : (
-                            <span className="text-[10px] text-yellow-600 flex items-center gap-1">
-                              <ClockCircleOutline className="w-3 h-3" color="#D97706" /> Awaiting approval
+                            <span className={`backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] px-2 py-0.5 rounded-[100px] whitespace-nowrap ${
+                              isApproved ? 'bg-[rgba(208,224,255,0.9)] text-[#0b46a3]' : 'bg-yellow-100/90 text-yellow-700'
+                            }`}>
+                              {isApproved ? 'Approved' : 'Pending'}
                             </span>
-                          ))}
+                          )}
+
+                          <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-[100px]">
+                            +{ev.points_value} pts
+                          </span>
                         </div>
                       </div>
-                      {!isExpired && <AltArrowRightOutline className="w-4 h-4 shrink-0 mt-1" color="#CBD5E1" />}
                     </motion.button>
                   )
                 })}
@@ -516,7 +531,7 @@ export default function EventsList() {
                 <h2 className="text-base font-bold text-slate-900">Filter by Chapter</h2>
                 <button
                   onClick={() => setShowChapterSheet(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-slate-100/50 backdrop-blur-md border border-slate-200/50 flex items-center justify-center transition-colors active:bg-slate-200"
                 >
                   <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
                 </button>

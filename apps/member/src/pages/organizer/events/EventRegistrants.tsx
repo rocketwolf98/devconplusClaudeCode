@@ -117,6 +117,10 @@ interface VolunteerApplication {
   profiles: { full_name: string | null } | null
 }
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export function OrgEventRegistrants() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -313,29 +317,50 @@ export function OrgEventRegistrants() {
   }
 
   return (
-    <div>
-      <div className="bg-blue px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl relative">
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"
-          >
-            <ArrowLeftOutline className="w-5 h-5" color="white" />
-          </button>
-          {event && (
-            <button
-              onClick={() => setShowAnnounce(true)}
-              className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
-                         text-white text-xs font-bold"
-            >
-              <UserSpeakOutline className="w-3.5 h-3.5" />
-              Announce
-            </button>
-          )}
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 px-6 pb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate(-1)}
+                className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+              >
+                <ArrowLeftOutline className="w-5 h-5" color="white" />
+              </button>
+              <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+                Attendees
+              </h1>
+            </div>
+            {event && (
+              <button
+                onClick={() => setShowAnnounce(true)}
+                className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
+                           text-white text-xs font-bold active:bg-white/30 transition-colors shrink-0"
+              >
+                <UserSpeakOutline className="w-3.5 h-3.5" color="white" />
+                Announce
+              </button>
+            )}
+          </div>
+          <div className="px-[76px] pb-4">
+            <p className="text-white/70 text-[13px] font-proxima truncate leading-none">
+              {event?.title ?? 'Event'}
+            </p>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-white">Attendees</h1>
-        <p className="text-white/60 text-sm mt-0.5">{event?.title ?? 'Event'}</p>
-      </div>
+      </header>
 
       <motion.div
         className="p-4"

@@ -39,17 +39,17 @@ function JobCard({ job }: { job: Job }) {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               {job.work_type && (
-                <div className="bg-[rgba(102,102,102,0.2)] px-[12px] py-[6px] rounded-[100px] flex items-center justify-center shrink-0">
-                  <span className="text-[#6b7280] text-[9px] font-bold tracking-[0.9px] uppercase leading-none">
+                <div className="backdrop-blur-[16px] bg-[rgba(102,102,102,0.2)] px-[12px] py-[6px] rounded-[100px] inline-flex items-center justify-center shrink-0">
+                  <span className="font-proxima font-semibold text-[#6b7280] text-[9px] tracking-[0.9px] uppercase leading-[13.5px]">
                     {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
                   </span>
                 </div>
               )}
               
               {job.is_promoted && (
-                <div className="bg-[rgba(255,111,11,0.2)] px-[12px] py-[6px] rounded-[100px] flex items-center justify-center shrink-0">
-                  <span className="text-[#ff6f0b] text-[9px] font-bold tracking-[0.9px] uppercase leading-none">
-                    PROMOTED
+                <div className="backdrop-blur-[16px] bg-[rgba(255,225,205,0.9)] px-[12px] py-[6px] rounded-[100px] inline-flex items-center justify-center shrink-0">
+                  <span className="font-proxima font-semibold text-[#ff6f0b] text-[9px] tracking-[0.9px] uppercase leading-[13.5px]">
+                    Promoted
                   </span>
                 </div>
               )}

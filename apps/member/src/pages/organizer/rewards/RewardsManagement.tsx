@@ -37,12 +37,9 @@ export function OrgRewardsManagement() {
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
-        {/* ── Glassmorphism Background ── */}
-        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
-
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          className="bg-[#1152d4] relative z-0 pointer-events-auto pb-[64px]"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -52,16 +49,16 @@ export function OrgRewardsManagement() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6 pb-4">
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
             <h1 className="text-white text-[28px] font-semibold font-proxima leading-none tracking-tight">
               Rewards
             </h1>
             
             <button
               onClick={() => navigate('/organizer/rewards/create')}
-              className="flex items-center gap-1.5 px-3 py-2 bg-white/20 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-white/20 backdrop-blur-md border border-white/40 text-white text-sm font-bold font-proxima rounded-full active:bg-white/40 transition-colors shadow-lg shrink-0"
             >
-              <AddCircleOutline className="w-4 h-4" />
+              <AddCircleOutline className="w-[18px] h-[18px]" color="white" />
               Add Reward
             </button>
           </div>
@@ -107,7 +104,7 @@ export function OrgRewardsManagement() {
       </header>
 
       <motion.div
-        className="p-4 space-y-4"
+        className="px-[25px] pt-4 space-y-4 pb-24 md:max-w-4xl md:mx-auto"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
@@ -135,11 +132,11 @@ export function OrgRewardsManagement() {
                 <motion.div
                   key={reward.id}
                   variants={cardItem}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden"
+                  className="bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 overflow-hidden"
                 >
-                  <div className="flex items-stretch gap-0">
-                    {/* Image / placeholder */}
-                    <div className="w-20 shrink-0">
+                  <div className="flex items-center gap-4">
+                    {/* Left Side: Image or Placeholder */}
+                    <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0 relative">
                       {reward.image_url ? (
                         <img
                           src={reward.image_url}
@@ -147,24 +144,26 @@ export function OrgRewardsManagement() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-blue/10 flex items-center justify-center">
-                          <GiftOutline className="w-6 h-6" color="rgba(17,82,212,0.3)" />
+                        <div 
+                          className="w-full h-full flex items-center justify-center bg-[#1152d4]"
+                          style={{
+                            backgroundImage: PATTERN_BG,
+                            backgroundSize: '40px 40px',
+                            backgroundPosition: 'center'
+                          }}
+                        >
+                          <GiftOutline className="size-8" color="white" />
                         </div>
                       )}
                     </div>
 
-                    {/* InfoCircleOutline */}
-                    <div className="flex-1 min-w-0 p-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-900 leading-snug truncate">
-                            {reward.name}
-                          </p>
-                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
-                            {reward.description}
-                          </p>
-                        </div>
-
+                    {/* Right Side: Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                        <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
+                          {reward.name}
+                        </p>
+                        
                         {/* Action buttons */}
                         {deleteConfirmId !== reward.id && (
                           <div className="flex items-center gap-1.5 shrink-0">
@@ -184,20 +183,28 @@ export function OrgRewardsManagement() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="text-xs font-bold text-blue bg-blue/10 px-2 py-0.5 rounded-full">
+                      <p className="text-[11px] text-slate-500 line-clamp-1 mb-1.5">
+                        {reward.description}
+                      </p>
+
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[9px] font-bold text-blue bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <GiftOutline className="w-2.5 h-2.5" />
                           {reward.points_cost.toLocaleString()} pts
                         </span>
-                        <span className="text-xs text-slate-400 capitalize">
+                        
+                        <span className="text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">
                           {reward.claim_method === 'digital_delivery' ? 'Digital' : 'On-site'}
                         </span>
+
                         {!reward.is_active && (
-                          <span className="text-[10px] font-bold text-red/60 bg-red/10 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                          <span className="text-[9px] font-bold text-red/60 bg-red/10 px-2 py-0.5 rounded-full uppercase">
                             Inactive
                           </span>
                         )}
+                        
                         {reward.is_coming_soon && (
-                          <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                          <span className="text-[9px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full uppercase">
                             Coming Soon
                           </span>
                         )}
@@ -206,21 +213,21 @@ export function OrgRewardsManagement() {
                       {/* Inline delete confirm */}
                       {deleteConfirmId === reward.id && (
                         <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <p className="text-xs text-slate-500">Remove from catalog?</p>
+                          <p className="text-[10px] text-slate-500">Remove?</p>
                           <div className="flex gap-2">
                             <button
                               onClick={() => setDeleteConfirmId(null)}
                               disabled={isDeleting}
-                              className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold"
                             >
-                              Cancel
+                              No
                             </button>
                             <button
                               onClick={() => void handleDelete(reward.id)}
                               disabled={isDeleting}
-                              className="px-3 py-1.5 rounded-lg bg-red text-white text-xs font-semibold disabled:opacity-50"
+                              className="px-2.5 py-1 rounded-lg bg-red text-white text-[10px] font-bold"
                             >
-                              {isDeleting ? 'Removing…' : 'Remove'}
+                              {isDeleting ? '...' : 'Yes'}
                             </button>
                           </div>
                         </div>
