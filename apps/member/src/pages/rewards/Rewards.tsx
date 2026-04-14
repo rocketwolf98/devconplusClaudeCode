@@ -3,7 +3,7 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
 import { StarOutline, CupFirstOutline, LockOutline, GiftOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { Reward } from '@devcon-plus/supabase'
+import type { Reward, RewardRedemption } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
 import { useRewardsStore } from '../../stores/useRewardsStore'
 import { SkeletonRewardCard } from '../../components/Skeleton'
@@ -298,9 +298,95 @@ function RewardCard({ reward, spendablePoints, onRedeem }: RewardCardProps) {
   )
 }
 
+// ── Claim Receipt Sheet ───────────────────────────────────────────────────────
+
+interface ClaimReceiptSheetProps {
+  redemption: RewardRedemption
+  reward: Reward | null
+  onClose: () => void
+}
+
+function ClaimReceiptSheet({ redemption, reward, onClose }: ClaimReceiptSheetProps) {
+  const [visible, setVisible] = useState(true)
+  const handleClose = () => {
+    setVisible(false)
+    setTimeout(onClose, 220)
+  }
+  const pin = redemption.claim_pin ?? '------'
+
+  return createPortal(
+    <AnimatePresence>
+      {visible && (
+        <>
+          <motion.div
+            className="fixed inset-0 bg-black/50 z-[60]"
+            variants={backdrop}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={handleClose}
+          />
+          <motion.div
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-[24px] overflow-hidden"
+            variants={slideUp}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1" />
+            <div className="flex flex-col items-center text-center px-6 pb-8 pt-4 gap-3">
+              <h2 className="text-[20px] font-proxima font-bold text-slate-900">Claim Receipt</h2>
+              <p className="text-[13px] text-slate-500">Show this PIN to the organizer at the rewards booth</p>
+
+              {reward && (
+                <p className="text-[14px] font-proxima font-semibold text-slate-700">{reward.name}</p>
+              )}
+
+              {/* PIN digit boxes */}
+              <div className="flex gap-2 my-2">
+                {pin.split('').map((digit, i) => (
+                  <div
+                    key={i}
+                    className="w-11 h-[52px] bg-slate-50 border-2 border-slate-200 rounded-[10px] flex items-center justify-center"
+                  >
+                    <span className="text-[24px] font-proxima font-black text-slate-900 leading-none">
+                      {digit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Status pill */}
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
+                <div className="w-2 h-2 rounded-full bg-amber-400" />
+                <p className="text-[11px] font-proxima font-bold text-amber-700">Awaiting Verification</p>
+              </div>
+
+              <motion.button
+                onClick={handleClose}
+                className="mt-2 w-full py-3.5 bg-[#1152d4] text-white rounded-[14px] font-proxima font-bold text-[15px]"
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              >
+                Close
+              </motion.button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
+    document.body
+  )
+}
+
 // ── Claim Receipts Tab Content ────────────────────────────────────────────────
 
-function ClaimReceiptsTab() {
+interface ClaimReceiptsTabProps {
+  onSelectReceipt: (redemption: RewardRedemption) => void
+}
+
+function ClaimReceiptsTab({ onSelectReceipt }: ClaimReceiptsTabProps) {
   const { redemptions, allRewards, rewards, fetchAllRewards, loadRedemptions, isLoading } = useRewardsStore()
 
   useEffect(() => {
@@ -338,12 +424,28 @@ function ClaimReceiptsTab() {
       initial="hidden"
       animate="visible"
     >
-      {redemptions.map(redemption => {
-        // Try active rewards first, then fallback to allRewards (for inactive ones)
-        const reward = rewards.find(r => r.id === redemption.reward_id) || allRewards.find(r => r.id === redemption.reward_id)
-        
+      {redemptions.map((redemption) => {
+        const reward = rewards.find(r => r.id === redemption.reward_id) ||
+                       allRewards.find(r => r.id === redemption.reward_id)
+        const status = redemption.status ?? 'pending'
+        const isPending = status === 'pending'
+
+        const pillConfig = {
+          pending:   { bg: 'bg-amber-50',  text: 'text-amber-700', dot: 'bg-amber-400',  label: 'Awaiting Verification' },
+          claimed:   { bg: 'bg-green/10',  text: 'text-green',     dot: 'bg-green',      label: 'Verified' },
+          cancelled: { bg: 'bg-red/10',    text: 'text-red',       dot: 'bg-red',        label: 'Refunded' },
+        } as const
+        const pill = pillConfig[status as keyof typeof pillConfig] ?? pillConfig['pending']
+
         return (
-          <motion.div key={redemption.id} variants={cardItem} className="bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4">
+          <motion.div
+            key={redemption.id}
+            variants={cardItem}
+            className={`bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 ${isPending ? 'cursor-pointer active:bg-slate-50' : ''}`}
+            onClick={isPending ? () => onSelectReceipt(redemption) : undefined}
+            whileTap={isPending ? { scale: 0.98 } : undefined}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
             <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0">
               {reward?.image_url ? (
                 <img src={reward.image_url} alt={reward?.name || 'Reward'} className="w-full h-full object-cover" />
@@ -355,17 +457,24 @@ function ClaimReceiptsTab() {
               <p className="font-proxima font-bold text-[14px] text-slate-900 leading-snug mb-1 truncate">
                 {reward?.name || 'Unknown Reward'}
               </p>
-              <p className="text-[12px] text-slate-500 mb-2">
-                {new Date(redemption.redeemed_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-              </p>
-              <div className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                redemption.status === 'claimed'
-                  ? 'bg-slate-100 text-slate-600'
-                  : 'bg-[#eef4ff] text-[#1152d4]'
-              }`}>
-                {redemption.status === 'claimed' ? 'Claimed' : 'Ready to Claim'}
+              {/* Show PIN on pending items */}
+              {isPending && redemption.claim_pin && (
+                <p className="text-[12px] font-proxima font-black text-slate-700 tracking-[0.15em] mb-1">
+                  PIN: {redemption.claim_pin}
+                </p>
+              )}
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${pill.bg}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${pill.dot}`} />
+                <p className={`text-[10px] font-proxima font-bold ${pill.text}`}>{pill.label}</p>
               </div>
             </div>
+            {isPending && (
+              <div className="shrink-0 text-slate-300">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            )}
           </motion.div>
         )
       })}
@@ -385,8 +494,9 @@ const TABS = [
 export default function Rewards() {
   const { user } = useAuthStore()
   const { spendablePoints, loadTotalPoints } = usePointsStore()
-  const { rewards, fetchRewards, isLoading } = useRewardsStore()
+  const { rewards, allRewards, fetchRewards, isLoading } = useRewardsStore()
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null)
+  const [selectedReceipt, setSelectedReceipt] = useState<RewardRedemption | null>(null)
   const [activeTab, setActiveTab] = useState<typeof TABS[number]['id']>('redeem')
   const [comingSoonFeature, setComingSoonFeature] = useState<string | null>(null)
 
@@ -515,7 +625,7 @@ export default function Rewards() {
             </motion.div>
           )
         ) : activeTab === 'receipts' ? (
-          <ClaimReceiptsTab />
+          <ClaimReceiptsTab onSelectReceipt={setSelectedReceipt} />
         ) : null}
       </div>
 
@@ -524,6 +634,18 @@ export default function Rewards() {
           reward={selectedReward}
           spendablePoints={spendablePoints}
           onClose={handleSheetClose}
+        />
+      )}
+
+      {selectedReceipt && (
+        <ClaimReceiptSheet
+          redemption={selectedReceipt}
+          reward={
+            rewards.find(r => r.id === selectedReceipt.reward_id) ||
+            allRewards.find(r => r.id === selectedReceipt.reward_id) ||
+            null
+          }
+          onClose={() => setSelectedReceipt(null)}
         />
       )}
 

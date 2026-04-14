@@ -178,6 +178,7 @@ export interface RewardRedemption {
   status: RedemptionStatus
   redeemed_at: string
   claimed_at: string | null
+  claim_pin: string | null
 }
 
 export interface Job {
