@@ -754,6 +754,8 @@ export type Database = {
           claimed_at: string | null
           id: string
           redeemed_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           reward_id: string | null
           status: string | null
           user_id: string | null
@@ -762,6 +764,8 @@ export type Database = {
           claimed_at?: string | null
           id?: string
           redeemed_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           reward_id?: string | null
           status?: string | null
           user_id?: string | null
@@ -770,11 +774,20 @@ export type Database = {
           claimed_at?: string | null
           id?: string
           redeemed_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           reward_id?: string | null
           status?: string | null
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reward_redemptions_reward_id_fkey"
             columns: ["reward_id"]
