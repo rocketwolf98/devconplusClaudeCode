@@ -40,12 +40,7 @@ export default function ComingSoonModal({ onClose, feature = 'This feature' }: P
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-2" />
-            <div className="flex justify-end mb-2">
-              <button onClick={handleClose} className="p-1">
-                <CloseCircleLineDuotone className="w-6 h-6" color="#EF4444" />
-              </button>
-            </div>
+            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-6" />
             <div className="text-center">
               <div className="flex justify-center mb-3">
                 <RocketOutline className="w-12 h-12" color="rgb(var(--color-primary))" />

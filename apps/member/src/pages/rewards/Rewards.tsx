@@ -94,23 +94,17 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
               <>
                 {/* Header Image Part */}
                 <div className="h-[180px] w-full relative bg-slate-100">
-                  {reward.image_url ? (
-                     <img src={reward.image_url} alt={reward.name} className="w-full h-full object-cover" />
-                  ) : (
-                     <RewardPlaceholder iconSize="size-16" />
-                  )}
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
-                    <p className="text-[#6b7280] text-[12px] font-proxima font-semibold">
-                      {reward.stock_remaining !== null ? `${reward.stock_remaining} Left in Stock` : 'Available'}
-                    </p>
-                  </div>
-                  {sheetState !== 'loading' && (
-                    <button onClick={handleClose} className="absolute top-4 left-4 size-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-sm transition-colors hover:bg-white">
-                       <CloseCircleLineDuotone className="size-5" color="#EF4444" />
-                    </button>
-                  )}
+                {reward.image_url ? (
+                   <img src={reward.image_url} alt={reward.name} className="w-full h-full object-cover" />
+                ) : (
+                   <RewardPlaceholder iconSize="size-16" />
+                )}
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                  <p className="text-[#6b7280] text-[12px] font-proxima font-semibold">
+                    {reward.stock_remaining !== null ? `${reward.stock_remaining} Left in Stock` : 'Available'}
+                  </p>
                 </div>
-                
+                </div>                
                 {/* Details Part */}
                 <div className="p-6 pt-5">
                   <h2 className="text-[20px] font-proxima font-bold text-slate-900 leading-none mb-2">
@@ -155,12 +149,7 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
             ) : (
               // Success State: Claim Receipt View
               <div className="p-6 flex flex-col items-center text-center">
-                 <div className="w-full flex justify-end mb-2">
-                   <button onClick={handleClose} className="size-8 bg-slate-100 rounded-full flex items-center justify-center transition-colors hover:bg-slate-200">
-                      <CloseCircleLineDuotone className="size-5" color="#EF4444" />
-                   </button>
-                 </div>
-                 <div className="size-[80px] bg-green/10 rounded-full flex items-center justify-center mb-5">
+                 <div className="size-[80px] bg-green/10 rounded-full flex items-center justify-center mb-5 mt-4">
                     <CheckCircleOutline className="size-[40px] text-[#21C45D]" />
                  </div>
                  <h2 className="text-[24px] font-proxima font-bold text-slate-900 mb-2">Claim Receipt</h2>

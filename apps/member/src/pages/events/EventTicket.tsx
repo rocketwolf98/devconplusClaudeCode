@@ -35,6 +35,10 @@ const RECT_SIZE = 220   // slightly larger than the 204px QR container
 const RECT_RX   = 24   // rounded-3xl to match the card aesthetic
 const RECT_CIRCUMFERENCE = 4 * (RECT_SIZE - 2 * RECT_RX) + 2 * Math.PI * RECT_RX
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 // Inline horizontal logo — white text paths + multicolor ICON
 function LogoHorizontalWhite({ width = 132 }: { width?: number }) {
   const height = Math.round((width / 178) * 27)
@@ -195,7 +199,7 @@ export default function EventTicket() {
   if (!event || !reg || reg.status !== 'approved') {
     return (
       <div className="p-4 text-center text-slate-400 pt-20">
-        TicketOutline not available.{' '}
+        Ticket not available.{' '}
         <button onClick={() => navigate(-1)} className="text-primary">Go back</button>
       </div>
     )
@@ -236,7 +240,11 @@ export default function EventTicket() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: `linear-gradient(160deg, ${effectiveTheme.darkHex} 0%, ${effectiveTheme.hex} 100%)` }}
+      style={{ 
+        background: `${PATTERN_BG}, linear-gradient(160deg, ${effectiveTheme.darkHex} 0%, ${effectiveTheme.hex} 100%)`,
+        backgroundSize: '60px 60px, auto',
+        backgroundRepeat: 'repeat, no-repeat'
+      }}
     >
 
       {/* Floating back button */}
@@ -283,7 +291,7 @@ export default function EventTicket() {
               transition={{ delay: 0.34, duration: 0.22 }}
             >
               <p className="text-white/60 text-[10px] font-semibold uppercase tracking-widest">
-                Event TicketOutline
+                Event Ticket
               </p>
               <h2 className="text-white text-[17px] font-bold mt-1 leading-snug">
                 {event.title}
@@ -519,7 +527,7 @@ export default function EventTicket() {
                        rounded-2xl py-3 text-sm font-semibold backdrop-blur-sm mt-4"
           >
             <CalendarAddOutline className="w-4 h-4" />
-            Add to CalendarOutline
+            Add to Calendar
           </motion.button>
         )}
 

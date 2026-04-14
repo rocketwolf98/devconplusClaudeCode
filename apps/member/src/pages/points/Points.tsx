@@ -23,6 +23,10 @@ const SHARE: { Icon: SolarIcon; label: string; pts: string }[] = [
   { Icon: ShareOutline, label: 'Share + Submit Link', pts: '10–25 pts' },
 ]
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export default function Points() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
@@ -57,69 +61,104 @@ export default function Points() {
   const earnItems = tab === 'earn' ? EARN : SHARE
 
   return (
-    <div>
-      {/* ── Sticky header ─────────────────────────────────────── */}
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-5 rounded-b-3xl">
-        <h1 className="text-white text-xl font-bold">Points+</h1>
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
 
-        {/* Dual balance display */}
-        <div className="mt-3 space-y-1.5">
-          {/* Spendable */}
-          <div className="flex items-center gap-2">
-            <StarOutline className="w-4 h-4 shrink-0" color="#F8C630" />
-            <span className="text-white font-black text-lg leading-none">
-              {spendablePoints.toLocaleString()} pts
-            </span>
-            <span className="text-white/60 text-xs">Available to spend</span>
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          {/* Header Row: Title + Icons */}
+          <div className="relative z-10 px-[25px] pb-4 flex items-center gap-3">
+            <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight flex-1">
+              Points+
+            </h1>
           </div>
+        </div>
 
-          {/* Lifetime */}
-          <div className="flex items-center gap-2">
-            <BoltOutline className="w-4 h-4 shrink-0" color="rgba(255,255,255,0.7)" />
-            <span className="text-white/90 font-semibold text-sm leading-none">
-              {lifetimePoints.toLocaleString()} lifetime pts
-            </span>
-            {!prestigeUnlocked && (
-              <span className="text-white/50 text-xs">
-                (Prestige: {PRESTIGE_THRESHOLD.toLocaleString()})
-              </span>
-            )}
-            {prestigeUnlocked && (
-              <span className="text-gold text-xs font-bold">Prestige Unlocked!</span>
-            )}
-          </div>
+        {/* ── Stats Card Overlay ── */}
+        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+          <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 p-[20px] flex flex-col gap-4 pointer-events-auto">
+            {/* Dual balance display */}
+            <div className="space-y-3">
+              {/* Spendable */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center shrink-0">
+                  <StarOutline className="w-6 h-6" color="#F8C630" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[#464646] font-black text-2xl leading-none">
+                    {spendablePoints.toLocaleString()} XP
+                  </span>
+                  <span className="text-[#6b7280] text-[11px] font-proxima uppercase tracking-wider mt-1">Available to spend</span>
+                </div>
+              </div>
 
-          {/* Lifetime progress bar */}
-          {!prestigeUnlocked && (
-            <div className="h-1.5 bg-white/20 rounded-full overflow-hidden mt-1">
-              <motion.div
-                className="h-full bg-gold rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPct}%` }}
-                transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }}
-              />
+              {/* Lifetime */}
+              <div className="flex items-center gap-3 pt-1">
+                <div className="w-10 h-10 rounded-full bg-blue/5 flex items-center justify-center shrink-0">
+                  <BoltOutline className="w-5 h-5" color="#1152d4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-slate-600 font-bold text-sm leading-none">
+                    {lifetimePoints.toLocaleString()} lifetime XP
+                  </span>
+                  {prestigeUnlocked ? (
+                    <span className="text-gold text-[10px] font-bold uppercase tracking-wider mt-1">Prestige Unlocked!</span>
+                  ) : (
+                    <span className="text-slate-400 text-[10px] uppercase tracking-wider mt-1">
+                      Next: Prestige at {PRESTIGE_THRESHOLD.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Lifetime progress bar */}
+              {!prestigeUnlocked && (
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                  <motion.div
+                    className="h-full bg-[#1152d4]"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPct}%` }}
+                    transition={{ duration: 0.9, ease: 'easeOut', delay: 0.2 }}
+                  />
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Tab toggle */}
-        <div className="flex gap-2 mt-4">
-          {(['earn', 'share'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                tab === t ? 'bg-white text-primary' : 'bg-white/20 text-white'
-              }`}
-            >
-              {t === 'earn' ? 'Ways to Earn' : 'Share & Earn'}
-            </button>
-          ))}
+        {/* ── Tabs Wrapper ── */}
+        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+          <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
+            {(['earn', 'share'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
+                  tab === t
+                    ? 'bg-[#1152d4] text-white shadow-sm'
+                    : 'bg-[#1152d4]/10 text-[#1152d4]'
+                }`}
+              >
+                {t === 'earn' ? 'Ways to Earn' : 'Share & Earn'}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* ── Scrollable body ───────────────────────────────────── */}
-      <div className="bg-slate-50 min-h-screen p-4 pb-24">
+      <div className="px-[25px] pt-4 pb-24 md:max-w-4xl md:mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}

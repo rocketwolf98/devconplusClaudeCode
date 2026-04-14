@@ -403,7 +403,7 @@ export function OrgQRScanner() {
           aria-label="Go back"
           whileTap={{ scale: 0.9 }}
           onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-black/40 backdrop-blur flex items-center justify-center"
+          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-lg"
         >
           <ArrowLeftOutline className="w-5 h-5" color="white" />
         </motion.button>
@@ -415,7 +415,7 @@ export function OrgQRScanner() {
             whileTap={{ scale: 0.9 }}
             onClick={cycleCamera}
             disabled={isSwitching}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/40 backdrop-blur disabled:opacity-40"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 disabled:opacity-40 shadow-lg transition-colors"
           >
             <CameraRotateOutline className="w-4 h-4" color="white" />
             <span className="text-white text-xs font-medium">Lens</span>

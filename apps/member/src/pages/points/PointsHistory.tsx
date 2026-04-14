@@ -91,7 +91,7 @@ export default function PointsHistory() {
 
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[64px] pt-14"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -101,19 +101,16 @@ export default function PointsHistory() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
-            <div className="flex items-center gap-[12px]">
-              <button 
-                onClick={() => navigate(-1)}
-                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
-                aria-label="Back"
-              >
-                <ArrowLeftOutline className="w-[18px] h-[18px]" color="white" />
-              </button>
-              <h1 className="font-proxima font-semibold text-[24px] text-white leading-none tracking-tight">
-                Points History
-              </h1>
-            </div>
+          <div className="relative z-10 flex items-center gap-3 px-[25px] pb-2">
+            <button
+              onClick={() => navigate(-1)}
+              className="bg-white/20 size-[42px] flex items-center justify-center rounded-full border border-white/30 backdrop-blur-md transition-colors active:bg-white/40 shadow-lg shrink-0"
+            >
+              <ArrowLeftOutline className="w-[18px] h-[18px]" color="white" />
+            </button>
+            <h1 className="font-proxima font-semibold text-[24px] text-white leading-none tracking-tight">
+              Points History
+            </h1>
           </div>
         </div>
 

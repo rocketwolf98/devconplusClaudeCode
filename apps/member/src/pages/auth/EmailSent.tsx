@@ -52,18 +52,34 @@ export default function EmailSent() {
     ? 'We sent a confirmation link to your email. Click it to activate your account.'
     : 'We sent a password reset link to your email. Click it to set a new password.'
 
-  return (
-    <div className="min-h-screen bg-blue flex flex-col">
-      {/* Header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
-        <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
-        <p className="text-white/60 mt-3 text-sm">
-          {type === 'signup' ? 'One more step' : 'Reset your password'}
-        </p>
-      </div>
+  // Flower-of-life pattern matching Rewards/Dashboard/Events
+  const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+  const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
-      {/* Card */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 flex flex-col items-center text-center">
+  return (
+        <div className="min-h-screen bg-slate-50 flex flex-col">
+          {/* ── Header ── */}
+          <header className="flex flex-col pointer-events-none">
+            {/* ── Blue Background Container ── */}
+            <div 
+              className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[48px] pt-16 text-center"
+              style={{ 
+                clipPath: 'ellipse(100% 100% at 50% 0%)',
+                backgroundImage: PATTERN_BG,
+                backgroundSize: '60px 60px',
+                backgroundPosition: 'top center',
+                backgroundRepeat: 'repeat'
+              }}
+            >
+              <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
+              <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+                {type === 'signup' ? 'One more step' : 'Reset your password'}
+              </p>
+            </div>
+          </header>
+
+          {/* Card */}
+          <div className="flex-1 px-6 pt-10 pb-10 flex flex-col items-center text-center">
         {/* LetterOutline icon */}
         <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mb-5">
           <LetterOutline className="w-8 h-8" color="#1152D4" />

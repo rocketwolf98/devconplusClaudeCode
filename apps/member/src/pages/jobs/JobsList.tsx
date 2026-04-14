@@ -518,14 +518,14 @@ export default function JobsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Jobs and Missions
             </h1>
             
             <div className="flex items-center gap-[8px]">
               <button 
-                className="bg-white/20 size-[42px] flex items-center justify-center rounded-full transition-colors active:bg-white/30"
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
                 aria-label="Search"
               >
                 <MagniferOutline className="w-[18px] h-[18px]" color="white" />

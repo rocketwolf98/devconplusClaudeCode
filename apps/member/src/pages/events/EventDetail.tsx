@@ -9,6 +9,10 @@ import { supabase } from '../../lib/supabase'
 import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export default function EventDetail() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
@@ -48,28 +52,34 @@ export default function EventDetail() {
   return (
     <motion.div
       className="min-h-screen bg-slate-50"
-      style={getEventThemeStyle(event.devcon_category)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
-      {/* Cover image */}
-      {event.cover_image_url ? (
-        <img src={event.cover_image_url} alt={event.title} className="w-full h-52 object-cover rounded-b-3xl" />
-      ) : (
-        <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <CalendarOutline className="w-20 h-20" color="rgba(255,255,255,0.2)" />
-        </div>
-      )}
+      {/* Floating back button (Sticky/Fixed) */}
+      <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-4 pt-12 pointer-events-none">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center active:bg-white/40 transition-colors shadow-lg pointer-events-auto"
+        >
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
+        </button>
+      </div>
 
-      {/* Back button — fixed so it stays visible over the cover image */}
-      <motion.button
-        onClick={() => navigate(-1)}
-        whileTap={{ scale: 0.95 }}
-        className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+      {/* ── Header ── */}
+      <header 
+        className="relative z-50 h-60 bg-slate-200 overflow-hidden"
+        style={{ clipPath: 'ellipse(100% 100% at 50% 0%)' }}
       >
-        <ArrowLeftOutline className="w-5 h-5" />
-      </motion.button>
+        {event.cover_image_url ? (
+          <img src={event.cover_image_url} alt={event.title} className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full bg-[#1152d4]"
+            style={{ backgroundImage: PATTERN_BG, backgroundSize: '60px 60px' }}
+          />
+        )}
+      </header>
 
       <div className="p-4 space-y-4">
         <div>
@@ -129,7 +139,7 @@ export default function EventDetail() {
               className="w-full bg-green text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2"
             >
               <TicketOutline className="w-5 h-5" />
-              View My TicketOutline
+              View My Ticket
             </button>
           ) : (
             <div className="w-full bg-red/10 text-red font-semibold py-4 rounded-2xl text-center">

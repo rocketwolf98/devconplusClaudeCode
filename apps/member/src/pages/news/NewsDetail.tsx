@@ -105,6 +105,10 @@ function ArticleBody({ body }: { body: string }) {
   )
 }
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -122,34 +126,31 @@ export default function NewsDetail() {
   const dateStr = post.created_at ? formatDate.long(post.created_at) : ''
 
   return (
-    <div className="bg-slate-50 min-h-full pb-10">
-      {/* Hero image */}
-      {post.cover_image_url ? (
-        <img
-          src={post.cover_image_url}
-          alt={post.title}
-          className="w-full h-52 object-cover rounded-b-3xl"
-        />
-      ) : (
-        <div className="w-full h-52 bg-primary flex items-center justify-center rounded-b-3xl">
-          <DocumentTextOutline className="w-14 h-14" color="rgba(255,255,255,0.2)" />
-        </div>
-      )}
+    <div className="bg-slate-50 min-h-screen pb-10">
+      {/* Floating back button (Sticky/Fixed) */}
+      <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-4 pt-12 pointer-events-none">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center active:bg-white/40 transition-colors shadow-lg pointer-events-auto"
+        >
+          <ArrowLeftOutline className="w-5 h-5" color="white" />
+        </button>
+      </div>
 
-      {/* Back button */}
-      <motion.button
-        onClick={() => navigate(-1)}
-        whileTap={{ scale: 0.95 }}
-        className="fixed top-14 left-4 z-20 bg-white/80 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center shadow-card text-slate-700"
+      {/* ── Header ── */}
+      <header 
+        className="relative z-50 h-60 bg-slate-200 overflow-hidden"
+        style={{ clipPath: 'ellipse(100% 100% at 50% 0%)' }}
       >
-        <ArrowLeftOutline className="w-5 h-5" />
-      </motion.button>
-
-      {post.is_promoted && (
-        <div className="fixed top-14 right-4 z-20">
-          <PromotedBadge />
-        </div>
-      )}
+        {post.cover_image_url ? (
+          <img src={post.cover_image_url} alt={post.title} className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full bg-[#1152d4]"
+            style={{ backgroundImage: PATTERN_BG, backgroundSize: '60px 60px' }}
+          />
+        )}
+      </header>
 
       {/* Article content */}
       <motion.div

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftOutline, PenOutline, ClipboardListOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, PenOutline, ClipboardListOutline, MapPointOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
@@ -24,6 +24,10 @@ export function OrgEventSummary() {
   const [filter, setFilter]           = useState<FilterStatus>('all')
   
   const event = events.find((e) => e.id === id)
+
+  const dateStr = event?.event_date
+    ? new Date(event.event_date).toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+    : 'Date TBA'
 
   // Guard: load events if store is empty
   useEffect(() => {
@@ -121,11 +125,6 @@ export function OrgEventSummary() {
               <PenOutline className="w-4 h-4" color="white" />
             </button>
           </div>
-          <div className="px-[76px] pb-4">
-            <p className="text-white/70 text-[13px] font-proxima truncate leading-none">
-              {event.title}
-            </p>
-          </div>
         </div>
       </header>
 
@@ -135,6 +134,20 @@ export function OrgEventSummary() {
         initial="hidden"
         animate="visible"
       >
+        {/* ── Event Info (Styled like EventDetail) ── */}
+        <motion.div variants={fadeUp} className="mb-6 px-1">
+          <p className="text-xs text-slate-400 mb-1">{dateStr}</p>
+          <h2 className="text-xl font-bold text-slate-900 leading-tight">
+            {event.title}
+          </h2>
+          {event.location && (
+            <p className="text-sm text-slate-500 mt-1.5 flex items-center gap-1.5">
+              <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
+              {event.location}
+            </p>
+          )}
+        </motion.div>
+
         {/* ── Funnel Stats ── */}
         <motion.div variants={fadeUp} className="mb-6 space-y-3">
           {/* Row 1: Total Registered + Checked In */}

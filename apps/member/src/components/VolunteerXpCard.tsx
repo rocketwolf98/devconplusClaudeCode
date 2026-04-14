@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { BellOutline } from 'solar-icon-set'
 import { useAuthStore } from '../stores/useAuthStore'
 import { usePointsStore } from '../stores/usePointsStore'
 import { useNotificationsStore } from '../stores/useNotificationsStore'
 
 const imgGroup15 = "https://www.figma.com/api/mcp/asset/d47034ec-4ca5-47ee-b161-341ef687371e";
-const imgGroup = "https://www.figma.com/api/mcp/asset/4f38ea26-2090-4384-84ef-85435cf69538";
 const imgSolarMedalStarCircleBoldDuotone = "https://www.figma.com/api/mcp/asset/04489665-76af-4996-94c5-2fd03ef88f72";
 const imgSolarBoltBroken = "https://www.figma.com/api/mcp/asset/830e7e23-553e-4fe6-bc43-31e9a7a08703";
 
@@ -65,11 +65,9 @@ export default function VolunteerXpCard() {
 
           <button
             onClick={() => navigate('/notifications')}
-            className="relative flex items-center justify-center w-[42px] h-[42px] rounded-full bg-white/20 active:bg-white/30 transition-colors pointer-events-auto"
+            className="relative flex items-center justify-center w-[42px] h-[42px] rounded-full bg-white/20 backdrop-blur-md border border-white/20 active:bg-white/30 transition-colors pointer-events-auto shadow-lg"
           >
-            <div className="w-[18px] h-[20px] relative">
-              <img src={imgGroup} alt="Notifications" className="absolute inset-0 size-full" />
-            </div>
+            <BellOutline className="w-[20px] h-[20px]" color="white" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#EF4444] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 leading-none border border-white/20 shadow-sm">
                 {unreadCount > 9 ? '9+' : unreadCount}

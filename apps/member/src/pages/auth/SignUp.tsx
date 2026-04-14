@@ -60,6 +60,10 @@ function getPostAuthRoute(): string {
   return '/organizer-code-gate'
 }
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export default function SignUp() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -97,8 +101,6 @@ export default function SignUp() {
       setUsernameStatus(available ? 'available' : 'taken')
     }, 400)
   }, [checkUsernameAvailable])
-  // setUsernameStatus is a stable React state setter — intentionally omitted from deps.
-  // usernameTimerRef is a ref — refs are never listed in deps.
 
   const onSubmit = async (data: FormData) => {
     if (usernameStatus === 'taken' || usernameStatus === 'checking') {
@@ -121,8 +123,6 @@ export default function SignUp() {
         },
       )
 
-      // Silently confirm referral if a ?ref= code was present in the URL
-      // Only pass ref code if it matches expected format (alphanumeric, 6-12 chars)
       const REFERRAL_CODE_RE = /^[A-Z0-9]{6,12}$/i
       const sanitizedRef = refCode && REFERRAL_CODE_RE.test(refCode) ? refCode : null
       if (sanitizedRef) {
@@ -133,9 +133,7 @@ export default function SignUp() {
               p_referred_user_id: newUserId,
               p_referral_code:    sanitizedRef,
             })
-            .then(() => {
-              // Intentionally silent — referral failures must not block signup
-            })
+            .then(() => {})
         }
       }
 
@@ -153,15 +151,29 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen bg-blue flex flex-col">
-      {/* Gradient header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
-        <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
-        <p className="text-white/60 mt-3 text-sm">Create your account</p>
-      </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* ── Header ── */}
+      <header className="flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[48px] pt-16 text-center"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
+          <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+            Create your account
+          </p>
+        </div>
+      </header>
 
       {/* Floating card */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10 overflow-y-auto">
+      <div className="px-6 pt-10 pb-10 overflow-y-auto">
         <button
           type="button"
           disabled={googleLoading}
@@ -259,7 +271,6 @@ export default function SignUp() {
             />
           </div>
 
-          {/* Social Links */}
           <div className="space-y-3">
             <p className="text-sm font-medium text-slate-700">
               Social Links <span className="text-slate-400 font-normal">(optional)</span>
@@ -338,7 +349,7 @@ export default function SignUp() {
           <button
             type="submit"
             disabled={isSubmitting || !turnstileToken}
-            className="w-full bg-blue text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
+            className="w-full bg-[#1152d4] text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
           >
             {isSubmitting ? 'Creating account…' : 'Create Account'}
           </button>
@@ -349,7 +360,6 @@ export default function SignUp() {
           <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
         </p>
       </div>
-
     </div>
   )
 }

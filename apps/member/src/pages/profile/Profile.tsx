@@ -21,6 +21,10 @@ const MENU_ITEMS: { label: string; path: string }[] = [
   { label: 'Privacy & Security',   path: '/profile/privacy'       },
 ]
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export default function Profile() {
   const navigate = useNavigate()
   const { user, initials, signOut, chapterName } = useAuthStore()
@@ -56,53 +60,61 @@ export default function Profile() {
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="bg-primary px-4 pt-14 pb-8 rounded-b-3xl text-center">
-        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
-          {user?.avatar_url ? (
-            <>
-              <img
-                src={user.avatar_url}
-                alt={user.full_name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none'
-                  const fallback = e.currentTarget.nextElementSibling as HTMLElement | null
-                  if (fallback) fallback.style.display = 'block'
-                }}
-              />
-              <span style={{ display: 'none' }}>{initials}</span>
-            </>
-          ) : (
-            initials
-          )}
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[40px] pt-14 text-center"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
+              {user?.avatar_url ? (
+                <>
+                  <img
+                    src={user.avatar_url}
+                    alt={user.full_name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement | null
+                      if (fallback) fallback.style.display = 'block'
+                    }}
+                  />
+                  <span style={{ display: 'none' }}>{initials}</span>
+                </>
+              ) : (
+                initials
+              )}
+            </div>
+            <h1 className="text-xl font-bold text-white font-proxima tracking-tight">{user?.full_name}</h1>
+            <p className="text-white/70 text-sm font-proxima mt-0.5">{user?.email}</p>
+            
+            <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
+              {chapterName && (
+                <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                  {chapterName} Chapter
+                </span>
+              )}
+              <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                {ROLE_DISPLAY_NAMES[user?.role ?? 'member']}
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                <StarOutline className="w-3 h-3" color="#F8C630" />
+                {spendablePoints.toLocaleString()} XP
+              </span>
+            </div>
+          </div>
         </div>
-        <h1 className="text-xl font-black text-white">{user?.full_name}</h1>
-        <p className="text-white/60 text-sm mt-0.5">{user?.email}</p>
-        <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
-          {chapterName && (
-            <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-              {chapterName} Chapter
-            </span>
-          )}
-          <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {ROLE_DISPLAY_NAMES[user?.role ?? 'member']}
-          </span>
-          <span className="inline-flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1 text-white text-xs font-semibold">
-            <StarOutline className="w-3 h-3" color="#F8C630" />
-            {spendablePoints.toLocaleString()} XP
-          </span>
-          {prestigeUnlocked && (
-            <span className="inline-flex items-center gap-1 bg-gold/10 text-gold border border-gold/30 rounded-full px-2 py-0.5 text-xs font-semibold">
-              <CupFirstOutline className="w-4 h-4" color="#F8C630" />
-              Prestige Access
-            </span>
-          )}
-        </div>
-      </div>
+      </header>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8 md:max-w-full md:px-8">
+      <div className="px-[25px] pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
 
         {/* Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4">

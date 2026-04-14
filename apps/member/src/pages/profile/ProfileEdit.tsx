@@ -42,6 +42,12 @@ type PasswordFormData = z.infer<typeof passwordSchema>
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function ProfileEdit() {
   const navigate = useNavigate()
   const { user, initials, updateProfile, uploadAvatar, updateEmail, updatePassword, requestOrganizerUpgrade, checkUsernameAvailable } = useAuthStore()
@@ -216,18 +222,34 @@ export default function ProfileEdit() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-primary px-4 pt-14 sticky top-0 z-10 pb-6 rounded-b-3xl">
-        <button
-          onClick={() => navigate(-1)}
-          className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center mb-3"
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
         >
-          <ArrowLeftOutline className="w-5 h-5" color="white" />
-        </button>
-        <h1 className="text-white text-xl font-bold">Edit Profile</h1>
-      </div>
+          {/* Header Row: Back + Title */}
+          <div className="relative z-10 flex items-center gap-3 px-[25px] pb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+            >              <ArrowLeftOutline className="w-5 h-5" color="white" />
+            </button>
+            <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
+              Edit Profile
+            </h1>
+          </div>
+        </div>
+      </header>
 
-      <div className="p-4 space-y-6 pb-24">
+      <div className="px-[25px] pt-4 space-y-6 pb-24 md:max-w-4xl md:mx-auto">
 
         {/* ── PROFILE FORM ── */}
         <form id="profile-form" onSubmit={handleSubmit(onSaveProfile)} className="space-y-4">

@@ -147,7 +147,7 @@ export function OrgDashboard() {
     <div className="flex flex-col min-h-screen bg-slate-50">
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
         {/* ── Glassmorphism Background ── */}
-        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
+        <div className="absolute inset-0 bg-transparent pointer-events-auto -z-10" />
 
         {/* ── Blue Background Container ── */}
         <div 
@@ -161,7 +161,7 @@ export function OrgDashboard() {
           }}
         >
           {/* Header Row: Logo + Greeting + Notifications */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
             <div className="flex items-center gap-2">
               <div className="h-[26px] w-[44px] relative">
                 <img src={imgGroup15} alt="DEVCON+" className="absolute inset-0 size-full" />
@@ -178,11 +178,14 @@ export function OrgDashboard() {
 
             <button
               onClick={() => navigate('/organizer/notifications')}
-              className="relative flex items-center justify-center w-[42px] h-[42px] rounded-full bg-white/20 active:bg-white/30 transition-colors pointer-events-auto"
+              className="relative flex items-center justify-center w-[42px] h-[42px] rounded-full bg-white/20 backdrop-blur-md border border-white/20 active:bg-white/30 transition-colors pointer-events-auto shadow-lg"
             >
-              <div className="w-[18px] h-[20px] relative">
-                <img src={imgGroup} alt="Notifications" className="absolute inset-0 size-full" />
-              </div>
+              <BellOutline className="w-[20px] h-[20px]" color="white" />
+              {totalPending > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 bg-[#EF4444] text-white text-[9px] font-bold rounded-full flex items-center justify-center px-1 leading-none border border-white/20 shadow-sm">
+                  {totalPending > 9 ? '9+' : totalPending}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -220,9 +223,10 @@ export function OrgDashboard() {
 
             <motion.button
               onClick={() => navigate('/organizer/events/create')}
-              className="font-proxima font-semibold w-full bg-[#1152d4] text-white text-[16px] h-12 rounded-[80px]"
+              className="font-proxima font-semibold w-full bg-[#1152d4] text-white text-[16px] h-12 rounded-[80px] flex items-center justify-center gap-2"
               whileTap={{ scale: 0.95 }}
             >
+              <AddCircleOutline className="w-5 h-5" color="white" />
               Create Event
             </motion.button>
           </div>

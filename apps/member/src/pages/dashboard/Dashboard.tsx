@@ -158,6 +158,7 @@ useEffect(() => {
   const recentTxns = transactions.slice(0, 4)
 
   const featuredEvent = events.find((e) => e.is_featured) ?? upcomingByDate[0]
+  const unclaimedMissions = missions.filter(m => m.status !== 'claimed')
 
   return (
     <div className="relative min-h-screen bg-slate-50">
@@ -401,18 +402,42 @@ useEffect(() => {
         </section>
 
         {/* Missions */}
-        {missions.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <p className="font-proxima font-bold text-[18px] text-black">Missions</p>
-              <button onClick={() => navigate('/jobs?tab=missions')} className="flex gap-1 items-center">
-                <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">MORE</p>
-                <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
-              </button>
-            </div>
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <p className="font-proxima font-bold text-[18px] text-black">Missions</p>
+            <button onClick={() => navigate('/jobs?tab=missions')} className="flex gap-1 items-center">
+              <p className="font-proxima text-[#464646] text-[12px] tracking-[0.96px] uppercase">MORE</p>
+              <AltArrowRightOutline className="w-3 h-3" color="#64748B" />
+            </button>
+          </div>
 
+          {unclaimedMissions.length === 0 ? (
+            <motion.div
+              className="flex flex-col items-center gap-3 py-8 px-6 rounded-2xl bg-white border border-slate-200 shadow-card text-center"
+              variants={fadeUp}
+              initial="hidden"
+              animate="visible"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center">
+                <StarOutline className="w-6 h-6 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Missions are coming your way!</p>
+                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                  You've cleared the board! We're "deploying" more challenges soon. 
+                  Stay "synchronized" and keep your "cache" ready!
+                </p>
+              </div>
+              <button
+                onClick={() => navigate('/events')}
+                className="text-xs font-semibold text-primary"
+              >
+                Volunteer for events to earn more
+              </button>
+            </motion.div>
+          ) : (
             <motion.div className="flex flex-col gap-3" variants={staggerContainer} initial="hidden" animate="visible">
-              {missions.slice(0, 2).map((mission) => {
+              {unclaimedMissions.slice(0, 2).map((mission) => {
                 const submissionCount = submissions.filter(s => s.mission_id === mission.id).length
                 const participantCount = participants.filter(p => p.mission_id === mission.id).length
                 const isClaimed = mission.status === 'claimed'
@@ -475,8 +500,8 @@ useEffect(() => {
                 )
               })}
             </motion.div>
-          </section>
-        )}
+          )}
+        </section>
 
         {/* Switcher: Updates / Featured */}
         <section className="flex flex-col gap-4">

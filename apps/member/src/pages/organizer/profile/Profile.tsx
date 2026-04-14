@@ -23,6 +23,10 @@ const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }>
   past:     { bg: 'bg-slate-100',  text: 'text-slate-500',  label: 'Past'     },
 }
 
+// Flower-of-life pattern matching Rewards/Dashboard/Events
+const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
+const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+
 export function OrgProfile() {
   const user = useOrganizerUser()
   const { logout: orgLogout } = useOrgAuthStore()
@@ -50,29 +54,43 @@ export function OrgProfile() {
     .slice(0, 5)
 
   return (
-    <div>
-      {/* Header */}
-      <div className="bg-blue px-4 pt-14 pb-8 rounded-b-3xl text-center">
-        <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
-          {user.avatar_url ? (
-            <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
-          ) : (
-            user.initials
-          )}
+    <div className="min-h-screen bg-slate-50">
+      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Blue Background Container ── */}
+        <div 
+          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[40px] pt-14 text-center"
+          style={{ 
+            clipPath: 'ellipse(100% 100% at 50% 0%)',
+            backgroundImage: PATTERN_BG,
+            backgroundSize: '60px 60px',
+            backgroundPosition: 'top center',
+            backgroundRepeat: 'repeat'
+          }}
+        >
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+              ) : (
+                user.initials
+              )}
+            </div>
+            <h1 className="text-xl font-bold text-white font-proxima tracking-tight">{user.full_name}</h1>
+            <p className="text-white/70 text-sm font-proxima mt-0.5">{user.email}</p>
+            
+            <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
+              <span className="text-[10px] font-bold bg-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                {user.chapter} Chapter
+              </span>
+              <span className="text-[10px] font-bold bg-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+                {ROLE_DISPLAY_NAMES[user.role] ?? 'Chapter Officer'}
+              </span>
+            </div>
+          </div>
         </div>
-        <h1 className="text-xl font-black text-white">{user.full_name}</h1>
-        <p className="text-white/60 text-sm mt-0.5">{user.email}</p>
-        <div className="flex items-center gap-2 mt-3 flex-wrap justify-center">
-          <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {user.chapter} Chapter
-          </span>
-          <span className="text-xs font-semibold bg-white/20 rounded-full px-3 py-1 text-white">
-            {ROLE_DISPLAY_NAMES[user.role] ?? 'Chapter Officer'}
-          </span>
-        </div>
-      </div>
+      </header>
 
-      <div className="bg-slate-50 min-h-screen p-4 space-y-3 pb-8">
+      <div className="p-4 space-y-3 pb-24">
 
         {/* Event History */}
         <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">

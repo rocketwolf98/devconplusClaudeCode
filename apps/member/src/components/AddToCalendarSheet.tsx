@@ -123,7 +123,7 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-slate-900">iCal / Other Calendars</p>
-                  <p className="text-xs text-slate-400">Downloads .ics — Apple CalendarOutline, Outlook</p>
+                  <p className="text-xs text-slate-400">Downloads .ics — Apple Calendar, Outlook</p>
                 </div>
               </motion.button>
             </div>
