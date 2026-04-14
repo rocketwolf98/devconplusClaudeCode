@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
-import { StarOutline, CupFirstOutline, LockOutline, GiftOutline } from 'solar-icon-set'
+import { StarOutline, CupFirstOutline, LockOutline, GiftOutline, AltArrowRightOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Reward, RewardRedemption } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -314,6 +314,13 @@ function ClaimReceiptSheet({ redemption, reward, onClose }: ClaimReceiptSheetPro
   }
   const pin = redemption.claim_pin ?? '------'
 
+  const statusPillConfig = {
+    pending:   { bg: 'bg-amber-50',  text: 'text-amber-700', dot: 'bg-amber-400',  label: 'Awaiting Verification' },
+    claimed:   { bg: 'bg-green/10',  text: 'text-green',     dot: 'bg-green',      label: 'Verified' },
+    cancelled: { bg: 'bg-red/10',    text: 'text-red',       dot: 'bg-red',        label: 'Refunded' },
+  } as const
+  const pill = statusPillConfig[redemption.status as keyof typeof statusPillConfig] ?? statusPillConfig['pending']
+
   return createPortal(
     <AnimatePresence>
       {visible && (
@@ -358,9 +365,9 @@ function ClaimReceiptSheet({ redemption, reward, onClose }: ClaimReceiptSheetPro
               </div>
 
               {/* Status pill */}
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-amber-400" />
-                <p className="text-[11px] font-proxima font-bold text-amber-700">Awaiting Verification</p>
+              <div className={`flex items-center gap-1.5 ${pill.bg} px-3 py-1.5 rounded-full`}>
+                <div className={`w-2 h-2 rounded-full ${pill.dot}`} />
+                <p className={`text-[11px] font-proxima font-bold ${pill.text}`}>{pill.label}</p>
               </div>
 
               <motion.button
@@ -469,10 +476,8 @@ function ClaimReceiptsTab({ onSelectReceipt }: ClaimReceiptsTabProps) {
               </div>
             </div>
             {isPending && (
-              <div className="shrink-0 text-slate-300">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <div className="shrink-0">
+                <AltArrowRightOutline className="w-4 h-4 text-slate-300" />
               </div>
             )}
           </motion.div>
