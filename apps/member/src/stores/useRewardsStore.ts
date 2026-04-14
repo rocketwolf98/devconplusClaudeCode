@@ -4,9 +4,20 @@ import { supabase } from '../lib/supabase'
 
 let _chanSeq = 0
 const nextChan = (base: string) => `${base}-${++_chanSeq}`
+import { toast } from 'sonner'
 import { useAuthStore } from './useAuthStore'
 import { usePointsStore } from './usePointsStore'
 import type { RewardFormData } from '../pages/organizer/rewards/rewardFormConstants'
+
+export interface RewardRedemptionWithDetails extends RewardRedemption {
+  member_name: string
+  member_email: string
+  reward_name: string
+  reward_image_url: string | null
+  reward_points_cost: number
+  reviewed_by: string | null
+  reviewed_at: string | null
+}
 
 interface RewardsState {
   // Member-facing: active rewards only
@@ -15,9 +26,12 @@ interface RewardsState {
   allRewards: Reward[]
 
   redemptions: RewardRedemption[]
+  allRedemptions: RewardRedemptionWithDetails[]
+  unseenClaimCount: number
 
   isLoading: boolean      // member fetchRewards / redeemReward / loadRedemptions
   isLoadingAll: boolean   // organizer fetchAllRewards
+  isLoadingClaims: boolean
   error: string | null
 
   fetchRewards: () => Promise<void>
@@ -26,16 +40,24 @@ interface RewardsState {
   updateReward: (id: string, data: RewardFormData, imageUrl: string | null) => Promise<void>
   deleteReward: (id: string) => Promise<void>
   subscribeToChanges: () => () => void
-  redeemReward: (rewardId: string) => Promise<{ success: boolean; error?: string }>
+  redeemReward: (rewardId: string) => Promise<{ success: boolean; error?: string; redemptionId?: string }>
   loadRedemptions: () => Promise<void>
+  fetchAllRedemptions: () => Promise<void>
+  approveClaim: (redemptionId: string) => Promise<{ success: boolean; error?: string }>
+  refundClaim: (redemptionId: string) => Promise<{ success: boolean; error?: string }>
+  subscribeToRedemptions: () => () => void
+  markClaimsAsSeen: () => void
 }
 
 export const useRewardsStore = create<RewardsState>((set, get) => ({
   rewards: [],
   allRewards: [],
   redemptions: [],
+  allRedemptions: [],
+  unseenClaimCount: 0,
   isLoading: false,
   isLoadingAll: false,
+  isLoadingClaims: false,
   error: null,
 
   // ── Member: active rewards only ─────────────────────────────────────────
@@ -162,6 +184,16 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     } as never)
     if (error) return { success: false, error: error.message }
 
+    // Fetch the newly created redemption ID
+    const { data: newRedemption } = await supabase
+      .from('reward_redemptions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('reward_id', rewardId)
+      .order('redeemed_at', { ascending: false })
+      .limit(1)
+      .single()
+
     const [, refreshedRewards] = await Promise.all([
       usePointsStore.getState().loadTotalPoints(),
       supabase
@@ -173,7 +205,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     if (!refreshedRewards.error) {
       set({ rewards: (refreshedRewards.data ?? []) as Reward[] })
     }
-    return { success: true }
+    return { success: true, redemptionId: newRedemption?.id }
   },
 
   // ── Redemption history ───────────────────────────────────────────────────
@@ -194,5 +226,147 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     } finally {
       set({ isLoading: false })
     }
+  },
+
+  // ── All redemptions (organizer/admin view) ───────────────────────────────
+  fetchAllRedemptions: async () => {
+    set({ isLoadingClaims: true, error: null })
+    try {
+      const { data, error } = await supabase
+        .from('reward_redemptions')
+        .select(`
+          *,
+          profiles!reward_redemptions_user_id_fkey (full_name, email),
+          rewards!reward_redemptions_reward_id_fkey (name, image_url, points_cost)
+        `)
+        .order('redeemed_at', { ascending: false })
+      if (error) throw error
+      const mapped: RewardRedemptionWithDetails[] = (data ?? []).map((row) => {
+        const profile = row.profiles as { full_name: string; email: string } | null
+        const reward = row.rewards as { name: string; image_url: string | null; points_cost: number } | null
+        return {
+          id: row.id,
+          user_id: row.user_id,
+          reward_id: row.reward_id,
+          status: row.status,
+          redeemed_at: row.redeemed_at,
+          claimed_at: row.claimed_at,
+          reviewed_by: (row as Record<string, unknown>).reviewed_by as string | null ?? null,
+          reviewed_at: (row as Record<string, unknown>).reviewed_at as string | null ?? null,
+          member_name: profile?.full_name ?? 'Unknown',
+          member_email: profile?.email ?? '',
+          reward_name: reward?.name ?? 'Unknown Reward',
+          reward_image_url: reward?.image_url ?? null,
+          reward_points_cost: reward?.points_cost ?? 0,
+        }
+      })
+      set({ allRedemptions: mapped })
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      set({ isLoadingClaims: false })
+    }
+  },
+
+  // ── Approve claim ────────────────────────────────────────────────────────
+  approveClaim: async (redemptionId) => {
+    const organizer = useAuthStore.getState().user
+    if (!organizer) return { success: false, error: 'Not authenticated' }
+    const { data, error } = await supabase.rpc('approve_reward_claim' as never, {
+      p_redemption_id: redemptionId,
+      p_organizer_id: organizer.id,
+    } as never)
+    if (error) return { success: false, error: error.message }
+    const result = data as { success: boolean; error?: string }
+    if (!result.success) return { success: false, error: result.error }
+    set((s) => ({
+      allRedemptions: s.allRedemptions.map((r) =>
+        r.id === redemptionId
+          ? { ...r, status: 'claimed' as const, reviewed_by: organizer.id, reviewed_at: new Date().toISOString() }
+          : r
+      ),
+    }))
+    return { success: true }
+  },
+
+  // ── Refund claim ─────────────────────────────────────────────────────────
+  refundClaim: async (redemptionId) => {
+    const organizer = useAuthStore.getState().user
+    if (!organizer) return { success: false, error: 'Not authenticated' }
+    const { data, error } = await supabase.rpc('refund_reward_claim' as never, {
+      p_redemption_id: redemptionId,
+      p_organizer_id: organizer.id,
+    } as never)
+    if (error) return { success: false, error: error.message }
+    const result = data as { success: boolean; error?: string }
+    if (!result.success) return { success: false, error: result.error }
+    set((s) => ({
+      allRedemptions: s.allRedemptions.map((r) =>
+        r.id === redemptionId
+          ? { ...r, status: 'cancelled' as const, reviewed_by: organizer.id, reviewed_at: new Date().toISOString() }
+          : r
+      ),
+    }))
+    return { success: true }
+  },
+
+  // ── Mark claims as seen ──────────────────────────────────────────────────
+  markClaimsAsSeen: () => {
+    set({ unseenClaimCount: 0 })
+  },
+
+  // ── Realtime redemption subscriptions ────────────────────────────────────
+  subscribeToRedemptions: () => {
+    const channel = supabase
+      .channel(nextChan('reward-redemptions-realtime'))
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'reward_redemptions' },
+        (payload) => {
+          const row = payload.new as RewardRedemption
+          void supabase
+            .from('reward_redemptions')
+            .select(`
+              *,
+              profiles!reward_redemptions_user_id_fkey (full_name, email),
+              rewards!reward_redemptions_reward_id_fkey (name, image_url, points_cost)
+            `)
+            .eq('id', row.id)
+            .single()
+            .then(({ data }) => {
+              if (!data) return
+              const profile = data.profiles as { full_name: string; email: string } | null
+              const reward = data.rewards as { name: string; image_url: string | null; points_cost: number } | null
+              const enriched: RewardRedemptionWithDetails = {
+                id: data.id,
+                user_id: data.user_id,
+                reward_id: data.reward_id,
+                status: data.status,
+                redeemed_at: data.redeemed_at,
+                claimed_at: data.claimed_at,
+                reviewed_by: (data as Record<string, unknown>).reviewed_by as string | null ?? null,
+                reviewed_at: (data as Record<string, unknown>).reviewed_at as string | null ?? null,
+                member_name: profile?.full_name ?? 'Unknown',
+                member_email: profile?.email ?? '',
+                reward_name: reward?.name ?? 'Unknown Reward',
+                reward_image_url: reward?.image_url ?? null,
+                reward_points_cost: reward?.points_cost ?? 0,
+              }
+              set((s) => ({
+                allRedemptions: [enriched, ...s.allRedemptions],
+                unseenClaimCount: s.unseenClaimCount + 1,
+              }))
+              toast.info(
+                `New reward claim — ${enriched.member_name} requested: ${enriched.reward_name} (${enriched.reward_points_cost.toLocaleString()} pts)`
+              )
+            })
+        }
+      )
+      .subscribe((status, err) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[reward-redemptions-realtime] channel error', status, err)
+        }
+      })
+    return () => { void supabase.removeChannel(channel) }
   },
 }))
