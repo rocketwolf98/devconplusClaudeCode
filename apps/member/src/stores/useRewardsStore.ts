@@ -179,21 +179,16 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     if (!user) return { success: false, error: 'Not authenticated' }
 
     // redeem_reward exists in DB but not yet in generated types — cast is intentional
-    const { error } = await supabase.rpc('redeem_reward' as never, {
+    // RPC returns { success, redemption_id, claim_pin } directly so we avoid
+    // a separate SELECT that could fail if PostgREST schema cache is stale
+    type RedeemResult = { success: boolean; redemption_id?: string; claim_pin?: string; error?: string }
+    const { data: rpcData, error } = await supabase.rpc('redeem_reward' as never, {
       p_reward_id: rewardId,
       p_user_id: user.id,
     } as never)
     if (error) return { success: false, error: error.message }
-
-    // Fetch the newly created redemption ID + claim PIN
-    const { data: newRedemption } = await supabase
-      .from('reward_redemptions')
-      .select('id, claim_pin')
-      .eq('user_id', user.id)
-      .eq('reward_id', rewardId)
-      .order('redeemed_at', { ascending: false })
-      .limit(1)
-      .single()
+    const rpcResult = rpcData as RedeemResult | null
+    if (!rpcResult?.success) return { success: false, error: rpcResult?.error ?? 'Redemption failed' }
 
     const [, refreshedRewards] = await Promise.all([
       usePointsStore.getState().loadTotalPoints(),
@@ -206,7 +201,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     if (!refreshedRewards.error) {
       set({ rewards: (refreshedRewards.data ?? []) as Reward[] })
     }
-    return { success: true, redemptionId: newRedemption?.id, claimPin: (newRedemption as Record<string, unknown> | null)?.claim_pin as string | null ?? null }
+    return { success: true, redemptionId: rpcResult.redemption_id, claimPin: rpcResult.claim_pin ?? null }
   },
 
   // ── Redemption history ───────────────────────────────────────────────────
