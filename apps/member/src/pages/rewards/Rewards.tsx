@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
-import { StarOutline, CloseCircleLineDuotone, CupFirstOutline, LockOutline, GiftOutline, CheckCircleOutline } from 'solar-icon-set'
+import { StarOutline, CupFirstOutline, LockOutline, GiftOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Reward } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -49,6 +49,7 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
   const { redeemReward } = useRewardsStore()
   const [sheetState, setSheetState] = useState<SheetState>('confirm')
   const [errorMessage, setErrorMessage] = useState<string>('')
+  const [claimPin, setClaimPin] = useState<string | null>(null)
   const [visible, setVisible] = useState(true)
 
   const isInsufficient = spendablePoints < reward.points_cost
@@ -62,6 +63,7 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
     setSheetState('loading')
     const result = await redeemReward(reward.id)
     if (result.success) {
+      setClaimPin(result.claimPin ?? null)
       setSheetState('success')
     } else {
       setErrorMessage(result.error ?? 'Redemption failed. Please try again.')
@@ -147,21 +149,75 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
                 </div>
               </>
             ) : (
-              // Success State: Claim Receipt View
-              <div className="p-6 flex flex-col items-center text-center">
-                 <div className="size-[80px] bg-green/10 rounded-full flex items-center justify-center mb-5 mt-4">
-                    <CheckCircleOutline className="size-[40px] text-[#21C45D]" />
-                 </div>
-                 <h2 className="text-[24px] font-proxima font-bold text-slate-900 mb-2">Claim Receipt</h2>
-                 <p className="text-[15px] text-slate-500 leading-relaxed mb-6">
-                   You have successfully redeemed <strong>{reward.name}</strong> for {reward.points_cost.toLocaleString()} points.
-                 </p>
-                 <div className="w-full bg-slate-50 rounded-[16px] p-5 mb-6 text-left border border-slate-100">
-                    <p className="text-[14px] text-slate-600">Present this receipt at the DEVCON merch booth to claim your item.</p>
-                 </div>
-                 <button onClick={handleClose} className="w-full py-4 bg-[#1152d4] text-white rounded-[16px] font-proxima font-bold text-[16px] hover:bg-[#0b46a3] transition-colors">
-                   Done
-                 </button>
+              // Success State: PIN Claim Receipt
+              <div className="p-6 flex flex-col items-center text-center max-h-[90vh] overflow-y-auto">
+                <div className="w-full mb-4 mt-4">
+                  <h2 className="text-[22px] font-proxima font-bold text-slate-900 mb-1">Claim Receipt</h2>
+                  <p className="text-[13px] text-slate-500">
+                    Show this PIN to the organizer at the rewards booth
+                  </p>
+                </div>
+
+                {/* Receipt Card */}
+                <div className="w-full bg-white border border-slate-200 rounded-[20px] shadow-card overflow-hidden mb-5">
+                  {/* Reward image header */}
+                  <div className="h-[100px] w-full bg-slate-100 relative">
+                    {reward.image_url ? (
+                      <img src={reward.image_url} alt={reward.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <RewardPlaceholder iconSize="size-10" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                    <p className="absolute bottom-3 left-4 text-white text-[14px] font-proxima font-bold drop-shadow">
+                      {reward.name}
+                    </p>
+                  </div>
+
+                  {/* PIN display */}
+                  <div className="flex flex-col items-center px-6 py-6 gap-3">
+                    <p className="text-[11px] font-proxima font-bold text-slate-400 uppercase tracking-widest">
+                      Your Claim PIN
+                    </p>
+                    <div className="flex gap-2">
+                      {(claimPin ?? '------').split('').map((digit, i) => (
+                        <div
+                          key={i}
+                          className="w-10 h-12 bg-slate-50 border-2 border-slate-200 rounded-[10px] flex items-center justify-center"
+                        >
+                          <span className="text-[22px] font-proxima font-black text-slate-900 leading-none">
+                            {digit}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Status pill */}
+                    <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full mt-1">
+                      <div className="w-2 h-2 rounded-full bg-amber-400" />
+                      <p className="text-[11px] font-proxima font-bold text-amber-700">Awaiting Verification</p>
+                    </div>
+                  </div>
+
+                  {/* Points summary */}
+                  <div className="mx-4 mb-4 bg-slate-50 rounded-[12px] px-4 py-3 flex items-center justify-between">
+                    <p className="text-[12px] text-slate-500 font-proxima">Points deducted</p>
+                    <div className="flex items-center gap-1">
+                      <StarOutline className="size-[14px]" color="#F8C630" />
+                      <p className="text-[14px] font-proxima font-bold text-slate-900">
+                        -{reward.points_cost.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={handleClose}
+                  className="w-full py-4 bg-[#1152d4] text-white rounded-[16px] font-proxima font-bold text-[16px] hover:bg-[#0b46a3] transition-colors"
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                >
+                  Done
+                </motion.button>
               </div>
             )}
           </motion.div>

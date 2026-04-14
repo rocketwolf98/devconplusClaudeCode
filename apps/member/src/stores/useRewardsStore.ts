@@ -40,7 +40,7 @@ interface RewardsState {
   updateReward: (id: string, data: RewardFormData, imageUrl: string | null) => Promise<void>
   deleteReward: (id: string) => Promise<void>
   subscribeToChanges: () => () => void
-  redeemReward: (rewardId: string) => Promise<{ success: boolean; error?: string; redemptionId?: string }>
+  redeemReward: (rewardId: string) => Promise<{ success: boolean; error?: string; redemptionId?: string; claimPin?: string | null }>
   loadRedemptions: () => Promise<void>
   fetchAllRedemptions: () => Promise<void>
   approveClaim: (redemptionId: string) => Promise<{ success: boolean; error?: string }>
@@ -184,10 +184,10 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     } as never)
     if (error) return { success: false, error: error.message }
 
-    // Fetch the newly created redemption ID
+    // Fetch the newly created redemption ID + claim PIN
     const { data: newRedemption } = await supabase
       .from('reward_redemptions')
-      .select('id')
+      .select('id, claim_pin')
       .eq('user_id', user.id)
       .eq('reward_id', rewardId)
       .order('redeemed_at', { ascending: false })
@@ -205,7 +205,7 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     if (!refreshedRewards.error) {
       set({ rewards: (refreshedRewards.data ?? []) as Reward[] })
     }
-    return { success: true, redemptionId: newRedemption?.id }
+    return { success: true, redemptionId: newRedemption?.id, claimPin: (newRedemption as Record<string, unknown> | null)?.claim_pin as string | null ?? null }
   },
 
   // ── Redemption history ───────────────────────────────────────────────────
