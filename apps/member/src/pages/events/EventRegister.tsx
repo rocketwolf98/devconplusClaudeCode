@@ -4,6 +4,7 @@ import { ArrowLeftOutline } from 'solar-icon-set'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { supabase } from '../../lib/supabase'
+import { useFormDraft } from '../../hooks/useFormDraft'
 
 // ── Custom form field types ───────────────────────────────────────────────────
 
@@ -119,14 +120,20 @@ const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 export default function EventRegister() {
   const { slug } = useParams<{ slug: string }>()
+  const { draft, saveDraft, clearDraft } = useFormDraft<{
+    formResponses: Record<string, string | string[]>
+    agreed: boolean
+  }>(`event-register:${slug ?? ''}`, 'local')
   const navigate = useNavigate()
   const { events, registrations, register } = useEventsStore()
   const { user } = useAuthStore()
-  const [agreed, setAgreed] = useState(false)
+  const [agreed, setAgreed] = useState<boolean>((draft.agreed as boolean) ?? false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [formResponses, setFormResponses] = useState<Record<string, string | string[]>>({})
+  const [formResponses, setFormResponses] = useState<Record<string, string | string[]>>(
+    (draft.formResponses as Record<string, string | string[]>) ?? {},
+  )
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const event   = events.find((e) => e.slug === slug)
@@ -162,8 +169,10 @@ export default function EventRegister() {
   if (isChapterBlocked || existingReg) return null
 
   const setResponse = (fieldId: string, value: string | string[]) => {
-    setFormResponses(prev => ({ ...prev, [fieldId]: value }))
+    const next = { ...formResponses, [fieldId]: value }
+    setFormResponses(next)
     if (fieldErrors[fieldId]) setFieldErrors(prev => ({ ...prev, [fieldId]: '' }))
+    saveDraft({ formResponses: next, agreed })
   }
 
   const validateCustomFields = (): boolean => {
@@ -220,6 +229,7 @@ export default function EventRegister() {
         }
       }
 
+      clearDraft()
       navigate(destination, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
@@ -311,7 +321,11 @@ export default function EventRegister() {
           <input
             type="checkbox"
             checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked
+              setAgreed(checked)
+              saveDraft({ formResponses, agreed: checked })
+            }}
             className="mt-0.5 accent-blue"
           />
           <span className="text-sm text-slate-600">
