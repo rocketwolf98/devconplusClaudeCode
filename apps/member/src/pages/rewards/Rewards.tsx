@@ -359,11 +359,11 @@ function ClaimReceiptsTab() {
                 {new Date(redemption.redeemed_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
               </p>
               <div className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                (redemption as any).status === 'claimed' 
-                  ? 'bg-slate-100 text-slate-600' 
+                redemption.status === 'claimed'
+                  ? 'bg-slate-100 text-slate-600'
                   : 'bg-[#eef4ff] text-[#1152d4]'
               }`}>
-                {(redemption as any).status === 'claimed' ? 'Claimed' : 'Ready to Claim'}
+                {redemption.status === 'claimed' ? 'Claimed' : 'Ready to Claim'}
               </div>
             </div>
           </motion.div>
