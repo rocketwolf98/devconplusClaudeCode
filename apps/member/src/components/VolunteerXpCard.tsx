@@ -18,7 +18,7 @@ export default function VolunteerXpCard() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const unreadCount = useNotificationsStore((s) => s.unreadCount)
-  const { spendablePoints, lifetimePoints, tierProgress } = usePointsStore()
+  const { spendablePoints, lifetimePoints, currentTier, tierProgress } = usePointsStore()
   
   const [isScrolled, setIsScrolled] = useState(false)
 
@@ -91,8 +91,11 @@ export default function VolunteerXpCard() {
       >
         <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 p-[24px] flex flex-col gap-5 pointer-events-auto">
           <div className="flex">
-            <span className="font-proxima font-bold bg-[#1152d4] text-white text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full">
-              VOLUNTEER
+            <span 
+              className="font-proxima font-bold text-white text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: currentTier.color }}
+            >
+              {currentTier.name}
             </span>
           </div>
 
@@ -124,8 +127,29 @@ export default function VolunteerXpCard() {
                   style={{ backgroundColor: '#eab308' }}
                   initial={{ width: 0 }}
                   animate={{ width: `${tierProgress}%` }}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                />
+                  transition={{ 
+                    type: 'spring',
+                    stiffness: 50,
+                    damping: 20,
+                    restDelta: 0.001
+                  }}
+                >
+                  {/* Shimmer effect */}
+                  <motion.div
+                    className="absolute inset-0 w-full h-full"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                    }}
+                    animate={{
+                      x: ['-100%', '100%'],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: 'linear',
+                    }}
+                  />
+                </motion.div>
               </div>
             </div>
           </div>

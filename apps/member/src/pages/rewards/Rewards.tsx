@@ -23,7 +23,7 @@ const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 function RewardPlaceholder({ className = "w-full h-full", iconSize = "size-12" }: { className?: string, iconSize?: string }) {
   return (
     <div 
-      className={`flex items-center justify-center bg-[#1152d4] ${className}`}
+      className={`flex items-center justify-center bg-primary ${className}`}
       style={{ 
         backgroundImage: PATTERN_BG,
         backgroundSize: '40px 40px',

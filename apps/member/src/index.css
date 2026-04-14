@@ -150,6 +150,12 @@ body {
     --shadow-primary: 0 4px 24px rgba(248, 198, 48, 0.12);
   }
 
+  .theme-purple {
+    --color-primary:      124 58 237;   /* #7C3AED violet-600 */
+    --color-primary-dark: 109 40 217;   /* #6D28D9 violet-700 */
+    --shadow-primary: 0 4px 24px rgba(124, 58, 237, 0.12);
+  }
+
   /* Hide scrollbar utility */
   .no-scrollbar::-webkit-scrollbar {
     display: none;

@@ -5,7 +5,7 @@ const imgSolarMedalStarCircleBoldDuotone = "https://www.figma.com/api/mcp/asset/
 const imgSolarBoltBroken = "https://www.figma.com/api/mcp/asset/830e7e23-553e-4fe6-bc43-31e9a7a08703";
 
 export default function ProfileExpCard() {
-  const { spendablePoints, lifetimePoints, tierProgress } = usePointsStore()
+  const { spendablePoints, lifetimePoints, currentTier, tierProgress } = usePointsStore()
 
   return (
     <div className="bg-white rounded-[24px] border border-slate-400/30 p-[24px] flex flex-col gap-5 shadow-card">
@@ -37,8 +37,29 @@ export default function ProfileExpCard() {
               style={{ backgroundColor: '#eab308' }}
               initial={{ width: 0 }}
               animate={{ width: `${tierProgress}%` }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-            />
+              transition={{ 
+                type: 'spring',
+                stiffness: 50,
+                damping: 20,
+                restDelta: 0.001
+              }}
+            >
+              {/* Shimmer effect */}
+              <motion.div
+                className="absolute inset-0 w-full h-full"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                }}
+                animate={{
+                  x: ['-100%', '100%'],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+            </motion.div>
           </div>
         </div>
       </div>

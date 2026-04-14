@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import logoVertical from '../../assets/logos/logo-vertical.svg'
 import { useAuthStore } from '../../stores/useAuthStore'
 import AnimatedDice from '../../components/AnimatedDice'
@@ -27,11 +27,14 @@ const bgStyle: React.CSSProperties = {
 
 export default function SplashScreen() {
   const navigate = useNavigate()
+  const [showLoadingText, setShowLoadingText] = useState(false)
   const [showSlowText, setShowSlowText] = useState(false)
 
   useEffect(() => {
-    // Show slow-load hint after 5 extra seconds
-    const slowTimer = setTimeout(() => setShowSlowText(true), 5000)
+    // Show "Hang tight" after 10 seconds
+    const loadingTimer = setTimeout(() => setShowLoadingText(true), 10000)
+    // Show slow-load hint after 15 seconds
+    const slowTimer = setTimeout(() => setShowSlowText(true), 15000)
 
     const navTimer = setTimeout(() => {
       const { user, isInitialized } = useAuthStore.getState()
@@ -40,6 +43,7 @@ export default function SplashScreen() {
     }, 2600)
 
     return () => {
+      clearTimeout(loadingTimer)
       clearTimeout(slowTimer)
       clearTimeout(navTimer)
     }
@@ -47,7 +51,7 @@ export default function SplashScreen() {
 
   return (
     <div className="h-screen flex flex-col relative overflow-hidden" style={bgStyle}>
-      {/* Pattern opacity overlay — matches Figma's opacity-10 on the pattern layer */}
+      {/* Pattern opacity overlay — matches App.tsx */}
       <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.10, backgroundColor: 'transparent' }} />
 
       {/* Centered logo — takes up main body space */}
@@ -55,14 +59,14 @@ export default function SplashScreen() {
         <motion.img
           src={logoVertical}
           alt="DEVCON+"
-          className="w-36 h-auto"
-          initial={{ opacity: 0, scale: 0.85 }}
+          className="w-48 h-auto"
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+          transition={{ duration: 0.5 }}
         />
       </div>
 
-      {/* Bottom section — dice + loading text, matches Figma bottom placement */}
+      {/* Bottom section — dice + loading text, matches App.tsx bottom placement */}
       <div className="flex flex-col items-center gap-3 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -72,16 +76,20 @@ export default function SplashScreen() {
           <AnimatedDice />
         </motion.div>
 
-        <motion.p
-          className="text-white text-[13px] tracking-tight"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: showSlowText ? 1 : 0.7, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-        >
-          {showSlowText
-            ? 'Taking longer than usual… check your connection.'
-            : 'Hang tight! DEVCON+ will load shortly...'}
-        </motion.p>
+        <AnimatePresence>
+          {showLoadingText && (
+            <motion.p
+              className="text-white/70 text-[13px] tracking-tight"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              {showSlowText
+                ? 'Taking longer than usual… check your connection.'
+                : 'Hang tight! DEVCON+ will load shortly...'}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

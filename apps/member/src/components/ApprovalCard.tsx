@@ -89,7 +89,7 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
           className="w-full py-2 text-sm font-semibold rounded-xl bg-green/10 text-green border border-green/20 hover:bg-green/20 transition-colors flex items-center justify-center gap-1.5"
         >
           <UserCheckOutline className="w-3.5 h-3.5" />
-          CheckCircleOutline In
+          Check In
         </motion.button>
       )}
       {registration.status === 'approved' && registration.checked_in && (

@@ -55,10 +55,9 @@ export function OrgProfile() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
-        {/* ── Blue Background Container ── */}
-        <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[40px] pt-14 text-center"
+      {/* ── Blue Background Container ── */}
+      <div 
+        className="bg-[#1152d4] relative overflow-hidden z-0 pb-[40px] pt-14 text-center"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -68,7 +67,7 @@ export function OrgProfile() {
           }}
         >
           <div className="relative z-10">
-            <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
+            <div className="w-32 h-32 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-4xl font-black text-white mx-auto mb-3 overflow-hidden">
               {user.avatar_url ? (
                 <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
               ) : (
@@ -79,16 +78,15 @@ export function OrgProfile() {
             <p className="text-white/70 text-sm font-proxima mt-0.5">{user.email}</p>
             
             <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
-              <span className="text-[10px] font-bold bg-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+              <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
                 {user.chapter} Chapter
               </span>
-              <span className="text-[10px] font-bold bg-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
+              <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
                 {ROLE_DISPLAY_NAMES[user.role] ?? 'Chapter Officer'}
               </span>
             </div>
           </div>
         </div>
-      </header>
 
       <div className="p-4 space-y-3 pb-24">
 

@@ -284,7 +284,7 @@ useEffect(() => {
 
                   <button
                     onClick={(e) => { e.stopPropagation(); banner?.onClick() }}
-                    className="bg-[#1152d4] text-white text-xs font-semibold px-[18px] py-[12px] rounded-full flex items-center justify-center shrink-0 leading-none shadow-sm"
+                    className="bg-primary text-white text-xs font-semibold px-[18px] py-[12px] rounded-full flex items-center justify-center shrink-0 leading-none shadow-sm"
                   >
                     {banner.cta}
                   </button>
@@ -298,7 +298,7 @@ useEffect(() => {
                 key={i}
                 animate={{
                   width:           i === safeIdx ? 16 : 6,
-                  backgroundColor: i === safeIdx ? '#1E2A56' : '#CBD5E1',
+                  backgroundColor: i === safeIdx ? 'rgb(var(--color-primary-dark))' : '#CBD5E1',
                 }}
                 transition={{ duration: 0.25 }}
                 className="h-1.5 rounded-full"
@@ -497,7 +497,7 @@ useEffect(() => {
                       <div className="pt-1">
                         <span
                           className="text-white text-[12px] font-semibold px-[18px] py-[10px] rounded-full inline-block leading-none"
-                          style={{ backgroundColor: isClaimed ? '#868686' : '#1152d4' }}
+                          style={{ backgroundColor: isClaimed ? '#868686' : 'rgb(var(--color-primary))' }}
                         >
                           {isClaimed ? 'Claimed' : 'Start Mission'}
                         </span>
@@ -512,11 +512,11 @@ useEffect(() => {
 
         {/* Switcher: Updates / Featured */}
         <section className="flex flex-col gap-4">
-          <div className="bg-[#eef4ff] inline-flex self-start items-center p-1 rounded-full">
+          <div className="bg-primary/10 inline-flex self-start items-center p-1 rounded-full">
             <button
               onClick={() => setActiveTab('updates')}
               className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
-                activeTab === 'updates' ? 'bg-[#1152d4] text-white shadow-sm' : 'text-black hover:bg-[#dbeafe]/50'
+                activeTab === 'updates' ? 'bg-primary text-white shadow-sm' : 'text-black hover:bg-primary/20'
               }`}
             >
               <span className="font-proxima font-bold text-[16px]">
@@ -526,7 +526,7 @@ useEffect(() => {
             <button
               onClick={() => setActiveTab('featured')}
               className={`flex items-center justify-center px-5 py-1.5 rounded-full transition-all duration-300 ${
-                activeTab === 'featured' ? 'bg-[#1152d4] text-white shadow-sm' : 'text-black hover:bg-[#dbeafe]/50'
+                activeTab === 'featured' ? 'bg-primary text-white shadow-sm' : 'text-black hover:bg-primary/20'
               }`}
             >
               <span className="font-proxima font-bold text-[16px]">
@@ -614,6 +614,10 @@ useEffect(() => {
                   <SkeletonXPRow key={i} border={i < 4} />
                 ))}
               </>
+            ) : recentTxns.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                <p className="text-sm text-slate-400 font-medium italic">No transactions yet</p>
+              </div>
             ) : (
               <motion.div
                 variants={staggerContainer}

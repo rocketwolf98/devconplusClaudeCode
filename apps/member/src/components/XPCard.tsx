@@ -10,13 +10,6 @@ export default function XPCard() {
   return (
     <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-[rgba(156,163,175,0.3)] p-[21px] flex flex-col gap-5">
 
-      {/* Tier badge — top, Proxima Nova Semibold 9px tracked */}
-      <div className="flex">
-        <span className="font-proxima font-semibold bg-[#1152d4] text-white text-[9px] tracking-[0.9px] uppercase px-3 py-1.5 rounded-full">
-          {currentTier.name}
-        </span>
-      </div>
-
       {/* Points section */}
       <div className="flex flex-col gap-2">
         {/* Medal + XP number */}
@@ -48,7 +41,23 @@ export default function XPCard() {
               initial={{ width: 0 }}
               animate={{ width: `${tierProgress}%` }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-            />
+            >
+              {/* Shimmer effect */}
+              <motion.div
+                className="absolute inset-0 w-full h-full"
+                style={{
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)',
+                }}
+                animate={{
+                  x: ['-100%', '100%'],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+            </motion.div>
           </div>
         </div>
       </div>

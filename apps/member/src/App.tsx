@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { RouterProvider } from 'react-router-dom'
-import { MotionConfig } from 'framer-motion'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import { Toaster } from 'sonner'
 import { router } from './router'
 import { useThemeStore, PROGRAM_THEMES } from './stores/useThemeStore'
@@ -29,6 +29,12 @@ const PATTERN_STYLE: React.CSSProperties = {
 export default function App() {
   const { themeId } = useThemeStore()
   const { initialize, isInitialized } = useAuthStore()
+  const [showLoadingText, setShowLoadingText] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowLoadingText(true), 10000)
+    return () => clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     const allClasses = PROGRAM_THEMES.map((t) => t.cssClass)
@@ -55,16 +61,35 @@ export default function App() {
         className="fixed inset-0 flex flex-col overflow-hidden"
         style={PATTERN_STYLE}
       >
+        {/* Pattern opacity overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.10, backgroundColor: 'transparent' }} />
+
         {/* Logo — centered in remaining space */}
         <div className="flex-1 flex items-center justify-center">
-          <img src={logoVertical} alt="DEVCON+" className="w-28 h-auto" />
+          <motion.img 
+            src={logoVertical} 
+            alt="DEVCON+" 
+            className="w-48 h-auto"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+          />
         </div>
         {/* Dice at bottom — same placement as SplashScreen */}
         <div className="flex flex-col items-center gap-3 pb-16">
           <AnimatedDice />
-          <p className="text-white/70 text-[13px] tracking-tight">
-            Hang tight! DEVCON+ will load shortly...
-          </p>
+          <AnimatePresence>
+            {showLoadingText && (
+              <motion.p 
+                className="text-white/70 text-[13px] tracking-tight"
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+              >
+                Hang tight! DEVCON+ will load shortly...
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     )

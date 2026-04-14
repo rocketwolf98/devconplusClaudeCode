@@ -262,11 +262,11 @@ export default function ProfileEdit() {
               className="relative"
               disabled={avatarUploading}
             >
-              <div className="w-24 h-24 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
+              <div className="w-32 h-32 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center overflow-hidden">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-2xl font-black text-primary">{displayInitials}</span>
+                  <span className="text-4xl font-black text-primary">{displayInitials}</span>
                 )}
               </div>
               {avatarUploading && (

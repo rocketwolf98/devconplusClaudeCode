@@ -266,6 +266,9 @@ export function OrgRewardsManagement() {
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
+        {/* ── Glassmorphism Background ── */}
+        <div className="absolute inset-0 backdrop-blur-md bg-slate-50/80 pointer-events-auto -z-10" />
+
         {/* ── Blue Background Container ── */}
         <div
           className="bg-[#1152d4] relative z-0 pointer-events-auto pb-[64px]"

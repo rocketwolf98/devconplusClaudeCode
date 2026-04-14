@@ -246,10 +246,10 @@ export default function EventVolunteer() {
             )}
           </div>
 
-          {/* PhoneOutline number */}
+          {/* Phone number */}
           <div>
             <label className="text-sm font-medium text-slate-700 block mb-1">
-              PhoneOutline Number <span className="text-slate-400 text-xs font-normal">(optional)</span>
+              Phone Number <span className="text-slate-400 text-xs font-normal">(optional)</span>
             </label>
             <input
               {...register('phone_number')}

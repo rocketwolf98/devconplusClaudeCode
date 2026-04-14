@@ -183,11 +183,11 @@ export function OrgProfileEdit() {
               className="relative"
               disabled={avatarUploading}
             >
-              <div className="w-24 h-24 rounded-full bg-blue/10 border-2 border-blue/20 flex items-center justify-center overflow-hidden">
+              <div className="w-32 h-32 rounded-full bg-blue/10 border-2 border-blue/20 flex items-center justify-center overflow-hidden">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-2xl font-black text-blue">{displayInitials}</span>
+                  <span className="text-4xl font-black text-blue">{displayInitials}</span>
                 )}
               </div>
               {avatarUploading && (

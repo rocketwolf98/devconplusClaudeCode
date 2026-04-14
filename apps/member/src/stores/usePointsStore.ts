@@ -17,6 +17,8 @@ interface PointsState {
   tierProgress: number
   transactions: PointTransaction[]
   isLoading: boolean
+  isTransactionsLoading: boolean
+  isTotalPointsLoading: boolean
   error: string | null
 
   loadTransactions: () => Promise<void>
@@ -33,12 +35,14 @@ export const usePointsStore = create<PointsState>((set, get) => ({
   tierProgress: 0,
   transactions: [],
   isLoading: false,
+  isTransactionsLoading: false,
+  isTotalPointsLoading: false,
   error: null,
 
   loadTransactions: async () => {
     const user = useAuthStore.getState().user
     if (!user) return
-    set({ isLoading: true, error: null })
+    set({ isTransactionsLoading: true, isLoading: true, error: null })
     try {
       const { data, error } = await supabase
         .from('point_transactions')
@@ -50,14 +54,15 @@ export const usePointsStore = create<PointsState>((set, get) => ({
     } catch (err) {
       set({ transactions: [], error: err instanceof Error ? err.message : String(err) })
     } finally {
-      set({ isLoading: false })
+      const isTotalPointsLoading = get().isTotalPointsLoading
+      set({ isTransactionsLoading: false, isLoading: isTotalPointsLoading })
     }
   },
 
   loadTotalPoints: async () => {
     const user = useAuthStore.getState().user
     if (!user) return
-    set({ isLoading: true, error: null })
+    set({ isTotalPointsLoading: true, isLoading: true, error: null })
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -92,7 +97,8 @@ export const usePointsStore = create<PointsState>((set, get) => ({
     } catch (err) {
       set({ error: err instanceof Error ? err.message : String(err) })
     } finally {
-      set({ isLoading: false })
+      const isTransactionsLoading = get().isTransactionsLoading
+      set({ isTotalPointsLoading: false, isLoading: isTransactionsLoading })
     }
   },
 

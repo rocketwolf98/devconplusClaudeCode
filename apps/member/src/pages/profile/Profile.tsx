@@ -29,8 +29,8 @@ const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 export default function Profile() {
   const navigate = useNavigate()
   const { user, initials, signOut, chapterName } = useAuthStore()
-  const { spendablePoints, prestigeUnlocked, loadTotalPoints } = usePointsStore()
-  const { themeId, setTheme } = useThemeStore()
+  const { spendablePoints, lifetimePoints, currentTier, prestigeUnlocked, loadTotalPoints } = usePointsStore()
+  const { themeId, setTheme, isLocked } = useThemeStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
   const [canInstall, setCanInstall] = useState(false)
@@ -62,10 +62,9 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
-        {/* ── Blue Background Container ── */}
-        <div 
-          className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[40px] pt-14 text-center"
+      {/* ── Blue Background Container ── */}
+      <div 
+        className="bg-primary relative overflow-hidden z-0 pb-[40px] pt-14 text-center"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -75,7 +74,7 @@ export default function Profile() {
           }}
         >
           <div className="relative z-10">
-            <div className="w-20 h-20 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-2xl font-black text-white mx-auto mb-3 overflow-hidden">
+            <div className="w-32 h-32 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-4xl font-black text-white mx-auto mb-3 overflow-hidden">
               {user?.avatar_url ? (
                 <>
                   <img
@@ -99,7 +98,7 @@ export default function Profile() {
             
             <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
               <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
-                Volunteer
+                {currentTier.name}
               </span>
               {chapterName && (
                 <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
@@ -112,7 +111,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      </header>
 
       <div className="px-[25px] pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
 
@@ -121,20 +119,26 @@ export default function Profile() {
         {/* Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
           <p className="text-sm font-bold text-slate-900 mb-3">Theme</p>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             {PROGRAM_THEMES.map((theme) => {
               const isActive = theme.id === themeId
+              const locked = isLocked(theme, lifetimePoints)
               return (
                 <button
                   key={theme.id}
-                  onClick={() => setTheme(theme.id)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                  onClick={() => !locked && setTheme(theme.id)}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${locked ? 'opacity-40 cursor-not-allowed grayscale' : 'hover:scale-105 active:scale-95'}`}
                   style={{
                     backgroundColor: theme.hex,
                     boxShadow: isActive ? `0 0 0 2px white, 0 0 0 4px ${theme.hex}` : 'none',
                   }}
+                  title={locked ? `Unlocks at ${theme.unlockPoints} XP` : theme.label}
                 >
-                  {isActive && <CheckCircleOutline className="w-4 h-4" color="white" />}
+                  {isActive ? (
+                    <CheckCircleOutline className="w-4 h-4" color="white" />
+                  ) : locked ? (
+                    <StarOutline className="w-4 h-4" color="white" />
+                  ) : null}
                 </button>
               )
             })}
@@ -165,9 +169,9 @@ export default function Profile() {
                   <DownloadOutline className="w-4 h-4" color="rgb(var(--color-primary))" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-900">Add to HomeOutline Screen</p>
+                  <p className="text-sm font-semibold text-slate-900">Add to Home Screen</p>
                   {isIos && !canInstall && (
-                    <p className="text-xs text-slate-400 mt-0.5">Tap Share → "Add to HomeOutline Screen"</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Tap Share → "Add to Home Screen"</p>
                   )}
                 </div>
               </div>
