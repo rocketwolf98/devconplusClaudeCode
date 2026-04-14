@@ -20,6 +20,11 @@ CREATE OR REPLACE FUNCTION approve_reward_claim(
 DECLARE
   v_redemption reward_redemptions%ROWTYPE;
 BEGIN
+  -- Verify caller matches the organizer ID passed in
+  IF auth.uid() IS DISTINCT FROM p_organizer_id THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
+  END IF;
+
   SELECT * INTO v_redemption
     FROM reward_redemptions WHERE id = p_redemption_id FOR UPDATE;
 
@@ -55,6 +60,11 @@ DECLARE
   v_reward_name text;
   v_ref text;
 BEGIN
+  -- Verify caller matches the organizer ID passed in
+  IF auth.uid() IS DISTINCT FROM p_organizer_id THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
+  END IF;
+
   SELECT * INTO v_redemption
     FROM reward_redemptions WHERE id = p_redemption_id FOR UPDATE;
 
@@ -63,7 +73,7 @@ BEGIN
   END IF;
 
   IF v_redemption.status = 'claimed' THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Cannot refund an already approved claim');
+    RAISE EXCEPTION 'Cannot refund an already approved claim';
   END IF;
 
   IF v_redemption.status = 'cancelled' THEN
