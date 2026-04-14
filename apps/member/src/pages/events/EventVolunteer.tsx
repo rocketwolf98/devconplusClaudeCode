@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState, useEffect } from 'react'
+import { useFormDraft } from '../../hooks/useFormDraft'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
 import { getEventThemeStyle } from '../../lib/eventTheme'
@@ -74,16 +75,34 @@ export default function EventVolunteer() {
     loadApplications()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const { draft, saveDraft, clearDraft } = useFormDraft<FormValues>(
+    `event-volunteer:${slug ?? ''}`,
+    'local',
+  )
+
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      reason:              (draft.reason              as string) ?? '',
+      phone_number:        (draft.phone_number        as string) ?? '',
+      social_media_handle: (draft.social_media_handle as string) ?? '',
+    },
   })
+
+  useEffect(() => {
+    const { unsubscribe } = watch((values) => {
+      saveDraft(values as Partial<FormValues>)
+    })
+    return unsubscribe
+  }, [watch, saveDraft])
 
   if (!event || !eventId) return <NotFound />
 
@@ -142,6 +161,7 @@ export default function EventVolunteer() {
       social_media_handle: values.social_media_handle || undefined,
     })
     if (result.success) {
+      clearDraft()
       setSubmitted(true)
     } else {
       setSubmitError(result.error ?? 'Something went wrong. Please try again.')
