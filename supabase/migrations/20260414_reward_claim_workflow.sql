@@ -25,6 +25,15 @@ BEGIN
     RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
   END IF;
 
+  -- Verify caller holds an organizer role
+  IF NOT EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = p_organizer_id
+      AND role IN ('chapter_officer', 'hq_admin', 'super_admin')
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
+  END IF;
+
   SELECT * INTO v_redemption
     FROM reward_redemptions WHERE id = p_redemption_id FOR UPDATE;
 
@@ -65,6 +74,15 @@ BEGIN
     RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
   END IF;
 
+  -- Verify caller holds an organizer role
+  IF NOT EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = p_organizer_id
+      AND role IN ('chapter_officer', 'hq_admin', 'super_admin')
+  ) THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Unauthorized');
+  END IF;
+
   SELECT * INTO v_redemption
     FROM reward_redemptions WHERE id = p_redemption_id FOR UPDATE;
 
@@ -81,7 +99,12 @@ BEGIN
   END IF;
 
   SELECT points_cost, name INTO v_points_cost, v_reward_name
-    FROM rewards WHERE id = v_redemption.reward_id;
+    FROM rewards WHERE id = v_redemption.reward_id
+    FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Reward not found for redemption';
+  END IF;
 
   v_ref := upper(substring(gen_random_uuid()::text, 1, 8));
 
