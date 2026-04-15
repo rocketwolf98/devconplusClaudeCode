@@ -197,8 +197,8 @@ export default function PointsHistory() {
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
               <BoltOutline className="w-8 h-8" color="rgba(var(--color-primary), 0.5)" />
             </div>
-            <h2 className="text-base font-bold text-slate-900 mb-1">No transactions yet</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">No transactions yet</h2>
+            <p className="text-md3-body-md text-slate-500">
               {activeFilter === 'all' ? 'Your history is empty.' : `No ${activeFilter.replace('_', ' ')} transactions found.`}
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function PointsHistory() {
         )}
 
         {groups.length > 0 && (
-          <p className="text-center text-xs text-slate-400 mt-6 pb-4">That's it!</p>
+          <p className="text-center text-md3-label-md text-slate-400 mt-6 pb-4">That's it!</p>
         )}
       </div>
     </div>

@@ -121,7 +121,7 @@ function ClaimCard({ claim, onApprove, onRefund, actionLoadingId, isHighlighted 
     >
       {/* Member row */}
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-10 h-10 rounded-full bg-blue/10 flex items-center justify-center text-blue text-sm font-proxima font-bold shrink-0">
+        <div className="w-10 h-10 rounded-full bg-blue/10 flex items-center justify-center text-blue text-md3-body-md font-proxima font-bold shrink-0">
           {initials}
         </div>
         <div className="flex-1 min-w-0">
@@ -289,7 +289,7 @@ export function OrgRewardsManagement() {
             {activeTab === 'rewards' && (
               <button
                 onClick={() => navigate('/organizer/rewards/create')}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-white/20 backdrop-blur-md border border-white/40 text-white text-sm font-bold font-proxima rounded-full active:bg-white/40 transition-colors shadow-lg shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white/20 backdrop-blur-md border border-white/40 text-white text-md3-body-md font-bold font-proxima rounded-full active:bg-white/40 transition-colors shadow-lg shrink-0"
               >
                 <AddCircleOutline className="w-[18px] h-[18px]" color="white" />
                 Add Reward
@@ -396,7 +396,7 @@ export function OrgRewardsManagement() {
         {activeTab === 'rewards' && (
           <>
             {deleteError && (
-              <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+              <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
                 {deleteError}
               </p>
             )}
@@ -409,8 +409,8 @@ export function OrgRewardsManagement() {
               <motion.div className="space-y-3" variants={staggerContainer} initial="hidden" animate="visible">
                 {allRewards.length === 0 ? (
                   <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-                    <p className="text-base font-bold text-slate-700">No rewards yet</p>
-                    <p className="text-sm text-slate-400 mt-1">Add items to the catalog.</p>
+                    <p className="text-md3-body-lg font-bold text-slate-700">No rewards yet</p>
+                    <p className="text-md3-body-md text-slate-400 mt-1">Add items to the catalog.</p>
                   </motion.div>
                 ) : (
                   allRewards.map((reward) => (
@@ -531,7 +531,7 @@ export function OrgRewardsManagement() {
         {activeTab === 'claims' && (
           <>
             {actionError && (
-              <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">{actionError}</p>
+              <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">{actionError}</p>
             )}
 
             {/* PIN Search */}
@@ -562,8 +562,8 @@ export function OrgRewardsManagement() {
               </motion.div>
             ) : pendingClaims.length === 0 && resolvedClaims.length === 0 ? (
               <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-                <p className="text-base font-bold text-slate-700">No claims yet</p>
-                <p className="text-sm text-slate-400 mt-1">When members redeem rewards, they'll appear here.</p>
+                <p className="text-md3-body-lg font-bold text-slate-700">No claims yet</p>
+                <p className="text-md3-body-md text-slate-400 mt-1">When members redeem rewards, they'll appear here.</p>
               </motion.div>
             ) : (
               <>

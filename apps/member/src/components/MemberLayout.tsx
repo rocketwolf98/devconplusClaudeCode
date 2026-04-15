@@ -318,7 +318,7 @@ export default function MemberLayout() {
               to="/home"
               end
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -330,7 +330,7 @@ export default function MemberLayout() {
             <NavLink
               to="/rewards"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -343,7 +343,7 @@ export default function MemberLayout() {
             <NavLink
               to="/events"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -363,7 +363,7 @@ export default function MemberLayout() {
             <NavLink
               to="/jobs"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -375,7 +375,7 @@ export default function MemberLayout() {
             <NavLink
               to="/profile"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }

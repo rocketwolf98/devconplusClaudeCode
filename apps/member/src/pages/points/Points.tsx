@@ -96,7 +96,7 @@ export default function Points() {
                   <StarOutline className="w-6 h-6" color="#F8C630" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[#464646] font-black text-2xl leading-none">
+                  <span className="text-[#464646] font-black text-md3-headline-sm leading-none">
                     {spendablePoints.toLocaleString()} XP
                   </span>
                   <span className="text-[#6b7280] text-[11px] font-proxima uppercase tracking-wider mt-1">Available to spend</span>
@@ -109,7 +109,7 @@ export default function Points() {
                   <BoltOutline className="w-5 h-5" color="rgb(var(--color-primary))" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-slate-600 font-bold text-sm leading-none">
+                  <span className="text-slate-600 font-bold text-md3-body-md leading-none">
                     {lifetimePoints.toLocaleString()} lifetime XP
                   </span>
                   {prestigeUnlocked ? (
@@ -180,12 +180,12 @@ export default function Points() {
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-semibold text-slate-900 text-sm">{item.label}</p>
+                      <p className="font-semibold text-slate-900 text-md3-body-md">{item.label}</p>
                       {'note' in item && !!(item as { note?: unknown }).note && (
-                        <p className="text-xs text-slate-400 mt-0.5">{String((item as { note?: string }).note)}</p>
+                        <p className="text-md3-label-md text-slate-400 mt-0.5">{String((item as { note?: string }).note)}</p>
                       )}
                     </div>
-                    <span className="text-xs font-bold text-primary ml-2 shrink-0">{item.pts}</span>
+                    <span className="text-md3-label-md font-bold text-primary ml-2 shrink-0">{item.pts}</span>
                   </div>
                 </div>
               </motion.div>
@@ -197,7 +197,7 @@ export default function Points() {
                 variants={cardItem}
                 className="bg-white/60 rounded-2xl px-4 py-3 border border-slate-200"
               >
-                <p className="text-xs text-slate-500 text-center">
+                <p className="text-md3-label-md text-slate-500 text-center">
                   Redeeming rewards deducts from your{' '}
                   <span className="font-semibold text-slate-700">spendable balance only</span>
                   {' '}— lifetime points are never reduced.
@@ -211,9 +211,9 @@ export default function Points() {
         <div className="mt-4 bg-white rounded-2xl shadow-card p-4">
           <div className="flex items-center gap-2 mb-1">
             <UsersGroupRoundedOutline className="w-4 h-4" color="rgb(var(--color-primary))" />
-            <p className="font-bold text-slate-900 text-sm">Share & Earn</p>
+            <p className="font-bold text-slate-900 text-md3-body-md">Share & Earn</p>
           </div>
-          <p className="text-xs text-slate-500 mb-3">
+          <p className="text-md3-label-md text-slate-500 mb-3">
             Refer a friend and earn <span className="font-semibold text-primary">100 pts</span> per sign-up
           </p>
 
@@ -225,13 +225,13 @@ export default function Points() {
             <div className="h-10 bg-slate-100 rounded-xl animate-pulse" />
           ) : referralCode !== null ? (
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-slate-100 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 text-sm tracking-widest">
+              <div className="flex-1 bg-slate-100 rounded-xl px-4 py-2.5 font-mono font-bold text-slate-900 text-md3-body-md tracking-widest">
                 {referralCode}
               </div>
               <motion.button
                 onClick={handleCopy}
                 whileTap={{ scale: 0.95 }}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-md3-body-md font-semibold transition-colors ${
                   copied
                     ? 'bg-green/10 text-green'
                     : 'bg-primary text-white'
@@ -251,13 +251,13 @@ export default function Points() {
               </motion.button>
             </div>
           ) : (
-            <div className="h-10 flex items-center px-3 bg-slate-100 rounded-xl text-sm text-slate-400">
+            <div className="h-10 flex items-center px-3 bg-slate-100 rounded-xl text-md3-body-md text-slate-400">
               Referral code not yet assigned
             </div>
           )}
 
           {!referralsLoading && (referralCode !== null || referralCount > 0) && (
-            <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="mt-3 flex items-center gap-1.5 text-md3-label-md text-slate-500">
               <UsersGroupRoundedOutline className="w-3.5 h-3.5 shrink-0" color="#94A3B8" />
               <span>
                 Referred:{' '}
@@ -272,7 +272,7 @@ export default function Points() {
 
         <button
           onClick={() => navigate('/points/history')}
-          className="w-full mt-4 bg-white border border-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-sm shadow-card"
+          className="w-full mt-4 bg-white border border-slate-200 text-slate-700 font-semibold py-3 rounded-2xl text-md3-body-md shadow-card"
         >
           View Points History
         </button>

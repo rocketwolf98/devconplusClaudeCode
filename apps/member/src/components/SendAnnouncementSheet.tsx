@@ -65,9 +65,9 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
             <div className="flex items-center gap-2 mb-1">
               <UserSpeakOutline className="w-4 h-4" color="rgb(var(--color-primary))" />
-              <h3 className="text-base font-bold text-slate-900">Send Announcement</h3>
+              <h3 className="text-md3-body-lg font-bold text-slate-900">Send Announcement</h3>
             </div>
-            <p className="text-xs text-slate-400 mb-4">{eventTitle}</p>
+            <p className="text-md3-label-md text-slate-400 mb-4">{eventTitle}</p>
 
             <div className="relative mb-1">
               <textarea
@@ -76,7 +76,7 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
                 value={message}
                 onChange={(e) => { setMessage(e.target.value); setSendError(null) }}
                 placeholder="Write your announcement…"
-                className="w-full border border-slate-200 rounded-xl p-3 text-sm text-slate-900
+                className="w-full border border-slate-200 rounded-xl p-3 text-md3-body-md text-slate-900
                            placeholder-slate-400 resize-none focus:outline-none focus:ring-2
                            focus:ring-blue/30"
               />
@@ -85,10 +85,10 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
               </span>
             </div>
 
-            <p className="text-xs text-slate-400 mb-4">Sends to all approved registrants</p>
+            <p className="text-md3-label-md text-slate-400 mb-4">Sends to all approved registrants</p>
 
             {sendError && (
-              <p className="text-xs text-red mb-3">{sendError}</p>
+              <p className="text-md3-label-md text-red mb-3">{sendError}</p>
             )}
 
             <div className="flex gap-3">
@@ -96,7 +96,7 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
                 whileTap={{ scale: 0.95 }}
                 onClick={handleClose}
                 disabled={isSending}
-                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold
+                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-md3-body-md font-bold
                            disabled:opacity-50"
               >
                 Cancel
@@ -105,7 +105,7 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSend}
                 disabled={message.trim().length === 0 || isSending}
-                className="flex-1 py-3 rounded-xl bg-blue text-white text-sm font-bold
+                className="flex-1 py-3 rounded-xl bg-blue text-white text-md3-body-md font-bold
                            disabled:opacity-50"
               >
                 {isSending ? 'Sending…' : 'Send'}

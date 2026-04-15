@@ -45,7 +45,7 @@ export function OrgEventsList() {
 
             <button
               onClick={() => navigate('/organizer/events/create')}
-              className="flex items-center gap-2 bg-white/25 border border-white/50 px-3.5 py-2 rounded-full text-white text-sm font-bold font-proxima active:bg-white/40 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.35)]"
+              className="flex items-center gap-2 bg-white/25 border border-white/50 px-3.5 py-2 rounded-full text-white text-md3-body-md font-bold font-proxima active:bg-white/40 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.35)]"
             >
               <AddCircleOutline className="w-[18px] h-[18px]" color="white" />
               New Event
@@ -107,7 +107,7 @@ export function OrgEventsList() {
                         <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
                           {dateParts.month}
                         </span>
-                        <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                        <span className="text-md3-title-lg font-black leading-tight text-white drop-shadow-md">
                           {dateParts.day}
                         </span>
                       </div>
@@ -120,7 +120,7 @@ export function OrgEventsList() {
                         <span className="text-[10px] font-bold leading-none text-blue/60 uppercase">
                           {dateParts.month}
                         </span>
-                        <span className="text-2xl font-black leading-tight text-blue">
+                        <span className="text-md3-headline-sm font-black leading-tight text-blue">
                           {dateParts.day}
                         </span>
                       </>

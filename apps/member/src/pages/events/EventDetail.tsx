@@ -82,10 +82,10 @@ export default function EventDetail() {
 
       <div className="p-4 space-y-4">
         <div>
-          <p className="text-xs text-slate-400 mb-1">{dateStr}</p>
-          <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
+          <p className="text-md3-label-md text-slate-400 mb-1">{dateStr}</p>
+          <h1 className="text-md3-title-lg font-bold text-slate-900">{event.title}</h1>
           {event.location && (
-            <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
+            <p className="text-md3-body-md text-slate-500 mt-1 flex items-center gap-1">
               <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
               {event.location}
             </p>
@@ -94,19 +94,19 @@ export default function EventDetail() {
 
         <div className="flex gap-3">
           <div className="bg-primary/10 rounded-xl px-3 py-2 flex-1 text-center">
-            <p className="text-primary text-xs font-medium">Points Value</p>
+            <p className="text-primary text-md3-label-md font-medium">Points Value</p>
             <p className="text-primary font-bold">+{event.points_value} pts</p>
           </div>
           <div className="bg-slate-100 rounded-xl px-3 py-2 flex-1 text-center">
-            <p className="text-slate-500 text-xs font-medium">Status</p>
+            <p className="text-slate-500 text-md3-label-md font-medium">Status</p>
             <p className="text-slate-700 font-bold capitalize">{event.status}</p>
           </div>
         </div>
 
         {event.description && (
           <div>
-            <h2 className="text-sm font-bold text-slate-900 mb-1">About</h2>
-            <p className="text-sm text-slate-600 leading-relaxed">{event.description}</p>
+            <h2 className="text-md3-body-md font-bold text-slate-900 mb-1">About</h2>
+            <p className="text-md3-body-md text-slate-600 leading-relaxed">{event.description}</p>
           </div>
         )}
 
@@ -114,7 +114,7 @@ export default function EventDetail() {
         <div className="pt-2 space-y-3">
           {!reg ? (
             isChapterLocked ? (
-              <div className="w-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold py-4 rounded-2xl text-center text-sm">
+              <div className="w-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold py-4 rounded-2xl text-center text-md3-body-md">
                 This event is exclusive to {eventChapterName ?? "this chapter's"} members
               </div>
             ) : (
@@ -149,13 +149,13 @@ export default function EventDetail() {
           {/* Volunteer CTA — only for upcoming events, hidden for cross-chapter members */}
           {event.status === 'upcoming' && (
             isChapterLocked ? (
-              <div className="w-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold py-4 rounded-2xl text-center text-sm">
+              <div className="w-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold py-4 rounded-2xl text-center text-md3-body-md">
                 This event is exclusive to {eventChapterName ?? "this chapter's"} members
               </div>
             ) : volunteerApp ? (
               <div className="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
                 <HeartOutline className="w-4 h-4" color="#94A3B8" />
-                <span className="text-sm font-medium text-slate-500">
+                <span className="text-md3-body-md font-medium text-slate-500">
                   Volunteer Application:{' '}
                   <span
                     className={

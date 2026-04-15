@@ -57,7 +57,7 @@ export function RewardEdit() {
           type="button"
           whileTap={{ scale: 0.95 }}
           onClick={() => setDeleteOpen(true)}
-          className="w-full py-3 rounded-xl border border-red/30 text-red text-sm font-bold hover:bg-red/5 transition-colors"
+          className="w-full py-3 rounded-xl border border-red/30 text-red text-md3-body-md font-bold hover:bg-red/5 transition-colors"
         >
           Remove from Catalog
         </motion.button>
@@ -86,31 +86,31 @@ export function RewardEdit() {
                 <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
                   <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
                 </div>
-                <h2 className="text-base font-bold text-slate-900 mb-1">
+                <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">
                   Remove from Catalog?
                 </h2>
-                <p className="text-sm text-slate-500">
+                <p className="text-md3-body-md text-slate-500">
                   <span className="font-semibold text-slate-700">
                     &ldquo;{reward.name}&rdquo;
                   </span>{' '}
                   will be removed from the member rewards catalog.
                 </p>
                 {deleteError && (
-                  <p className="mt-3 text-sm text-red font-semibold">{deleteError}</p>
+                  <p className="mt-3 text-md3-body-md text-red font-semibold">{deleteError}</p>
                 )}
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setDeleteOpen(false)}
                   disabled={isDeleting}
-                  className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold disabled:opacity-50"
+                  className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-md3-body-md font-bold disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => { void handleDelete() }}
                   disabled={isDeleting}
-                  className="flex-1 py-3 rounded-xl bg-red text-white text-sm font-bold disabled:opacity-60"
+                  className="flex-1 py-3 rounded-xl bg-red text-white text-md3-body-md font-bold disabled:opacity-60"
                 >
                   {isDeleting ? 'Removing…' : 'Remove'}
                 </button>

@@ -135,12 +135,12 @@ export function OrgEventSummary() {
       >
         {/* ── Event Info (Styled like EventDetail) ── */}
         <motion.div variants={fadeUp} className="mb-6 px-1">
-          <p className="text-xs text-slate-400 mb-1">{dateStr}</p>
-          <h2 className="text-xl font-bold text-slate-900 leading-tight">
+          <p className="text-md3-label-md text-slate-400 mb-1">{dateStr}</p>
+          <h2 className="text-md3-title-lg font-bold text-slate-900 leading-tight">
             {event.title}
           </h2>
           {event.location && (
-            <p className="text-sm text-slate-500 mt-1.5 flex items-center gap-1.5">
+            <p className="text-md3-body-md text-slate-500 mt-1.5 flex items-center gap-1.5">
               <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
               {event.location}
             </p>
@@ -156,8 +156,8 @@ export function OrgEventSummary() {
               { label: 'Checked In',       value: funnel.checkedIn, color: 'text-green' },
             ].map(({ label, value, color }) => (
               <div key={label} className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-                <p className={`text-2xl font-black ${color}`}>{value}</p>
-                <p className="text-xs text-slate-400 mt-1">{label}</p>
+                <p className={`text-md3-headline-sm font-black ${color}`}>{value}</p>
+                <p className="text-md3-label-md text-slate-400 mt-1">{label}</p>
               </div>
             ))}
           </div>
@@ -169,8 +169,8 @@ export function OrgEventSummary() {
               { label: 'Rejected', value: funnel.rejected, color: 'text-red' },
             ].map(({ label, value, color }) => (
               <div key={label} className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-                <p className={`text-2xl font-black ${color}`}>{value}</p>
-                <p className="text-xs text-slate-400 mt-1">{label}</p>
+                <p className={`text-md3-headline-sm font-black ${color}`}>{value}</p>
+                <p className="text-md3-label-md text-slate-400 mt-1">{label}</p>
               </div>
             ))}
           </div>
@@ -182,7 +182,7 @@ export function OrgEventSummary() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors capitalize ${
+              className={`px-4 py-1.5 rounded-lg text-md3-body-md font-semibold transition-colors capitalize ${
                 filter === f
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
@@ -222,8 +222,8 @@ export function OrgEventSummary() {
                 <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
                   <ClipboardListOutline className="w-7 h-7" color="#94A3B8" />
                 </div>
-                <p className="text-base font-bold text-slate-700">No registrants found</p>
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-md3-body-lg font-bold text-slate-700">No registrants found</p>
+                <p className="text-md3-body-md text-slate-400 mt-1">
                   {filter === 'all' ? 'No one registered for this event.' : `No ${filter} registrations.`}
                 </p>
               </motion.div>

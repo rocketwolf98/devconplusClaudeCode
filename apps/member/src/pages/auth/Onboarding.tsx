@@ -85,7 +85,7 @@ export default function Onboarding() {
         </div>
         <button
           onClick={() => navigate('/sign-up')}
-          className="text-white/75 text-sm font-medium px-1 py-1"
+          className="text-white/75 text-md3-body-md font-medium px-1 py-1"
         >
           Skip
         </button>

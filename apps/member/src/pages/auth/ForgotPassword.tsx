@@ -55,7 +55,7 @@ export default function ForgotPassword() {
             }}
           >
             <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
-            <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+            <p className="text-white/60 mt-3 text-md3-body-md font-proxima relative z-10 uppercase tracking-widest font-bold">
               Reset your password
             </p>
           </div>
@@ -63,27 +63,27 @@ export default function ForgotPassword() {
 
         {/* Card */}
         <div className="px-6 pt-10 pb-10">
-        <h2 className="text-xl font-black text-slate-900 mb-1">Forgot Password?</h2>
-        <p className="text-sm text-slate-500 mb-6">
+        <h2 className="text-md3-title-lg font-black text-slate-900 mb-1">Forgot Password?</h2>
+        <p className="text-md3-body-md text-slate-500 mb-6">
           Enter your email and we'll send you a link to reset your password.
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Email</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Email</label>
             <input
               {...register('email')}
               type="email"
               placeholder="juan@devcon.ph"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
             {errors.email && (
-              <p className="text-red text-xs mt-1">{errors.email.message}</p>
+              <p className="text-red text-md3-label-md mt-1">{errors.email.message}</p>
             )}
           </div>
 
           {formError && (
-            <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+            <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
               {formError}
             </p>
           )}
@@ -106,7 +106,7 @@ export default function ForgotPassword() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-md3-body-md text-slate-500 mt-6">
           Remember your password?{' '}
           <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
         </p>

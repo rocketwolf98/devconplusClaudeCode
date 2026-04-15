@@ -71,8 +71,8 @@ export default function KonamiModal({ open, onClose }: Props) {
                         <ShieldCheckOutline className="w-7 h-7" color="rgb(var(--color-primary))" />
                       </div>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900 mb-2">Admin Access</h2>
-                    <p className="text-sm text-slate-500 mb-6">You found the secret entrance.</p>
+                    <h2 className="text-md3-title-lg font-bold text-slate-900 mb-2">Admin Access</h2>
+                    <p className="text-md3-body-md text-slate-500 mb-6">You found the secret entrance.</p>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={handleEnterAdmin}
@@ -91,8 +91,8 @@ export default function KonamiModal({ open, onClose }: Props) {
                         <MonitorOutline className="w-7 h-7" color="#94A3B8" />
                       </div>
                     </div>
-                    <h2 className="text-lg font-bold text-slate-900 mb-2">Desktop Required</h2>
-                    <p className="text-sm text-slate-500 mb-6">The admin panel requires a desktop browser.</p>
+                    <h2 className="text-md3-title-lg font-bold text-slate-900 mb-2">Desktop Required</h2>
+                    <p className="text-md3-body-md text-slate-500 mb-6">The admin panel requires a desktop browser.</p>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={onClose}

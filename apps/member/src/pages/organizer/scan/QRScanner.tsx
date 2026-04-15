@@ -337,7 +337,7 @@ export function OrgQRScanner() {
             className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none"
           >
             <div className="w-10 h-10 rounded-full border-2 border-white border-t-transparent animate-spin" />
-            <p className="text-white text-sm font-medium">
+            <p className="text-white text-md3-body-md font-medium">
               Starting camera…{retryAttempt > 1 ? ` (attempt ${retryAttempt}/3)` : ''}
             </p>
           </motion.div>
@@ -353,8 +353,8 @@ export function OrgQRScanner() {
               <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-3">
                 <CloseCircleOutline className="w-6 h-6" color="#EF4444" />
               </div>
-              <p className="text-sm font-bold text-slate-900 mb-1">Camera access denied</p>
-              <p className="text-xs text-slate-500">Enable camera access in your browser settings and reload the page.</p>
+              <p className="text-md3-body-md font-bold text-slate-900 mb-1">Camera access denied</p>
+              <p className="text-md3-label-md text-slate-500">Enable camera access in your browser settings and reload the page.</p>
             </div>
           </motion.div>
         )}
@@ -369,13 +369,13 @@ export function OrgQRScanner() {
               <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-3">
                 <CloseCircleOutline className="w-6 h-6" color="#EF4444" />
               </div>
-              <p className="text-sm font-bold text-slate-900 mb-1">Camera unavailable</p>
-              <p className="text-xs text-slate-500 mb-4">Check browser permissions and try again.</p>
+              <p className="text-md3-body-md font-bold text-slate-900 mb-1">Camera unavailable</p>
+              <p className="text-md3-label-md text-slate-500 mb-4">Check browser permissions and try again.</p>
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => { if (videoEl) void startCameraWithRetry(videoEl) }}
-                className="w-full py-2.5 bg-blue text-white text-sm font-bold rounded-xl"
+                className="w-full py-2.5 bg-blue text-white text-md3-body-md font-bold rounded-xl"
               >
                 Try Again
               </motion.button>
@@ -390,7 +390,7 @@ export function OrgQRScanner() {
           <div className="relative w-60 h-60">
             <CornerBrackets />
           </div>
-          <p className="text-white/80 text-sm font-medium tracking-wide">
+          <p className="text-white/80 text-md3-body-md font-medium tracking-wide">
             {isSwitching ? 'Switching camera…' : 'Align QR to scan'}
           </p>
         </div>
@@ -418,7 +418,7 @@ export function OrgQRScanner() {
             className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 disabled:opacity-40 shadow-lg transition-colors"
           >
             <CameraRotateOutline className="w-4 h-4" color="white" />
-            <span className="text-white text-xs font-medium">Lens</span>
+            <span className="text-white text-md3-label-md font-medium">Lens</span>
           </motion.button>
         )}
       </div>
@@ -450,12 +450,12 @@ export function OrgQRScanner() {
                     <CheckCircleOutline className="w-5 h-5" color="white" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white font-black text-base truncate">{overlayEntry.data.memberName}</p>
-                    <p className="text-white/70 text-xs truncate">{overlayEntry.data.eventTitle}</p>
+                    <p className="text-white font-black text-md3-body-lg truncate">{overlayEntry.data.memberName}</p>
+                    <p className="text-white/70 text-md3-label-md truncate">{overlayEntry.data.eventTitle}</p>
                   </div>
                   <div className="ml-auto flex items-center gap-1 shrink-0">
                     <BoltOutline className="w-4 h-4" color="white" />
-                    <span className="text-white font-black text-lg">+{overlayEntry.data.pointsAwarded}</span>
+                    <span className="text-white font-black text-md3-title-lg">+{overlayEntry.data.pointsAwarded}</span>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
@@ -482,8 +482,8 @@ export function OrgQRScanner() {
                     <InfoCircleOutline className="w-5 h-5" color="white" />
                   </div>
                   <div>
-                    <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
-                    <p className="text-white/80 text-xs">Already checked in</p>
+                    <p className="text-white font-black text-md3-body-lg">{overlayEntry.data.memberName}</p>
+                    <p className="text-white/80 text-md3-label-md">Already checked in</p>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
@@ -510,14 +510,14 @@ export function OrgQRScanner() {
                     <ClockCircleOutline className="w-5 h-5" color="#EAB308" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-slate-900 font-black text-base truncate">{overlayEntry.data.memberName}</p>
-                    <p className="text-slate-500 text-xs truncate">{overlayEntry.data.eventTitle}</p>
+                    <p className="text-slate-900 font-black text-md3-body-lg truncate">{overlayEntry.data.memberName}</p>
+                    <p className="text-slate-500 text-md3-label-md truncate">{overlayEntry.data.eventTitle}</p>
                   </div>
                   <span className="ml-auto shrink-0 bg-yellow-100 text-yellow-700 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full">
                     Pending
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mb-4 mt-2">
+                <p className="text-md3-label-md text-slate-500 mb-4 mt-2">
                   This member requires approval to attend. Approve to check them in and award points.
                 </p>
                 <div className="flex gap-2">
@@ -528,7 +528,7 @@ export function OrgQRScanner() {
                       e.stopPropagation()
                       void handleDoorAction(overlayEntry.data.registrationId!, 'reject')
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-red/30 bg-red/5 text-red text-sm font-bold"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl border border-red/30 bg-red/5 text-red text-md3-body-md font-bold"
                   >
                     <UserCrossOutline className="w-4 h-4" />
                     Reject
@@ -540,7 +540,7 @@ export function OrgQRScanner() {
                       e.stopPropagation()
                       void handleDoorAction(overlayEntry.data.registrationId!, 'approve')
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green text-white text-sm font-bold"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl bg-green text-white text-md3-body-md font-bold"
                   >
                     <UserCheckOutline className="w-4 h-4" />
                     Approve
@@ -556,8 +556,8 @@ export function OrgQRScanner() {
                     <UserCrossOutline className="w-5 h-5" color="white" />
                   </div>
                   <div>
-                    <p className="text-white font-black text-base">{overlayEntry.data.memberName}</p>
-                    <p className="text-white/70 text-xs">Entry rejected</p>
+                    <p className="text-white font-black text-md3-body-lg">{overlayEntry.data.memberName}</p>
+                    <p className="text-white/70 text-md3-label-md">Entry rejected</p>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">
@@ -584,8 +584,8 @@ export function OrgQRScanner() {
                     <CloseCircleOutline className="w-5 h-5" color="white" />
                   </div>
                   <div>
-                    <p className="text-white font-black text-base">Scan Failed</p>
-                    <p className="text-white/80 text-xs">{overlayEntry.data.message}</p>
+                    <p className="text-white font-black text-md3-body-lg">Scan Failed</p>
+                    <p className="text-white/80 text-md3-label-md">{overlayEntry.data.message}</p>
                   </div>
                 </div>
                 <div className="h-1 bg-white/30 rounded-full overflow-hidden">

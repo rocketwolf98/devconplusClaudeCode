@@ -100,8 +100,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-black text-slate-900 mb-1">Admin Dashboard</h1>
-      <p className="text-sm text-slate-500 mb-6">Platform overview for DEVCON+</p>
+      <h1 className="text-md3-headline-sm font-black text-slate-900 mb-1">Admin Dashboard</h1>
+      <p className="text-md3-body-md text-slate-500 mb-6">Platform overview for DEVCON+</p>
 
       {/* Row 1 — KPI Cards */}
       <div className="grid grid-cols-4 gap-4">
@@ -110,17 +110,17 @@ export default function AdminDashboard() {
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}>
               <Icon className="w-5 h-5" />
             </div>
-            <p className={`text-2xl font-black ${isLoading ? 'text-slate-300' : 'text-slate-900'}`}>{value}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+            <p className={`text-md3-headline-sm font-black ${isLoading ? 'text-slate-300' : 'text-slate-900'}`}>{value}</p>
+            <p className="text-md3-label-md text-slate-500 mt-0.5">{label}</p>
           </div>
         ))}
       </div>
 
       {/* Row 2 — Member Growth Area Chart */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-card mt-4">
-        <p className="text-base font-bold text-slate-900 mb-4">Member Growth</p>
+        <p className="text-md3-body-lg font-bold text-slate-900 mb-4">Member Growth</p>
         {isLoading || memberGrowth.length === 0 ? (
-          <div className="h-[180px] flex items-center justify-center text-slate-400 text-sm">
+          <div className="h-[180px] flex items-center justify-center text-slate-400 text-md3-body-md">
             {isLoading ? 'Loading…' : 'No data yet'}
           </div>
         ) : (
@@ -137,9 +137,9 @@ export default function AdminDashboard() {
 
       {/* Row 3 — XP by Chapter Horizontal Bar Chart */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-card mt-4">
-        <p className="text-base font-bold text-slate-900 mb-4">XP by Chapter</p>
+        <p className="text-md3-body-lg font-bold text-slate-900 mb-4">XP by Chapter</p>
         {isLoading || xpByChapter.length === 0 ? (
-          <div className="h-[260px] flex items-center justify-center text-slate-400 text-sm">
+          <div className="h-[260px] flex items-center justify-center text-slate-400 text-md3-body-md">
             {isLoading ? 'Loading…' : 'No data yet'}
           </div>
         ) : (
@@ -156,9 +156,9 @@ export default function AdminDashboard() {
 
       {/* Row 4 — Event Attendance Trend Line Chart */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-card mt-4">
-        <p className="text-base font-bold text-slate-900 mb-4">Event Attendance Trend</p>
+        <p className="text-md3-body-lg font-bold text-slate-900 mb-4">Event Attendance Trend</p>
         {isLoading || attendanceTrend.length === 0 ? (
-          <div className="h-[180px] flex items-center justify-center text-slate-400 text-sm">
+          <div className="h-[180px] flex items-center justify-center text-slate-400 text-md3-body-md">
             {isLoading ? 'Loading…' : 'No completed events yet'}
           </div>
         ) : (

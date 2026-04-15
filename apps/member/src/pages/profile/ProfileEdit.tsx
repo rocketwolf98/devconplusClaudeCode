@@ -266,7 +266,7 @@ export default function ProfileEdit() {
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-4xl font-black text-primary">{displayInitials}</span>
+                  <span className="text-md3-display-sm font-black text-primary">{displayInitials}</span>
                 )}
               </div>
               {avatarUploading && (
@@ -281,36 +281,36 @@ export default function ProfileEdit() {
               )}
             </button>
             {avatarError && (
-              <p className="text-red text-xs flex items-center gap-1">
+              <p className="text-red text-md3-label-md flex items-center gap-1">
                 <CloseCircleOutline className="w-3.5 h-3.5" />{avatarError}
               </p>
             )}
             {avatarUploading && (
-              <p className="text-xs text-slate-400">Uploading photo…</p>
+              <p className="text-md3-label-md text-slate-400">Uploading photo…</p>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => void handlePhotoChange(e)} />
           </div>
 
           {/* Full Name */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Full Name</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Full Name</label>
             <input
               {...register('full_name')}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            {errors.full_name && <p className="text-red text-xs mt-1">{errors.full_name.message}</p>}
+            {errors.full_name && <p className="text-red text-md3-label-md mt-1">{errors.full_name.message}</p>}
           </div>
 
           {/* Username */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Username</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Username</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm select-none">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-md3-body-md select-none">@</span>
               <input
                 {...register('username', {
                   onChange: (e) => handleUsernameChange(e.target.value),
                 })}
-                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
@@ -321,64 +321,64 @@ export default function ProfileEdit() {
                 {usernameStatus === 'taken' && watchedUsername !== user?.username && <CloseCircleOutline className="w-4 h-4" color="#EF4444" />}
               </span>
             </div>
-            {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
+            {errors.username && <p className="text-red text-md3-label-md mt-1">{errors.username.message}</p>}
             {usernameStatus === 'taken' && watchedUsername !== user?.username && !errors.username && (
-              <p className="text-red text-xs mt-1">Username already taken</p>
+              <p className="text-red text-md3-label-md mt-1">Username already taken</p>
             )}
           </div>
 
           {/* School / Company */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               School / Company <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <input
               {...register('school_or_company')}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           {/* Social Links */}
           <div className="space-y-3">
-            <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+            <p className="text-md3-body-md font-medium text-slate-700 flex items-center gap-1.5">
               <LinkOutline className="w-4 h-4" color="#94A3B8" />
               Social Links <span className="text-slate-400 font-normal">(optional)</span>
             </p>
             <div>
-              <label className="text-xs text-slate-500 block mb-1">LinkedIn</label>
+              <label className="text-md3-label-md text-slate-500 block mb-1">LinkedIn</label>
               <input
                 {...register('linkedin_url')}
                 type="url"
                 placeholder="https://linkedin.com/in/yourprofile"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              {errors.linkedin_url && <p className="text-red text-xs mt-1">{errors.linkedin_url.message}</p>}
+              {errors.linkedin_url && <p className="text-red text-md3-label-md mt-1">{errors.linkedin_url.message}</p>}
             </div>
             <div>
-              <label className="text-xs text-slate-500 block mb-1">GitHub</label>
+              <label className="text-md3-label-md text-slate-500 block mb-1">GitHub</label>
               <input
                 {...register('github_url')}
                 type="url"
                 placeholder="https://github.com/yourusername"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              {errors.github_url && <p className="text-red text-xs mt-1">{errors.github_url.message}</p>}
+              {errors.github_url && <p className="text-red text-md3-label-md mt-1">{errors.github_url.message}</p>}
             </div>
             <div>
-              <label className="text-xs text-slate-500 block mb-1">Portfolio</label>
+              <label className="text-md3-label-md text-slate-500 block mb-1">Portfolio</label>
               <input
                 {...register('portfolio_url')}
                 type="url"
                 placeholder="https://yourportfolio.com"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              {errors.portfolio_url && <p className="text-red text-xs mt-1">{errors.portfolio_url.message}</p>}
+              {errors.portfolio_url && <p className="text-red text-md3-label-md mt-1">{errors.portfolio_url.message}</p>}
             </div>
           </div>
 
           {/* Chapter — password gated (managed outside RHF) */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               Chapter <span className="text-[10px] font-normal text-slate-400 ml-1">requires password</span>
             </label>
             <select
@@ -390,7 +390,7 @@ export default function ProfileEdit() {
                   handleChapterChange(val)
                 }
               }}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Select chapter…</option>
               {chapters.map((c) => (
@@ -398,11 +398,11 @@ export default function ProfileEdit() {
               ))}
             </select>
             {chapterSuccess ? (
-              <p className="text-green text-xs mt-1 flex items-center gap-1">
+              <p className="text-green text-md3-label-md mt-1 flex items-center gap-1">
                 <CheckCircleOutline className="w-3.5 h-3.5" /> Chapter updated successfully.
               </p>
             ) : (
-              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+              <p className="text-md3-label-md text-slate-400 mt-1 flex items-center gap-1">
                 <MapPointOutline className="w-3 h-3" />
                 Changing chapter requires password confirmation
               </p>
@@ -414,67 +414,67 @@ export default function ProfileEdit() {
         {/* ── SENSITIVE SETTINGS CARD ── */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Account Security</p>
+            <p className="text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Account Security</p>
           </div>
 
           {/* Change Email */}
           <div className="px-4 py-4 border-b border-slate-100">
-            <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
+            <p className="text-md3-body-md font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
               <LetterOutline className="w-4 h-4" color="#94A3B8" />
               Change Email
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires password</span>
             </p>
-            <p className="text-xs text-slate-400 mb-3">Current: {user?.email}</p>
+            <p className="text-md3-label-md text-slate-400 mb-3">Current: {user?.email}</p>
             {emailSuccess ? (
-              <p className="text-green text-xs flex items-center gap-1"><CheckCircleOutline className="w-3.5 h-3.5" /> CheckCircleOutline your new email to confirm the change.</p>
+              <p className="text-green text-md3-label-md flex items-center gap-1"><CheckCircleOutline className="w-3.5 h-3.5" /> CheckCircleOutline your new email to confirm the change.</p>
             ) : (
               <form onSubmit={emailForm.handleSubmit(handleChangeEmail)} className="flex gap-2">
                 <input
                   {...emailForm.register('new_email')}
                   type="email"
                   placeholder="New email address"
-                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <button type="submit" className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shrink-0">
+                <button type="submit" className="px-4 py-2.5 bg-primary text-white text-md3-body-md font-bold rounded-xl shrink-0">
                   Update
                 </button>
               </form>
             )}
             {emailForm.formState.errors.new_email && (
-              <p className="text-red text-xs mt-1">{emailForm.formState.errors.new_email.message}</p>
+              <p className="text-red text-md3-label-md mt-1">{emailForm.formState.errors.new_email.message}</p>
             )}
           </div>
 
           {/* Change Password */}
           <div className="px-4 py-4">
-            <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
+            <p className="text-md3-body-md font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
               <LockOutline className="w-4 h-4" color="#94A3B8" />
               Change Password
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires current password</span>
             </p>
             {passwordSuccess ? (
-              <p className="text-green text-xs flex items-center gap-1 mt-2"><CheckCircleOutline className="w-3.5 h-3.5" /> Password updated successfully.</p>
+              <p className="text-green text-md3-label-md flex items-center gap-1 mt-2"><CheckCircleOutline className="w-3.5 h-3.5" /> Password updated successfully.</p>
             ) : (
               <form onSubmit={passwordForm.handleSubmit(handleChangePassword)} className="space-y-2 mt-3">
                 <input
                   {...passwordForm.register('new_password')}
                   type="password"
                   placeholder="New password (min 8 characters)"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {passwordForm.formState.errors.new_password && (
-                  <p className="text-red text-xs">{passwordForm.formState.errors.new_password.message}</p>
+                  <p className="text-red text-md3-label-md">{passwordForm.formState.errors.new_password.message}</p>
                 )}
                 <input
                   {...passwordForm.register('confirm_password')}
                   type="password"
                   placeholder="Confirm new password"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 {passwordForm.formState.errors.confirm_password && (
-                  <p className="text-red text-xs">{passwordForm.formState.errors.confirm_password.message}</p>
+                  <p className="text-red text-md3-label-md">{passwordForm.formState.errors.confirm_password.message}</p>
                 )}
-                <button type="submit" className="w-full bg-slate-900 text-white text-sm font-bold py-3 rounded-xl mt-1">
+                <button type="submit" className="w-full bg-slate-900 text-white text-md3-body-md font-bold py-3 rounded-xl mt-1">
                   Update Password
                 </button>
               </form>
@@ -486,7 +486,7 @@ export default function ProfileEdit() {
         {user?.role === 'member' && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <p className="text-md3-label-md font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheckOutline className="w-3.5 h-3.5" />
                 Become an Organizer
               </p>
@@ -496,13 +496,13 @@ export default function ProfileEdit() {
                 <div className="flex items-start gap-3 bg-primary/5 border border-primary/20 rounded-xl p-3">
                   <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-primary">Upgrade request pending</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Awaiting super admin approval. You'll have organizer access once approved.</p>
+                    <p className="text-md3-body-md font-semibold text-primary">Upgrade request pending</p>
+                    <p className="text-md3-label-md text-slate-500 mt-0.5">Awaiting super admin approval. You'll have organizer access once approved.</p>
                   </div>
                 </div>
               ) : (
                 <>
-                  <p className="text-sm text-slate-500 mb-3">
+                  <p className="text-md3-body-md text-slate-500 mb-3">
                     Enter your organizer code to request access. The code must match your chapter.
                   </p>
                   <div className="flex gap-2">
@@ -510,28 +510,28 @@ export default function ProfileEdit() {
                       value={upgradeCode}
                       onChange={(e) => { setUpgradeCode(e.target.value.toUpperCase()); setUpgradeStatus('idle') }}
                       placeholder="DCN-XXX-0000"
-                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary uppercase"
+                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md font-mono focus:outline-none focus:ring-2 focus:ring-primary uppercase"
                     />
                     <button
                       type="button"
                       onClick={() => void handleUpgradeSubmit()}
                       disabled={upgradeStatus === 'loading' || upgradeStatus === 'rate_limited' || !upgradeCode.trim()}
-                      className="px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shrink-0 disabled:opacity-60"
+                      className="px-4 py-2.5 bg-primary text-white text-md3-body-md font-bold rounded-xl shrink-0 disabled:opacity-60"
                     >
                       {upgradeStatus === 'loading' ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Submit'}
                     </button>
                   </div>
                   {upgradeStatus === 'invalid_code' && (
-                    <p className="text-red text-xs mt-2 flex items-center gap-1"><CloseCircleOutline className="w-3.5 h-3.5" /> Invalid or inactive organizer code.</p>
+                    <p className="text-red text-md3-label-md mt-2 flex items-center gap-1"><CloseCircleOutline className="w-3.5 h-3.5" /> Invalid or inactive organizer code.</p>
                   )}
                   {upgradeStatus === 'wrong_chapter' && (
-                    <p className="text-red text-xs mt-2 flex items-center gap-1"><CloseCircleOutline className="w-3.5 h-3.5" /> This code belongs to a different chapter. Make sure your chapter is set correctly first.</p>
+                    <p className="text-red text-md3-label-md mt-2 flex items-center gap-1"><CloseCircleOutline className="w-3.5 h-3.5" /> This code belongs to a different chapter. Make sure your chapter is set correctly first.</p>
                   )}
                   {upgradeStatus === 'error' && (
-                    <p className="text-red text-xs mt-2">Something went wrong. Please try again.</p>
+                    <p className="text-red text-md3-label-md mt-2">Something went wrong. Please try again.</p>
                   )}
                   {upgradeStatus === 'rate_limited' && (
-                    <p className="text-red text-xs mt-2 flex items-center gap-1"><CloseCircleOutline className="w-3.5 h-3.5" /> Too many attempts. Please wait 60 seconds before trying again.</p>
+                    <p className="text-red text-md3-label-md mt-2 flex items-center gap-1"><CloseCircleOutline className="w-3.5 h-3.5" /> Too many attempts. Please wait 60 seconds before trying again.</p>
                   )}
                 </>
               )}
@@ -541,7 +541,7 @@ export default function ProfileEdit() {
 
         {/* ── SAVE BUTTON — always at bottom ── */}
         {saveError && (
-          <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">{saveError}</p>
+          <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">{saveError}</p>
         )}
         <button
           type="submit"

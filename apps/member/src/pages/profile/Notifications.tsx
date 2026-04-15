@@ -51,8 +51,8 @@ export default function Notifications() {
         {SETTINGS.map((s) => (
           <div key={s.key} className="bg-white rounded-2xl shadow-card px-4 py-4 flex items-center gap-3">
             <div className="flex-1">
-              <p className="font-medium text-slate-900 text-sm">{s.label}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{s.desc}</p>
+              <p className="font-medium text-slate-900 text-md3-body-md">{s.label}</p>
+              <p className="text-md3-label-md text-slate-400 mt-0.5">{s.desc}</p>
             </div>
             <button
               onClick={() => setOn((prev) => ({ ...prev, [s.key]: !prev[s.key] }))}

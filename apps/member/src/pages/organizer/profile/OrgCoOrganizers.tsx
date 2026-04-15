@@ -216,14 +216,14 @@ export function OrgCoOrganizers() {
       <div className="p-4 space-y-4 pb-24">
 
         {error && (
-          <div className="bg-red/10 border border-red/20 rounded-2xl px-4 py-3 text-sm text-red font-medium">
+          <div className="bg-red/10 border border-red/20 rounded-2xl px-4 py-3 text-md3-body-md text-red font-medium">
             {error}
           </div>
         )}
 
         {/* Zone 1 — Chapter Invite Code */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">
+          <p className="text-md3-label-md font-semibold text-slate-400 uppercase tracking-wide mb-3">
             Chapter Invite Code
           </p>
           {loading ? (
@@ -231,12 +231,12 @@ export function OrgCoOrganizers() {
           ) : chapterCode ? (
             <>
               <div className="flex items-center justify-between gap-3">
-                <span className="font-mono text-2xl font-black text-slate-900 tracking-widest">
+                <span className="font-mono text-md3-headline-sm font-black text-slate-900 tracking-widest">
                   {chapterCode.code}
                 </span>
                 <button
                   onClick={handleCopy}
-                  className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors ${
+                  className={`flex items-center gap-1.5 text-md3-label-md font-bold px-3 py-1.5 rounded-xl transition-colors ${
                     copied
                       ? 'bg-green/10 text-green'
                       : 'bg-blue/10 text-blue hover:bg-blue/20'
@@ -249,12 +249,12 @@ export function OrgCoOrganizers() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-md3-label-md text-slate-400 mt-2">
                 Share this with members in your chapter to invite them as co-organizers.
               </p>
             </>
           ) : (
-            <p className="text-sm text-slate-400">
+            <p className="text-md3-body-md text-slate-400">
               No active invite code found. Contact HQ admin to generate one.
             </p>
           )}
@@ -264,9 +264,9 @@ export function OrgCoOrganizers() {
         {(loading || pendingRequests.length > 0) && (
           <div>
             <div className="flex items-center gap-2 mb-2 px-1">
-              <p className="text-sm font-bold text-slate-900">Awaiting Approval</p>
+              <p className="text-md3-body-md font-bold text-slate-900">Awaiting Approval</p>
               {!loading && (
-                <span className="text-xs font-bold bg-gold/10 text-gold px-2 py-0.5 rounded-full">
+                <span className="text-md3-label-md font-bold bg-gold/10 text-gold px-2 py-0.5 rounded-full">
                   {pendingRequests.length}
                 </span>
               )}
@@ -306,12 +306,12 @@ export function OrgCoOrganizers() {
                           {profile?.avatar_url ? (
                             <img src={profile.avatar_url} alt={name} className="w-full h-full object-cover" />
                           ) : (
-                            <span className="text-xs font-black text-blue">{getInitials(name)}</span>
+                            <span className="text-md3-label-md font-black text-blue">{getInitials(name)}</span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">{name}</p>
-                          <p className="text-xs text-slate-400 truncate">{profile?.email}</p>
+                          <p className="text-md3-body-md font-semibold text-slate-900 truncate">{name}</p>
+                          <p className="text-md3-label-md text-slate-400 truncate">{profile?.email}</p>
                           <p className="text-[10px] text-slate-300 mt-0.5">
                             {formatDate.short(req.created_at)}
                           </p>
@@ -320,14 +320,14 @@ export function OrgCoOrganizers() {
                           <button
                             onClick={() => void handleApprove(req.id)}
                             disabled={isProcessing}
-                            className="text-xs font-bold bg-primary text-white px-3 py-1.5 rounded-xl disabled:opacity-50 transition-opacity"
+                            className="text-md3-label-md font-bold bg-primary text-white px-3 py-1.5 rounded-xl disabled:opacity-50 transition-opacity"
                           >
                             {isProcessing ? '…' : 'Approve'}
                           </button>
                           <button
                             onClick={() => void handleReject(req.id)}
                             disabled={isProcessing}
-                            className="text-xs font-bold text-red-500 disabled:opacity-50"
+                            className="text-md3-label-md font-bold text-red-500 disabled:opacity-50"
                           >
                             Reject
                           </button>
@@ -344,7 +344,7 @@ export function OrgCoOrganizers() {
         {/* Zone 3 — Active Co-Organizers */}
         <div>
           <div className="flex items-center gap-2 mb-2 px-1">
-            <p className="text-sm font-bold text-slate-900">Chapter Officers</p>
+            <p className="text-md3-body-md font-bold text-slate-900">Chapter Officers</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
@@ -365,8 +365,8 @@ export function OrgCoOrganizers() {
                 <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3">
                   <UsersGroupRoundedOutline className="w-6 h-6" color="#CBD5E1" />
                 </div>
-                <p className="text-sm font-semibold text-slate-500">No co-organizers yet</p>
-                <p className="text-xs text-slate-400 mt-1 text-center">
+                <p className="text-md3-body-md font-semibold text-slate-500">No co-organizers yet</p>
+                <p className="text-md3-label-md text-slate-400 mt-1 text-center">
                   Share your code above to invite members as co-organizers.
                 </p>
               </div>
@@ -387,12 +387,12 @@ export function OrgCoOrganizers() {
                           {coOrg.avatar_url ? (
                             <img src={coOrg.avatar_url} alt={coOrg.full_name} className="w-full h-full object-cover" />
                           ) : (
-                            <span className="text-xs font-black text-blue">{getInitials(coOrg.full_name)}</span>
+                            <span className="text-md3-label-md font-black text-blue">{getInitials(coOrg.full_name)}</span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-slate-900 truncate">{coOrg.full_name}</p>
-                          <p className="text-xs text-slate-400 truncate">{coOrg.email}</p>
+                          <p className="text-md3-body-md font-semibold text-slate-900 truncate">{coOrg.full_name}</p>
+                          <p className="text-md3-label-md text-slate-400 truncate">{coOrg.email}</p>
                           <div className="flex items-center gap-1 mt-0.5">
                             <ClockCircleOutline className="w-2.5 h-2.5" color="#CBD5E1" />
                             <p className="text-[10px] text-slate-300">
@@ -419,18 +419,18 @@ export function OrgCoOrganizers() {
                             className="overflow-hidden"
                           >
                             <div className="mt-3 ml-13 flex items-center gap-2 pl-[52px]">
-                              <p className="text-xs text-slate-500 flex-1">
+                              <p className="text-md3-label-md text-slate-500 flex-1">
                                 Remove <span className="font-semibold">{coOrg.full_name}</span> as co-organizer?
                               </p>
                               <button
                                 onClick={() => setConfirmRemoveId(null)}
-                                className="text-xs font-semibold text-slate-400 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+                                className="text-md3-label-md font-semibold text-slate-400 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
                               >
                                 Cancel
                               </button>
                               <button
                                 onClick={() => void handleRemove(coOrg.id)}
-                                className="text-xs font-bold text-white bg-red-500 px-3 py-1.5 rounded-xl"
+                                className="text-md3-label-md font-bold text-white bg-red-500 px-3 py-1.5 rounded-xl"
                               >
                                 Remove
                               </button>

@@ -17,7 +17,7 @@ function JobCard({ job }: { job: Job }) {
       <div className="px-[18px] py-[12px] flex flex-col gap-2">
         {/* Logo */}
         <div className="w-12 h-12 bg-primary rounded-full shrink-0 flex items-center justify-center">
-          <span className="text-white font-proxima font-bold text-xl uppercase">
+          <span className="text-white font-proxima font-bold text-md3-title-lg uppercase">
             {job.company?.[0] ?? 'J'}
           </span>
         </div>

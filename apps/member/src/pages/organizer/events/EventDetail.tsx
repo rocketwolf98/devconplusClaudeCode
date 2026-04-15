@@ -79,10 +79,10 @@ export function OrgEventDetail() {
       >
         {/* Title & Info section (Similar to Member Side) */}
         <motion.div variants={fadeUp} className="mb-6">
-          <p className="text-xs text-slate-400 mb-1">{formattedDate}</p>
-          <h1 className="text-xl font-bold text-slate-900">{event.title}</h1>
+          <p className="text-md3-label-md text-slate-400 mb-1">{formattedDate}</p>
+          <h1 className="text-md3-title-lg font-bold text-slate-900">{event.title}</h1>
           {event.location && (
-            <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
+            <p className="text-md3-body-md text-slate-500 mt-1 flex items-center gap-1">
               <MapPointOutline className="w-3.5 h-3.5 shrink-0" />
               {event.location}
             </p>
@@ -101,8 +101,8 @@ export function OrgEventDetail() {
               variants={cardItem}
               className="bg-white rounded-xl border border-slate-200 p-4 text-center"
             >
-              <p className={`text-2xl font-black ${color}`}>{value}</p>
-              <p className="text-xs text-slate-400 mt-1">{label}</p>
+              <p className={`text-md3-headline-sm font-black ${color}`}>{value}</p>
+              <p className="text-md3-label-md text-slate-400 mt-1">{label}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -110,27 +110,27 @@ export function OrgEventDetail() {
         {/* Detail card */}
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-xs font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+            <span className="text-md3-label-md font-semibold text-blue bg-blue/10 px-2.5 py-1 rounded-full flex items-center gap-1">
               <BoltOutline className="w-3 h-3" />
               {event.points_value} XP
             </span>
             {event.requires_approval && (
-              <span className="text-xs font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-full">
+              <span className="text-md3-label-md font-semibold text-yellow-700 bg-yellow-50 border border-yellow-200 px-2.5 py-1 rounded-full">
                 Approval Required
               </span>
             )}
           </div>
 
           <div className="border-t border-slate-100 pt-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">About</p>
-            <p className="text-sm text-slate-600 leading-relaxed">{event.description}</p>
+            <p className="text-md3-label-md font-bold uppercase tracking-wide text-slate-400 mb-2">About</p>
+            <p className="text-md3-body-md text-slate-600 leading-relaxed">{event.description}</p>
           </div>
         </motion.div>
 
         <motion.button
           variants={fadeUp}
           onClick={() => setShowAnnounce(true)}
-          className="w-full py-3 mb-3 border border-blue/30 text-blue text-sm font-bold rounded-xl
+          className="w-full py-3 mb-3 border border-blue/30 text-blue text-md3-body-md font-bold rounded-xl
                      hover:bg-blue/5 transition-colors flex items-center justify-center gap-2"
           whileTap={{ scale: 0.98 }}
         >
@@ -141,7 +141,7 @@ export function OrgEventDetail() {
         <motion.button
           variants={fadeUp}
           onClick={() => navigate(`/organizer/events/${event.id}/registrants`)}
-          className="w-full py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="w-full py-3 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
           whileTap={{ scale: 0.98 }}
         >
           View Registrants

@@ -284,8 +284,8 @@ export function OrgDashboard() {
                   <div className="w-14 h-14 rounded-full bg-green/10 flex items-center justify-center mx-auto mb-3">
                     <CheckCircleOutline className="w-7 h-7" color="#21C45D" />
                   </div>
-                  <p className="text-base font-bold text-slate-700">All caught up!</p>
-                  <p className="text-sm text-slate-400 mt-1">No pending registrations right now.</p>
+                  <p className="text-md3-body-lg font-bold text-slate-700">All caught up!</p>
+                  <p className="text-md3-body-md text-slate-400 mt-1">No pending registrations right now.</p>
                 </div>
               ) : (
                 <motion.div
@@ -294,7 +294,7 @@ export function OrgDashboard() {
                   initial="hidden"
                   animate="visible"
                 >
-                  <p className="text-sm text-slate-500 mb-2">
+                  <p className="text-md3-body-md text-slate-500 mb-2">
                     {pendingRegistrations.length} registration{pendingRegistrations.length !== 1 ? 's' : ''} awaiting approval
                   </p>
                   {registrations.map((reg) => (
@@ -322,7 +322,7 @@ export function OrgDashboard() {
             >
               {volunteerError && (
                 <div className="bg-red/5 border border-red/20 rounded-xl px-4 py-3 mb-3">
-                  <p className="text-xs text-red">{volunteerError}</p>
+                  <p className="text-md3-label-md text-red">{volunteerError}</p>
                 </div>
               )}
               {volunteerLoading ? (
@@ -345,8 +345,8 @@ export function OrgDashboard() {
                   <div className="w-14 h-14 rounded-full bg-blue/10 flex items-center justify-center mx-auto mb-3">
                     <HeartOutline className="w-7 h-7" color="#1152D4" />
                   </div>
-                  <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
-                  <p className="text-sm text-slate-400 mt-1">Applications will appear here when members apply.</p>
+                  <p className="text-md3-body-lg font-bold text-slate-700">No volunteer applications yet.</p>
+                  <p className="text-md3-body-md text-slate-400 mt-1">Applications will appear here when members apply.</p>
                 </div>
               ) : (
                 <motion.div
@@ -356,7 +356,7 @@ export function OrgDashboard() {
                   animate="visible"
                 >
                   {pendingVolunteers.length > 0 && (
-                    <p className="text-sm text-slate-500 mb-2">
+                    <p className="text-md3-body-md text-slate-500 mb-2">
                       {pendingVolunteers.length} application{pendingVolunteers.length !== 1 ? 's' : ''} awaiting review
                     </p>
                   )}

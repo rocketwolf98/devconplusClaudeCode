@@ -144,7 +144,7 @@ export default function EventVolunteer() {
           >
             <HeartOutline className="w-10 h-10 mx-auto" color="rgb(var(--color-primary))" />
             <p className="text-slate-700 font-semibold">Application Submitted</p>
-            <p className="text-sm text-slate-500">
+            <p className="text-md3-body-md text-slate-500">
               Status:{' '}
               <span
                 className={
@@ -197,16 +197,16 @@ export default function EventVolunteer() {
           >
             <CheckCircleOutline className="w-14 h-14 mx-auto" color="#21C45D" />
             <div>
-              <h2 className="text-slate-900 text-lg font-bold">Application Submitted!</h2>
-              <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+              <h2 className="text-slate-900 text-md3-title-lg font-bold">Application Submitted!</h2>
+              <p className="text-md3-body-md text-slate-500 mt-1 leading-relaxed">
                 We'll review your application and notify you soon.
               </p>
             </div>
             <div className="bg-primary/10 rounded-xl px-4 py-3">
-              <p className="text-primary text-sm font-semibold">
+              <p className="text-primary text-md3-body-md font-semibold">
                 +{event.points_value + event.volunteer_points} pts when approved!
               </p>
-              <p className="text-primary/60 text-xs mt-0.5">
+              <p className="text-primary/60 text-md3-label-md mt-0.5">
                 {event.points_value} attendance + {event.volunteer_points} volunteer bonus
               </p>
             </div>
@@ -249,10 +249,10 @@ export default function EventVolunteer() {
               <CalendarOutline className="w-10 h-10" color="rgba(var(--color-primary), 0.3)" />
             </div>
           )}
-          <h2 className="text-slate-900 font-bold text-base">{event.title}</h2>
-          <p className="text-xs text-slate-400">{dateStr}</p>
+          <h2 className="text-slate-900 font-bold text-md3-body-lg">{event.title}</h2>
+          <p className="text-md3-label-md text-slate-400">{dateStr}</p>
           {event.location && (
-            <p className="text-xs text-slate-500 flex items-center gap-1">
+            <p className="text-md3-label-md text-slate-500 flex items-center gap-1">
               <MapPointOutline className="w-3 h-3 shrink-0" />
               {event.location}
             </p>
@@ -263,49 +263,49 @@ export default function EventVolunteer() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           {/* Reason */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               Why do you want to volunteer? <span className="text-red">*</span>
             </label>
             <textarea
               {...register('reason')}
               rows={4}
               placeholder="Tell us why you'd like to volunteer for this event (at least 20 characters)…"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md text-slate-700 placeholder-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
             />
             {errors.reason && (
-              <p className="text-red text-xs mt-1">{errors.reason.message}</p>
+              <p className="text-red text-md3-label-md mt-1">{errors.reason.message}</p>
             )}
           </div>
 
           {/* Phone number */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
-              Phone Number <span className="text-slate-400 text-xs font-normal">(optional)</span>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
+              Phone Number <span className="text-slate-400 text-md3-label-md font-normal">(optional)</span>
             </label>
             <input
               {...register('phone_number')}
               type="tel"
               placeholder="+63 900 000 0000"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md text-slate-700 placeholder-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
           {/* Social media handle */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
-              Social Media Handle <span className="text-slate-400 text-xs font-normal">(optional)</span>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
+              Social Media Handle <span className="text-slate-400 text-md3-label-md font-normal">(optional)</span>
             </label>
             <input
               {...register('social_media_handle')}
               type="text"
               placeholder="@username or profile URL"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md text-slate-700 placeholder-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
           {/* Submit error */}
           {submitError && (
-            <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+            <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
               {submitError}
             </p>
           )}

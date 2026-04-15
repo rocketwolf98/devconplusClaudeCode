@@ -61,7 +61,7 @@ function EventCard({
         <div className="space-y-3">
           {/* Title and Meta */}
           <div className="space-y-1">
-            <p className="font-proxima font-bold text-white text-xl leading-tight line-clamp-2">
+            <p className="font-proxima font-bold text-white text-md3-title-lg leading-tight line-clamp-2">
               {event.title}
             </p>
             <div className="flex items-center gap-1 flex-wrap">

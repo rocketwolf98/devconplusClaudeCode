@@ -48,7 +48,7 @@ export function OrgEventManagement() {
             
             <button
               onClick={() => navigate('/organizer/events/create')}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-white/20 backdrop-blur-md border border-white/40 text-white text-sm font-bold rounded-full active:bg-white/40 transition-colors shadow-lg shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-white/20 backdrop-blur-md border border-white/40 text-white text-md3-body-md font-bold rounded-full active:bg-white/40 transition-colors shadow-lg shrink-0"
             >
               <AddCircleOutline className="w-4 h-4" />
               New Event
@@ -107,7 +107,7 @@ export function OrgEventManagement() {
                     </div>
                     
                     <div className="space-y-1">
-                      <p className="font-proxima font-bold text-white text-xl leading-tight line-clamp-2">
+                      <p className="font-proxima font-bold text-white text-md3-title-lg leading-tight line-clamp-2">
                         {currentEvent.title}
                       </p>
                       <div className="flex items-center gap-1.5">
@@ -170,8 +170,8 @@ export function OrgEventManagement() {
 
         {pastEvents.length === 0 && upcomingEvents.length === 0 && (
           <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <p className="text-base font-bold text-slate-700">No events yet</p>
-            <p className="text-sm text-slate-400 mt-1">Create your first chapter event.</p>
+            <p className="text-md3-body-lg font-bold text-slate-700">No events yet</p>
+            <p className="text-md3-body-md text-slate-400 mt-1">Create your first chapter event.</p>
           </motion.div>
         )}
       </motion.div>
@@ -218,7 +218,7 @@ function EventRow({ event, onTap }: EventRowProps) {
                 <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
                   {dateParts.month}
                 </span>
-                <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                <span className="text-md3-title-lg font-black leading-tight text-white drop-shadow-md">
                   {dateParts.day}
                 </span>
               </div>
@@ -231,7 +231,7 @@ function EventRow({ event, onTap }: EventRowProps) {
                 <span className="text-[10px] font-bold leading-none text-blue/60 uppercase">
                   {dateParts.month}
                 </span>
-                <span className="text-2xl font-black leading-tight text-blue">
+                <span className="text-md3-headline-sm font-black leading-tight text-blue">
                   {dateParts.day}
                 </span>
               </>

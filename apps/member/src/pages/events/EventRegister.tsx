@@ -27,7 +27,7 @@ function buildConfirmationEmail({ memberName, eventTitle, eventDate, eventLocati
 
 // ── Dynamic field renderer ────────────────────────────────────────────────────
 
-const inputCls = 'w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20'
+const inputCls = 'w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20'
 
 function renderField(
   field: CustomFormField,
@@ -80,7 +80,7 @@ function renderField(
                 onChange={() => onChange(opt)}
                 className="w-4 h-4 accent-primary"
               />
-              <span className="text-sm text-slate-700">{opt}</span>
+              <span className="text-md3-body-md text-slate-700">{opt}</span>
             </label>
           ))}
         </div>
@@ -101,7 +101,7 @@ function renderField(
                 )}
                 className="w-4 h-4 accent-primary rounded"
               />
-              <span className="text-sm text-slate-700">{opt}</span>
+              <span className="text-md3-body-md text-slate-700">{opt}</span>
             </label>
           ))}
         </div>
@@ -274,7 +274,7 @@ export default function EventRegister() {
 
       <form onSubmit={handleSubmit} className="p-4 space-y-4 pb-24">
         {/* Pre-filled profile fields */}
-        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide">Your Details (pre-filled)</p>
+        <p className="text-md3-label-md text-slate-400 font-semibold uppercase tracking-wide">Your Details (pre-filled)</p>
 
         {[
           { label: 'Full Name',         value: user.full_name },
@@ -282,11 +282,11 @@ export default function EventRegister() {
           { label: 'School / Company',  value: user.school_or_company ?? '' },
         ].map(({ label, value }) => (
           <div key={label}>
-            <label className="text-sm font-medium text-slate-700 block mb-1">{label}</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">{label}</label>
             <input
               value={value}
               readOnly
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-slate-100 text-slate-500"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md bg-slate-100 text-slate-500"
             />
           </div>
         ))}
@@ -294,12 +294,12 @@ export default function EventRegister() {
         {/* Dynamic custom fields */}
         {customSchema.length > 0 && (
           <>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wide pt-2">
+            <p className="text-md3-label-md text-slate-400 font-semibold uppercase tracking-wide pt-2">
               Additional Information
             </p>
             {customSchema.map(field => (
               <div key={field.id}>
-                <label className="text-sm font-medium text-slate-700 block mb-1">
+                <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
                   {field.label}
                   {field.required && <span className="text-red ml-1">*</span>}
                 </label>
@@ -309,7 +309,7 @@ export default function EventRegister() {
                   val => setResponse(field.id, val),
                 )}
                 {fieldErrors[field.id] && (
-                  <p className="text-xs text-red mt-1">{fieldErrors[field.id]}</p>
+                  <p className="text-md3-label-md text-red mt-1">{fieldErrors[field.id]}</p>
                 )}
               </div>
             ))}
@@ -328,13 +328,13 @@ export default function EventRegister() {
             }}
             className="mt-0.5 accent-blue"
           />
-          <span className="text-sm text-slate-600">
+          <span className="text-md3-body-md text-slate-600">
             I agree to the Terms & Conditions and Privacy Policy for this event.
           </span>
         </label>
 
         {error && (
-          <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+          <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
             {error}
           </p>
         )}

@@ -260,7 +260,7 @@ useEffect(() => {
                 transition={{ duration: 0.35 }}
               >
                 <div className="flex flex-col flex-1 gap-1 items-start w-full">
-                  <p className="font-proxima font-bold text-2xl text-white leading-normal line-clamp-2 w-full">
+                  <p className="font-proxima font-bold text-md3-headline-sm text-white leading-normal line-clamp-2 w-full">
                     {banner.title}
                   </p>
                   
@@ -268,13 +268,13 @@ useEffect(() => {
                     <div className="flex gap-1 items-center flex-wrap">
                       {'date' in banner && banner.date && (
                         <>
-                          <p className="font-proxima text-[#dfdfdf] text-xs tracking-[0.48px] uppercase">
+                          <p className="font-proxima text-[#dfdfdf] text-md3-label-md tracking-[0.48px] uppercase">
                             {banner.date}
                           </p>
                           <div className="w-1 h-1 bg-[#dfdfdf] rounded-full shrink-0" />
                         </>
                       )}
-                      <p className="font-proxima text-[#dfdfdf] text-xs tracking-[0.48px] uppercase line-clamp-1">
+                      <p className="font-proxima text-[#dfdfdf] text-md3-label-md tracking-[0.48px] uppercase line-clamp-1">
                         {banner.sub}
                       </p>
                     </div>
@@ -282,7 +282,7 @@ useEffect(() => {
 
                   <button
                     onClick={(e) => { e.stopPropagation(); banner?.onClick() }}
-                    className="bg-primary text-white text-xs font-semibold px-[18px] py-[12px] rounded-full flex items-center justify-center shrink-0 leading-none shadow-sm"
+                    className="bg-primary text-white text-md3-label-md font-semibold px-[18px] py-[12px] rounded-full flex items-center justify-center shrink-0 leading-none shadow-sm"
                   >
                     {banner.cta}
                   </button>
@@ -336,14 +336,14 @@ useEffect(() => {
                 <CalendarMarkOutline className="w-6 h-6" color="rgb(var(--color-primary))" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-800">Events coming soon</p>
-                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                <p className="text-md3-body-md font-semibold text-slate-800">Events coming soon</p>
+                <p className="text-md3-label-md text-slate-400 mt-0.5 leading-relaxed">
                   Your chapter is planning something. Check back soon or browse all events.
                 </p>
               </div>
               <button
                 onClick={() => navigate('/events')}
-                className="text-xs font-semibold text-primary"
+                className="text-md3-label-md font-semibold text-primary"
               >
                 Browse all events
               </button>
@@ -427,15 +427,15 @@ useEffect(() => {
                 <StarOutline className="w-6 h-6 text-amber-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-800">Missions are coming your way!</p>
-                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                <p className="text-md3-body-md font-semibold text-slate-800">Missions are coming your way!</p>
+                <p className="text-md3-label-md text-slate-400 mt-0.5 leading-relaxed">
                   You've cleared the board! We're "deploying" more challenges soon. 
                   Stay "synchronized" and keep your "cache" ready!
                 </p>
               </div>
               <button
                 onClick={() => navigate('/events')}
-                className="text-xs font-semibold text-primary"
+                className="text-md3-label-md font-semibold text-primary"
               >
                 Volunteer for events to earn more
               </button>
@@ -581,7 +581,7 @@ useEffect(() => {
                   <StarOutline className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="font-bold text-slate-900 mb-1">Featured Articles Coming Soon!</h3>
-                <p className="text-sm text-slate-500 max-w-[240px]">
+                <p className="text-md3-body-md text-slate-500 max-w-[240px]">
                   We're still "debugging" the best stories for you. Please stay "tuned" — it's going to be "code-tastic"!
                 </p>
               </motion.div>
@@ -614,7 +614,7 @@ useEffect(() => {
               </>
             ) : recentTxns.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center px-4">
-                <p className="text-sm text-slate-400 font-medium italic">No transactions yet</p>
+                <p className="text-md3-body-md text-slate-400 font-medium italic">No transactions yet</p>
               </div>
             ) : (
               <motion.div
@@ -629,19 +629,19 @@ useEffect(() => {
                     className={`flex items-center gap-3 px-4 py-3 ${i < recentTxns.length - 1 ? 'border-b border-slate-100' : ''}`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-md3-label-md font-bold ${
                         tx.amount > 0 ? 'bg-green/10 text-green' : 'bg-red/10 text-red'
                       }`}
                     >
                       {tx.amount > 0 ? '+' : '−'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800 truncate">{tx.description}</p>
+                      <p className="text-md3-body-md font-medium text-slate-800 truncate">{tx.description}</p>
                       <p className="text-[10px] text-slate-400">
                         {formatDate.compact(tx.created_at)}
                       </p>
                     </div>
-                    <span className={`text-sm font-bold ${tx.amount > 0 ? 'text-green' : 'text-red'}`}>
+                    <span className={`text-md3-body-md font-bold ${tx.amount > 0 ? 'text-green' : 'text-red'}`}>
                       {tx.amount > 0 ? '+' : ''}{tx.amount} pts
                     </span>
                   </motion.div>

@@ -145,7 +145,7 @@ export default function MyQR() {
             </h1>
           </div>
           <div className="relative z-10 px-[25px] pb-4 pt-2">
-            <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-xl font-black text-white mx-auto mb-2 overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-md3-title-lg font-black text-white mx-auto mb-2 overflow-hidden">
               {user?.avatar_url ? (
                 <img src={user.avatar_url} alt={user?.full_name ?? ''} className="w-full h-full object-cover" />
               ) : (
@@ -223,14 +223,14 @@ export default function MyQR() {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setRetryKey(k => k + 1)}
-                className="flex items-center gap-1.5 text-red text-xs font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
+                className="flex items-center gap-1.5 text-red text-md3-label-md font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
               >
                 <RefreshOutline className="w-3 h-3" />
                 Tap to retry
               </motion.button>
             ) : (
               <p
-                className="text-xs font-medium"
+                className="text-md3-label-md font-medium"
                 style={{ color: secondsLeft <= 30 ? '#F8C630' : 'rgb(var(--color-primary))' }}
               >
                 {isRefreshing ? 'Refreshing…' : `Refreshes in ${countdownLabel}`}

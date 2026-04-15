@@ -12,12 +12,12 @@ export default function TransactionRow({ tx }: { tx: PointTransaction }) {
   return (
     <div className="flex items-start justify-between py-3 border-b border-slate-100 last:border-0">
       <div>
-        <p className="text-sm font-medium text-slate-900">{tx.description}</p>
-        <p className="text-xs text-slate-400 mt-0.5">
+        <p className="text-md3-body-md font-medium text-slate-900">{tx.description}</p>
+        <p className="text-md3-label-md text-slate-400 mt-0.5">
           Transaction no. {tx.transaction_ref} · {timeStr}
         </p>
       </div>
-      <p className={`text-sm font-bold ml-4 flex-shrink-0 ${isPositive ? 'text-green' : 'text-red'}`}>
+      <p className={`text-md3-body-md font-bold ml-4 flex-shrink-0 ${isPositive ? 'text-green' : 'text-red'}`}>
         {isPositive ? '+' : ''}{tx.amount.toLocaleString()} pts
       </p>
     </div>

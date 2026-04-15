@@ -48,7 +48,7 @@ export default function NotFound() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 1 }}
         >
-          <h1 className="text-2xl font-bold text-white">Whoops! Lost in the Matrix.</h1>
+          <h1 className="text-md3-headline-sm font-bold text-white">Whoops! Lost in the Matrix.</h1>
           <p className="text-white/70 mt-3 leading-relaxed">
             We couldn't find the page you're looking for. 
             The "source code" for this reality seems to have a bug!
@@ -64,14 +64,14 @@ export default function NotFound() {
         >
           <motion.button
             onClick={() => navigate('/home')}
-            className="bg-white text-primary font-bold text-base px-10 py-4 rounded-full shadow-xl hover:bg-slate-50 transition-colors"
+            className="bg-white text-primary font-bold text-md3-body-lg px-10 py-4 rounded-full shadow-xl hover:bg-slate-50 transition-colors"
             whileTap={{ scale: 0.95 }}
           >
             Back to Home
           </motion.button>
           <motion.button
             onClick={() => navigate(-1)}
-            className="bg-white/10 border border-white/20 text-white font-semibold text-base px-10 py-4 rounded-full backdrop-blur-md transition-all hover:bg-white/20"
+            className="bg-white/10 border border-white/20 text-white font-semibold text-md3-body-lg px-10 py-4 rounded-full backdrop-blur-md transition-all hover:bg-white/20"
             whileTap={{ scale: 0.95 }}
           >
             Go Back

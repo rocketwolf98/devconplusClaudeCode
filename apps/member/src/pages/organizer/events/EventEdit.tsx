@@ -338,7 +338,7 @@ export function OrgEventEdit() {
 
       {isLocked && (
         <div className="mx-4 mt-4 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-          <p className="text-xs font-semibold text-amber-700">
+          <p className="text-md3-label-md font-semibold text-amber-700">
             This event is <span className="capitalize">{event.status}</span>. Schedule and engagement fields are locked.
           </p>
         </div>
@@ -358,12 +358,12 @@ export function OrgEventEdit() {
             <div>
               <label className={labelClass}>Event Title</label>
               <input {...register('title')} className={inputClass} placeholder="e.g. DEVCON Summit Manila 2026" />
-              {errors.title && <p className="text-xs text-red mt-1">{errors.title.message}</p>}
+              {errors.title && <p className="text-md3-label-md text-red mt-1">{errors.title.message}</p>}
             </div>
             <div>
               <label className={labelClass}>Description</label>
               <textarea {...register('description')} rows={4} className={`${inputClass} resize-none`} placeholder="What is this event about?" />
-              {errors.description && <p className="text-xs text-red mt-1">{errors.description.message}</p>}
+              {errors.description && <p className="text-md3-label-md text-red mt-1">{errors.description.message}</p>}
             </div>
           </div>
         </motion.div>
@@ -389,7 +389,7 @@ export function OrgEventEdit() {
               className="w-full h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-blue hover:text-blue transition-colors mb-3"
             >
               <GalleryAddOutline className="w-6 h-6" />
-              <span className="text-xs font-medium">Tap to upload cover image</span>
+              <span className="text-md3-label-md font-medium">Tap to upload cover image</span>
               <span className="text-[10px] text-slate-300">JPG, PNG, WebP — optional</span>
             </button>
           )}
@@ -400,7 +400,7 @@ export function OrgEventEdit() {
             className="hidden"
             onChange={handleFileChange}
           />
-          {coverUploadError && <p className="text-xs text-red mt-1">{coverUploadError}</p>}
+          {coverUploadError && <p className="text-md3-label-md text-red mt-1">{coverUploadError}</p>}
         </motion.div>
 
         {/* ── CATEGORIZATION ── */}
@@ -422,7 +422,7 @@ export function OrgEventEdit() {
                           type="button"
                           onClick={() => field.onChange(opt.value)}
                           style={isSelected ? { backgroundColor: opt.hex, borderColor: opt.hex } : undefined}
-                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                          className={`px-3 py-1.5 rounded-full text-md3-label-md font-semibold border transition-colors ${
                             isSelected
                               ? opt.darkText ? 'text-slate-900' : 'text-white'
                               : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
@@ -435,7 +435,7 @@ export function OrgEventEdit() {
                   </div>
                 )}
               />
-              {errors.devcon_category && <p className="text-xs text-red mt-1">{errors.devcon_category.message}</p>}
+              {errors.devcon_category && <p className="text-md3-label-md text-red mt-1">{errors.devcon_category.message}</p>}
             </div>
 
             <div>
@@ -450,7 +450,7 @@ export function OrgEventEdit() {
                         key={opt.value}
                         type="button"
                         onClick={() => field.onChange(opt.value)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                        className={`px-3 py-1.5 rounded-full text-md3-label-md font-semibold border transition-colors ${
                           field.value === opt.value
                             ? 'bg-blue text-white border-blue'
                             : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
@@ -462,7 +462,7 @@ export function OrgEventEdit() {
                   </div>
                 )}
               />
-              {errors.category && <p className="text-xs text-red mt-1">{errors.category.message}</p>}
+              {errors.category && <p className="text-md3-label-md text-red mt-1">{errors.category.message}</p>}
             </div>
 
             <div>
@@ -479,7 +479,7 @@ export function OrgEventEdit() {
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {tags.map((t) => (
-                    <span key={t} className="inline-flex items-center gap-1 px-2 py-1 bg-blue/10 text-blue text-xs rounded-full">
+                    <span key={t} className="inline-flex items-center gap-1 px-2 py-1 bg-blue/10 text-blue text-md3-label-md rounded-full">
                       {t}
                       <button type="button" onClick={() => removeTag(t)} className="leading-none hover:text-blue-dark">×</button>
                     </span>
@@ -497,7 +497,7 @@ export function OrgEventEdit() {
             <div>
               <label className={labelClass}>Location</label>
               <input {...register('location')} className={inputClass} placeholder="Venue or Online" />
-              {errors.location && <p className="text-xs text-red mt-1">{errors.location.message}</p>}
+              {errors.location && <p className="text-md3-label-md text-red mt-1">{errors.location.message}</p>}
             </div>
 
             {isLocked ? (
@@ -509,7 +509,7 @@ export function OrgEventEdit() {
                   <div key={label}>
                     <label className={labelClass}>{label}</label>
                     <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
-                      <span className="text-sm text-slate-700">{value}</span>
+                      <span className="text-md3-body-md text-slate-700">{value}</span>
                       <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
                         Locked — event is {event.status}
                       </span>
@@ -522,12 +522,12 @@ export function OrgEventEdit() {
                 <div>
                   <label className={labelClass}>Start Date & Time</label>
                   <input {...register('event_date')} type="datetime-local" className={inputClass} />
-                  {errors.event_date && <p className="text-xs text-red mt-1">{errors.event_date.message}</p>}
+                  {errors.event_date && <p className="text-md3-label-md text-red mt-1">{errors.event_date.message}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>End Date & Time</label>
                   <input {...register('end_date')} type="datetime-local" className={inputClass} />
-                  {errors.end_date && <p className="text-xs text-red mt-1">{errors.end_date.message}</p>}
+                  {errors.end_date && <p className="text-md3-label-md text-red mt-1">{errors.end_date.message}</p>}
                 </div>
               </div>
             )}
@@ -546,7 +546,7 @@ export function OrgEventEdit() {
                     key={opt.value}
                     type="button"
                     onClick={() => setVisibility(opt.value)}
-                    className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+                    className={`flex-1 py-2 text-md3-label-md font-semibold transition-colors ${
                       visibility === opt.value
                         ? 'bg-blue text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -562,7 +562,7 @@ export function OrgEventEdit() {
               <div>
                 <label className={labelClass}>Registration Approval</label>
                 <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
-                  <span className="text-sm text-slate-700">
+                  <span className="text-md3-body-md text-slate-700">
                     {event.requires_approval ? 'Approval required' : 'Auto-approved'}
                   </span>
                   <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
@@ -579,10 +579,10 @@ export function OrgEventEdit() {
                   className="w-4 h-4 accent-blue rounded"
                 />
                 <div>
-                  <label htmlFor="requires_approval" className="text-sm font-semibold text-slate-900 cursor-pointer">
+                  <label htmlFor="requires_approval" className="text-md3-body-md font-semibold text-slate-900 cursor-pointer">
                     Require Registration Approval
                   </label>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-md3-label-md text-slate-400 mt-0.5">
                     Manually approve each registration before members receive their QR ticket.
                   </p>
                 </div>
@@ -600,11 +600,11 @@ export function OrgEventEdit() {
               <div>
                 <label
                   htmlFor="is_chapter_locked"
-                  className="text-sm font-semibold text-slate-900 cursor-pointer"
+                  className="text-md3-body-md font-semibold text-slate-900 cursor-pointer"
                 >
                   Lock to Chapter
                 </label>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-md3-label-md text-slate-400 mt-0.5">
                   Only members of your chapter can register for this event. Disable to allow members from any chapter to join.
                 </p>
               </div>
@@ -619,11 +619,11 @@ export function OrgEventEdit() {
                   render={({ field }) => (
                     <>
                       <button type="button" onClick={() => field.onChange(true)}
-                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${field.value ? 'bg-blue text-white border-blue' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'}`}>
+                        className={`flex-1 py-2 rounded-xl text-md3-label-md font-semibold border transition-colors ${field.value ? 'bg-blue text-white border-blue' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'}`}>
                         Free
                       </button>
                       <button type="button" onClick={() => field.onChange(false)}
-                        className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${!field.value ? 'bg-blue text-white border-blue' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'}`}>
+                        className={`flex-1 py-2 rounded-xl text-md3-label-md font-semibold border transition-colors ${!field.value ? 'bg-blue text-white border-blue' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'}`}>
                         Paid
                       </button>
                     </>
@@ -634,10 +634,10 @@ export function OrgEventEdit() {
                 <div className="mt-3">
                   <label className={labelClass}>Price (PHP)</label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">₱</span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-md3-body-md text-slate-400 pointer-events-none">₱</span>
                     <input {...register('ticket_price_php')} type="number" min={1} step={1} className={`${inputClass} pl-8`} placeholder="0" />
                   </div>
-                  {errors.ticket_price_php && <p className="text-xs text-red mt-1">{errors.ticket_price_php.message}</p>}
+                  {errors.ticket_price_php && <p className="text-md3-label-md text-red mt-1">{errors.ticket_price_php.message}</p>}
                 </div>
               )}
             </div>
@@ -645,7 +645,7 @@ export function OrgEventEdit() {
             <div>
               <label className={labelClass}>Capacity <span className="text-slate-300 normal-case font-normal">optional</span></label>
               <input {...register('capacity')} type="number" min={1} step={1} className={inputClass} placeholder="Unlimited" />
-              {errors.capacity && <p className="text-xs text-red mt-1">{errors.capacity.message}</p>}
+              {errors.capacity && <p className="text-md3-label-md text-red mt-1">{errors.capacity.message}</p>}
             </div>
           </div>
         </motion.div>
@@ -662,7 +662,7 @@ export function OrgEventEdit() {
                 <div key={label}>
                   <label className={labelClass}>{label}</label>
                   <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50">
-                    <span className="text-sm text-slate-700">{value ?? 0} pts</span>
+                    <span className="text-md3-body-md text-slate-700">{value ?? 0} pts</span>
                     <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full capitalize">
                       Locked — event is {event.status}
                     </span>
@@ -682,8 +682,8 @@ export function OrgEventEdit() {
                   max={1000}
                   step={1}
                 />
-                {errors.points_value && <p className="text-xs text-red mt-1">{errors.points_value.message}</p>}
-                <p className="text-xs text-slate-400 mt-1">
+                {errors.points_value && <p className="text-md3-label-md text-red mt-1">{errors.points_value.message}</p>}
+                <p className="text-md3-label-md text-slate-400 mt-1">
                   Auto-set based on category — Tech Talk/Social/Networking = 5 pts, Workshop/Brown Bag/Hackathon = 150 pts.
                 </p>
               </div>
@@ -698,8 +698,8 @@ export function OrgEventEdit() {
                   max={1000}
                   step={1}
                 />
-                {errors.volunteer_points && <p className="text-xs text-red mt-1">{errors.volunteer_points.message}</p>}
-                <p className="text-xs text-slate-400 mt-1">
+                {errors.volunteer_points && <p className="text-md3-label-md text-red mt-1">{errors.volunteer_points.message}</p>}
+                <p className="text-md3-label-md text-slate-400 mt-1">
                   XP awarded on top of attendance XP for members who volunteer at this event. Default: 500 pts.
                 </p>
               </div>
@@ -710,7 +710,7 @@ export function OrgEventEdit() {
         {/* ── REGISTRATION QUESTIONS ── */}
         <motion.div variants={fadeUp}>
           <SectionHeader title="Registration Questions" />
-          <p className="text-xs text-slate-400 mb-3">
+          <p className="text-md3-label-md text-slate-400 mb-3">
             Add custom fields to collect extra information from registrants.
           </p>
           <CustomFieldsBuilder
@@ -721,7 +721,7 @@ export function OrgEventEdit() {
 
         {/* Submit error */}
         {submitError && (
-          <motion.p variants={fadeUp} className="text-xs text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2">
+          <motion.p variants={fadeUp} className="text-md3-label-md text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2">
             {submitError}
           </motion.p>
         )}
@@ -732,7 +732,7 @@ export function OrgEventEdit() {
             type="button"
             onClick={() => navigate(-1)}
             whileTap={{ scale: 0.95 }}
-            className="flex-1 py-3 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+            className="flex-1 py-3 border border-slate-200 text-slate-700 text-md3-body-md font-semibold rounded-xl hover:bg-slate-50 transition-colors"
           >
             Cancel
           </motion.button>
@@ -740,7 +740,7 @@ export function OrgEventEdit() {
             type="submit"
             disabled={isSubmitting}
             whileTap={{ scale: 0.95 }}
-            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
+            className="flex-1 py-3 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
           >
             {isSubmitting ? 'Saving…' : 'Save Changes'}
           </motion.button>
@@ -755,7 +755,7 @@ export function OrgEventEdit() {
             type="button"
             onClick={() => setDeleteStep(1)}
             whileTap={{ scale: 0.95 }}
-            className="w-full py-3 rounded-xl border border-red/30 text-red text-sm font-bold hover:bg-red/5 transition-colors"
+            className="w-full py-3 rounded-xl border border-red/30 text-red text-md3-body-md font-bold hover:bg-red/5 transition-colors"
           >
             Delete Event
           </motion.button>
@@ -788,16 +788,16 @@ export function OrgEventEdit() {
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
                     <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
                   </div>
-                  <h2 className="text-base font-bold text-slate-900 mb-1">Delete Event?</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">Delete Event?</h2>
+                  <p className="text-md3-body-md text-slate-500">
                     You are about to delete{' '}
                     <span className="font-semibold text-slate-700">"{event.title}"</span>.
                     This will also permanently remove all registrations for this event.
                   </p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => setDeleteStep(0)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">Cancel</button>
-                  <button onClick={() => setDeleteStep(2)} className="flex-1 py-3 rounded-xl bg-red/10 text-red text-sm font-bold">Continue</button>
+                  <button onClick={() => setDeleteStep(0)} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-md3-body-md font-bold">Cancel</button>
+                  <button onClick={() => setDeleteStep(2)} className="flex-1 py-3 rounded-xl bg-red/10 text-red text-md3-body-md font-bold">Continue</button>
                 </div>
               </motion.div>
             )}
@@ -816,16 +816,16 @@ export function OrgEventEdit() {
                   <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
                     <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
                   </div>
-                  <h2 className="text-base font-bold text-slate-900 mb-1">Are you sure?</h2>
-                  <p className="text-sm text-slate-500">
+                  <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">Are you sure?</h2>
+                  <p className="text-md3-body-md text-slate-500">
                     All registrations for this event will be permanently deleted along with the event itself.{' '}
                     <span className="font-semibold text-red">This cannot be undone.</span>
                   </p>
-                  {deleteError && <p className="mt-3 text-sm text-red font-semibold">{deleteError}</p>}
+                  {deleteError && <p className="mt-3 text-md3-body-md text-red font-semibold">{deleteError}</p>}
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => setDeleteStep(0)} disabled={isDeleting} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold disabled:opacity-50">Cancel</button>
-                  <button onClick={handleDelete} disabled={isDeleting} className="flex-1 py-3 rounded-xl bg-red text-white text-sm font-bold disabled:opacity-60">
+                  <button onClick={() => setDeleteStep(0)} disabled={isDeleting} className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 text-md3-body-md font-bold disabled:opacity-50">Cancel</button>
+                  <button onClick={handleDelete} disabled={isDeleting} className="flex-1 py-3 rounded-xl bg-red text-white text-md3-body-md font-bold disabled:opacity-60">
                     {isDeleting ? 'Deleting…' : 'Delete Everything'}
                   </button>
                 </div>

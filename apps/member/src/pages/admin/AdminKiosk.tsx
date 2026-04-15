@@ -162,9 +162,9 @@ export default function AdminKiosk() {
       {/* Header */}
       <div className="shrink-0 px-8 pt-7 pb-4">
         <p className="text-white/30 text-[10px] font-bold uppercase tracking-[0.25em] mb-1">DEVCON+</p>
-        <h1 className="text-white text-3xl font-black tracking-wide leading-none">DAILY ATTENDANCE</h1>
-        <p className="text-white/50 text-sm mt-2 leading-tight">{dateStr}</p>
-        <p className="text-white text-2xl font-mono font-semibold mt-0.5 tabular-nums">{timeStr}</p>
+        <h1 className="text-white text-md3-headline-lg font-black tracking-wide leading-none">DAILY ATTENDANCE</h1>
+        <p className="text-white/50 text-md3-body-md mt-2 leading-tight">{dateStr}</p>
+        <p className="text-white text-md3-headline-sm font-mono font-semibold mt-0.5 tabular-nums">{timeStr}</p>
       </div>
 
       {/* CameraOutline viewfinder */}
@@ -194,12 +194,12 @@ export default function AdminKiosk() {
           {/* Live indicator (top-left) */}
           <div className="absolute top-4 left-4 flex items-center gap-1.5 pointer-events-none">
             <span className="w-2 h-2 rounded-full bg-green animate-pulse" />
-            <span className="text-white/70 text-xs font-semibold tracking-wide">LIVE</span>
+            <span className="text-white/70 text-md3-label-md font-semibold tracking-wide">LIVE</span>
           </div>
 
           {/* Instruction (bottom) */}
           <div className="absolute bottom-5 left-0 right-0 text-center pointer-events-none">
-            <p className="text-white/70 text-xs font-medium tracking-wide">
+            <p className="text-white/70 text-md3-label-md font-medium tracking-wide">
               Position QR code within frame
             </p>
           </div>
@@ -211,8 +211,8 @@ export default function AdminKiosk() {
         <div className="inline-flex items-center gap-3 bg-white/[0.07] border border-white/10 rounded-2xl px-7 py-4">
           <ScannerOutline className="w-5 h-5" color="rgba(255,255,255,0.4)" />
           <div className="flex items-baseline gap-2">
-            <span className="text-white text-3xl font-black tabular-nums leading-none">{dailyCount}</span>
-            <span className="text-white/40 text-sm">checked in today</span>
+            <span className="text-white text-md3-headline-lg font-black tabular-nums leading-none">{dailyCount}</span>
+            <span className="text-white/40 text-md3-body-md">checked in today</span>
           </div>
         </div>
       </div>
@@ -256,12 +256,12 @@ export default function AdminKiosk() {
                 </motion.div>
               </div>
 
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Check-in Successful</p>
-              <p className="text-2xl font-black text-slate-900 leading-tight mb-1">{lastResult.memberName}</p>
+              <p className="text-md3-label-md font-bold text-slate-400 uppercase tracking-widest mb-1">Check-in Successful</p>
+              <p className="text-md3-headline-sm font-black text-slate-900 leading-tight mb-1">{lastResult.memberName}</p>
               {lastResult.pointsAwarded > 0 && (
-                <p className="text-sm font-bold text-green mb-0.5">+{lastResult.pointsAwarded} XP awarded</p>
+                <p className="text-md3-body-md font-bold text-green mb-0.5">+{lastResult.pointsAwarded} XP awarded</p>
               )}
-              <p className="text-xs text-slate-400 mb-5">
+              <p className="text-md3-label-md text-slate-400 mb-5">
                 {now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit', hour12: true })}
               </p>
 

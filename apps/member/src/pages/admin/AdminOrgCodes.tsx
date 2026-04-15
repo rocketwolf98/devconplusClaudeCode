@@ -158,12 +158,12 @@ export default function AdminOrgCodes() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Organizer Codes</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Issue codes to grant officer access per chapter</p>
+          <h1 className="text-md3-headline-sm font-black text-slate-900">Organizer Codes</h1>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">Issue codes to grant officer access per chapter</p>
         </div>
         <button
           onClick={() => { setValue('code', generateCode()); setShowForm((v) => !v) }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           New Code
@@ -171,7 +171,7 @@ export default function AdminOrgCodes() {
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {showForm && (
@@ -179,16 +179,16 @@ export default function AdminOrgCodes() {
           onSubmit={handleSubmit(onSubmit)}
           className="bg-white border border-slate-200 rounded-2xl p-5 mb-6 shadow-card space-y-4"
         >
-          <h2 className="text-sm font-bold text-slate-900">Create Organizer Code</h2>
+          <h2 className="text-md3-body-md font-bold text-slate-900">Create Organizer Code</h2>
 
           {/* Code */}
           <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Code</label>
+            <label className="text-md3-label-md font-medium text-slate-700 block mb-1">Code</label>
             <div className="flex gap-1.5">
               <input
                 {...register('code')}
                 readOnly
-                className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm font-mono bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue"
+                className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md font-mono bg-slate-50 text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <button
                 type="button"
@@ -204,10 +204,10 @@ export default function AdminOrgCodes() {
 
           {/* Chapter */}
           <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Chapter</label>
+            <label className="text-md3-label-md font-medium text-slate-700 block mb-1">Chapter</label>
             <select
               {...register('chapter_id')}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
             >
               <option value="">Select…</option>
               {chapters.map((c) => (
@@ -219,10 +219,10 @@ export default function AdminOrgCodes() {
 
           {/* Role */}
           <div>
-            <label className="text-xs font-medium text-slate-700 block mb-1">Role</label>
+            <label className="text-md3-label-md font-medium text-slate-700 block mb-1">Role</label>
             <select
               {...register('assigned_role')}
-              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
             >
               <option value="chapter_officer">Chapter Officer</option>
               <option value="hq_admin">HQ Admin</option>
@@ -238,7 +238,7 @@ export default function AdminOrgCodes() {
                 id="has_usage_limit"
                 className="w-4 h-4 accent-blue"
               />
-              <label htmlFor="has_usage_limit" className="text-xs text-slate-700">Limit uses</label>
+              <label htmlFor="has_usage_limit" className="text-md3-label-md text-slate-700">Limit uses</label>
             </div>
             {hasUsageLimit && (
               <input
@@ -246,7 +246,7 @@ export default function AdminOrgCodes() {
                 type="number"
                 min={1}
                 placeholder="Max uses"
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
               />
             )}
             {errors.usage_limit && <p className="text-red text-[10px] mt-1">{errors.usage_limit.message}</p>}
@@ -261,13 +261,13 @@ export default function AdminOrgCodes() {
                 id="has_expiry"
                 className="w-4 h-4 accent-blue"
               />
-              <label htmlFor="has_expiry" className="text-xs text-slate-700">Set expiry date</label>
+              <label htmlFor="has_expiry" className="text-md3-label-md text-slate-700">Set expiry date</label>
             </div>
             {hasExpiry && (
               <input
                 {...register('expires_at')}
                 type="date"
-                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
               />
             )}
             {errors.expires_at && <p className="text-red text-[10px] mt-1">{errors.expires_at.message}</p>}
@@ -277,7 +277,7 @@ export default function AdminOrgCodes() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark disabled:opacity-60 transition-colors"
+              className="px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark disabled:opacity-60 transition-colors"
             >
               {isSubmitting ? 'Creating…' : 'Create Code'}
             </button>
@@ -292,7 +292,7 @@ export default function AdminOrgCodes() {
                   has_expiry: false,
                 })
               }}
-              className="px-4 py-2 bg-slate-100 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-colors"
+              className="px-4 py-2 bg-slate-100 text-slate-600 text-md3-body-md font-semibold rounded-xl hover:bg-slate-200 transition-colors"
             >
               Cancel
             </button>
@@ -301,31 +301,31 @@ export default function AdminOrgCodes() {
       )}
 
       {isLoading ? (
-        <p className="text-slate-400 text-sm">Loading codes…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading codes…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Chapter</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Usage</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Expires</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Code</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Role</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Chapter</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Usage</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Expires</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
               {codes.map((c) => (
                 <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3 font-mono font-bold text-slate-900 text-xs tracking-wider">{c.code}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">{c.assigned_role}</td>
+                  <td className="px-4 py-3 font-mono font-bold text-slate-900 text-md3-label-md tracking-wider">{c.code}</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">{c.assigned_role}</td>
                   <td className="px-4 py-3 text-slate-600">{c.chapters?.name ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs tabular-nums">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md tabular-nums">
                     {c.usage_count} / {c.usage_limit ?? '∞'}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">
                     {c.expires_at
                       ? new Date(c.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                       : 'Never'}
@@ -361,12 +361,12 @@ export default function AdminOrgCodes() {
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => setConfirmDeleteId(null)}
-                            className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                            className="text-md3-label-md px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                           >Cancel</button>
                           <button
                             onClick={() => void handleDelete(c.id)}
                             disabled={deletingId === c.id}
-                            className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50 hover:bg-red/80 transition-colors"
+                            className="text-md3-label-md px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50 hover:bg-red/80 transition-colors"
                           >{deletingId === c.id ? '…' : 'Delete'}</button>
                         </div>
                       ) : (
@@ -384,7 +384,7 @@ export default function AdminOrgCodes() {
             </tbody>
           </table>
           {codes.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No organizer codes yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No organizer codes yet.</p>
           )}
         </div>
       )}

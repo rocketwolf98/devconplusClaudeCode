@@ -30,8 +30,8 @@ function NewsCard({ post }: { post: NewsPost }) {
         </div>
       )}
       <div className="p-3">
-        <p className="text-xs text-slate-400 mb-1">{dateStr}</p>
-        <p className="font-semibold text-slate-900 text-sm leading-tight">{post.title}</p>
+        <p className="text-md3-label-md text-slate-400 mb-1">{dateStr}</p>
+        <p className="font-semibold text-slate-900 text-md3-body-md leading-tight">{post.title}</p>
       </div>
     </motion.div>
   )

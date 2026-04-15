@@ -74,8 +74,8 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
             <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-5">
               <BellOffOutline className="w-9 h-9" color="#CBD5E1" />
             </div>
-            <p className="text-base font-bold text-slate-700">No announcements yet</p>
-            <p className="text-sm text-slate-400 mt-2 leading-relaxed">
+            <p className="text-md3-body-lg font-bold text-slate-700">No announcements yet</p>
+            <p className="text-md3-body-md text-slate-400 mt-2 leading-relaxed">
               Event updates from organizers will appear here.
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
                       {formatDate.compact(n.created_at)}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-700 leading-relaxed font-proxima">{n.message}</p>
+                  <p className="text-md3-body-md text-slate-700 leading-relaxed font-proxima">{n.message}</p>
                 </motion.div>
               ))}
             </AnimatePresence>

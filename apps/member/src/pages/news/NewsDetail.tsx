@@ -62,7 +62,7 @@ function ArticleBody({ body }: { body: string }) {
 
         if (trimmed.startsWith('## ')) {
           return (
-            <h2 key={i} className="text-base font-bold text-slate-900 pt-2">
+            <h2 key={i} className="text-md3-body-lg font-bold text-slate-900 pt-2">
               {trimmed.slice(3)}
             </h2>
           )
@@ -70,7 +70,7 @@ function ArticleBody({ body }: { body: string }) {
 
         if (trimmed.startsWith('### ')) {
           return (
-            <h3 key={i} className="text-sm font-bold text-primary">
+            <h3 key={i} className="text-md3-body-md font-bold text-primary">
               {trimmed.slice(4)}
             </h3>
           )
@@ -86,7 +86,7 @@ function ArticleBody({ body }: { body: string }) {
           return (
             <ul key={i} className="space-y-1 pl-4">
               {items.map((item, j) => (
-                <li key={j} className="text-sm text-slate-700 leading-relaxed list-disc">
+                <li key={j} className="text-md3-body-md text-slate-700 leading-relaxed list-disc">
                   {item.slice(2)}
                 </li>
               ))}
@@ -95,7 +95,7 @@ function ArticleBody({ body }: { body: string }) {
         }
 
         return (
-          <p key={i} className="text-sm text-slate-700 leading-relaxed">
+          <p key={i} className="text-md3-body-md text-slate-700 leading-relaxed">
             {trimmed}
           </p>
         )
@@ -173,7 +173,7 @@ export default function NewsDetail() {
         </div>
 
         {/* Title */}
-        <h1 className="text-xl font-black text-slate-900 leading-snug">{post.title}</h1>
+        <h1 className="text-md3-title-lg font-black text-slate-900 leading-snug">{post.title}</h1>
 
         {/* Divider */}
         <hr className="border-slate-200" />
