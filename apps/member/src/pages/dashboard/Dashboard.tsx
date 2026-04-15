@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AltArrowRightOutline, CalendarMarkOutline, MapPointOutline, CheckSquareOutline, StarOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
+import { AltArrowRightOutline, CalendarMarkOutline, CheckSquareOutline, StarOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -18,7 +18,6 @@ import {
   SkeletonMissionCard,
 } from '../../components/Skeleton'
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
-import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { formatDate, isEventArchived } from '../../lib/dates'
 
 const WELCOME_BANNER = {
@@ -158,7 +157,6 @@ useEffect(() => {
     .slice(0, 3)
   const recentTxns = transactions.slice(0, 4)
 
-  const featuredEvent = events.find((e) => e.is_featured) ?? upcomingByDate[0]
   const unclaimedMissions = missions.filter(m => m.status !== 'claimed')
 
   return (

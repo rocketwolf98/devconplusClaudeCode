@@ -5,7 +5,7 @@ const imgSolarMedalStarCircleBoldDuotone = "https://www.figma.com/api/mcp/asset/
 const imgSolarBoltBroken = "https://www.figma.com/api/mcp/asset/830e7e23-553e-4fe6-bc43-31e9a7a08703";
 
 export default function ProfileExpCard() {
-  const { spendablePoints, lifetimePoints, currentTier, tierProgress } = usePointsStore()
+  const { spendablePoints, lifetimePoints, tierProgress } = usePointsStore()
 
   return (
     <div className="bg-white rounded-[24px] border border-slate-400/30 p-[24px] flex flex-col gap-5 shadow-card">

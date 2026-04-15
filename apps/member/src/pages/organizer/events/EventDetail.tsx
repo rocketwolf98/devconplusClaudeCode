@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftOutline, CalendarOutline, BoltOutline, PenOutline, UserSpeakOutline, MapPointOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, BoltOutline, PenOutline, UserSpeakOutline, MapPointOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CupFirstOutline, CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, StarOutline } from 'solar-icon-set'
+import { CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, StarOutline } from 'solar-icon-set'
 import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
 import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -29,7 +29,7 @@ const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 export default function Profile() {
   const navigate = useNavigate()
   const { user, initials, signOut, chapterName } = useAuthStore()
-  const { spendablePoints, lifetimePoints, currentTier, prestigeUnlocked, loadTotalPoints } = usePointsStore()
+  const { lifetimePoints, currentTier, loadTotalPoints } = usePointsStore()
   const { themeId, setTheme, isLocked } = useThemeStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)

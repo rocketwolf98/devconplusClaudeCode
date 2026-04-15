@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { isValidUUID } from '../../../lib/validation'
-import { ArrowLeftOutline, GalleryAddOutline, CloseCircleLineDuotone, PenOutline, DangerTriangleOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, GalleryAddOutline, CloseCircleLineDuotone, DangerTriangleOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'

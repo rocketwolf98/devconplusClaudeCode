@@ -6,7 +6,6 @@ import { useEventsStore } from '../../../stores/useEventsStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
 import { isEventArchived } from '../../../lib/dates'
-import FrostedActionButton from '../../../components/FrostedActionButton'
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`

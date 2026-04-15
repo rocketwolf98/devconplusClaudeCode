@@ -4,7 +4,6 @@ import { ArrowLeftOutline, PenOutline, ClipboardListOutline, MapPointOutline } f
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
-import { formatDate } from '../../../lib/dates'
 import { ApprovalCard, type Registration } from '../../../components/ApprovalCard'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 

@@ -31,7 +31,7 @@ function removeStorage(storage: Storage, key: string): void {
 export function useFormDraft<T extends Record<string, unknown>>(
   key: string,
   storageType: 'session' | 'local',
-  options?: { exclude?: (keyof T)[] },
+  options?: { exclude?: string[] },
 ): {
   draft: Partial<T>
   saveDraft: (values: Partial<T>) => void

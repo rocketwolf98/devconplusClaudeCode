@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeftOutline, CaseOutline, MapPointOutline, ShareOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, MapPointOutline, ShareOutline } from 'solar-icon-set'
 import { useJobsStore } from '../../stores/useJobsStore'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import NotFound from '../NotFound'

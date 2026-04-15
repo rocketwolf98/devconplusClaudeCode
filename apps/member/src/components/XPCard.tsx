@@ -5,7 +5,7 @@ import { usePointsStore } from '../stores/usePointsStore'
 
 export default function XPCard() {
   const navigate = useNavigate()
-  const { spendablePoints, lifetimePoints, currentTier, nextTier, tierProgress } = usePointsStore()
+  const { spendablePoints, lifetimePoints, tierProgress } = usePointsStore()
 
   return (
     <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-[rgba(156,163,175,0.3)] p-[21px] flex flex-col gap-5">

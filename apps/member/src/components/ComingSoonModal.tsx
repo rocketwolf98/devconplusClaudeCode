@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { RocketOutline, CloseCircleLineDuotone } from 'solar-icon-set'
+import { RocketOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { backdrop, slideUp } from '../lib/animation'
 

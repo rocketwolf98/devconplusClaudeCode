@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, type Easing } from 'framer-motion'
 
 const Drawing404 = () => {
   const containerVariants = {
@@ -23,7 +23,7 @@ const Drawing404 = () => {
       pathLength: 1,
       fill: "rgba(255, 255, 255, 1)",
       transition: { 
-        pathLength: { duration: 1.5, ease: "easeInOut" },
+        pathLength: { duration: 1.5, ease: "easeInOut" as Easing },
         fill: { duration: 0.8, delay: 1 }
       }
     }

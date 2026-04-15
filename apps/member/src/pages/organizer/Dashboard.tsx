@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircleOutline, BellOutline, AddCircleOutline, HeartOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
-import { OrgBanner } from '../../components/OrgBanner'
 import { ApprovalCard, type Registration } from '../../components/ApprovalCard'
 import { VolunteerApprovalCard } from '../../components/VolunteerApprovalCard'
 import { useOrganizerUser } from '../../stores/useOrgAuthStore'
@@ -19,8 +18,6 @@ const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"
 const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 
 const imgGroup15 = "https://www.figma.com/api/mcp/asset/d47034ec-4ca5-47ee-b161-341ef687371e";
-const imgGroup = "https://www.figma.com/api/mcp/asset/4f38ea26-2090-4384-84ef-85435cf69538";
-
 export function OrgDashboard() {
   const user = useOrganizerUser()
   const { user: profile } = useAuthStore()

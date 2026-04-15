@@ -246,10 +246,10 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
         const reward = row.rewards as { name: string; image_url: string | null; points_cost: number } | null
         return {
           id: row.id,
-          user_id: row.user_id,
-          reward_id: row.reward_id,
-          status: row.status,
-          redeemed_at: row.redeemed_at,
+          user_id: row.user_id ?? '',
+          reward_id: row.reward_id ?? '',
+          status: (row.status ?? 'pending') as RewardRedemption['status'],
+          redeemed_at: row.redeemed_at ?? '',
           claimed_at: row.claimed_at,
           reviewed_by: (row as Record<string, unknown>).reviewed_by as string | null ?? null,
           reviewed_at: (row as Record<string, unknown>).reviewed_at as string | null ?? null,
@@ -345,10 +345,10 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
               const reward = data.rewards as { name: string; image_url: string | null; points_cost: number } | null
               const enriched: RewardRedemptionWithDetails = {
                 id: data.id,
-                user_id: data.user_id,
-                reward_id: data.reward_id,
-                status: data.status,
-                redeemed_at: data.redeemed_at,
+                user_id: data.user_id ?? '',
+                reward_id: data.reward_id ?? '',
+                status: (data.status ?? 'pending') as RewardRedemption['status'],
+                redeemed_at: data.redeemed_at ?? '',
                 claimed_at: data.claimed_at,
                 reviewed_by: (data as Record<string, unknown>).reviewed_by as string | null ?? null,
                 reviewed_at: (data as Record<string, unknown>).reviewed_at as string | null ?? null,

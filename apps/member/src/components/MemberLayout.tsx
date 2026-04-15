@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { HomeOutline, GiftOutline, QRCodeOutline, CaseOutline, UserOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '../stores/useAuthStore'
@@ -20,7 +20,6 @@ import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 export default function MemberLayout() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
-  const location = useLocation()
   const scrollRef = useRef<HTMLDivElement>(null)
   const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
   const subscribeToRewardChanges = useRewardsStore((s) => s.subscribeToChanges)
@@ -324,12 +323,8 @@ export default function MemberLayout() {
                 }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  <HomeOutline className="w-4 h-4 shrink-0" />
-                  Home
-                </>
-              )}
+              <HomeOutline className="w-4 h-4 shrink-0" />
+              Home
             </NavLink>
 
             <NavLink
@@ -340,12 +335,8 @@ export default function MemberLayout() {
                 }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  <GiftOutline className="w-4 h-4 shrink-0" />
-                  Rewards
-                </>
-              )}
+              <GiftOutline className="w-4 h-4 shrink-0" />
+              Rewards
             </NavLink>
 
             {/* Events — circle accent */}
@@ -377,12 +368,8 @@ export default function MemberLayout() {
                 }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  <CaseOutline className="w-4 h-4 shrink-0" />
-                  Jobs
-                </>
-              )}
+              <CaseOutline className="w-4 h-4 shrink-0" />
+              Jobs
             </NavLink>
 
             <NavLink
@@ -393,12 +380,8 @@ export default function MemberLayout() {
                 }`
               }
             >
-              {({ isActive }) => (
-                <>
-                  <UserOutline className="w-4 h-4 shrink-0" />
-                  Profile
-                </>
-              )}
+              <UserOutline className="w-4 h-4 shrink-0" />
+              Profile
             </NavLink>
 
           </nav>

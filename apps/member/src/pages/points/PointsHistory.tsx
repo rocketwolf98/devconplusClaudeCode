@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeftOutline, StarOutline, BoltOutline, MagniferOutline } from 'solar-icon-set'
-import { motion } from 'framer-motion'
+import { ArrowLeftOutline, BoltOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import TransactionRow from '../../components/TransactionRow'
@@ -208,11 +207,10 @@ export default function PointsHistory() {
             <div key={date} className="mb-6">
               <p className="font-proxima text-[#6b7280] text-[10px] uppercase tracking-wider mb-2 font-bold px-1">{date}</p>
               <div className="bg-white rounded-2xl border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] px-4">
-                {txs.map((tx, idx) => (
-                  <TransactionRow 
-                    key={tx.id} 
-                    tx={tx} 
-                    isLast={idx === txs.length - 1}
+                {txs.map((tx) => (
+                  <TransactionRow
+                    key={tx.id}
+                    tx={tx}
                   />
                 ))}
               </div>

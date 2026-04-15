@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeftOutline, CalendarOutline, MapPointOutline, TicketOutline, HeartOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, MapPointOutline, TicketOutline, HeartOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { supabase } from '../../lib/supabase'
-import { getEventThemeStyle } from '../../lib/eventTheme'
 import NotFound from '../NotFound'
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
