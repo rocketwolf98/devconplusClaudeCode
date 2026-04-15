@@ -138,7 +138,7 @@ export default function SignIn() {
         </header>
 
         {/* Card */}
-        <div className="px-6 pt-10 pb-10 overflow-y-auto">
+        <div className="px-4 pt-10 pb-10 overflow-y-auto">
 
         {/* Password reset success banner */}
         {passwordReset && (

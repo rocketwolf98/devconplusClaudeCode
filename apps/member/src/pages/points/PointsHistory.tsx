@@ -100,7 +100,7 @@ export default function PointsHistory() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center gap-3 px-[25px] pb-2">
+          <div className="relative z-10 flex items-center gap-3 px-4 pb-2">
             <button
               onClick={() => navigate(-1)}
               className="bg-white/20 size-[42px] flex items-center justify-center rounded-full border border-white/30 backdrop-blur-md transition-colors active:bg-white/40 shadow-lg shrink-0"
@@ -114,7 +114,7 @@ export default function PointsHistory() {
         </div>
 
         {/* ── Points Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 h-[100px] flex items-center pointer-events-auto">
             {/* Spendable */}
             <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
@@ -166,7 +166,7 @@ export default function PointsHistory() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {FILTER_CHIPS.map((chip) => (
               <button
@@ -186,7 +186,7 @@ export default function PointsHistory() {
       </header>
 
       {/* ── Transaction list ───────────────────────────────────── */}
-      <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+      <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
         {isLoading ? (
           <>
             <SkeletonTransactionGroup rows={3} />

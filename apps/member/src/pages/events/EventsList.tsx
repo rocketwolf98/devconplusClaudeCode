@@ -129,7 +129,7 @@ export default function EventsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Events
             </h1>
@@ -147,7 +147,7 @@ export default function EventsList() {
         </div>
 
         {/* ── Points/Chapter Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           {tab === 'discover' && selectedChapterName && (
             <motion.div 
               initial={{ opacity: 0, y: 5 }}
@@ -195,7 +195,7 @@ export default function EventsList() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {(['discover', 'tickets'] as const).map((t) => (
               <button
@@ -234,7 +234,7 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+          <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
             {/* Loading skeletons */}
             {isLoading && (
               <div className="pt-4 space-y-3">
@@ -248,7 +248,7 @@ export default function EventsList() {
 
             {/* Empty state — no events at all */}
             {!isLoading && events.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-4 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
@@ -261,7 +261,7 @@ export default function EventsList() {
 
             {/* Empty state — chapter filter yields nothing */}
             {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-4 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
@@ -412,9 +412,9 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+          <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
             {myTickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center px-[25px] pt-24">
+              <div className="flex flex-col items-center justify-center px-4 pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <TicketOutline className="w-8 h-8" color="#0b46a3" />
                 </div>

@@ -43,7 +43,7 @@ export default function EventPending() {
   // ── Rejection screen ──────────────────────────────────────────────────────
   if (isRejected) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -69,7 +69,7 @@ export default function EventPending() {
 
   // ── Main pending screen ───────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-6 text-center pb-24">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 text-center pb-24">
 
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
@@ -96,7 +96,7 @@ export default function EventPending() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="w-full max-w-xs bg-yellow-50 border border-yellow-200 rounded-2xl px-5 py-4 mb-8 text-left"
+        className="w-full max-w-xs bg-yellow-50 border border-yellow-200 rounded-2xl px-4 py-4 mb-8 text-left"
       >
         <p className="text-md3-label-md font-semibold text-yellow-700 uppercase tracking-widest mb-1">What happens next</p>
         <ul className="text-md3-body-md text-yellow-800 space-y-1 list-disc list-inside">

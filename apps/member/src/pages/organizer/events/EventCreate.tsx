@@ -269,7 +269,7 @@ export function OrgEventCreate() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-6 pb-4 flex items-center gap-3">
+          <div className="relative z-10 px-4 pb-4 flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"

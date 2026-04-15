@@ -152,9 +152,8 @@ export default function NewsDetail() {
       </header>
 
       {/* Article content */}
-      <motion.div
-        className="px-5 pt-5 space-y-4"
-        variants={fadeUp}
+      <motion.div 
+        className="px-4 pt-5 space-y-4"        variants={fadeUp}
         initial="hidden"
         animate="visible"
       >

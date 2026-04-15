@@ -79,7 +79,7 @@ export default function Onboarding() {
       </div>
 
       {/* ── Fixed header ─────────────────────────────────────── */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 pt-5 pb-3">
+      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-5 pb-3">
         <div className="flex items-center gap-2.5">
           <img src={logoMark} alt="DEVCON+" className="h-7 w-auto" />
         </div>
@@ -92,7 +92,7 @@ export default function Onboarding() {
       </div>
 
       {/* ── Fixed bottom panel ───────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-blue rounded-t-[28px] px-6 pt-6 pb-10">
+      <div className="absolute bottom-0 left-0 right-0 z-20 bg-blue rounded-t-[28px] px-4 pt-6 pb-10">
         {/* Slide caption */}
         <div key={current} className="mb-5 animate-[fadeIn_0.3s_ease-out]">
           <p className="text-white/50 text-[11px] font-semibold uppercase tracking-widest mb-1.5">

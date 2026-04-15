@@ -517,7 +517,7 @@ export default function JobsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Jobs and Missions
             </h1>
@@ -534,7 +534,7 @@ export default function JobsList() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {(['jobs', 'missions'] as const).map((tab) => (
               <button

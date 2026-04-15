@@ -53,7 +53,7 @@ export default function VolunteerXpCard() {
         }}
       >
         {/* Header Row: Logo + Greeting + Notifications */}
-        <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+        <div className="relative z-10 flex items-center justify-between px-4 pt-6">
           <div className="flex items-center gap-2">
             <div className="h-[26px] w-[44px] relative">
               <img src={imgGroup15} alt="DEVCON+" className="absolute inset-0 size-full" />
@@ -79,7 +79,7 @@ export default function VolunteerXpCard() {
 
       {/* ── Collapsing Wrapper: Card ONLY ── */}
       <motion.div 
-        className="relative z-10 flex flex-col overflow-hidden px-[25px]"
+        className="relative z-10 flex flex-col overflow-hidden px-4"
         initial={false}
         animate={{
           maxHeight: isScrolled ? 0 : 300, // Reduced height since grid is gone

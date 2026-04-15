@@ -158,7 +158,7 @@ export function OrgDashboard() {
           }}
         >
           {/* Header Row: Logo + Greeting + Notifications */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <div className="flex items-center gap-2">
               <div className="h-[26px] w-[44px] relative">
                 <img src={imgGroup15} alt="DEVCON+" className="absolute inset-0 size-full" />
@@ -188,7 +188,7 @@ export function OrgDashboard() {
         </div>
 
         {/* ── Stats Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 p-[24px] flex flex-col gap-5 pointer-events-auto">
             <div className="flex">
               <span className="font-proxima font-bold bg-[#1152d4] text-white text-[10px] tracking-widest uppercase px-3 py-1.5 rounded-full">

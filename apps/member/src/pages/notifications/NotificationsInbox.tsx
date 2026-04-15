@@ -41,7 +41,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
           }}
         >
           {/* Title + Back Button + Clear All */}
-          <div className="relative z-10 flex items-center justify-between px-6 pb-4">
+          <div className="relative z-10 flex items-center justify-between px-4 pb-4">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => navigate(-1)}
@@ -68,7 +68,7 @@ export default function NotificationsInbox({ isOrganizer = false }: Notification
         </div>
       </header>
 
-      <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+      <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-8 pt-20 text-center">
             <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-5">

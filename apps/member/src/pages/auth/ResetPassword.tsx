@@ -65,13 +65,13 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-blue px-4 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         <p className="text-white/60 mt-3 text-md3-body-md">Set a new password</p>
       </div>
 
       {/* Card */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10">
+      <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-8 pb-10">
 
         {/* Waiting for Supabase to exchange the token */}
         {pageState === 'waiting' && (

@@ -105,7 +105,7 @@ export function OrgEventSummary() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-6 pb-4 flex items-center justify-between">
+          <div className="relative z-10 px-4 pb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate(-1)}

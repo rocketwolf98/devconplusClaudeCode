@@ -45,7 +45,7 @@ export default function Privacy() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-[25px] pb-4 flex items-center gap-3">
+          <div className="relative z-10 px-4 pb-4 flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
@@ -58,7 +58,7 @@ export default function Privacy() {
         </div>
       </header>
 
-      <div className="px-[25px] pt-4 space-y-2 pb-24 md:max-w-4xl md:mx-auto">
+      <div className="px-4 pt-4 space-y-2 pb-24 md:max-w-4xl md:mx-auto">
         {COMING_SOON_OPTIONS.map((opt) => (
           <button
             key={opt}

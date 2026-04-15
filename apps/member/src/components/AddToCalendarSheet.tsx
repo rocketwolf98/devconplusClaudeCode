@@ -86,7 +86,7 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
             onClick={onClose}
           />
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-10"
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-4 pt-4 pb-10"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}

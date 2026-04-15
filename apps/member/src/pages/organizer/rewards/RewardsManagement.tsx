@@ -281,7 +281,7 @@ export function OrgRewardsManagement() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[28px] font-semibold font-proxima leading-none tracking-tight">
               Rewards
             </h1>
@@ -299,7 +299,7 @@ export function OrgRewardsManagement() {
         </div>
 
         {/* ── Stats Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 h-[100px] flex items-center pointer-events-auto">
             {/* Total */}
             <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
@@ -355,7 +355,7 @@ export function OrgRewardsManagement() {
         </div>
 
         {/* ── Tab bar ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px]">
             <button
               onClick={() => setActiveTab('rewards')}
@@ -387,7 +387,7 @@ export function OrgRewardsManagement() {
       </header>
 
       <motion.div
-        className="px-[25px] pt-4 space-y-4 pb-24 md:max-w-4xl md:mx-auto"
+        className="px-4 pt-4 space-y-4 pb-24 md:max-w-4xl md:mx-auto"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"

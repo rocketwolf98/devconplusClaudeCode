@@ -112,7 +112,7 @@ export default function Profile() {
           </div>
         </div>
 
-      <div className="px-[25px] pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
+      <div className="px-4 pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
 
         <ProfileExpCard />
 

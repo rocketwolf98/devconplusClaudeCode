@@ -83,7 +83,7 @@ export default function EmailConfirm() {
         </div>
       </header>
 
-      <div className="flex-1 px-6 pt-10 pb-10 flex flex-col items-center text-center">
+      <div className="flex-1 px-4 pt-10 pb-10 flex flex-col items-center text-center">
         {status === 'verifying' && (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <div className="w-6 h-6 border-2 border-blue/30 border-t-blue rounded-full animate-spin" />

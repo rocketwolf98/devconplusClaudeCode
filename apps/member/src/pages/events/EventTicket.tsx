@@ -261,7 +261,7 @@ export default function EventTicket() {
       </motion.button>
 
       {/* Scrollable content */}
-      <div className="flex flex-col items-center px-5 pt-20 pb-12">
+      <div className="flex flex-col items-center px-4 pt-20 pb-12">
 
         {/* TicketOutline card */}
         <motion.div
@@ -273,7 +273,7 @@ export default function EventTicket() {
         >
           {/* ── Primary header strip ── */}
           <div
-            className="px-6 pt-6 pb-5 text-center"
+            className="px-4 pt-6 pb-5 text-center"
             style={{ backgroundColor: checkedIn ? '#21C45D' : effectiveTheme.hex, transition: 'background-color 0.6s ease' }}
           >
             <motion.div
@@ -314,7 +314,7 @@ export default function EventTicket() {
               initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center pt-6 pb-3 px-6 gap-3"
+              className="flex flex-col items-center pt-6 pb-3 px-4 gap-3"
             >
               {/* Fixed-size wrapper so QR and success card share the same footprint */}
               <div className="relative w-[240px] h-[240px] flex items-center justify-center">
@@ -488,7 +488,7 @@ export default function EventTicket() {
               variants={staggerRows}
               initial="hidden"
               animate="visible"
-              className="px-6 pt-4 pb-6 space-y-3"
+              className="px-4 pt-4 pb-6 space-y-3"
             >
               {infoRows.map(({ label, value, valueClass }) => (
                 <motion.div key={label} variants={rowItem} className="flex justify-between items-center text-md3-label-md">
@@ -500,7 +500,7 @@ export default function EventTicket() {
 
             {/* Cancel registration — only shown when not yet checked in */}
             {!reg.checked_in && !checkedIn && !eventEnded && (
-              <div className="px-6 pb-5">
+              <div className="px-4 pb-5">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCancelStep('first')}
@@ -563,7 +563,7 @@ export default function EventTicket() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full bg-white rounded-t-3xl px-5 pt-4 pb-10"
+              className="w-full bg-white rounded-t-3xl px-4 pt-4 pb-10"
               onClick={(e) => e.stopPropagation()}
             >
               {cancelStep === 'first' ? (

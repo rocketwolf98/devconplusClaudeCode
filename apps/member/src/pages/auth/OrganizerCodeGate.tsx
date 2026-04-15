@@ -112,13 +112,13 @@ export default function OrganizerCodeGate() {
   return (
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Gradient header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-blue px-4 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         <p className="text-white/70 mt-3 text-md3-body-md">Welcome, {firstName}!</p>
       </div>
 
       {/* Card */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-32 overflow-y-auto">
+      <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-8 pb-32 overflow-y-auto">
 
         {submitted ? (
           /* Success state — request is pending admin approval */

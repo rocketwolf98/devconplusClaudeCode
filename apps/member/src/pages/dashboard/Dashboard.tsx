@@ -165,7 +165,7 @@ useEffect(() => {
 
       {/* ── Main Content Area ── */}
       <motion.main 
-        className="relative z-10 flex flex-col gap-6 px-[25px] pb-4 md:max-w-4xl md:mx-auto"
+        className="relative z-10 flex flex-col gap-6 px-4 pb-4 md:max-w-4xl md:mx-auto"
         initial={false}
         animate={{
           paddingTop: isScrolled ? 80 : 16 // pt-20 when scrolled for clearance, pt-4 when unscrolled for tight gap

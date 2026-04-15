@@ -41,7 +41,7 @@ export function OrgEventManagement() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6 pb-4">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6 pb-4">
             <h1 className="text-white text-[28px] font-semibold font-proxima leading-none tracking-tight">
               Events
             </h1>

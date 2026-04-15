@@ -38,7 +38,7 @@ export function OrgEventsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Manage Events
             </h1>
@@ -55,7 +55,7 @@ export function OrgEventsList() {
       </header>
 
       <motion.div
-        className="px-[25px] pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-24"
+        className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-24"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"

@@ -200,7 +200,7 @@ export default function SignUp() {
       </header>
 
       {/* Floating card */}
-      <div className="px-6 pt-10 pb-10 overflow-y-auto">
+      <div className="px-4 pt-10 pb-10 overflow-y-auto">
         <button
           type="button"
           disabled={googleLoading}

@@ -85,10 +85,11 @@ export default function OAuthCallback() {
   if (error) {
     return (
       <div className="min-h-screen bg-blue flex flex-col">
-        <div className="bg-blue px-6 pt-16 pb-10 text-center">
+        <div className="bg-blue px-4 pt-16 pb-10 text-center">
           <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         </div>
-        <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-12 pb-10 flex flex-col items-center text-center">
+
+        <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-12 pb-10 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
             <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
           </div>

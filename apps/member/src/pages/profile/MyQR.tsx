@@ -134,7 +134,7 @@ export default function MyQR() {
           }}
         >
           {/* Header Row: Back + Title */}
-          <div className="relative z-10 px-[25px] pb-1 flex items-center gap-3">
+          <div className="relative z-10 px-4 pb-1 flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
@@ -144,7 +144,7 @@ export default function MyQR() {
               My Identity
             </h1>
           </div>
-          <div className="relative z-10 px-[25px] pb-4 pt-2">
+          <div className="relative z-10 px-4 pb-4 pt-2">
             <div className="w-16 h-16 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-md3-title-lg font-black text-white mx-auto mb-2 overflow-hidden">
               {user?.avatar_url ? (
                 <img src={user.avatar_url} alt={user?.full_name ?? ''} className="w-full h-full object-cover" />
@@ -157,7 +157,7 @@ export default function MyQR() {
         </div>
       </header>
 
-      <div className="flex flex-col items-center px-5 pb-12">
+      <div className="flex flex-col items-center px-4 pb-12">
 
         {/* Card */}
         <motion.div
@@ -167,7 +167,7 @@ export default function MyQR() {
           className="w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl bg-white border border-slate-100"
         >
           {/* QR section */}
-          <div className="flex flex-col items-center pt-8 pb-3 px-6 gap-3">
+          <div className="flex flex-col items-center pt-8 pb-3 px-4 gap-3">
             <div className="relative w-[240px] h-[240px] flex items-center justify-center">
 
               {/* SVG countdown border */}
@@ -246,7 +246,7 @@ export default function MyQR() {
           </div>
 
           {/* InfoCircleOutline rows */}
-          <div className="px-6 pt-4 pb-8 space-y-3">
+          <div className="px-4 pt-4 pb-8 space-y-3">
             <div className="flex justify-between items-center text-[13px]">
               <span className="text-slate-400 font-medium">Member</span>
               <span className="text-slate-900 font-bold">{user?.full_name ?? '—'}</span>

@@ -62,7 +62,7 @@ export default function ForgotPassword() {
         </header>
 
         {/* Card */}
-        <div className="px-6 pt-10 pb-10">
+        <div className="px-4 pt-10 pb-10">
         <h2 className="text-md3-title-lg font-black text-slate-900 mb-1">Forgot Password?</h2>
         <p className="text-md3-body-md text-slate-500 mb-6">
           Enter your email and we'll send you a link to reset your password.

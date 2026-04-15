@@ -32,7 +32,7 @@ function VolunteerPageHeader({ event, onBack }: { event: { title: string }; onBa
         }}
       >
         {/* Header Row: Back + Title */}
-        <div className="relative z-10 flex items-center gap-3 px-6 pb-2">
+        <div className="relative z-10 flex items-center gap-3 px-4 pb-2">
           <button
             onClick={onBack}
             className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"

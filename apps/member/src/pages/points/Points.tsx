@@ -78,7 +78,7 @@ export default function Points() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-[25px] pb-4 flex items-center gap-3">
+          <div className="relative z-10 px-4 pb-4 flex items-center gap-3">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight flex-1">
               Points+
             </h1>
@@ -86,7 +86,7 @@ export default function Points() {
         </div>
 
         {/* ── Stats Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 p-[20px] flex flex-col gap-4 pointer-events-auto">
             {/* Dual balance display */}
             <div className="space-y-3">
@@ -138,7 +138,7 @@ export default function Points() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {(['earn', 'share'] as const).map((t) => (
               <button
@@ -158,7 +158,7 @@ export default function Points() {
       </header>
 
       {/* ── Scrollable body ───────────────────────────────────── */}
-      <div className="px-[25px] pt-4 pb-24 md:max-w-4xl md:mx-auto">
+      <div className="px-4 pt-4 pb-24 md:max-w-4xl md:mx-auto">
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}

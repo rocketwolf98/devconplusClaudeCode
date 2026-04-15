@@ -79,7 +79,7 @@ export default function EmailSent() {
           </header>
 
           {/* Card */}
-          <div className="flex-1 px-6 pt-10 pb-10 flex flex-col items-center text-center">
+          <div className="flex-1 px-4 pt-10 pb-10 flex flex-col items-center text-center">
         {/* LetterOutline icon */}
         <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mb-5">
           <LetterOutline className="w-8 h-8" color="#1152D4" />

@@ -200,7 +200,7 @@ export default function OrganizerLayout() {
         {/* Floating sidebar */}
         <aside className="w-48 lg:w-56 shrink-0 bg-blue rounded-2xl shadow-card flex flex-col overflow-hidden">
           {/* Logo */}
-          <div className="px-5 py-5 border-b border-white/10">
+          <div className="px-4 py-5 border-b border-white/10">
             <img src={logoHorizontal} alt="DEVCON+" className="h-5 w-auto" />
             <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-white/50">
               Organizer
