@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useAuthStore } from '../../../stores/useAuthStore'
 import { useRewardsStore } from '../../../stores/useRewardsStore'
+import { useFormDraft } from '../../../hooks/useFormDraft'
 import type { Reward } from '@devcon-plus/supabase'
 import {
   schema,
@@ -40,6 +41,11 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
   const { createReward, updateReward } = useRewardsStore()
   const isEdit = Boolean(reward)
 
+  // ── Draft persistence ────────────────────────────────────────────────────
+  const draftKey = isEdit && reward ? `org-reward-edit:${reward.id}` : 'org-reward-create'
+  const { draft, saveDraft, clearDraft } = useFormDraft<RewardFormData>(draftKey, 'local')
+  const hasDraft = Object.keys(draft).length > 0
+
   // ── Image state ──────────────────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
@@ -61,25 +67,38 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
     resolver: zodResolver(schema),
     defaultValues: reward
       ? {
-          name: reward.name,
-          description: reward.description ?? '',
-          points_cost: reward.points_cost,
-          type: reward.type,
-          claim_method: reward.claim_method,
-          stock_remaining: reward.stock_remaining ?? undefined,
-          max_per_user: reward.max_per_user ?? undefined,
-          is_active: reward.is_active,
-          is_coming_soon: reward.is_coming_soon,
+          name: hasDraft ? (draft.name as string) ?? reward.name : reward.name,
+          description: hasDraft ? (draft.description as string) ?? reward.description ?? '' : reward.description ?? '',
+          points_cost: hasDraft ? (draft.points_cost as number) ?? reward.points_cost : reward.points_cost,
+          type: hasDraft ? (draft.type as RewardFormData['type']) ?? reward.type : reward.type,
+          claim_method: hasDraft ? (draft.claim_method as RewardFormData['claim_method']) ?? reward.claim_method : reward.claim_method,
+          stock_remaining: hasDraft ? (draft.stock_remaining as number | undefined) ?? reward.stock_remaining ?? undefined : reward.stock_remaining ?? undefined,
+          max_per_user: hasDraft ? (draft.max_per_user as number | undefined) ?? reward.max_per_user ?? undefined : reward.max_per_user ?? undefined,
+          is_active: hasDraft ? (draft.is_active as boolean) ?? reward.is_active : reward.is_active,
+          is_coming_soon: hasDraft ? (draft.is_coming_soon as boolean) ?? reward.is_coming_soon : reward.is_coming_soon,
         }
       : {
-          type: 'physical',
-          claim_method: 'onsite',
-          is_active: true,
-          is_coming_soon: true,
+          name: (draft.name as string) ?? '',
+          description: (draft.description as string) ?? '',
+          points_cost: (draft.points_cost as number) ?? undefined,
+          type: (draft.type as RewardFormData['type']) ?? 'physical',
+          claim_method: (draft.claim_method as RewardFormData['claim_method']) ?? 'onsite',
+          stock_remaining: (draft.stock_remaining as number | undefined) ?? undefined,
+          max_per_user: (draft.max_per_user as number | undefined) ?? undefined,
+          is_active: (draft.is_active as boolean) ?? true,
+          is_coming_soon: (draft.is_coming_soon as boolean) ?? true,
         },
   })
 
   const watchedType = watch('type')
+
+  // Persist form draft on every field change
+  useEffect(() => {
+    const { unsubscribe } = watch((values) => {
+      saveDraft(values as Partial<RewardFormData>)
+    })
+    return unsubscribe
+  }, [watch, saveDraft])
 
   // Auto-set claim_method when type changes
   useEffect(() => {
@@ -155,6 +174,7 @@ export function RewardForm({ reward, onSuccess, dangerZone }: RewardFormProps) {
       } else {
         await createReward(data, imageUrl)
       }
+      clearDraft()
       onSuccess()
     } catch (err) {
       setSubmitError(

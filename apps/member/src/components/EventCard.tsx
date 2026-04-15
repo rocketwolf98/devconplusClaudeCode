@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import type { Event } from '@devcon-plus/supabase'
 import PromotedBadge from './PromotedBadge'
 import StatusPill from './StatusPill'
-import { formatDate } from '../lib/dates'
+import { formatDate, isEventArchived } from '../lib/dates'
 
 function getInitials(name: string): string {
   return name
@@ -28,6 +28,7 @@ function EventCard({
   className?: string;
 }) {
   const navigate = useNavigate()
+  const isArchived = isEventArchived(event)
   const dateStr = event.event_date
     ? formatDate.compact(event.event_date)
     : 'Date TBA'
@@ -35,7 +36,7 @@ function EventCard({
   return (
     <motion.button
       onClick={() => navigate(`/events/${event.slug}`)}
-      className={`w-full bg-slate-900 rounded-2xl shadow-card text-left relative overflow-hidden group ${className || 'h-[200px]'}`}
+      className={`w-full bg-slate-900 rounded-2xl shadow-card text-left relative overflow-hidden group ${className || 'h-[200px]'} ${isArchived ? 'opacity-60 grayscale' : ''}`}
       whileTap={{ scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >

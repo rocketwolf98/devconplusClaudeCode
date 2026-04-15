@@ -134,14 +134,18 @@ export const useRewardsStore = create<RewardsState>((set, get) => ({
     await Promise.all([get().fetchAllRewards(), get().fetchRewards()])
   },
 
-  // ── Delete (soft) ────────────────────────────────────────────────────────
+  // ── Delete (permanent) ───────────────────────────────────────────────────
   deleteReward: async (id) => {
-    const { error } = await supabase
-      .from('rewards')
-      .update({ is_active: false })
-      .eq('id', id)
+    // Remove child redemptions first to satisfy FK constraint
+    const { error: redemptionsError } = await supabase
+      .from('reward_redemptions')
+      .delete()
+      .eq('reward_id', id)
+    if (redemptionsError) throw new Error(redemptionsError.message)
+
+    const { error } = await supabase.from('rewards').delete().eq('id', id)
     if (error) throw new Error(error.message)
-    // Optimistic: remove from both slices immediately
+
     set((s) => ({
       rewards: s.rewards.filter((r) => r.id !== id),
       allRewards: s.allRewards.filter((r) => r.id !== id),

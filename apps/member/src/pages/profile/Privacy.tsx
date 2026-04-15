@@ -91,14 +91,14 @@ export default function Privacy() {
             <div className="flex gap-2">
               <button
                 onClick={() => { setConfirmDelete(false); setDeleteError(null) }}
-                className="flex-1 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+                className="flex-1 py-3 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={isDeleting}
-                className="flex-1 py-2.5 bg-red text-white text-sm font-bold rounded-xl hover:bg-red/90 transition-colors disabled:opacity-60"
+                className="flex-1 py-3 bg-red text-white text-sm font-bold rounded-xl transition-colors disabled:opacity-60"
               >
                 {isDeleting ? 'Deleting…' : 'Yes, Delete'}
               </button>

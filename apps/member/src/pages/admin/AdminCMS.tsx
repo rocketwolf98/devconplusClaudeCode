@@ -389,6 +389,12 @@ function RewardsTab() {
   }
 
   const handleDelete = async (id: string) => {
+    const { error: redemptionsErr } = await supabase
+      .from('reward_redemptions')
+      .delete()
+      .eq('reward_id', id)
+    if (redemptionsErr) { setError(redemptionsErr.message); setConfirmDeleteId(null); return }
+
     const { error: err } = await supabase.from('rewards').delete().eq('id', id)
     if (err) setError(err.message)
     else setRows((prev) => prev.filter((r) => r.id !== id))

@@ -98,13 +98,22 @@ export default function PasswordConfirmModal({
               </p>
             )}
 
-            <button
-              onClick={() => void handleConfirm()}
-              disabled={isLoading}
-              className="w-full bg-primary text-white font-bold py-3 rounded-xl disabled:opacity-60"
-            >
-              {isLoading ? 'Verifying…' : confirmLabel}
-            </button>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleClose}
+                disabled={isLoading}
+                className="flex-1 py-3 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => void handleConfirm()}
+                disabled={isLoading}
+                className="flex-1 bg-primary text-white text-sm font-bold py-3 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-60"
+              >
+                {isLoading ? 'Verifying…' : confirmLabel}
+              </button>
+            </div>
           </motion.div>
         </>
       )}

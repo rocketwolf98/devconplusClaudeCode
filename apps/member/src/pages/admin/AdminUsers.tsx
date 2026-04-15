@@ -76,13 +76,39 @@ export default function AdminUsers() {
   const handleDelete = async (userId: string) => {
     setDeletingId(userId)
     setError(null)
-    const { error: dbErr } = await supabase
-      .from('profiles')
-      .delete()
-      .eq('id', userId)
+
+    const invokeWithToken = (token: string) =>
+      supabase.functions.invoke('delete-user', {
+        body: { user_id: userId },
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      setError('Session expired. Please sign in again.')
+      setDeletingId(null)
+      setConfirmDeleteId(null)
+      return
+    }
+
+    let res = await invokeWithToken(session.access_token)
+
+    // If the call failed, refresh the session once and retry.
+    // Handles the case where the access token expired between getSession() and the call.
+    if (res.error) {
+      const { data: refreshed } = await supabase.auth.refreshSession()
+      if (refreshed.session) {
+        res = await invokeWithToken(refreshed.session.access_token)
+      }
+    }
+
     setDeletingId(null)
     setConfirmDeleteId(null)
-    if (dbErr) { setError(dbErr.message); return }
+    if (res.error || !(res.data as { success?: boolean })?.success) {
+      const msg = (res.data as { error?: string })?.error ?? 'Failed to delete user.'
+      setError(msg)
+      return
+    }
     setUsers((prev) => prev.filter((u) => u.id !== userId))
     if (selectedUser?.id === userId) setSelectedUser(null)
   }

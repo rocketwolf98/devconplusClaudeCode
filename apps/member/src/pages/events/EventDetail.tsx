@@ -147,9 +147,13 @@ export default function EventDetail() {
             </div>
           )}
 
-          {/* Volunteer CTA — only for upcoming events */}
+          {/* Volunteer CTA — only for upcoming events, hidden for cross-chapter members */}
           {event.status === 'upcoming' && (
-            volunteerApp ? (
+            isChapterLocked ? (
+              <div className="w-full bg-amber-50 border border-amber-200 text-amber-700 font-semibold py-4 rounded-2xl text-center text-sm">
+                This event is exclusive to {eventChapterName ?? "this chapter's"} members
+              </div>
+            ) : volunteerApp ? (
               <div className="w-full border border-slate-200 rounded-xl py-3 px-4 flex items-center justify-center gap-2">
                 <HeartOutline className="w-4 h-4" color="#94A3B8" />
                 <span className="text-sm font-medium text-slate-500">

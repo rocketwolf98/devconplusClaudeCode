@@ -49,7 +49,7 @@ export default function ComingSoonModal({ onClose, feature = 'This feature' }: P
               <p className="text-sm text-slate-500 mb-6">{feature} is launching soon. Stay tuned!</p>
               <button
                 onClick={handleClose}
-                className="w-full bg-primary text-white font-bold py-3 rounded-xl"
+                className="w-full bg-primary text-white text-sm font-bold py-3 rounded-xl transition-opacity hover:opacity-90"
               >
                 Got it
               </button>

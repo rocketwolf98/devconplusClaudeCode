@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useFormDraft } from '../../hooks/useFormDraft'
 import { useEventsStore } from '../../stores/useEventsStore'
 import { useVolunteerStore } from '../../stores/useVolunteerStore'
+import { useAuthStore } from '../../stores/useAuthStore'
 import { getEventThemeStyle } from '../../lib/eventTheme'
 import { fadeUp } from '../../lib/animation'
 import NotFound from '../NotFound'
@@ -66,10 +67,19 @@ export default function EventVolunteer() {
 
   const { events } = useEventsStore()
   const { loadApplications, applyToVolunteer, getApplicationByEventId } = useVolunteerStore()
+  const { user } = useAuthStore()
 
   const event = slug ? events.find((e) => e.slug === slug) : undefined
   const eventId = event?.id
   const existingApp = eventId ? getApplicationByEventId(eventId) : undefined
+
+  const isChapterBlocked = !!(event && user && event.is_chapter_locked === true && event.chapter_id !== user.chapter_id)
+
+  useEffect(() => {
+    if (isChapterBlocked && slug) {
+      navigate(`/events/${slug}`, { replace: true })
+    }
+  }, [isChapterBlocked, slug, navigate])
 
   useEffect(() => {
     loadApplications()
@@ -105,6 +115,7 @@ export default function EventVolunteer() {
   }, [watch, saveDraft])
 
   if (!event || !eventId) return <NotFound />
+  if (isChapterBlocked) return null
 
   const dateStr = event.event_date
     ? new Date(event.event_date).toLocaleDateString('en-PH', {

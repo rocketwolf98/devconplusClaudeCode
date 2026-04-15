@@ -204,7 +204,7 @@ function EventRow({ event, onTap }: EventRowProps) {
       onClick={onTap}
       whileTap={{ scale: 0.98 }}
       className={`w-full bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 text-left ${
-        isExpired ? 'opacity-60' : ''
+        isExpired ? 'opacity-60 grayscale' : ''
       }`}
     >
       {/* Left Side: Image or Date Placeholder */}

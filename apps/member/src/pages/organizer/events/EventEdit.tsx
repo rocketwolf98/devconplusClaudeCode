@@ -328,7 +328,6 @@ export function OrgEventEdit() {
               <ArrowLeftOutline className="w-5 h-5" color="white" />
             </button>
             <div className="flex items-center gap-2">
-              <PenOutline className="w-5 h-5" color="white" />
               <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
                 Edit Event
               </h1>

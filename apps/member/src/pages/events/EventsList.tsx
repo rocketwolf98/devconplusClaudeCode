@@ -89,14 +89,14 @@ export default function EventsList() {
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter events by selected chapter, excluding archived events in Discover tab
-  const activeEvents = events.filter((e) => !isEventArchived(e))
-
   const filteredEvents = selectedChapterId
-    ? activeEvents.filter((e) => e.chapter_id === selectedChapterId)
-    : activeEvents
+    ? events.filter((e) => e.chapter_id === selectedChapterId)
+    : events
 
-  const featuredEvent = filteredEvents.find((e) => e.is_featured) ?? filteredEvents[0]
-  const listEvents = filteredEvents.filter((e) => e.id !== featuredEvent?.id)
+  const activeEvents = filteredEvents.filter((e) => !isEventArchived(e))
+
+  const featuredEvent = activeEvents.find((e) => e.is_featured) ?? activeEvents[0]
+  const listEvents = activeEvents.filter((e) => e.id !== featuredEvent?.id)
 
   const selectedChapterName = selectedChapterId
     ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? null)
@@ -309,35 +309,75 @@ export default function EventsList() {
               >
                 {listEvents.map((event) => {
                   const dateParts = event.event_date ? formatEventDate(event.event_date) : null
+                  const isArchived = isEventArchived(event)
                   return (
                     <motion.button
                       key={event.id}
                       variants={cardItem}
                       onClick={() => navigate(`/events/${event.slug}`)}
-                      className="w-full bg-white rounded-2xl shadow-card p-4 text-left flex items-start gap-3"
+                      className={`w-full bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 text-left ${
+                        isArchived ? 'opacity-60 grayscale' : ''
+                      }`}
                       whileTap={{ scale: 0.98 }}
                     >
-                      {dateParts ? (
-                        <div className="w-12 h-14 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold text-primary leading-none">
-                            {dateParts.month}
-                          </span>
-                          <span className="text-xl font-black text-navy leading-tight">
-                            {dateParts.day}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="w-12 h-14 rounded-xl bg-slate-100 shrink-0" />
-                      )}
+                      {/* Left Side: Image or Date Placeholder */}
+                      <div className="size-[72px] bg-slate-100 rounded-[12px] overflow-hidden shrink-0 relative">
+                        {event.cover_image_url ? (
+                          <>
+                            <img src={event.cover_image_url} alt={event.title} className="w-full h-full object-cover" />
+                            {/* Date Overlay for Images */}
+                            {dateParts && (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                                <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
+                                  {dateParts.month}
+                                </span>
+                                <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                                  {dateParts.day}
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-primary/10">
+                            {dateParts ? (
+                              <>
+                                <span className="text-[10px] font-bold leading-none text-primary/60 uppercase">
+                                  {dateParts.month}
+                                </span>
+                                <span className="text-2xl font-black leading-tight text-primary">
+                                  {dateParts.day}
+                                </span>
+                              </>
+                            ) : (
+                              <ClockCircleOutline className="size-8 text-primary/40" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Side: Details */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-900 leading-tight">{event.title}</p>
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
+                            {event.title}
+                          </p>
+                          <AltArrowRightOutline className="w-3.5 h-3.5 shrink-0 text-slate-300 mt-0.5" />
+                        </div>
+
+                        {/* Date Text */}
+                        <p className="text-[11px] text-slate-500 mb-0.5">
+                          {event.event_date ? new Date(event.event_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'No date set'}
+                        </p>
+
+                        {/* Location */}
                         {event.location && (
-                          <p className="text-xs text-slate-500 mt-1 flex items-center gap-0.5">
-                            <MapPointOutline className="w-3 h-3 shrink-0" color="#0b46a3" /> {event.location}
+                          <p className="text-[11px] text-slate-400 truncate mb-1.5 flex items-center gap-1">
+                            <MapPointOutline className="w-2.5 h-2.5" color="#94A3B8" />
+                            {event.location}
                           </p>
                         )}
 
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2">
                           <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] bg-primary/10 text-primary px-2 py-0.5 rounded-[100px]">
                             +{event.points_value} pts
                           </span>
@@ -347,9 +387,13 @@ export default function EventsList() {
                               {attendeeCounts[event.id]}
                             </span>
                           )}
+                          {isArchived && (
+                            <span className="backdrop-blur-[16px] font-proxima font-semibold text-[9px] tracking-[0.9px] uppercase leading-[13.5px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-[100px]">
+                              Past
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <AltArrowRightOutline className="w-4 h-4 shrink-0 mt-1" color="#CBD5E1" />
                     </motion.button>
                   )
                 })}
@@ -410,7 +454,7 @@ export default function EventsList() {
                       onClick={isExpired ? undefined : () => navigate(destination)}
                       whileTap={isExpired ? undefined : { scale: 0.98 }}
                       className={`w-full bg-white border border-[rgba(156,163,175,0.3)] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] rounded-[16px] p-3 flex items-center gap-4 text-left ${
-                        isExpired ? 'opacity-50 cursor-not-allowed' : ''
+                        isExpired ? 'opacity-50 grayscale cursor-not-allowed' : ''
                       }`}
                     >
                       {/* Left Side: Image or Date Placeholder */}
