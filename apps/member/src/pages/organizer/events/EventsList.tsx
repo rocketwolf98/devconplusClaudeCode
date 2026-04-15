@@ -38,14 +38,14 @@ export function OrgEventsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Manage Events
             </h1>
 
             <button
               onClick={() => navigate('/organizer/events/create')}
-              className="flex items-center gap-2 bg-white/25 border border-white/50 px-3.5 py-2 rounded-full text-white text-sm font-bold font-proxima active:bg-white/40 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.35)]"
+              className="flex items-center gap-2 bg-white/25 border border-white/50 px-3.5 py-2 rounded-full text-white text-md3-body-md font-bold font-proxima active:bg-white/40 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.35)]"
             >
               <AddCircleOutline className="w-[18px] h-[18px]" color="white" />
               New Event
@@ -55,7 +55,7 @@ export function OrgEventsList() {
       </header>
 
       <motion.div
-        className="px-[25px] pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-24"
+        className="px-4 pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pb-24"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
@@ -107,7 +107,7 @@ export function OrgEventsList() {
                         <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
                           {dateParts.month}
                         </span>
-                        <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                        <span className="text-md3-title-lg font-black leading-tight text-white drop-shadow-md">
                           {dateParts.day}
                         </span>
                       </div>
@@ -120,7 +120,7 @@ export function OrgEventsList() {
                         <span className="text-[10px] font-bold leading-none text-blue/60 uppercase">
                           {dateParts.month}
                         </span>
-                        <span className="text-2xl font-black leading-tight text-blue">
+                        <span className="text-md3-headline-sm font-black leading-tight text-blue">
                           {dateParts.day}
                         </span>
                       </>

@@ -131,20 +131,20 @@ export default function SignIn() {
             }}
           >
             <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
-            <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+            <p className="text-white/60 mt-3 text-md3-body-md font-proxima relative z-10 uppercase tracking-widest font-bold">
               Sign in to your account
             </p>
           </div>
         </header>
 
         {/* Card */}
-        <div className="px-6 pt-10 pb-10 overflow-y-auto">
+        <div className="px-4 pt-10 pb-10 overflow-y-auto">
 
         {/* Password reset success banner */}
         {passwordReset && (
           <div className="bg-green/10 border border-green/20 rounded-xl px-4 py-3 mb-5">
-            <p className="text-green text-sm font-semibold">Password updated successfully!</p>
-            <p className="text-green/80 text-xs mt-0.5">Sign in with your new password.</p>
+            <p className="text-green text-md3-body-md font-semibold">Password updated successfully!</p>
+            <p className="text-green/80 text-md3-label-md mt-0.5">Sign in with your new password.</p>
           </div>
         )}
 
@@ -155,7 +155,7 @@ export default function SignIn() {
             setGoogleLoading(true)
             try { await signInWithGoogle() } catch { setGoogleLoading(false) }
           }}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-md3-body-md font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
         >
           <GoogleIcon />
           {googleLoading ? 'Redirecting…' : 'Continue with Google'}
@@ -163,26 +163,26 @@ export default function SignIn() {
 
         <div className="flex items-center gap-3 mb-5">
           <div className="flex-1 h-px bg-slate-200" />
-          <span className="text-xs text-slate-400 font-medium">or email</span>
+          <span className="text-md3-label-md text-slate-400 font-medium">or email</span>
           <div className="flex-1 h-px bg-slate-200" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Email</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Email</label>
             <input
               {...register('email')}
               type="email"
               placeholder="juan@devcon.ph"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
-            {errors.email && <p className="text-red text-xs mt-1">{errors.email.message}</p>}
+            {errors.email && <p className="text-red text-md3-label-md mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-sm font-medium text-slate-700">Password</label>
-              <Link to="/forgot-password" className="text-xs text-blue font-semibold">
+              <label className="text-md3-body-md font-medium text-slate-700">Password</label>
+              <Link to="/forgot-password" className="text-md3-label-md text-blue font-semibold">
                 Forgot password?
               </Link>
             </div>
@@ -191,7 +191,7 @@ export default function SignIn() {
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <button
                 type="button"
@@ -202,11 +202,11 @@ export default function SignIn() {
                 {showPassword ? <EyeClosedOutline className="w-4 h-4" /> : <EyeOutline className="w-4 h-4" />}
               </button>
             </div>
-            {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
+            {errors.password && <p className="text-red text-md3-label-md mt-1">{errors.password.message}</p>}
           </div>
 
           {formError && (
-            <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+            <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
               {formError}
             </p>
           )}
@@ -229,7 +229,7 @@ export default function SignIn() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-md3-body-md text-slate-500 mt-6">
           Don't have an account?{' '}
           <Link to="/sign-up" className="text-blue font-semibold">Sign Up</Link>
         </p>

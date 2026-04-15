@@ -86,7 +86,7 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
             onClick={onClose}
           />
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-5 pt-4 pb-10"
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-3xl px-4 pt-4 pb-10"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -94,8 +94,8 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
-            <h3 className="text-base font-bold text-slate-900 mb-1">Add to Calendar</h3>
-            <p className="text-sm text-slate-400 mb-5">{event.title}</p>
+            <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">Add to Calendar</h3>
+            <p className="text-md3-body-md text-slate-400 mb-5">{event.title}</p>
 
             <div className="space-y-3">
               <motion.button
@@ -107,8 +107,8 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                   <CalendarOutline className="w-5 h-5" color="rgb(var(--color-primary))" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-slate-900">Google Calendar</p>
-                  <p className="text-xs text-slate-400">Opens in browser</p>
+                  <p className="text-md3-body-md font-semibold text-slate-900">Google Calendar</p>
+                  <p className="text-md3-label-md text-slate-400">Opens in browser</p>
                 </div>
                 <ShareOutline className="w-4 h-4" color="#CBD5E1" />
               </motion.button>
@@ -122,8 +122,8 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
                   <DownloadOutline className="w-5 h-5" color="#64748B" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-slate-900">iCal / Other Calendars</p>
-                  <p className="text-xs text-slate-400">Downloads .ics — Apple Calendar, Outlook</p>
+                  <p className="text-md3-body-md font-semibold text-slate-900">iCal / Other Calendars</p>
+                  <p className="text-md3-label-md text-slate-400">Downloads .ics — Apple Calendar, Outlook</p>
                 </div>
               </motion.button>
             </div>

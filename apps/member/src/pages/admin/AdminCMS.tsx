@@ -34,8 +34,8 @@ const ROLE_LABELS: Record<string, string> = {
   hq_admin: 'HQ Admin',
 }
 
-const INPUT_CLS = 'w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue'
-const LABEL_CLS = 'text-xs font-medium text-slate-700 block mb-1'
+const INPUT_CLS = 'w-full border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue'
+const LABEL_CLS = 'text-md3-label-md font-medium text-slate-700 block mb-1'
 
 // ── Shared UI helpers ─────────────────────────────────────────────────────
 
@@ -58,7 +58,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm text-slate-700">{label}</span>
+      <span className="text-md3-body-md text-slate-700">{label}</span>
       <Toggle checked={checked} onChange={onChange} />
     </div>
   )
@@ -78,7 +78,7 @@ function SlideOver({ title, onClose, onSubmit, saving, children }: SlideOverProp
       <div className="flex-1 bg-black/30" onClick={onClose} />
       <div className="w-96 bg-white h-full shadow-2xl overflow-y-auto flex flex-col">
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-          <h2 className="text-lg font-bold text-slate-900">{title}</h2>
+          <h2 className="text-md3-title-lg font-bold text-slate-900">{title}</h2>
           <button onClick={onClose}>
             <CloseCircleLineDuotone className="w-4 h-4" color="#EF4444" />
           </button>
@@ -92,7 +92,7 @@ function SlideOver({ title, onClose, onSubmit, saving, children }: SlideOverProp
             <button
               type="submit"
               disabled={saving}
-              className="w-full py-2.5 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-50"
+              className="w-full py-2.5 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-50"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -107,18 +107,18 @@ function ConfirmDelete({ label, onConfirm, onCancel }: { label: string; onConfir
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
       <div className="bg-white rounded-2xl p-6 w-80 shadow-2xl">
-        <p className="text-sm text-slate-700 mb-1 font-semibold">Delete {label}?</p>
-        <p className="text-xs text-slate-400 mb-5">This action cannot be undone.</p>
+        <p className="text-md3-body-md text-slate-700 mb-1 font-semibold">Delete {label}?</p>
+        <p className="text-md3-label-md text-slate-400 mb-5">This action cannot be undone.</p>
         <div className="flex gap-2">
           <button
             onClick={onCancel}
-            className="flex-1 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 font-semibold hover:bg-slate-50"
+            className="flex-1 py-2 border border-slate-200 rounded-xl text-md3-body-md text-slate-600 font-semibold hover:bg-slate-50"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2 bg-red text-white rounded-xl text-sm font-bold hover:opacity-90"
+            className="flex-1 py-2 bg-red text-white rounded-xl text-md3-body-md font-bold hover:opacity-90"
           >
             Delete
           </button>
@@ -205,51 +205,51 @@ function UpgradeRequestsTab() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Organizer Upgrade Requests</h2>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h2 className="text-md3-title-lg font-bold text-slate-900">Organizer Upgrade Requests</h2>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">
             Review member requests to become chapter officers or HQ admins
           </p>
         </div>
         {pendingCount > 0 && (
-          <span className="px-3 py-1 bg-primary/10 text-primary text-sm font-bold rounded-full">
+          <span className="px-3 py-1 bg-primary/10 text-primary text-md3-body-md font-bold rounded-full">
             {pendingCount} pending
           </span>
         )}
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {isLoading ? (
-        <p className="text-slate-400 text-sm">Loading requests…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading requests…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Member</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Current Chapter</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Requested Role</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Member</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Current Chapter</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Code</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Requested Role</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {requests.map((req) => (
                 <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-slate-900 text-sm">{req.profiles?.full_name ?? '—'}</p>
-                    <p className="text-xs text-slate-400">{req.profiles?.email ?? '—'}</p>
+                    <p className="font-semibold text-slate-900 text-md3-body-md">{req.profiles?.full_name ?? '—'}</p>
+                    <p className="text-md3-label-md text-slate-400">{req.profiles?.email ?? '—'}</p>
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">
                     {req.profiles?.chapters?.name ?? 'No chapter'}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-700 font-bold tracking-wider">
+                  <td className="px-4 py-3 font-mono text-md3-label-md text-slate-700 font-bold tracking-wider">
                     {req.organizer_code}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
                       {ROLE_LABELS[req.requested_role] ?? req.requested_role}
                     </span>
@@ -269,7 +269,7 @@ function UpgradeRequestsTab() {
                         <button
                           onClick={() => void handleApprove(req)}
                           disabled={actionLoading === req.id}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green/10 text-green text-md3-label-md font-bold rounded-lg hover:bg-green/20 disabled:opacity-50 transition-colors"
                         >
                           <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve
@@ -277,7 +277,7 @@ function UpgradeRequestsTab() {
                         <button
                           onClick={() => void handleReject(req)}
                           disabled={actionLoading === req.id}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red/10 text-red text-xs font-bold rounded-lg hover:bg-red/20 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red/10 text-red text-md3-label-md font-bold rounded-lg hover:bg-red/20 disabled:opacity-50 transition-colors"
                         >
                           <CloseCircleOutline className="w-3.5 h-3.5" />
                           Reject
@@ -290,7 +290,7 @@ function UpgradeRequestsTab() {
             </tbody>
           </table>
           {requests.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No upgrade requests yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No upgrade requests yet.</p>
           )}
         </div>
       )}
@@ -408,12 +408,12 @@ function RewardsTab() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Rewards</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Manage the rewards catalog</p>
+          <h2 className="text-md3-title-lg font-bold text-slate-900">Rewards</h2>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">Manage the rewards catalog</p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           Add Reward
@@ -421,32 +421,32 @@ function RewardsTab() {
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-slate-400 text-sm">Loading…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Points Cost</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Claim Method</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Active</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Coming Soon</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Name</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Points Cost</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Claim Method</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Active</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Coming Soon</th>
+                <th className="px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-semibold text-slate-900">{r.name}</td>
-                  <td className="px-4 py-3 text-slate-700 font-mono text-xs">{r.points_cost.toLocaleString()} pts</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs capitalize">{r.type}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">{r.claim_method === 'digital_delivery' ? 'Digital Delivery' : 'Onsite'}</td>
+                  <td className="px-4 py-3 text-slate-700 font-mono text-md3-label-md">{r.points_cost.toLocaleString()} pts</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md capitalize">{r.type}</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">{r.claim_method === 'digital_delivery' ? 'Digital Delivery' : 'Onsite'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${r.is_active ? 'bg-green/10 text-green' : 'bg-slate-100 text-slate-400'}`}>
                       {r.is_active ? 'Yes' : 'No'}
@@ -472,7 +472,7 @@ function RewardsTab() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No rewards yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No rewards yet.</p>
           )}
         </div>
       )}
@@ -634,12 +634,12 @@ function JobsTab() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Jobs</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Manage the jobs board listings</p>
+          <h2 className="text-md3-title-lg font-bold text-slate-900">Jobs</h2>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">Manage the jobs board listings</p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           Add Job
@@ -647,32 +647,32 @@ function JobsTab() {
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-slate-400 text-sm">Loading…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Title</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Company</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Location</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Promoted</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Active</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Title</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Company</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Location</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Type</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Promoted</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Active</th>
+                <th className="px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((j) => (
                 <tr key={j.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-semibold text-slate-900">{j.title}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">{j.company}</td>
-                  <td className="px-4 py-3 text-slate-500 text-xs">{j.location ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs capitalize">{j.work_type.replace('_', ' ')}</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">{j.company}</td>
+                  <td className="px-4 py-3 text-slate-500 text-md3-label-md">{j.location ?? '—'}</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md capitalize">{j.work_type.replace('_', ' ')}</td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${j.is_promoted ? 'bg-promoted/10 text-promoted' : 'bg-slate-100 text-slate-400'}`}>
                       {j.is_promoted ? 'Yes' : 'No'}
@@ -698,7 +698,7 @@ function JobsTab() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No jobs yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No jobs yet.</p>
           )}
         </div>
       )}
@@ -867,12 +867,12 @@ function ArticlesTab() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Articles</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Manage news posts and updates</p>
+          <h2 className="text-md3-title-lg font-bold text-slate-900">Articles</h2>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">Manage news posts and updates</p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           Add Article
@@ -880,28 +880,28 @@ function ArticlesTab() {
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-slate-400 text-sm">Loading…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Title</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Category</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Featured</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Promoted</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Title</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Category</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Featured</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Promoted</th>
+                <th className="px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((n) => (
                 <tr key={n.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-semibold text-slate-900 max-w-xs truncate">{n.title}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs capitalize">{n.category.replace('_', ' ')}</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md capitalize">{n.category.replace('_', ' ')}</td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${n.is_featured ? 'bg-blue/10 text-blue' : 'bg-slate-100 text-slate-400'}`}>
                       {n.is_featured ? 'Yes' : 'No'}
@@ -927,7 +927,7 @@ function ArticlesTab() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No articles yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No articles yet.</p>
           )}
         </div>
       )}
@@ -1161,13 +1161,13 @@ function MissionsTab() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Missions</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Manage bounty missions and review submissions</p>
+          <h2 className="text-md3-title-lg font-bold text-slate-900">Missions</h2>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">Manage bounty missions and review submissions</p>
         </div>
         {subTab === 'manage' && (
           <button
             onClick={openCreate}
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
           >
             <AddCircleOutline className="w-4 h-4" />
             Add Mission
@@ -1181,7 +1181,7 @@ function MissionsTab() {
           <button
             key={t}
             onClick={() => setSubTab(t)}
-            className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+            className={`px-4 py-1.5 rounded-full text-md3-body-md font-semibold transition-colors ${
               subTab === t ? 'bg-blue text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
             }`}
           >
@@ -1190,7 +1190,7 @@ function MissionsTab() {
         ))}
       </div>
 
-      {error && <p className="text-sm text-red mb-4">{error}</p>}
+      {error && <p className="text-md3-body-md text-red mb-4">{error}</p>}
 
       {/* Mission Manager */}
       {subTab === 'manage' && (
@@ -1201,14 +1201,14 @@ function MissionsTab() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-12">No missions yet. Add one to get started.</p>
+          <p className="text-md3-body-md text-slate-400 text-center py-12">No missions yet. Add one to get started.</p>
         ) : (
           <div className="space-y-2">
             {rows.map((m) => (
               <div key={m.id} className="flex items-center gap-4 bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-card">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-slate-900 truncate">{m.title}</span>
+                    <span className="text-md3-body-md font-semibold text-slate-900 truncate">{m.title}</span>
                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${DIFF_COLORS[m.difficulty]}`}>
                       {m.difficulty}
                     </span>
@@ -1218,7 +1218,7 @@ function MissionsTab() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">+{m.xp_reward} XP</p>
+                  <p className="text-md3-label-md text-slate-400 mt-0.5">+{m.xp_reward} XP</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => openEdit(m)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600">
@@ -1243,22 +1243,22 @@ function MissionsTab() {
             ))}
           </div>
         ) : queue.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-12">No pending submissions. The queue is clear.</p>
+          <p className="text-md3-body-md text-slate-400 text-center py-12">No pending submissions. The queue is clear.</p>
         ) : (
           <div className="space-y-3">
-            {approveError && <p className="text-sm text-red mb-2">{approveError}</p>}
+            {approveError && <p className="text-md3-body-md text-red mb-2">{approveError}</p>}
             {queue.map((sub) => (
               <div key={sub.id} className="bg-white border border-slate-100 rounded-xl px-4 py-3 shadow-card">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{sub.profiles?.full_name ?? 'Unknown'}</p>
-                    <p className="text-xs text-slate-400">{sub.profiles?.email}</p>
-                    <p className="text-xs text-slate-500 mt-1 font-medium">{sub.missions?.title}</p>
+                    <p className="text-md3-body-md font-semibold text-slate-900">{sub.profiles?.full_name ?? 'Unknown'}</p>
+                    <p className="text-md3-label-md text-slate-400">{sub.profiles?.email}</p>
+                    <p className="text-md3-label-md text-slate-500 mt-1 font-medium">{sub.missions?.title}</p>
                     <a
                       href={sub.pr_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue hover:underline mt-1 block truncate"
+                      className="text-md3-label-md text-blue hover:underline mt-1 block truncate"
                     >
                       {sub.pr_link}
                     </a>
@@ -1269,7 +1269,7 @@ function MissionsTab() {
                   <button
                     onClick={() => void handleApprove(sub.id)}
                     disabled={approvingId === sub.id}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 transition-colors disabled:opacity-50 shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-green/10 text-green text-md3-label-md font-bold rounded-lg hover:bg-green/20 transition-colors disabled:opacity-50 shrink-0"
                   >
                     <CheckCircleOutline className="w-3.5 h-3.5" />
                     {approvingId === sub.id ? 'Approving…' : 'Approve & Award'}
@@ -1419,12 +1419,12 @@ function XpTiersTab() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">XP Tiers</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Define member experience point tiers</p>
+          <h2 className="text-md3-title-lg font-bold text-slate-900">XP Tiers</h2>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">Define member experience point tiers</p>
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           Add Tier
@@ -1432,31 +1432,31 @@ function XpTiersTab() {
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {loading ? (
-        <p className="text-slate-400 text-sm">Loading…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Label</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Min Points</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Max Points</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Badge Color</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Name</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Label</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Min Points</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Max Points</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Badge Color</th>
+                <th className="px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((t) => (
                 <tr key={t.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3 font-semibold text-slate-900">{t.name}</td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">{t.label}</td>
-                  <td className="px-4 py-3 text-slate-700 font-mono text-xs">{t.min_points.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-slate-500 font-mono text-xs">{t.max_points !== null ? t.max_points.toLocaleString() : '∞'}</td>
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">{t.label}</td>
+                  <td className="px-4 py-3 text-slate-700 font-mono text-md3-label-md">{t.min_points.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-slate-500 font-mono text-md3-label-md">{t.max_points !== null ? t.max_points.toLocaleString() : '∞'}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {t.badge_color && (
@@ -1465,7 +1465,7 @@ function XpTiersTab() {
                           style={{ backgroundColor: t.badge_color }}
                         />
                       )}
-                      <span className="text-xs font-mono text-slate-500">{t.badge_color ?? '—'}</span>
+                      <span className="text-md3-label-md font-mono text-slate-500">{t.badge_color ?? '—'}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -1483,7 +1483,7 @@ function XpTiersTab() {
             </tbody>
           </table>
           {rows.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No XP tiers yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No XP tiers yet.</p>
           )}
         </div>
       )}
@@ -1546,8 +1546,8 @@ export default function AdminCMS() {
     <div className="min-h-screen bg-slate-50">
       {/* Page header */}
       <div className="px-8 pt-8 pb-4">
-        <h1 className="text-2xl font-black text-slate-900">CMS</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Manage platform content and access requests</p>
+        <h1 className="text-md3-headline-sm font-black text-slate-900">CMS</h1>
+        <p className="text-md3-body-md text-slate-500 mt-0.5">Manage platform content and access requests</p>
       </div>
 
       {/* Tab bar */}
@@ -1556,7 +1556,7 @@ export default function AdminCMS() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 text-sm font-semibold rounded-t-lg transition-colors ${
+            className={`px-4 py-2.5 text-md3-body-md font-semibold rounded-t-lg transition-colors ${
               activeTab === tab
                 ? 'bg-white border border-b-white border-slate-100 text-blue -mb-px relative z-10'
                 : 'text-slate-400 hover:text-slate-600'

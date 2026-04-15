@@ -193,14 +193,14 @@ export default function SignUp() {
           }}
         >
           <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
-          <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+          <p className="text-white/60 mt-3 text-md3-body-md font-proxima relative z-10 uppercase tracking-widest font-bold">
             Create your account
           </p>
         </div>
       </header>
 
       {/* Floating card */}
-      <div className="px-6 pt-10 pb-10 overflow-y-auto">
+      <div className="px-4 pt-10 pb-10 overflow-y-auto">
         <button
           type="button"
           disabled={googleLoading}
@@ -208,7 +208,7 @@ export default function SignUp() {
             setGoogleLoading(true)
             try { await signInWithGoogle() } catch { setGoogleLoading(false) }
           }}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-md3-body-md font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
         >
           <GoogleIcon />
           {googleLoading ? 'Redirecting…' : 'Continue with Google'}
@@ -216,31 +216,31 @@ export default function SignUp() {
 
         <div className="flex items-center gap-3 mb-5">
           <div className="flex-1 h-px bg-slate-200" />
-          <span className="text-xs text-slate-400 font-medium">or email</span>
+          <span className="text-md3-label-md text-slate-400 font-medium">or email</span>
           <div className="flex-1 h-px bg-slate-200" />
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Full Name</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Full Name</label>
             <input
               {...register('full_name')}
               placeholder="Juan dela Cruz"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
-            {errors.full_name && <p className="text-red text-xs mt-1">{errors.full_name.message}</p>}
+            {errors.full_name && <p className="text-red text-md3-label-md mt-1">{errors.full_name.message}</p>}
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Username</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Username</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm select-none">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-md3-body-md select-none">@</span>
               <input
                 {...register('username', {
                   onChange: (e) => handleUsernameChange(e.target.value),
                 })}
                 placeholder="juan_delacruz"
-                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
@@ -248,31 +248,31 @@ export default function SignUp() {
                 {usernameStatus === 'taken' && <CloseCircleOutline className="w-4 h-4" color="#EF4444" />}
               </span>
             </div>
-            {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
+            {errors.username && <p className="text-red text-md3-label-md mt-1">{errors.username.message}</p>}
             {usernameStatus === 'taken' && !errors.username && (
-              <p className="text-red text-xs mt-1">Username already taken</p>
+              <p className="text-red text-md3-label-md mt-1">Username already taken</p>
             )}
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Email</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Email</label>
             <input
               {...register('email')}
               type="email"
               placeholder="juan@devcon.ph"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
-            {errors.email && <p className="text-red text-xs mt-1">{errors.email.message}</p>}
+            {errors.email && <p className="text-red text-md3-label-md mt-1">{errors.email.message}</p>}
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Password</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Password</label>
             <div className="relative">
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <button
                 type="button"
@@ -284,63 +284,63 @@ export default function SignUp() {
               </button>
             </div>
             <PasswordStrengthMeter password={watchedPassword} />
-            {errors.password && <p className="text-red text-xs mt-1">{errors.password.message}</p>}
+            {errors.password && <p className="text-red text-md3-label-md mt-1">{errors.password.message}</p>}
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               School / Company <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <input
               {...register('school_or_company')}
               placeholder="University of Santo Tomas"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
           </div>
 
           <div className="space-y-3">
-            <p className="text-sm font-medium text-slate-700">
+            <p className="text-md3-body-md font-medium text-slate-700">
               Social Links <span className="text-slate-400 font-normal">(optional)</span>
             </p>
             <div>
-              <label className="text-xs text-slate-500 block mb-1">LinkedIn</label>
+              <label className="text-md3-label-md text-slate-500 block mb-1">LinkedIn</label>
               <input
                 {...register('linkedin_url')}
                 type="url"
                 placeholder="https://linkedin.com/in/yourprofile"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
-              {errors.linkedin_url && <p className="text-red text-xs mt-1">{errors.linkedin_url.message}</p>}
+              {errors.linkedin_url && <p className="text-red text-md3-label-md mt-1">{errors.linkedin_url.message}</p>}
             </div>
             <div>
-              <label className="text-xs text-slate-500 block mb-1">GitHub</label>
+              <label className="text-md3-label-md text-slate-500 block mb-1">GitHub</label>
               <input
                 {...register('github_url')}
                 type="url"
                 placeholder="https://github.com/yourusername"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
-              {errors.github_url && <p className="text-red text-xs mt-1">{errors.github_url.message}</p>}
+              {errors.github_url && <p className="text-red text-md3-label-md mt-1">{errors.github_url.message}</p>}
             </div>
             <div>
-              <label className="text-xs text-slate-500 block mb-1">Portfolio</label>
+              <label className="text-md3-label-md text-slate-500 block mb-1">Portfolio</label>
               <input
                 {...register('portfolio_url')}
                 type="url"
                 placeholder="https://yourportfolio.com"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
-              {errors.portfolio_url && <p className="text-red text-xs mt-1">{errors.portfolio_url.message}</p>}
+              {errors.portfolio_url && <p className="text-red text-md3-label-md mt-1">{errors.portfolio_url.message}</p>}
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               Chapter
             </label>
             <select
               {...register('chapter_id')}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
             >
               <option value="">Select your chapter…</option>
               {['Luzon', 'Visayas', 'Mindanao'].map((region) => {
@@ -355,11 +355,11 @@ export default function SignUp() {
                 )
               })}
             </select>
-            {errors.chapter_id && <p className="text-red text-xs mt-1">{errors.chapter_id.message}</p>}
+            {errors.chapter_id && <p className="text-red text-md3-label-md mt-1">{errors.chapter_id.message}</p>}
           </div>
 
           {formError && (
-            <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+            <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
               {formError}
             </p>
           )}
@@ -382,7 +382,7 @@ export default function SignUp() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-slate-500 mt-6">
+        <p className="text-center text-md3-body-md text-slate-500 mt-6">
           Already have an account?{' '}
           <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
         </p>

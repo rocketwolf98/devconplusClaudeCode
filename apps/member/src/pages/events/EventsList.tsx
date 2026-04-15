@@ -129,7 +129,7 @@ export default function EventsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Events
             </h1>
@@ -147,7 +147,7 @@ export default function EventsList() {
         </div>
 
         {/* ── Points/Chapter Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           {tab === 'discover' && selectedChapterName && (
             <motion.div 
               initial={{ opacity: 0, y: 5 }}
@@ -195,7 +195,7 @@ export default function EventsList() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {(['discover', 'tickets'] as const).map((t) => (
               <button
@@ -234,7 +234,7 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+          <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
             {/* Loading skeletons */}
             {isLoading && (
               <div className="pt-4 space-y-3">
@@ -248,12 +248,12 @@ export default function EventsList() {
 
             {/* Empty state — no events at all */}
             {!isLoading && events.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-4 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mb-1">Events coming soon</h3>
-                <p className="text-sm text-slate-500 text-center">
+                <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">Events coming soon</h3>
+                <p className="text-md3-body-md text-slate-500 text-center">
                   Your chapter's next events will appear here. Check back shortly!
                 </p>
               </div>
@@ -261,19 +261,19 @@ export default function EventsList() {
 
             {/* Empty state — chapter filter yields nothing */}
             {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
-              <div className="flex flex-col items-center justify-center px-[25px] pt-20 pb-8">
+              <div className="flex flex-col items-center justify-center px-4 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mb-1">
+                <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">
                   No events in {selectedChapterName}
                 </h3>
-                <p className="text-sm text-slate-500 text-center mb-5">
+                <p className="text-md3-body-md text-slate-500 text-center mb-5">
                   This chapter has no upcoming events. Try a different chapter.
                 </p>
                 <button
                   onClick={() => setSelectedChapterId(null)}
-                  className="bg-primary text-white font-semibold text-sm px-6 py-2.5 rounded-xl"
+                  className="bg-primary text-white font-semibold text-md3-body-md px-6 py-2.5 rounded-xl"
                 >
                   Show All Chapters
                 </button>
@@ -330,7 +330,7 @@ export default function EventsList() {
                                 <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
                                   {dateParts.month}
                                 </span>
-                                <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                                <span className="text-md3-title-lg font-black leading-tight text-white drop-shadow-md">
                                   {dateParts.day}
                                 </span>
                               </div>
@@ -343,7 +343,7 @@ export default function EventsList() {
                                 <span className="text-[10px] font-bold leading-none text-primary/60 uppercase">
                                   {dateParts.month}
                                 </span>
-                                <span className="text-2xl font-black leading-tight text-primary">
+                                <span className="text-md3-headline-sm font-black leading-tight text-primary">
                                   {dateParts.day}
                                 </span>
                               </>
@@ -412,19 +412,19 @@ export default function EventsList() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-          <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+          <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
             {myTickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center px-[25px] pt-24">
+              <div className="flex flex-col items-center justify-center px-4 pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <TicketOutline className="w-8 h-8" color="#0b46a3" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900 mb-1">No tickets yet</h3>
-                <p className="text-sm text-slate-500 text-center mb-5">
+                <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">No tickets yet</h3>
+                <p className="text-md3-body-md text-slate-500 text-center mb-5">
                   Register for an event to get your QR ticket here.
                 </p>
                 <button
                   onClick={() => setTab('discover')}
-                  className="bg-primary text-white font-semibold text-sm px-6 py-2.5 rounded-xl"
+                  className="bg-primary text-white font-semibold text-md3-body-md px-6 py-2.5 rounded-xl"
                 >
                   Browse Events
                 </button>
@@ -467,7 +467,7 @@ export default function EventsList() {
                                 <span className="text-[10px] font-bold leading-none text-white/90 uppercase drop-shadow-sm">
                                   {dateParts.month}
                                 </span>
-                                <span className="text-xl font-black leading-tight text-white drop-shadow-md">
+                                <span className="text-md3-title-lg font-black leading-tight text-white drop-shadow-md">
                                   {dateParts.day}
                                 </span>
                               </div>
@@ -480,7 +480,7 @@ export default function EventsList() {
                                 <span className="text-[10px] font-bold leading-none text-primary/60 uppercase">
                                   {dateParts.month}
                                 </span>
-                                <span className="text-2xl font-black leading-tight text-primary">
+                                <span className="text-md3-headline-sm font-black leading-tight text-primary">
                                   {dateParts.day}
                                 </span>
                               </>
@@ -571,7 +571,7 @@ export default function EventsList() {
 
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-bold text-slate-900">Filter by Chapter</h2>
+                <h2 className="text-md3-body-lg font-bold text-slate-900">Filter by Chapter</h2>
                 <button
                   onClick={() => setShowChapterSheet(false)}
                   className="w-8 h-8 rounded-full bg-slate-100/50 backdrop-blur-md border border-slate-200/50 flex items-center justify-center transition-colors active:bg-slate-200"
@@ -585,7 +585,7 @@ export default function EventsList() {
                 onClick={() => { setSelectedChapterId(null); setShowChapterSheet(false) }}
                 className="w-full flex items-center justify-between py-3 border-b border-slate-100"
               >
-                <span className={`text-sm font-semibold ${selectedChapterId === null ? 'text-primary' : 'text-slate-700'}`}>
+                <span className={`text-md3-body-md font-semibold ${selectedChapterId === null ? 'text-primary' : 'text-slate-700'}`}>
                   All Chapters
                 </span>
                 {selectedChapterId === null && (
@@ -608,7 +608,7 @@ export default function EventsList() {
                         onClick={() => { setSelectedChapterId(ch.id); setShowChapterSheet(false) }}
                         className="w-full flex items-center justify-between py-2.5 border-b border-slate-50"
                       >
-                        <span className={`text-sm ${selectedChapterId === ch.id ? 'font-semibold text-primary' : 'text-slate-700'}`}>
+                        <span className={`text-md3-body-md ${selectedChapterId === ch.id ? 'font-semibold text-primary' : 'text-slate-700'}`}>
                           {ch.name}
                         </span>
                         {selectedChapterId === ch.id && (

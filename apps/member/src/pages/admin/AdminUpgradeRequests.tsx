@@ -98,51 +98,51 @@ export default function AdminUpgradeRequests() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">Organizer Upgrade Requests</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h1 className="text-md3-headline-sm font-black text-slate-900">Organizer Upgrade Requests</h1>
+          <p className="text-md3-body-md text-slate-500 mt-0.5">
             Review member requests to become chapter officers or HQ admins
           </p>
         </div>
         {pendingCount > 0 && (
-          <span className="px-3 py-1 bg-primary/10 text-primary text-sm font-bold rounded-full">
+          <span className="px-3 py-1 bg-primary/10 text-primary text-md3-body-md font-bold rounded-full">
             {pendingCount} pending
           </span>
         )}
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {isLoading ? (
-        <p className="text-slate-400 text-sm">Loading requests…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading requests…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Member</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Current Chapter</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Code</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Requested Role</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Member</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Current Chapter</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Code</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Requested Role</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {requests.map((req) => (
                 <tr key={req.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-slate-900 text-sm">{req.profiles?.full_name ?? '—'}</p>
-                    <p className="text-xs text-slate-400">{req.profiles?.email ?? '—'}</p>
+                    <p className="font-semibold text-slate-900 text-md3-body-md">{req.profiles?.full_name ?? '—'}</p>
+                    <p className="text-md3-label-md text-slate-400">{req.profiles?.email ?? '—'}</p>
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">
                     {req.profiles?.chapters?.name ?? 'No chapter'}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-700 font-bold tracking-wider">
+                  <td className="px-4 py-3 font-mono text-md3-label-md text-slate-700 font-bold tracking-wider">
                     {req.organizer_code}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">
                     <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
                       {ROLE_LABELS[req.requested_role] ?? req.requested_role}
                     </span>
@@ -162,7 +162,7 @@ export default function AdminUpgradeRequests() {
                         <button
                           onClick={() => void handleApprove(req)}
                           disabled={actionLoading === req.id}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-green/10 text-green text-xs font-bold rounded-lg hover:bg-green/20 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-green/10 text-green text-md3-label-md font-bold rounded-lg hover:bg-green/20 disabled:opacity-50 transition-colors"
                         >
                           <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve
@@ -170,7 +170,7 @@ export default function AdminUpgradeRequests() {
                         <button
                           onClick={() => void handleReject(req)}
                           disabled={actionLoading === req.id}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red/10 text-red text-xs font-bold rounded-lg hover:bg-red/20 disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red/10 text-red text-md3-label-md font-bold rounded-lg hover:bg-red/20 disabled:opacity-50 transition-colors"
                         >
                           <CloseCircleOutline className="w-3.5 h-3.5" />
                           Reject
@@ -183,7 +183,7 @@ export default function AdminUpgradeRequests() {
             </tbody>
           </table>
           {requests.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No upgrade requests yet.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No upgrade requests yet.</p>
           )}
         </div>
       )}

@@ -74,7 +74,7 @@ export default function Profile() {
           }}
         >
           <div className="relative z-10">
-            <div className="w-32 h-32 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-4xl font-black text-white mx-auto mb-3 overflow-hidden">
+            <div className="w-32 h-32 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-md3-display-sm font-black text-white mx-auto mb-3 overflow-hidden">
               {user?.avatar_url ? (
                 <>
                   <img
@@ -93,8 +93,8 @@ export default function Profile() {
                 initials
               )}
             </div>
-            <h1 className="text-xl font-bold text-white font-proxima tracking-tight">{user?.full_name}</h1>
-            <p className="text-white/70 text-sm font-proxima mt-0.5">{user?.email}</p>
+            <h1 className="text-md3-title-lg font-bold text-white font-proxima tracking-tight">{user?.full_name}</h1>
+            <p className="text-white/70 text-md3-body-md font-proxima mt-0.5">{user?.email}</p>
             
             <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
               <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
@@ -112,13 +112,13 @@ export default function Profile() {
           </div>
         </div>
 
-      <div className="px-[25px] pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
+      <div className="px-4 pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
 
         <ProfileExpCard />
 
         {/* Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
-          <p className="text-sm font-bold text-slate-900 mb-3">Theme</p>
+          <p className="text-md3-body-md font-bold text-slate-900 mb-3">Theme</p>
           <div className="flex gap-3 flex-wrap">
             {PROGRAM_THEMES.map((theme) => {
               const isActive = theme.id === themeId
@@ -155,7 +155,7 @@ export default function Profile() {
                 i < MENU_ITEMS.length - 1 ? 'border-b border-slate-100' : ''
               }`}
             >
-              <span className="text-sm font-semibold text-slate-900">{item.label}</span>
+              <span className="text-md3-body-md font-semibold text-slate-900">{item.label}</span>
               <AltArrowRightOutline className="w-4 h-4" color="#CBD5E1" />
             </button>
           ))}
@@ -169,9 +169,9 @@ export default function Profile() {
                   <DownloadOutline className="w-4 h-4" color="rgb(var(--color-primary))" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-900">Add to Home Screen</p>
+                  <p className="text-md3-body-md font-semibold text-slate-900">Add to Home Screen</p>
                   {isIos && !canInstall && (
-                    <p className="text-xs text-slate-400 mt-0.5">Tap Share → "Add to Home Screen"</p>
+                    <p className="text-md3-label-md text-slate-400 mt-0.5">Tap Share → "Add to Home Screen"</p>
                   )}
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function Profile() {
             onClick={() => setShowHelpModal(true)}
             className="w-full px-4 py-4 flex items-center justify-between text-left border-t border-slate-100 hover:bg-slate-50 transition-colors"
           >
-            <span className="text-sm font-semibold text-slate-900">Help & Support</span>
+            <span className="text-md3-body-md font-semibold text-slate-900">Help & Support</span>
             <AltArrowRightOutline className="w-4 h-4" color="#CBD5E1" />
           </button>
         </div>
@@ -191,7 +191,7 @@ export default function Profile() {
         {user?.role && ORGANIZER_ROLES.includes(user.role as OrganizerRole) && (
           <button
             onClick={() => navigate('/organizer')}
-            className="w-full py-3.5 bg-blue/10 text-blue text-sm font-bold rounded-2xl hover:bg-blue/20 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-blue/10 text-blue text-md3-body-md font-bold rounded-2xl hover:bg-blue/20 transition-colors flex items-center justify-center gap-2"
           >
             <ShieldOutline className="w-4 h-4" />
             Officer Portal
@@ -201,7 +201,7 @@ export default function Profile() {
         {/* Sign Out */}
         <button
           onClick={() => { signOut(); navigate('/sign-in') }}
-          className="w-full py-3.5 bg-red/10 text-red text-sm font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-red/10 text-red text-md3-body-md font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
         >
           <LogoutOutline className="w-4 h-4" />
           Sign Out

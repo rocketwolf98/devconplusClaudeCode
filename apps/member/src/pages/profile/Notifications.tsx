@@ -34,7 +34,7 @@ export default function Notifications() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-[25px] pb-4 flex items-center gap-3">
+          <div className="relative z-10 px-4 pb-4 flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
@@ -47,12 +47,12 @@ export default function Notifications() {
         </div>
       </header>
 
-      <div className="px-[25px] pt-4 space-y-2 pb-24 md:max-w-4xl md:mx-auto">
+      <div className="px-4 pt-4 space-y-2 pb-24 md:max-w-4xl md:mx-auto">
         {SETTINGS.map((s) => (
           <div key={s.key} className="bg-white rounded-2xl shadow-card px-4 py-4 flex items-center gap-3">
             <div className="flex-1">
-              <p className="font-medium text-slate-900 text-sm">{s.label}</p>
-              <p className="text-xs text-slate-400 mt-0.5">{s.desc}</p>
+              <p className="font-medium text-slate-900 text-md3-body-md">{s.label}</p>
+              <p className="text-md3-label-md text-slate-400 mt-0.5">{s.desc}</p>
             </div>
             <button
               onClick={() => setOn((prev) => ({ ...prev, [s.key]: !prev[s.key] }))}

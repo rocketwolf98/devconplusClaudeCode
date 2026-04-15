@@ -112,13 +112,13 @@ export default function OrganizerCodeGate() {
   return (
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Gradient header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-blue px-4 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
-        <p className="text-white/70 mt-3 text-sm">Welcome, {firstName}!</p>
+        <p className="text-white/70 mt-3 text-md3-body-md">Welcome, {firstName}!</p>
       </div>
 
       {/* Card */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-32 overflow-y-auto">
+      <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-8 pb-32 overflow-y-auto">
 
         {submitted ? (
           /* Success state — request is pending admin approval */
@@ -129,8 +129,8 @@ export default function OrganizerCodeGate() {
               </svg>
             </div>
             <div>
-              <p className="text-base font-bold text-slate-800">Request Submitted!</p>
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-md3-body-lg font-bold text-slate-800">Request Submitted!</p>
+              <p className="text-md3-body-md text-slate-500 mt-1">
                 Your officer upgrade request is pending approval from your chapter lead. You'll be notified once it's approved.
               </p>
             </div>
@@ -151,7 +151,7 @@ export default function OrganizerCodeGate() {
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-blue font-bold text-lg select-none">{initials}</span>
+                    <span className="text-blue font-bold text-md3-title-lg select-none">{initials}</span>
                   )}
                 </div>
                 <button
@@ -169,10 +169,10 @@ export default function OrganizerCodeGate() {
               </div>
 
               {avatarError && (
-                <p className="text-red text-xs mt-2 text-center max-w-[180px]">{avatarError}</p>
+                <p className="text-red text-md3-label-md mt-2 text-center max-w-[180px]">{avatarError}</p>
               )}
 
-              <p className="text-xs text-slate-400 mt-1">Add a profile photo (optional)</p>
+              <p className="text-md3-label-md text-slate-400 mt-1">Add a profile photo (optional)</p>
 
               <input
                 ref={fileInputRef}
@@ -183,8 +183,8 @@ export default function OrganizerCodeGate() {
               />
             </div>
 
-            <h2 className="text-lg font-black text-slate-900 mb-1">Are you a Chapter Officer?</h2>
-            <p className="text-sm text-slate-500 mb-6">
+            <h2 className="text-md3-title-lg font-black text-slate-900 mb-1">Are you a Chapter Officer?</h2>
+            <p className="text-md3-body-md text-slate-500 mb-6">
               Enter your organizer code to request officer access, or continue as a member.
             </p>
 
@@ -194,9 +194,9 @@ export default function OrganizerCodeGate() {
                 onChange={(e) => { setCode(e.target.value); setError('') }}
                 onKeyDown={(e) => e.key === 'Enter' && handleAccessPortal()}
                 placeholder="e.g. DCN-ABC-1234"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue uppercase tracking-wider"
               />
-              {error && <p className="text-red text-xs">{error}</p>}
+              {error && <p className="text-red text-md3-label-md">{error}</p>}
 
               <button
                 type="button"
@@ -210,7 +210,7 @@ export default function OrganizerCodeGate() {
 
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-xs text-slate-400 font-medium">or</span>
+              <span className="text-md3-label-md text-slate-400 font-medium">or</span>
               <div className="flex-1 h-px bg-slate-200" />
             </div>
 
@@ -222,7 +222,7 @@ export default function OrganizerCodeGate() {
               Continue as Member
             </button>
 
-            <p className="text-center text-xs text-slate-400 mt-5">
+            <p className="text-center text-md3-label-md text-slate-400 mt-5">
               Organizer codes are issued by your chapter lead.
             </p>
           </>

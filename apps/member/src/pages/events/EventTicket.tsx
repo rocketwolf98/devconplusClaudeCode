@@ -254,14 +254,14 @@ export default function EventTicket() {
         transition={{ delay: 0.05, duration: 0.2 }}
         onClick={() => navigate(-1)}
         whileTap={{ scale: 0.92 }}
-        className="fixed top-4 left-4 z-20 flex items-center gap-1.5 text-white/90 bg-white/20 backdrop-blur-md px-3.5 py-2 rounded-full text-sm font-medium border border-white/20"
+        className="fixed top-4 left-4 z-20 flex items-center gap-1.5 text-white/90 bg-white/20 backdrop-blur-md px-3.5 py-2 rounded-full text-md3-body-md font-medium border border-white/20"
       >
         <ArrowLeftOutline className="w-4 h-4" />
         Back
       </motion.button>
 
       {/* Scrollable content */}
-      <div className="flex flex-col items-center px-5 pt-20 pb-12">
+      <div className="flex flex-col items-center px-4 pt-20 pb-12">
 
         {/* TicketOutline card */}
         <motion.div
@@ -273,7 +273,7 @@ export default function EventTicket() {
         >
           {/* ── Primary header strip ── */}
           <div
-            className="px-6 pt-6 pb-5 text-center"
+            className="px-4 pt-6 pb-5 text-center"
             style={{ backgroundColor: checkedIn ? '#21C45D' : effectiveTheme.hex, transition: 'background-color 0.6s ease' }}
           >
             <motion.div
@@ -296,9 +296,9 @@ export default function EventTicket() {
               <h2 className="text-white text-[17px] font-bold mt-1 leading-snug">
                 {event.title}
               </h2>
-              <p className="text-white/75 text-xs mt-1.5">{dateStr}</p>
+              <p className="text-white/75 text-md3-label-md mt-1.5">{dateStr}</p>
               {event.location && (
-                <p className="text-white/60 text-xs flex items-center justify-center gap-1 mt-0.5">
+                <p className="text-white/60 text-md3-label-md flex items-center justify-center gap-1 mt-0.5">
                   <MapPointOutline className="w-3 h-3 shrink-0" />
                   {event.location}
                 </p>
@@ -314,7 +314,7 @@ export default function EventTicket() {
               initial={{ opacity: 0, scale: 0.88 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center pt-6 pb-3 px-6 gap-3"
+              className="flex flex-col items-center pt-6 pb-3 px-4 gap-3"
             >
               {/* Fixed-size wrapper so QR and success card share the same footprint */}
               <div className="relative w-[240px] h-[240px] flex items-center justify-center">
@@ -340,7 +340,7 @@ export default function EventTicket() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.26, duration: 0.22 }}
-                        className="text-base font-black text-slate-900"
+                        className="text-md3-body-lg font-black text-slate-900"
                       >
                         Signed In!
                       </motion.p>
@@ -359,7 +359,7 @@ export default function EventTicket() {
                         className="flex items-center gap-1 bg-green/10 rounded-full px-3 py-1 border border-green/20"
                       >
                         <BoltOutline className="w-3 h-3" color="#21C45D" />
-                        <span className="text-xs font-bold text-green">+{event.points_value} XP earned!</span>
+                        <span className="text-md3-label-md font-bold text-green">+{event.points_value} XP earned!</span>
                       </motion.div>
                     </motion.div>
                   ) : eventEnded ? (
@@ -383,7 +383,7 @@ export default function EventTicket() {
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.26, duration: 0.22 }}
-                        className="text-base font-black text-slate-900"
+                        className="text-md3-body-lg font-black text-slate-900"
                       >
                         Event Ended
                       </motion.p>
@@ -463,13 +463,13 @@ export default function EventTicket() {
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setRetryKey(k => k + 1)}
-                    className="flex items-center gap-1.5 text-red text-xs font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
+                    className="flex items-center gap-1.5 text-red text-md3-label-md font-semibold px-4 py-1.5 rounded-full border border-red/30 bg-red/5"
                   >
                     <RefreshOutline className="w-3 h-3" />
                     Tap to retry
                   </motion.button>
                 ) : (
-                  <p className="text-xs font-medium" style={{ color: secondsLeft <= 10 ? '#F8C630' : 'rgb(var(--color-primary))' }}>
+                  <p className="text-md3-label-md font-medium" style={{ color: secondsLeft <= 10 ? '#F8C630' : 'rgb(var(--color-primary))' }}>
                     {isRefreshing ? 'Refreshing…' : `Refreshes in ${secondsLeft}s`}
                   </p>
                 )
@@ -488,10 +488,10 @@ export default function EventTicket() {
               variants={staggerRows}
               initial="hidden"
               animate="visible"
-              className="px-6 pt-4 pb-6 space-y-3"
+              className="px-4 pt-4 pb-6 space-y-3"
             >
               {infoRows.map(({ label, value, valueClass }) => (
-                <motion.div key={label} variants={rowItem} className="flex justify-between items-center text-xs">
+                <motion.div key={label} variants={rowItem} className="flex justify-between items-center text-md3-label-md">
                   <span className="text-slate-400">{label}</span>
                   <span className={valueClass}>{value}</span>
                 </motion.div>
@@ -500,11 +500,11 @@ export default function EventTicket() {
 
             {/* Cancel registration — only shown when not yet checked in */}
             {!reg.checked_in && !checkedIn && !eventEnded && (
-              <div className="px-6 pb-5">
+              <div className="px-4 pb-5">
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCancelStep('first')}
-                  className="w-full py-2.5 text-sm font-semibold text-red border border-red/20 rounded-xl hover:bg-red/5 transition-colors"
+                  className="w-full py-2.5 text-md3-body-md font-semibold text-red border border-red/20 rounded-xl hover:bg-red/5 transition-colors"
                 >
                   Cancel Registration
                 </motion.button>
@@ -524,7 +524,7 @@ export default function EventTicket() {
             onClick={() => setShowCalSheet(true)}
             className="w-full max-w-sm flex items-center justify-center gap-2
                        bg-white/[0.18] border border-white/30 text-white
-                       rounded-2xl py-3 text-sm font-semibold backdrop-blur-sm mt-4"
+                       rounded-2xl py-3 text-md3-body-md font-semibold backdrop-blur-sm mt-4"
           >
             <CalendarAddOutline className="w-4 h-4" />
             Add to Calendar
@@ -536,7 +536,7 @@ export default function EventTicket() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.62, duration: 0.3 }}
-          className="text-white/40 text-xs text-center mt-5"
+          className="text-white/40 text-md3-label-md text-center mt-5"
         >
           {checkedIn
             ? 'You\'re all set — enjoy the event!'
@@ -563,7 +563,7 @@ export default function EventTicket() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full bg-white rounded-t-3xl px-5 pt-4 pb-10"
+              className="w-full bg-white rounded-t-3xl px-4 pt-4 pb-10"
               onClick={(e) => e.stopPropagation()}
             >
               {cancelStep === 'first' ? (
@@ -571,24 +571,24 @@ export default function EventTicket() {
                   <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
                     <DangerTriangleOutline className="w-6 h-6" color="#EF4444" />
                   </div>
-                  <h3 className="text-lg font-black text-slate-900 text-center mb-1">
+                  <h3 className="text-md3-title-lg font-black text-slate-900 text-center mb-1">
                     Cancel your registration?
                   </h3>
-                  <p className="text-sm text-slate-500 text-center mb-6">
+                  <p className="text-md3-body-md text-slate-500 text-center mb-6">
                     You'll lose your spot for <span className="font-semibold text-slate-700">{event.title}</span>. This cannot be undone.
                   </p>
                   <div className="flex gap-3">
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setCancelStep(null)}
-                      className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700"
+                      className="flex-1 py-3 rounded-2xl border border-slate-200 text-md3-body-md font-bold text-slate-700"
                     >
                       Keep my spot
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setCancelStep('second')}
-                      className="flex-1 py-3 rounded-2xl bg-slate-100 text-sm font-bold text-slate-900"
+                      className="flex-1 py-3 rounded-2xl bg-slate-100 text-md3-body-md font-bold text-slate-900"
                     >
                       Yes, continue →
                     </motion.button>
@@ -599,21 +599,21 @@ export default function EventTicket() {
                   <div className="w-12 h-12 rounded-full bg-red/10 flex items-center justify-center mx-auto mb-4">
                     <DangerTriangleOutline className="w-6 h-6" color="#EF4444" />
                   </div>
-                  <h3 className="text-lg font-black text-slate-900 text-center mb-1">
+                  <h3 className="text-md3-title-lg font-black text-slate-900 text-center mb-1">
                     Are you absolutely sure?
                   </h3>
-                  <p className="text-sm text-slate-500 text-center mb-2">
+                  <p className="text-md3-body-md text-slate-500 text-center mb-2">
                     You will be permanently removed from the attendee list.
                   </p>
                   {cancelError && (
-                    <p className="text-xs text-red text-center mb-2">{cancelError}</p>
+                    <p className="text-md3-label-md text-red text-center mb-2">{cancelError}</p>
                   )}
                   <div className="flex gap-3 mt-4">
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setCancelStep('first')}
                       disabled={isCancelling}
-                      className="flex-1 py-3 rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 disabled:opacity-50"
+                      className="flex-1 py-3 rounded-2xl border border-slate-200 text-md3-body-md font-bold text-slate-700 disabled:opacity-50"
                     >
                       Go back
                     </motion.button>
@@ -621,7 +621,7 @@ export default function EventTicket() {
                       whileTap={{ scale: 0.95 }}
                       onClick={handleConfirmCancel}
                       disabled={isCancelling}
-                      className="flex-1 py-3 rounded-2xl bg-red text-white text-sm font-bold disabled:opacity-50"
+                      className="flex-1 py-3 rounded-2xl bg-red text-white text-md3-body-md font-bold disabled:opacity-50"
                     >
                       {isCancelling ? 'Cancelling…' : 'Cancel Registration'}
                     </motion.button>

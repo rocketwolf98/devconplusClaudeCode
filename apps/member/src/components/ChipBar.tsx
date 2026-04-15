@@ -14,7 +14,7 @@ export default function ChipBar({ options, selected, onChange }: Props) {
           <motion.button
             key={opt}
             onClick={() => onChange(opt)}
-            className={`flex-shrink-0 text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors ${
+            className={`flex-shrink-0 text-md3-body-md font-semibold px-4 py-1.5 rounded-lg transition-colors ${
               selected === opt
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-500 hover:text-slate-700'

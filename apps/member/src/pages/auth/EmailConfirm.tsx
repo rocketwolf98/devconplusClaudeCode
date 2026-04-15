@@ -77,17 +77,17 @@ export default function EmailConfirm() {
           }}
         >
           <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
-          <p className="text-white/60 mt-3 text-sm font-proxima relative z-10 uppercase tracking-widest font-bold">
+          <p className="text-white/60 mt-3 text-md3-body-md font-proxima relative z-10 uppercase tracking-widest font-bold">
             Email Confirmation
           </p>
         </div>
       </header>
 
-      <div className="flex-1 px-6 pt-10 pb-10 flex flex-col items-center text-center">
+      <div className="flex-1 px-4 pt-10 pb-10 flex flex-col items-center text-center">
         {status === 'verifying' && (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <div className="w-6 h-6 border-2 border-blue/30 border-t-blue rounded-full animate-spin" />
-            <p className="text-sm text-slate-400">Confirming your email…</p>
+            <p className="text-md3-body-md text-slate-400">Confirming your email…</p>
           </div>
         )}
 
@@ -96,8 +96,8 @@ export default function EmailConfirm() {
             <div className="w-16 h-16 rounded-2xl bg-green/10 flex items-center justify-center mb-5 mt-4">
               <CheckCircleOutline className="w-8 h-8" color="#21C45D" />
             </div>
-            <h2 className="text-xl font-black text-slate-900 mb-2">Email Confirmed!</h2>
-            <p className="text-sm text-slate-500">Your account is ready. Redirecting you now…</p>
+            <h2 className="text-md3-title-lg font-black text-slate-900 mb-2">Email Confirmed!</h2>
+            <p className="text-md3-body-md text-slate-500">Your account is ready. Redirecting you now…</p>
           </>
         )}
 
@@ -106,15 +106,15 @@ export default function EmailConfirm() {
             <div className="w-16 h-16 rounded-2xl bg-red/10 flex items-center justify-center mb-5 mt-4">
               <CloseCircleOutline className="w-8 h-8" color="#EF4444" />
             </div>
-            <h2 className="text-xl font-black text-slate-900 mb-2">Confirmation Failed</h2>
-            <p className="text-sm text-slate-500 mb-6 max-w-xs">{errorMsg}</p>
+            <h2 className="text-md3-title-lg font-black text-slate-900 mb-2">Confirmation Failed</h2>
+            <p className="text-md3-body-md text-slate-500 mb-6 max-w-xs">{errorMsg}</p>
             <Link
               to="/sign-up"
               className="w-full bg-blue text-white font-bold py-4 rounded-2xl text-center block"
             >
               Sign Up Again
             </Link>
-            <Link to="/sign-in" className="text-blue font-semibold text-sm mt-4 block">
+            <Link to="/sign-in" className="text-blue font-semibold text-md3-body-md mt-4 block">
               Back to Sign In
             </Link>
           </>

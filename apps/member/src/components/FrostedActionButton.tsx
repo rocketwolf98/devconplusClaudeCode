@@ -17,7 +17,7 @@ export default function FrostedActionButton({
     <motion.button
       whileTap={{ scale: 0.95 }}
       className={cn(
-        "flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-bold rounded-xl active:bg-white/30 transition-colors shrink-0 shadow-lg pointer-events-auto",
+        "flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md border border-white/30 text-white text-md3-body-md font-bold rounded-xl active:bg-white/30 transition-colors shrink-0 shadow-lg pointer-events-auto",
         className
       )}
       {...props}

@@ -85,15 +85,16 @@ export default function OAuthCallback() {
   if (error) {
     return (
       <div className="min-h-screen bg-blue flex flex-col">
-        <div className="bg-blue px-6 pt-16 pb-10 text-center">
+        <div className="bg-blue px-4 pt-16 pb-10 text-center">
           <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
         </div>
-        <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-12 pb-10 flex flex-col items-center text-center">
+
+        <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-12 pb-10 flex flex-col items-center text-center">
           <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
             <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />
           </div>
-          <p className="text-base font-bold text-slate-800 mb-2">Sign-in failed</p>
-          <p className="text-sm text-slate-500 mb-8 max-w-xs">{error}</p>
+          <p className="text-md3-body-lg font-bold text-slate-800 mb-2">Sign-in failed</p>
+          <p className="text-md3-body-md text-slate-500 mb-8 max-w-xs">{error}</p>
           <Link
             to="/sign-in"
             replace
@@ -124,7 +125,7 @@ export default function OAuthCallback() {
             <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/>
           </svg>
         </div>
-        <p className="text-slate-500 text-sm font-medium">Signing you in…</p>
+        <p className="text-slate-500 text-md3-body-md font-medium">Signing you in…</p>
       </div>
     </div>
   )

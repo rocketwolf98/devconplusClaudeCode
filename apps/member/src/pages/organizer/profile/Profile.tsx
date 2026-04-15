@@ -67,15 +67,15 @@ export function OrgProfile() {
           }}
         >
           <div className="relative z-10">
-            <div className="w-32 h-32 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-4xl font-black text-white mx-auto mb-3 overflow-hidden">
+            <div className="w-32 h-32 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center text-md3-display-sm font-black text-white mx-auto mb-3 overflow-hidden">
               {user.avatar_url ? (
                 <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
               ) : (
                 user.initials
               )}
             </div>
-            <h1 className="text-xl font-bold text-white font-proxima tracking-tight">{user.full_name}</h1>
-            <p className="text-white/70 text-sm font-proxima mt-0.5">{user.email}</p>
+            <h1 className="text-md3-title-lg font-bold text-white font-proxima tracking-tight">{user.full_name}</h1>
+            <p className="text-white/70 text-md3-body-md font-proxima mt-0.5">{user.email}</p>
             
             <div className="flex items-center gap-2 mt-3 flex-wrap justify-center px-4">
               <span className="text-[10px] font-bold bg-white/20 border border-white/20 rounded-full px-3 py-1 text-white uppercase tracking-wider backdrop-blur-sm">
@@ -93,10 +93,10 @@ export function OrgProfile() {
         {/* Event History */}
         <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-card">
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <p className="text-sm font-bold text-slate-900">Event History</p>
+            <p className="text-md3-body-md font-bold text-slate-900">Event History</p>
             <button
               onClick={() => navigate('/organizer/events')}
-              className="text-xs font-semibold text-blue"
+              className="text-md3-label-md font-semibold text-blue"
             >
               View all
             </button>
@@ -107,8 +107,8 @@ export function OrgProfile() {
               <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mb-2">
                 <CalendarOutline className="w-5 h-5" color="#CBD5E1" />
               </div>
-              <p className="text-sm font-semibold text-slate-500">No events yet</p>
-              <p className="text-xs text-slate-400 mt-0.5">Events you create will appear here.</p>
+              <p className="text-md3-body-md font-semibold text-slate-500">No events yet</p>
+              <p className="text-md3-label-md text-slate-400 mt-0.5">Events you create will appear here.</p>
             </div>
           ) : (
             <motion.div
@@ -137,13 +137,13 @@ export function OrgProfile() {
                       <CalendarOutline className="w-5 h-5" color="#1152D4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 leading-tight truncate">
+                      <p className="text-md3-body-md font-semibold text-slate-900 leading-tight truncate">
                         {event.title}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-xs text-slate-400">{dateStr}</p>
+                        <p className="text-md3-label-md text-slate-400">{dateStr}</p>
                         {event.location && (
-                          <p className="text-xs text-slate-400 flex items-center gap-0.5 truncate">
+                          <p className="text-md3-label-md text-slate-400 flex items-center gap-0.5 truncate">
                             <MapPointOutline className="w-2.5 h-2.5 shrink-0" />
                             {event.location}
                           </p>
@@ -170,7 +170,7 @@ export function OrgProfile() {
                 i < MENU_ITEMS.length - 1 ? 'border-b border-slate-100' : ''
               }`}
             >
-              <span className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <span className="flex items-center gap-2 text-md3-body-md font-semibold text-slate-900">
                 {item.icon && <item.icon className="w-4 h-4 text-slate-400" />}
                 {item.label}
               </span>
@@ -182,7 +182,7 @@ export function OrgProfile() {
         {/* Switch to Member View */}
         <button
           onClick={() => navigate('/home')}
-          className="w-full py-3.5 bg-primary/10 text-primary text-sm font-bold rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-primary/10 text-primary text-md3-body-md font-bold rounded-2xl hover:bg-primary/20 transition-colors flex items-center justify-center gap-2"
         >
           <UserOutline className="w-4 h-4" />
           Switch to Member View
@@ -191,7 +191,7 @@ export function OrgProfile() {
         {/* Sign Out */}
         <button
           onClick={handleLogout}
-          className="w-full py-3.5 bg-red/10 text-red text-sm font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-red/10 text-red text-md3-body-md font-bold rounded-2xl hover:bg-red/20 transition-colors flex items-center justify-center gap-2"
         >
           <LogoutOutline className="w-4 h-4" />
           Sign Out

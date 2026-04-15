@@ -53,7 +53,7 @@ function FormResponsesPanel({
     <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-md3-label-md font-bold text-slate-500 hover:text-slate-700 transition-colors"
       >
         <span className="flex items-center gap-1.5">
           <ClipboardListOutline className="w-3.5 h-3.5" />
@@ -92,7 +92,7 @@ function FormResponsesPanel({
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">
                       {field.label}{field.required ? ' *' : ''}
                     </p>
-                    <p className="text-sm">{display}</p>
+                    <p className="text-md3-body-md">{display}</p>
                   </div>
                 )
               })}
@@ -331,7 +331,7 @@ export function OrgEventRegistrants() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-6 pb-4 flex items-center justify-between">
+          <div className="relative z-10 px-4 pb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate(-1)}
@@ -347,7 +347,7 @@ export function OrgEventRegistrants() {
               <button
                 onClick={() => setShowAnnounce(true)}
                 className="bg-white/20 rounded-xl px-3 py-1.5 flex items-center gap-1.5
-                           text-white text-xs font-bold active:bg-white/30 transition-colors shrink-0"
+                           text-white text-md3-label-md font-bold active:bg-white/30 transition-colors shrink-0"
               >
                 <UserSpeakOutline className="w-3.5 h-3.5" color="white" />
                 Announce
@@ -374,7 +374,7 @@ export function OrgEventRegistrants() {
             <button
               key={tab}
               onClick={() => setMainTab(tab)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors capitalize flex items-center gap-1.5 ${
+              className={`px-4 py-1.5 rounded-lg text-md3-body-md font-semibold transition-colors capitalize flex items-center gap-1.5 ${
                 mainTab === tab
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
@@ -402,7 +402,7 @@ export function OrgEventRegistrants() {
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors capitalize ${
+                    className={`px-4 py-1.5 rounded-lg text-md3-body-md font-semibold transition-colors capitalize ${
                       filter === f
                         ? 'bg-white text-slate-900 shadow-sm'
                         : 'text-slate-500 hover:text-slate-700'
@@ -421,7 +421,7 @@ export function OrgEventRegistrants() {
                     animate="visible"
                     exit="exit"
                     onClick={handleApproveAll}
-                    className="mb-4 px-4 py-2 bg-green text-white text-sm font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
+                    className="mb-4 px-4 py-2 bg-green text-white text-md3-body-md font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
                     whileTap={{ scale: 0.97 }}
                   >
                     <CheckCircleOutline className="w-4 h-4" />
@@ -458,8 +458,8 @@ export function OrgEventRegistrants() {
                       <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
                         <ClipboardListOutline className="w-7 h-7" color="#94A3B8" />
                       </div>
-                      <p className="text-base font-bold text-slate-700">No registrants found</p>
-                      <p className="text-sm text-slate-400 mt-1">
+                      <p className="text-md3-body-lg font-bold text-slate-700">No registrants found</p>
+                      <p className="text-md3-body-md text-slate-400 mt-1">
                         {filter === 'all' ? 'No one has registered yet.' : `No ${filter} registrations.`}
                       </p>
                     </motion.div>
@@ -528,8 +528,8 @@ export function OrgEventRegistrants() {
                   <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
                     <UsersGroupRoundedOutline className="w-7 h-7" color="#94A3B8" />
                   </div>
-                  <p className="text-base font-bold text-slate-700">No volunteer applications yet.</p>
-                  <p className="text-sm text-slate-400 mt-1">Applications will appear here once submitted.</p>
+                  <p className="text-md3-body-lg font-bold text-slate-700">No volunteer applications yet.</p>
+                  <p className="text-md3-body-md text-slate-400 mt-1">Applications will appear here once submitted.</p>
                 </motion.div>
               ) : (
                 <motion.div
@@ -546,17 +546,17 @@ export function OrgEventRegistrants() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-slate-900 truncate">
+                          <p className="text-md3-body-md font-bold text-slate-900 truncate">
                             {app.profiles?.full_name ?? 'Unknown'}
                           </p>
                           {app.reason && (
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                            <p className="text-md3-label-md text-slate-500 mt-1 line-clamp-2">
                               {app.reason}
                             </p>
                           )}
                         </div>
                         <span
-                          className={`flex-shrink-0 text-xs font-semibold rounded-full px-2.5 py-1 ${
+                          className={`flex-shrink-0 text-md3-label-md font-semibold rounded-full px-2.5 py-1 ${
                             app.status === 'approved'
                               ? 'bg-green/10 text-green'
                               : app.status === 'rejected'
@@ -571,7 +571,7 @@ export function OrgEventRegistrants() {
                         <motion.button
                           whileTap={{ scale: 0.95 }}
                           onClick={() => handleApproveVolunteer(app.id)}
-                          className="mt-3 w-full py-2 bg-green text-white text-xs font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center justify-center gap-1.5"
+                          className="mt-3 w-full py-2 bg-green text-white text-md3-label-md font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center justify-center gap-1.5"
                         >
                           <CheckCircleOutline className="w-3.5 h-3.5" />
                           Approve

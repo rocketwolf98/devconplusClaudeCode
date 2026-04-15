@@ -52,7 +52,7 @@ export default function JobDetail() {
           }}
         >
           {/* Header Row: Back + Title */}
-          <div className="relative z-10 flex items-center gap-3 px-6 pb-2">
+          <div className="relative z-10 flex items-center gap-3 px-4 pb-2">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
@@ -74,11 +74,11 @@ export default function JobDetail() {
       <div className="p-4 space-y-4 pb-24">
         {/* Meta chips */}
         <div className="flex flex-wrap gap-2">
-          <span className="text-xs bg-primary/10 text-primary font-semibold px-3 py-1 rounded-full">
+          <span className="text-md3-label-md bg-primary/10 text-primary font-semibold px-3 py-1 rounded-full">
             {WORK_TYPE_LABELS[job.work_type] ?? job.work_type}
           </span>
           {job.location && (
-            <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full flex items-center gap-1">
+            <span className="text-md3-label-md bg-slate-100 text-slate-600 px-3 py-1 rounded-full flex items-center gap-1">
               <MapPointOutline className="w-3 h-3" />
               {job.location}
             </span>
@@ -88,8 +88,8 @@ export default function JobDetail() {
         {/* Description */}
         {job.description && (
           <div className="bg-white rounded-2xl p-4 border border-slate-100">
-            <h2 className="text-sm font-bold text-slate-900 mb-2">About This Role</h2>
-            <p className="text-sm text-slate-600 leading-relaxed">{job.description}</p>
+            <h2 className="text-md3-body-md font-bold text-slate-900 mb-2">About This Role</h2>
+            <p className="text-md3-body-md text-slate-600 leading-relaxed">{job.description}</p>
           </div>
         )}
 

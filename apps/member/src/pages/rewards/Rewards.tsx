@@ -174,7 +174,7 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
                   </div>
 
                   {/* PIN display */}
-                  <div className="flex flex-col items-center px-6 py-6 gap-3">
+                  <div className="flex flex-col items-center px-4 py-6 gap-3">
                     <p className="text-[11px] font-proxima font-bold text-slate-400 uppercase tracking-widest">
                       Your Claim PIN
                     </p>
@@ -342,7 +342,7 @@ function ClaimReceiptSheet({ redemption, reward, onClose }: ClaimReceiptSheetPro
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1" />
-            <div className="flex flex-col items-center text-center px-6 pb-8 pt-4 gap-3">
+            <div className="flex flex-col items-center text-center px-4 pb-8 pt-4 gap-3">
               <h2 className="text-[20px] font-proxima font-bold text-slate-900">Claim Receipt</h2>
               <p className="text-[13px] text-slate-500">Show this PIN to the organizer at the rewards booth</p>
 
@@ -407,7 +407,7 @@ function ClaimReceiptsTab({ onSelectReceipt }: ClaimReceiptsTabProps) {
     return (
       <div className="flex flex-col items-center justify-center pt-10 px-8 text-center">
         <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
-        <p className="text-sm text-slate-500">Loading your receipts...</p>
+        <p className="text-md3-body-md text-slate-500">Loading your receipts...</p>
       </div>
     )
   }
@@ -418,8 +418,8 @@ function ClaimReceiptsTab({ onSelectReceipt }: ClaimReceiptsTabProps) {
         <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
           <GiftOutline className="w-8 h-8 text-slate-400" />
         </div>
-        <h3 className="text-base font-bold text-slate-900 mb-1">No receipts yet</h3>
-        <p className="text-sm text-slate-500">You haven't redeemed any rewards.</p>
+        <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">No receipts yet</h3>
+        <p className="text-md3-body-md text-slate-500">You haven't redeemed any rewards.</p>
       </div>
     )
   }
@@ -542,7 +542,7 @@ export default function Rewards() {
           }}
         >
           {/* Header Row: Title */}
-          <div className="relative z-10 flex items-center justify-between px-6 pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Rewards
             </h1>
@@ -550,7 +550,7 @@ export default function Rewards() {
         </div>
 
         {/* ── Points Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-[25px] -mt-[40px] pointer-events-none">
+        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 px-[21px] py-6 flex items-center pointer-events-auto">
             <div className="flex items-center gap-[8px]">
               <div className="shrink-0 size-[48px]">
@@ -578,7 +578,7 @@ export default function Rewards() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {TABS.map((tab) => (
               <button
@@ -598,7 +598,7 @@ export default function Rewards() {
       </header>
 
       {/* ── Content ── */}
-      <div className="md:max-w-4xl md:mx-auto px-[25px] pt-4 pb-28">
+      <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
         {activeTab === 'redeem' ? (
           isLoading ? (
             <div className="grid grid-cols-2 gap-x-[6px] gap-y-[10px]">
@@ -607,8 +607,8 @@ export default function Rewards() {
           ) : rewards.length === 0 ? (
             <div className="flex flex-col items-center justify-center pt-10 px-8 text-center">
               <RewardPlaceholder className="w-16 h-16 rounded-full mb-4" iconSize="w-8 h-8" />
-              <h3 className="text-base font-bold text-slate-900 mb-1">No rewards yet</h3>
-              <p className="text-sm text-slate-500">Check back soon — exciting rewards are coming!</p>
+              <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">No rewards yet</h3>
+              <p className="text-md3-body-md text-slate-500">Check back soon — exciting rewards are coming!</p>
             </div>
           ) : (
             <motion.div

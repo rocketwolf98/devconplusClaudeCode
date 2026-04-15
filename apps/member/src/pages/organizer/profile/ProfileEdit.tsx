@@ -156,7 +156,7 @@ export function OrgProfileEdit() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 px-6 pb-4 flex items-center gap-3">
+          <div className="relative z-10 px-4 pb-4 flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
               className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
@@ -187,7 +187,7 @@ export function OrgProfileEdit() {
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-4xl font-black text-blue">{displayInitials}</span>
+                  <span className="text-md3-display-sm font-black text-blue">{displayInitials}</span>
                 )}
               </div>
               {avatarUploading && (
@@ -202,36 +202,36 @@ export function OrgProfileEdit() {
               )}
             </button>
             {avatarError && (
-              <p className="text-red text-xs flex items-center gap-1">
+              <p className="text-red text-md3-label-md flex items-center gap-1">
                 <CloseCircleOutline className="w-3.5 h-3.5" />{avatarError}
               </p>
             )}
             {avatarUploading && (
-              <p className="text-xs text-slate-400">Uploading photo…</p>
+              <p className="text-md3-label-md text-slate-400">Uploading photo…</p>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => void handlePhotoChange(e)} />
           </div>
 
           {/* Full Name */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Full Name</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Full Name</label>
             <input
               {...register('full_name')}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
-            {errors.full_name && <p className="text-red text-xs mt-1">{errors.full_name.message}</p>}
+            {errors.full_name && <p className="text-red text-md3-label-md mt-1">{errors.full_name.message}</p>}
           </div>
 
           {/* Username */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">Username</label>
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Username</label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm select-none">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-md3-body-md select-none">@</span>
               <input
                 {...register('username', {
                   onChange: (e) => handleUsernameChange(e.target.value),
                 })}
-                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                className="w-full border border-slate-200 rounded-xl pl-8 pr-10 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2">
                 {usernameStatus === 'checking' && <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-400 rounded-full animate-spin" />}
@@ -242,34 +242,34 @@ export function OrgProfileEdit() {
                 {usernameStatus === 'taken' && watchedUsername !== user?.username && <CloseCircleOutline className="w-4 h-4" color="#EF4444" />}
               </span>
             </div>
-            {errors.username && <p className="text-red text-xs mt-1">{errors.username.message}</p>}
+            {errors.username && <p className="text-red text-md3-label-md mt-1">{errors.username.message}</p>}
             {usernameStatus === 'taken' && watchedUsername !== user?.username && !errors.username && (
-              <p className="text-red text-xs mt-1">Username already taken</p>
+              <p className="text-red text-md3-label-md mt-1">Username already taken</p>
             )}
           </div>
 
           {/* School / Company */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               School / Company <span className="text-slate-400 font-normal">(optional)</span>
             </label>
             <input
               {...register('school_or_company')}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
             />
           </div>
 
           {/* Chapter — read-only for organizers */}
           <div>
-            <label className="text-sm font-medium text-slate-700 block mb-1">
+            <label className="text-md3-body-md font-medium text-slate-700 block mb-1">
               Chapter <span className="text-[10px] font-normal text-slate-400 ml-1">assigned by admin</span>
             </label>
             <input
               value={orgUser?.chapter ?? ''}
               readOnly
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-slate-100 text-slate-500 cursor-not-allowed"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md bg-slate-100 text-slate-500 cursor-not-allowed"
             />
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-md3-label-md text-slate-400 mt-1">
               Chapter assignment is managed by your HQ admin and cannot be self-changed.
             </p>
           </div>
@@ -279,19 +279,19 @@ export function OrgProfileEdit() {
         {/* ── ACCOUNT SECURITY CARD ── */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
           <div className="px-4 py-3 border-b border-slate-100">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Account Security</p>
+            <p className="text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Account Security</p>
           </div>
 
           {/* Change Email */}
           <div className="px-4 py-4 border-b border-slate-100">
-            <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
+            <p className="text-md3-body-md font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
               <LetterOutline className="w-4 h-4" color="#94A3B8" />
               Change Email
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires password</span>
             </p>
-            <p className="text-xs text-slate-400 mb-3">Current: {orgUser?.email}</p>
+            <p className="text-md3-label-md text-slate-400 mb-3">Current: {orgUser?.email}</p>
             {emailSuccess ? (
-              <p className="text-green text-xs flex items-center gap-1">
+              <p className="text-green text-md3-label-md flex items-center gap-1">
                 <CheckCircleOutline className="w-3.5 h-3.5" /> CheckCircleOutline your new email to confirm the change.
               </p>
             ) : (
@@ -300,27 +300,27 @@ export function OrgProfileEdit() {
                   {...emailForm.register('new_email')}
                   type="email"
                   placeholder="New email address"
-                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
                 />
-                <button type="submit" className="px-4 py-2.5 bg-blue text-white text-sm font-bold rounded-xl shrink-0">
+                <button type="submit" className="px-4 py-2.5 bg-blue text-white text-md3-body-md font-bold rounded-xl shrink-0">
                   Update
                 </button>
               </form>
             )}
             {emailForm.formState.errors.new_email && (
-              <p className="text-red text-xs mt-1">{emailForm.formState.errors.new_email.message}</p>
+              <p className="text-red text-md3-label-md mt-1">{emailForm.formState.errors.new_email.message}</p>
             )}
           </div>
 
           {/* Change Password */}
           <div className="px-4 py-4">
-            <p className="text-sm font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
+            <p className="text-md3-body-md font-semibold text-slate-900 mb-0.5 flex items-center gap-2">
               <LockOutline className="w-4 h-4" color="#94A3B8" />
               Change Password
               <span className="text-[10px] font-normal text-slate-400 ml-1">requires current password</span>
             </p>
             {passwordSuccess ? (
-              <p className="text-green text-xs flex items-center gap-1 mt-2">
+              <p className="text-green text-md3-label-md flex items-center gap-1 mt-2">
                 <CheckCircleOutline className="w-3.5 h-3.5" /> Password updated successfully.
               </p>
             ) : (
@@ -329,21 +329,21 @@ export function OrgProfileEdit() {
                   {...passwordForm.register('new_password')}
                   type="password"
                   placeholder="New password (min 6 characters)"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
                 />
                 {passwordForm.formState.errors.new_password && (
-                  <p className="text-red text-xs">{passwordForm.formState.errors.new_password.message}</p>
+                  <p className="text-red text-md3-label-md">{passwordForm.formState.errors.new_password.message}</p>
                 )}
                 <input
                   {...passwordForm.register('confirm_password')}
                   type="password"
                   placeholder="Confirm new password"
-                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
                 />
                 {passwordForm.formState.errors.confirm_password && (
-                  <p className="text-red text-xs">{passwordForm.formState.errors.confirm_password.message}</p>
+                  <p className="text-red text-md3-label-md">{passwordForm.formState.errors.confirm_password.message}</p>
                 )}
-                <button type="submit" className="w-full bg-slate-900 text-white text-sm font-bold py-3 rounded-xl mt-1">
+                <button type="submit" className="w-full bg-slate-900 text-white text-md3-body-md font-bold py-3 rounded-xl mt-1">
                   Update Password
                 </button>
               </form>
@@ -353,7 +353,7 @@ export function OrgProfileEdit() {
 
         {/* ── SAVE BUTTON ── */}
         {saveError && (
-          <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">{saveError}</p>
+          <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">{saveError}</p>
         )}
         <button
           type="submit"

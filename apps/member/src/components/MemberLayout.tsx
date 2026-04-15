@@ -304,7 +304,7 @@ export default function MemberLayout() {
         {/* Floating sidebar */}
         <aside className="w-48 lg:w-56 shrink-0 bg-primary rounded-2xl shadow-card flex flex-col overflow-hidden">
           {/* Logo */}
-          <div className="px-5 py-5 border-b border-white/10">
+          <div className="px-4 py-5 border-b border-white/10">
             <img src={logoHorizontal} alt="DEVCON+" className="h-5 w-auto" />
             <span className="mt-1 block text-[10px] font-bold uppercase tracking-widest text-white/50">
               Member
@@ -318,7 +318,7 @@ export default function MemberLayout() {
               to="/home"
               end
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -330,7 +330,7 @@ export default function MemberLayout() {
             <NavLink
               to="/rewards"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -343,7 +343,7 @@ export default function MemberLayout() {
             <NavLink
               to="/events"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -363,7 +363,7 @@ export default function MemberLayout() {
             <NavLink
               to="/jobs"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }
@@ -375,7 +375,7 @@ export default function MemberLayout() {
             <NavLink
               to="/profile"
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive ? 'bg-white/20 text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`
               }

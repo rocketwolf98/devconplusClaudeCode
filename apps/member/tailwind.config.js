@@ -53,6 +53,27 @@ export default {
         blue: '0 4px 24px rgba(17,82,212,0.12)',
         primary: 'var(--shadow-primary)',
       },
+      // ── Material Design 3 Type Scale ────────────────────────────────────
+      // Additive tokens only — existing classes are unchanged.
+      // Usage: text-md3-body-md, text-md3-title-lg, etc.
+      // Each tuple: [fontSize, { lineHeight, letterSpacing }]
+      fontSize: {
+        'md3-display-lg':  ['3.5625rem',  { lineHeight: '4rem',    letterSpacing: '-0.015625rem' }],
+        'md3-display-md':  ['2.8125rem',  { lineHeight: '3.25rem', letterSpacing: '0' }],
+        'md3-display-sm':  ['2.25rem',    { lineHeight: '2.75rem', letterSpacing: '0' }],
+        'md3-headline-lg': ['2rem',       { lineHeight: '2.5rem',  letterSpacing: '0' }],
+        'md3-headline-md': ['1.75rem',    { lineHeight: '2.25rem', letterSpacing: '0' }],
+        'md3-headline-sm': ['1.5rem',     { lineHeight: '2rem',    letterSpacing: '0' }],
+        'md3-title-lg':    ['1.375rem',   { lineHeight: '1.75rem', letterSpacing: '0' }],
+        'md3-title-md':    ['1rem',       { lineHeight: '1.5rem',  letterSpacing: '0.009375rem' }],
+        'md3-title-sm':    ['0.875rem',   { lineHeight: '1.25rem', letterSpacing: '0.00625rem' }],
+        'md3-body-lg':     ['1rem',       { lineHeight: '1.5rem',  letterSpacing: '0.03125rem' }],
+        'md3-body-md':     ['0.875rem',   { lineHeight: '1.25rem', letterSpacing: '0.015625rem' }],
+        'md3-body-sm':     ['0.75rem',    { lineHeight: '1rem',    letterSpacing: '0.025rem' }],
+        'md3-label-lg':    ['0.875rem',   { lineHeight: '1.25rem', letterSpacing: '0.00625rem' }],
+        'md3-label-md':    ['0.75rem',    { lineHeight: '1rem',    letterSpacing: '0.03125rem' }],
+        'md3-label-sm':    ['0.6875rem',  { lineHeight: '1rem',    letterSpacing: '0.03125rem' }],
+      },
     },
   },
   plugins: [],

@@ -65,27 +65,27 @@ export default function ResetPassword() {
   return (
     <div className="min-h-screen bg-blue flex flex-col">
       {/* Header */}
-      <div className="bg-blue px-6 pt-16 pb-10 text-center">
+      <div className="bg-blue px-4 pt-16 pb-10 text-center">
         <img src={logoHorizontal} alt="DEVCON+" className="h-7 w-auto mx-auto" />
-        <p className="text-white/60 mt-3 text-sm">Set a new password</p>
+        <p className="text-white/60 mt-3 text-md3-body-md">Set a new password</p>
       </div>
 
       {/* Card */}
-      <div className="flex-1 bg-slate-50 rounded-t-3xl px-6 pt-8 pb-10">
+      <div className="flex-1 bg-slate-50 rounded-t-3xl px-4 pt-8 pb-10">
 
         {/* Waiting for Supabase to exchange the token */}
         {pageState === 'waiting' && (
           <div className="flex flex-col items-center justify-center h-48 gap-3">
             <div className="w-6 h-6 border-2 border-blue/30 border-t-blue rounded-full animate-spin" />
-            <p className="text-sm text-slate-400">Verifying your link…</p>
+            <p className="text-md3-body-md text-slate-400">Verifying your link…</p>
           </div>
         )}
 
         {/* Invalid / expired link */}
         {pageState === 'invalid' && (
           <div className="flex flex-col items-center text-center pt-6 gap-4">
-            <p className="text-base font-bold text-slate-800">Link expired or invalid</p>
-            <p className="text-sm text-slate-500">
+            <p className="text-md3-body-lg font-bold text-slate-800">Link expired or invalid</p>
+            <p className="text-md3-body-md text-slate-500">
               Password reset links expire after 1 hour. Request a new one.
             </p>
             <Link
@@ -100,18 +100,18 @@ export default function ResetPassword() {
         {/* Ready — show form */}
         {pageState === 'ready' && (
           <>
-            <h2 className="text-xl font-black text-slate-900 mb-1">New Password</h2>
-            <p className="text-sm text-slate-500 mb-6">Choose a strong password for your account.</p>
+            <h2 className="text-md3-title-lg font-black text-slate-900 mb-1">New Password</h2>
+            <p className="text-md3-body-md text-slate-500 mb-6">Choose a strong password for your account.</p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">New Password</label>
+                <label className="text-md3-body-md font-medium text-slate-700 block mb-1">New Password</label>
                 <div className="relative">
                   <input
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
                   />
                   <button
                     type="button"
@@ -123,18 +123,18 @@ export default function ResetPassword() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red text-xs mt-1">{errors.password.message}</p>
+                  <p className="text-red text-md3-label-md mt-1">{errors.password.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="text-sm font-medium text-slate-700 block mb-1">Confirm Password</label>
+                <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Confirm Password</label>
                 <div className="relative">
                   <input
                     {...register('confirmPassword')}
                     type={showConfirm ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+                    className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
                   />
                   <button
                     type="button"
@@ -146,12 +146,12 @@ export default function ResetPassword() {
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-red text-xs mt-1">{errors.confirmPassword.message}</p>
+                  <p className="text-red text-md3-label-md mt-1">{errors.confirmPassword.message}</p>
                 )}
               </div>
 
               {formError && (
-                <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2">
+                <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2">
                   {formError}
                 </p>
               )}

@@ -85,9 +85,9 @@ export type FormData = z.infer<typeof schema>
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 export const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
+  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-md3-body-md text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
 
-export const labelClass = 'block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5'
+export const labelClass = 'block text-md3-label-md font-bold uppercase tracking-wide text-slate-500 mb-1.5'
 
 // ── Options ───────────────────────────────────────────────────────────────────
 
@@ -190,7 +190,7 @@ export function CustomFieldsBuilder({
       {customFields.map((field, idx) => (
         <div key={field.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+            <span className="text-md3-label-md font-bold text-slate-400 uppercase tracking-wide">
               Question {idx + 1}
             </span>
             <button
@@ -222,7 +222,7 @@ export function CustomFieldsBuilder({
               ))}
             </select>
 
-            <label className="flex items-center gap-1.5 text-xs text-slate-600 font-medium shrink-0 cursor-pointer">
+            <label className="flex items-center gap-1.5 text-md3-label-md text-slate-600 font-medium shrink-0 cursor-pointer">
               <input
                 type="checkbox"
                 checked={field.required}
@@ -238,7 +238,7 @@ export function CustomFieldsBuilder({
             <div className="space-y-2">
               {field.options.map(opt => (
                 <div key={opt} className="flex items-center gap-2">
-                  <span className="flex-1 text-sm text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
+                  <span className="flex-1 text-md3-body-md text-slate-700 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
                     {opt}
                   </span>
                   <button
@@ -274,7 +274,7 @@ export function CustomFieldsBuilder({
       <button
         type="button"
         onClick={addField}
-        className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-blue hover:text-blue text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+        className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 text-slate-400 hover:border-blue hover:text-blue text-md3-label-md font-semibold flex items-center justify-center gap-1.5 transition-colors"
       >
         <AddCircleOutline className="w-3.5 h-3.5" />
         Add Question

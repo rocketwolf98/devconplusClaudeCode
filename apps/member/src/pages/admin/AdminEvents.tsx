@@ -72,8 +72,8 @@ type EventFormData = z.infer<typeof eventSchema>
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
-const labelClass = 'block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5'
+  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-md3-body-md text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
+const labelClass = 'block text-md3-label-md font-bold uppercase tracking-wide text-slate-500 mb-1.5'
 
 const CATEGORY_OPTIONS: { value: EventFormData['category']; label: string }[] = [
   { value: 'tech_talk',  label: 'Tech Talk'  },
@@ -228,10 +228,10 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
         <div>
-          <h2 className="text-base font-bold text-slate-900">
+          <h2 className="text-md3-body-lg font-bold text-slate-900">
             {mode === 'create' ? 'Create Event' : 'Edit Event'}
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-md3-label-md text-slate-400 mt-0.5">
             {mode === 'create' ? 'Add a new event to any chapter' : 'Update event details'}
           </p>
         </div>
@@ -259,7 +259,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             ))}
           </select>
           {errors.chapter_id && (
-            <p className="text-xs text-red mt-1">{errors.chapter_id.message}</p>
+            <p className="text-md3-label-md text-red mt-1">{errors.chapter_id.message}</p>
           )}
         </div>
 
@@ -273,7 +273,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
               placeholder="e.g. DEVCON Summit Manila 2026"
             />
             {errors.title && (
-              <p className="text-xs text-red mt-1">{errors.title.message}</p>
+              <p className="text-md3-label-md text-red mt-1">{errors.title.message}</p>
             )}
           </div>
 
@@ -287,7 +287,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
               placeholder="What is this event about?"
             />
             {errors.description && (
-              <p className="text-xs text-red mt-1">{errors.description.message}</p>
+              <p className="text-md3-label-md text-red mt-1">{errors.description.message}</p>
             )}
           </div>
         </div>
@@ -307,7 +307,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                     key={opt.value}
                     type="button"
                     onClick={() => field.onChange(opt.value)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    className={`px-3 py-1.5 rounded-full text-md3-label-md font-semibold border transition-colors ${
                       field.value === opt.value
                         ? 'bg-blue text-white border-blue'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
@@ -320,7 +320,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             )}
           />
           {errors.category && (
-            <p className="text-xs text-red mt-1">{errors.category.message}</p>
+            <p className="text-md3-label-md text-red mt-1">{errors.category.message}</p>
           )}
         </div>
 
@@ -333,7 +333,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             placeholder="Venue or Online"
           />
           {errors.location && (
-            <p className="text-xs text-red mt-1">{errors.location.message}</p>
+            <p className="text-md3-label-md text-red mt-1">{errors.location.message}</p>
           )}
         </div>
 
@@ -348,7 +348,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                 className={inputClass}
               />
               {errors.event_date && (
-                <p className="text-xs text-red mt-1">{errors.event_date.message}</p>
+                <p className="text-md3-label-md text-red mt-1">{errors.event_date.message}</p>
               )}
             </div>
             <div>
@@ -359,7 +359,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                 className={inputClass}
               />
               {errors.end_date && (
-                <p className="text-xs text-red mt-1">{errors.end_date.message}</p>
+                <p className="text-md3-label-md text-red mt-1">{errors.end_date.message}</p>
               )}
             </div>
           </div>
@@ -378,7 +378,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                     key={opt.value}
                     type="button"
                     onClick={() => field.onChange(opt.value)}
-                    className={`flex-1 py-2 text-xs font-semibold transition-colors ${
+                    className={`flex-1 py-2 text-md3-label-md font-semibold transition-colors ${
                       field.value === opt.value
                         ? 'bg-blue text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -404,11 +404,11 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             <div>
               <label
                 htmlFor="requires_approval_admin"
-                className="text-sm font-semibold text-slate-900 cursor-pointer"
+                className="text-md3-body-md font-semibold text-slate-900 cursor-pointer"
               >
                 Require Registration Approval
               </label>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-md3-label-md text-slate-400 mt-0.5">
                 Manually approve each registration before members receive their QR ticket.
               </p>
             </div>
@@ -427,7 +427,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                   <button
                     type="button"
                     onClick={() => field.onChange(true)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                    className={`flex-1 py-2 rounded-xl text-md3-label-md font-semibold border transition-colors ${
                       field.value
                         ? 'bg-blue text-white border-blue'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
@@ -438,7 +438,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                   <button
                     type="button"
                     onClick={() => field.onChange(false)}
-                    className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                    className={`flex-1 py-2 rounded-xl text-md3-label-md font-semibold border transition-colors ${
                       !field.value
                         ? 'bg-blue text-white border-blue'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-blue hover:text-blue'
@@ -455,7 +455,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             <div className="mt-3">
               <label className={labelClass}>Price (PHP)</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-md3-body-md text-slate-400 pointer-events-none">
                   ₱
                 </span>
                 <input
@@ -468,7 +468,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                 />
               </div>
               {errors.ticket_price_php && (
-                <p className="text-xs text-red mt-1">{errors.ticket_price_php.message}</p>
+                <p className="text-md3-label-md text-red mt-1">{errors.ticket_price_php.message}</p>
               )}
             </div>
           )}
@@ -489,7 +489,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             placeholder="Unlimited"
           />
           {errors.capacity && (
-            <p className="text-xs text-red mt-1">{errors.capacity.message}</p>
+            <p className="text-md3-label-md text-red mt-1">{errors.capacity.message}</p>
           )}
         </div>
 
@@ -505,9 +505,9 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
             step={50}
           />
           {errors.points_value && (
-            <p className="text-xs text-red mt-1">{errors.points_value.message}</p>
+            <p className="text-md3-label-md text-red mt-1">{errors.points_value.message}</p>
           )}
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-md3-label-md text-slate-400 mt-1">
             Members earn this many XP when checked in at the event.
           </p>
         </div>
@@ -517,14 +517,14 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           <div className="flex items-center justify-between mb-2">
             <div>
               <p className={labelClass}>Registration Questions</p>
-              <p className="text-xs text-slate-400 -mt-1 mb-2">
+              <p className="text-md3-label-md text-slate-400 -mt-1 mb-2">
                 Extra fields shown on the member registration form.
               </p>
             </div>
             <button
               type="button"
               onClick={addField}
-              className="flex items-center gap-1.5 text-xs font-bold text-blue bg-blue/10 hover:bg-blue/20 px-3 py-1.5 rounded-xl transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-md3-label-md font-bold text-blue bg-blue/10 hover:bg-blue/20 px-3 py-1.5 rounded-xl transition-colors shrink-0"
             >
               <AddCircleOutline className="w-3.5 h-3.5" />
               Add Question
@@ -532,7 +532,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           </div>
 
           {customFields.length === 0 && (
-            <p className="text-xs text-slate-300 italic text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <p className="text-md3-label-md text-slate-300 italic text-center py-4 bg-slate-50 rounded-xl border border-dashed border-slate-200">
               No extra questions — only name, email, and school/company will be collected.
             </p>
           )}
@@ -542,7 +542,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
               <div key={field.id} className="bg-slate-50 rounded-xl border border-slate-200 p-3 space-y-3">
                 {/* Header */}
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">
+                  <p className="text-md3-label-md font-bold text-slate-400 uppercase tracking-wide">
                     Question {index + 1}
                   </p>
                   <button
@@ -596,7 +596,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                       onChange={e => updateField(field.id, { required: e.target.checked })}
                       className="w-4 h-4 accent-blue"
                     />
-                    <span className="text-xs font-semibold text-slate-600">Required</span>
+                    <span className="text-md3-label-md font-semibold text-slate-600">Required</span>
                   </label>
                 </div>
 
@@ -608,7 +608,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                       {field.options.map((opt, i) => (
                         <span
                           key={i}
-                          className="flex items-center gap-1 bg-white border border-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full"
+                          className="flex items-center gap-1 bg-white border border-slate-200 text-slate-700 text-md3-label-md px-2 py-0.5 rounded-full"
                         >
                           {opt}
                           <button
@@ -621,7 +621,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                         </span>
                       ))}
                       {field.options.length === 0 && (
-                        <span className="text-xs text-slate-300 italic">No options yet</span>
+                        <span className="text-md3-label-md text-slate-300 italic">No options yet</span>
                       )}
                     </div>
                     <div className="flex gap-2">
@@ -640,7 +640,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
                       <button
                         type="button"
                         onClick={() => addOption(field.id)}
-                        className="px-3 py-2 bg-blue text-white text-xs font-bold rounded-xl hover:bg-blue-dark transition-colors shrink-0"
+                        className="px-3 py-2 bg-blue text-white text-md3-label-md font-bold rounded-xl hover:bg-blue-dark transition-colors shrink-0"
                       >
                         Add
                       </button>
@@ -654,7 +654,7 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
 
         {/* Submit error */}
         {submitError && (
-          <p className="text-xs text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2">
+          <p className="text-md3-label-md text-red bg-red/5 border border-red/20 rounded-xl px-3 py-2">
             {submitError}
           </p>
         )}
@@ -664,14 +664,14 @@ function EventSlideOverForm({ mode, event, chapters, onClose, onSaved }: SlideOv
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+            className="flex-1 py-3 border border-slate-200 text-slate-700 text-md3-body-md font-semibold rounded-xl hover:bg-slate-50 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 py-3 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
+            className="flex-1 py-3 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors disabled:opacity-60"
           >
             {isSubmitting
               ? mode === 'create' ? 'Creating…' : 'Saving…'
@@ -737,12 +737,12 @@ export default function AdminEvents() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 mb-1">Events</h1>
-          <p className="text-sm text-slate-500">View, create, and remove events across all chapters</p>
+          <h1 className="text-md3-headline-sm font-black text-slate-900 mb-1">Events</h1>
+          <p className="text-md3-body-md text-slate-500">View, create, and remove events across all chapters</p>
         </div>
         <button
           onClick={() => setSlideOver({ mode: 'create' })}
-          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           Create Event
@@ -750,21 +750,21 @@ export default function AdminEvents() {
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {isLoading ? (
-        <p className="text-slate-400 text-sm">Loading events…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading events…</p>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-card">
-          <table className="w-full text-sm">
+          <table className="w-full text-md3-body-md">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50">
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Event</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Chapter</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">XP</th>
-                <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Event</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Chapter</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">XP</th>
+                <th className="text-left px-4 py-3 text-md3-label-md font-bold text-slate-500 uppercase tracking-wider">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -774,20 +774,20 @@ export default function AdminEvents() {
                   <td className="px-4 py-3">
                     <p className="font-semibold text-slate-900">{event.title}</p>
                     {event.location && (
-                      <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                      <p className="text-md3-label-md text-slate-400 flex items-center gap-1 mt-0.5">
                         <MapPointOutline className="w-3 h-3 shrink-0" />
                         {event.location}
                       </p>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">{event.chapters?.name ?? '—'}</td>
-                  <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                  <td className="px-4 py-3 text-slate-600 text-md3-label-md">{event.chapters?.name ?? '—'}</td>
+                  <td className="px-4 py-3 text-slate-500 text-md3-label-md whitespace-nowrap">
                     {event.event_date
                       ? new Date(event.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                       : 'TBA'}
                   </td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-md3-label-md font-semibold text-blue/80 bg-blue/10 px-2 py-0.5 rounded-full">
                       <BoltOutline className="w-3 h-3" />
                       {event.points_value}
                     </span>
@@ -804,17 +804,17 @@ export default function AdminEvents() {
                   <td className="px-4 py-3 text-right">
                     {confirmDeleteId === event.id ? (
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-xs text-slate-500">Sure?</span>
+                        <span className="text-md3-label-md text-slate-500">Sure?</span>
                         <button
                           onClick={() => setConfirmDeleteId(null)}
-                          className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                          className="text-md3-label-md px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => void handleDelete(event.id)}
                           disabled={deletingId === event.id}
-                          className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
+                          className="text-md3-label-md px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
                         >
                           {deletingId === event.id ? '…' : 'Delete'}
                         </button>
@@ -841,7 +841,7 @@ export default function AdminEvents() {
             </tbody>
           </table>
           {events.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No events found.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No events found.</p>
           )}
         </div>
       )}

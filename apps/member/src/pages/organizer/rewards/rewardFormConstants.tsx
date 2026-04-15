@@ -25,10 +25,10 @@ export type RewardFormData = z.infer<typeof schema>
 // ── Styles (match eventFormConstants.tsx) ────────────────────────────────────
 
 export const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
+  'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-md3-body-md text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/20'
 
 export const labelClass =
-  'block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1.5'
+  'block text-md3-label-md font-bold uppercase tracking-wide text-slate-500 mb-1.5'
 
 // ── SectionHeader (JSX — same pattern as eventFormConstants.tsx) ─────────────
 

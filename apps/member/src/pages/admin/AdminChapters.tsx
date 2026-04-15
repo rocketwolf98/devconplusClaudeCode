@@ -68,13 +68,13 @@ function ChapterCard({
               <input
                 value={editName}
                 onChange={(e) => onEditNameChange(e.target.value)}
-                className="border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue w-44"
+                className="border border-slate-200 rounded-lg px-2 py-1.5 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue w-44"
                 autoFocus
               />
               <select
                 value={editRegion}
                 onChange={(e) => onEditRegionChange(e.target.value as Region)}
-                className="border border-slate-200 rounded-lg px-2 py-1.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+                className="border border-slate-200 rounded-lg px-2 py-1.5 text-md3-label-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
               >
                 {REGIONS.map((r) => (
                   <option key={r} value={r}>{r}</option>
@@ -113,15 +113,15 @@ function ChapterCard({
         {editingId !== chapter.id && (
           <div className="flex items-center gap-6 text-center shrink-0">
             <div>
-              <p className="text-sm font-bold text-slate-900">{memberCount.toLocaleString()}</p>
+              <p className="text-md3-body-md font-bold text-slate-900">{memberCount.toLocaleString()}</p>
               <p className="text-[10px] text-slate-400">Members</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900">{eventCount}</p>
+              <p className="text-md3-body-md font-bold text-slate-900">{eventCount}</p>
               <p className="text-[10px] text-slate-400">Events</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-900">{(xp / 1000).toFixed(0)}K</p>
+              <p className="text-md3-body-md font-bold text-slate-900">{(xp / 1000).toFixed(0)}K</p>
               <p className="text-[10px] text-slate-400">XP</p>
             </div>
           </div>
@@ -135,17 +135,17 @@ function ChapterCard({
           >
             {confirmDeleteId === chapter.id ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500">Sure?</span>
+                <span className="text-md3-label-md text-slate-500">Sure?</span>
                 <button
                   onClick={() => onCancelDelete()}
-                  className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  className="text-md3-label-md px-2 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => void onConfirmDelete(chapter.id)}
                   disabled={deletingId === chapter.id}
-                  className="text-xs px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
+                  className="text-md3-label-md px-2 py-1 rounded-lg bg-red text-white disabled:opacity-50"
                 >
                   {deletingId === chapter.id ? '…' : 'Delete'}
                 </button>
@@ -181,9 +181,9 @@ function ChapterCard({
           <div className="grid grid-cols-2 gap-4">
             {/* XP visualization */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">XP Overview</p>
+              <p className="text-md3-label-md font-bold uppercase tracking-wide text-slate-400 mb-3">XP Overview</p>
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-md3-body-md">
                   <span className="text-slate-600">Total XP Awarded</span>
                   <span className="font-bold text-gold">{xp.toLocaleString()}</span>
                 </div>
@@ -199,19 +199,19 @@ function ChapterCard({
 
             {/* Quick stats */}
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">Quick Stats</p>
+              <p className="text-md3-label-md font-bold uppercase tracking-wide text-slate-400 mb-3">Quick Stats</p>
               <div className="space-y-1.5">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-md3-body-md">
                   <span className="text-slate-500">Avg XP / Member</span>
                   <span className="font-semibold text-slate-700">
                     {memberCount > 0 ? Math.round(xp / memberCount).toLocaleString() : '—'}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-md3-body-md">
                   <span className="text-slate-500">Region</span>
                   <span className="font-semibold text-slate-700">{chapter.region ?? '—'}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-md3-body-md">
                   <span className="text-slate-500">Created</span>
                   <span className="font-semibold text-slate-700">
                     {new Date(chapter.created_at).toLocaleDateString('en-US', {
@@ -331,33 +331,33 @@ export default function AdminChapters() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 mb-1">Chapters</h1>
-          <p className="text-sm text-slate-500">Manage DEVCON chapters</p>
+          <h1 className="text-md3-headline-sm font-black text-slate-900 mb-1">Chapters</h1>
+          <p className="text-md3-body-md text-slate-500">Manage DEVCON chapters</p>
         </div>
       </div>
 
       {error && (
-        <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
+        <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-4">{error}</p>
       )}
 
       {/* Add chapter form */}
       <div className="bg-white rounded-2xl border border-slate-200 p-4 mb-4 shadow-card flex items-end gap-3">
         <div className="flex-1">
-          <label className="text-xs font-medium text-slate-700 block mb-1">Chapter Name</label>
+          <label className="text-md3-label-md font-medium text-slate-700 block mb-1">Chapter Name</label>
           <input
             value={addName}
             onChange={(e) => setAddName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && void addChapter()}
             placeholder="e.g. Batangas"
-            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue"
+            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-slate-700 block mb-1">Region</label>
+          <label className="text-md3-label-md font-medium text-slate-700 block mb-1">Region</label>
           <select
             value={addRegion}
             onChange={(e) => setAddRegion(e.target.value as Region)}
-            className="border border-slate-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue"
+            className="border border-slate-200 rounded-xl px-3 py-2 text-md3-body-md bg-white focus:outline-none focus:ring-2 focus:ring-blue"
           >
             {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
           </select>
@@ -365,7 +365,7 @@ export default function AdminChapters() {
         <button
           onClick={() => void addChapter()}
           disabled={adding || !addName.trim()}
-          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-sm font-bold rounded-xl hover:bg-blue-dark disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue text-white text-md3-body-md font-bold rounded-xl hover:bg-blue-dark disabled:opacity-60 transition-colors"
         >
           <AddCircleOutline className="w-4 h-4" />
           {adding ? 'Adding…' : 'Add Chapter'}
@@ -374,7 +374,7 @@ export default function AdminChapters() {
 
       {/* Chapter cards */}
       {isLoading ? (
-        <p className="text-slate-400 text-sm">Loading chapters…</p>
+        <p className="text-slate-400 text-md3-body-md">Loading chapters…</p>
       ) : (
         <div className="space-y-3">
           {chapters.map((chapter) => (
@@ -403,7 +403,7 @@ export default function AdminChapters() {
             />
           ))}
           {chapters.length === 0 && (
-            <p className="text-center py-10 text-slate-400 text-sm">No chapters found.</p>
+            <p className="text-center py-10 text-slate-400 text-md3-body-md">No chapters found.</p>
           )}
         </div>
       )}

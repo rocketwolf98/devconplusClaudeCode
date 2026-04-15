@@ -67,7 +67,7 @@ export default function AdminLayout() {
               to={path}
               end={end}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-md3-body-md font-medium transition-colors ${
                   isActive
                     ? 'bg-white/20 text-white'
                     : 'text-white/70 hover:bg-white/10 hover:text-white'
@@ -85,14 +85,14 @@ export default function AdminLayout() {
           <p className="text-[10px] text-white/50 truncate">{user.email}</p>
           <button
             onClick={() => navigate('/home')}
-            className="mt-3 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
+            className="mt-3 flex items-center gap-2 text-md3-label-md text-white/60 hover:text-white transition-colors"
           >
             <ArrowLeftOutline className="w-3.5 h-3.5" />
             Back to App
           </button>
           <button
             onClick={() => { void signOut(); navigate('/sign-in') }}
-            className="mt-2 flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
+            className="mt-2 flex items-center gap-2 text-md3-label-md text-white/60 hover:text-white transition-colors"
           >
             <LogoutOutline className="w-3.5 h-3.5" />
             Sign Out

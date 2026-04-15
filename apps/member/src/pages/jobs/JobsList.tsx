@@ -62,8 +62,8 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
 
   if (error) return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-      <p className="text-sm text-red mb-4">{error}</p>
-      <button onClick={() => void fetchJobs()} className="text-sm text-primary font-semibold">Try again</button>
+      <p className="text-md3-body-md text-red mb-4">{error}</p>
+      <button onClick={() => void fetchJobs()} className="text-md3-body-md text-primary font-semibold">Try again</button>
     </div>
   )
 
@@ -72,8 +72,8 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
         <CaseOutline className="w-8 h-8" color="rgba(var(--color-primary), 0.5)" />
       </div>
-      <h2 className="text-base font-bold text-slate-900 mb-1">No listings yet</h2>
-      <p className="text-sm text-slate-500">Check back soon for new opportunities.</p>
+      <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">No listings yet</h2>
+      <p className="text-md3-body-md text-slate-500">Check back soon for new opportunities.</p>
     </div>
   )
 
@@ -97,7 +97,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                   {/* Logo */}
                   <div className="w-12 h-12 bg-primary rounded-full shrink-0 flex items-center justify-center">
-                    <span className="text-white font-proxima font-bold text-xl uppercase">
+                    <span className="text-white font-proxima font-bold text-md3-title-lg uppercase">
                       {job.company?.[0] ?? 'J'}
                     </span>
                   </div>
@@ -163,12 +163,12 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                 >
                   <div className="px-[18px] pb-4 pt-3 border-t border-slate-100 space-y-4">
                     {job.description
-                      ? <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">{job.description}</p>
-                      : <p className="text-sm text-slate-400 italic">No description provided.</p>
+                      ? <p className="text-md3-body-md text-slate-600 leading-relaxed whitespace-pre-line">{job.description}</p>
+                      : <p className="text-md3-body-md text-slate-400 italic">No description provided.</p>
                     }
                     {job.apply_url && (
                       <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 w-full bg-primary text-white font-bold text-sm py-3 rounded-full shadow-sm">
+                        className="flex items-center justify-center gap-2 w-full bg-primary text-white font-bold text-md3-body-md py-3 rounded-full shadow-sm">
                         Apply Now <ShareOutline className="w-4 h-4" />
                       </a>
                     )}
@@ -253,8 +253,8 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
 
   if (error) return (
     <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-      <p className="text-sm text-red mb-4">{error}</p>
-      <button onClick={() => void fetchAll()} className="text-sm text-primary font-semibold">Try again</button>
+      <p className="text-md3-body-md text-red mb-4">{error}</p>
+      <button onClick={() => void fetchAll()} className="text-md3-body-md text-primary font-semibold">Try again</button>
     </div>
   )
 
@@ -263,8 +263,8 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
         <BoltOutline className="w-8 h-8" color="rgba(var(--color-primary), 0.5)" />
       </div>
-      <h2 className="text-base font-bold text-slate-900 mb-1">No missions yet</h2>
-      <p className="text-sm text-slate-500">Check back soon for new bounties.</p>
+      <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">No missions yet</h2>
+      <p className="text-md3-body-md text-slate-500">Check back soon for new bounties.</p>
     </div>
   )
 
@@ -365,7 +365,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                   <div className="px-[18px] pb-5 pt-3 border-t border-slate-100 space-y-4">
                     {/* Description */}
                     {mission.description && (
-                      <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                      <p className="text-md3-body-md text-slate-600 leading-relaxed whitespace-pre-line">
                         {mission.description}
                       </p>
                     )}
@@ -373,9 +373,9 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     {/* GitHub link */}
                     {mission.github_url && (
                       <a href={mission.github_url} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
+                        className="flex items-center gap-2 text-md3-body-md text-slate-500 hover:text-slate-800 transition-colors">
                         <CodeSquareOutline className="w-4 h-4 shrink-0" />
-                        <span className="truncate text-xs">{mission.github_url}</span>
+                        <span className="truncate text-md3-label-md">{mission.github_url}</span>
                         <ShareOutline className="w-3 h-3 shrink-0 ml-auto" />
                       </a>
                     )}
@@ -385,7 +385,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                       <motion.button
                         whileTap={{ scale: 0.97 }}
                         onClick={() => void handleStart(mission.id)}
-                        className="w-full bg-primary text-white font-bold text-sm py-3 rounded-full shadow-sm"
+                        className="w-full bg-primary text-white font-bold text-md3-body-md py-3 rounded-full shadow-sm"
                       >
                         Start Mission
                       </motion.button>
@@ -399,7 +399,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                           <div className="bg-slate-50 rounded-xl p-3 space-y-1">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Your Submission</p>
                             <a href={mySubmission.pr_link} target="_blank" rel="noopener noreferrer"
-                              className="text-xs text-blue hover:underline break-all block">{mySubmission.pr_link}</a>
+                              className="text-md3-label-md text-blue hover:underline break-all block">{mySubmission.pr_link}</a>
                             <p className="text-[10px] text-slate-400">
                               Submitted {new Date(mySubmission.submitted_at).toLocaleString()}
                             </p>
@@ -418,15 +418,15 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                                 value={prDrafts[mission.id] ?? ''}
                                 onChange={(e) => setPrDrafts((p) => ({ ...p, [mission.id]: e.target.value }))}
                                 placeholder="https://github.com/your/repo/pull/123"
-                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md bg-white text-slate-900 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
                               />
                               {submitErrors[mission.id] && (
-                                <p className="text-xs text-red">{submitErrors[mission.id]}</p>
+                                <p className="text-md3-label-md text-red">{submitErrors[mission.id]}</p>
                               )}
                               <div className="flex gap-2">
                                 <button
                                   onClick={() => setSubmitOpen((p) => ({ ...p, [mission.id]: false }))}
-                                  className="flex-1 py-2.5 rounded-full border border-slate-200 text-slate-600 text-sm font-semibold"
+                                  className="flex-1 py-2.5 rounded-full border border-slate-200 text-slate-600 text-md3-body-md font-semibold"
                                 >
                                   Cancel
                                 </button>
@@ -434,7 +434,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                                   whileTap={{ scale: 0.97 }}
                                   onClick={() => void handleSubmit(mission.id)}
                                   disabled={submitting[mission.id]}
-                                  className="flex-1 py-2.5 rounded-full bg-primary text-white text-sm font-bold disabled:opacity-50 shadow-sm"
+                                  className="flex-1 py-2.5 rounded-full bg-primary text-white text-md3-body-md font-bold disabled:opacity-50 shadow-sm"
                                 >
                                   {submitting[mission.id] ? 'Submitting…' : mySubmission ? 'Update Link' : 'Submit PR'}
                                 </motion.button>
@@ -448,7 +448,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                           <motion.button
                             whileTap={{ scale: 0.97 }}
                             onClick={() => openSubmit(mission.id, mySubmission?.pr_link)}
-                            className={`w-full font-bold text-sm py-3 rounded-full shadow-sm ${
+                            className={`w-full font-bold text-md3-body-md py-3 rounded-full shadow-sm ${
                               mySubmission
                                 ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                 : 'bg-primary text-white'
@@ -465,8 +465,8 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                       <div className="bg-gold/10 rounded-xl p-3 flex items-center gap-3">
                         <CupFirstOutline className="w-5 h-5 shrink-0" color="#D97706" />
                         <div>
-                          <p className="text-sm font-bold text-amber-700">You won this mission!</p>
-                          <p className="text-xs text-amber-600">+{mission.xp_reward} XP has been added to your account.</p>
+                          <p className="text-md3-body-md font-bold text-amber-700">You won this mission!</p>
+                          <p className="text-md3-label-md text-amber-600">+{mission.xp_reward} XP has been added to your account.</p>
                         </div>
                       </div>
                     )}
@@ -517,7 +517,7 @@ export default function JobsList() {
           }}
         >
           {/* Header Row: Title + Icons */}
-          <div className="relative z-10 flex items-center justify-between px-[25px] pt-6">
+          <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight">
               Jobs and Missions
             </h1>
@@ -534,7 +534,7 @@ export default function JobsList() {
         </div>
 
         {/* ── Tabs Wrapper ── */}
-        <div className="pt-4 pb-2 px-[25px] pointer-events-auto">
+        <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {(['jobs', 'missions'] as const).map((tab) => (
               <button

@@ -60,7 +60,7 @@ export default function PasswordConfirmModal({
 
           {/* Sheet */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl px-6 pt-6 pb-10"
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl px-4 pt-6 pb-10"
             variants={slideUp}
             initial="hidden"
             animate="visible"
@@ -69,8 +69,8 @@ export default function PasswordConfirmModal({
           >
             <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-6" />
 
-            <h2 className="text-base font-bold text-slate-900 mb-1">{title}</h2>
-            <p className="text-sm text-slate-500 mb-5">{description}</p>
+            <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">{title}</h2>
+            <p className="text-md3-body-md text-slate-500 mb-5">{description}</p>
 
             <div className="relative mb-3">
               <input
@@ -78,7 +78,7 @@ export default function PasswordConfirmModal({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your current password"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 pr-11 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-primary"
                 autoFocus
                 onKeyDown={(e) => { if (e.key === 'Enter') void handleConfirm() }}
               />
@@ -93,7 +93,7 @@ export default function PasswordConfirmModal({
             </div>
 
             {error && (
-              <p className="text-red text-xs bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-3">
+              <p className="text-red text-md3-label-md bg-red/5 border border-red/20 rounded-lg px-3 py-2 mb-3">
                 {error}
               </p>
             )}
@@ -102,14 +102,14 @@ export default function PasswordConfirmModal({
               <button
                 onClick={handleClose}
                 disabled={isLoading}
-                className="flex-1 py-3 bg-slate-100 text-slate-700 text-sm font-bold rounded-xl transition-colors disabled:opacity-50"
+                className="flex-1 py-3 bg-slate-100 text-slate-700 text-md3-body-md font-bold rounded-xl transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={() => void handleConfirm()}
                 disabled={isLoading}
-                className="flex-1 bg-primary text-white text-sm font-bold py-3 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-60"
+                className="flex-1 bg-primary text-white text-md3-body-md font-bold py-3 rounded-xl transition-opacity hover:opacity-90 disabled:opacity-60"
               >
                 {isLoading ? 'Verifying…' : confirmLabel}
               </button>
