@@ -187,16 +187,28 @@ export function OrgQRScanner() {
     isProcessingRef.current = true
 
     try {
-      // Always fetch a fresh session before invoking — this triggers an inline
-      // token refresh if the access token has expired, preventing stale-token 401s
-      // after the organizer leaves the scanner open past the 60-minute JWT TTL.
       const { data: sessionData } = await supabase.auth.getSession()
-      const accessToken = sessionData.session?.access_token
+      let accessToken = sessionData.session?.access_token
+
       if (!accessToken) {
         showOverlay({ type: 'error', message: 'Session expired. Please sign in again.' })
         isProcessingRef.current = false
         return
       }
+
+      // Proactively force-refresh if token expires within 5 minutes.
+      // getSession() reads from localStorage without a network call, so the stored
+      // token may be expired if the background auto-refresh timer failed silently.
+      const expiresAt = sessionData.session?.expires_at
+      if (!expiresAt || expiresAt - Math.floor(Date.now() / 1000) < 300) {
+        const { data: refreshed } = await supabase.auth.refreshSession()
+        if (refreshed.session?.access_token) {
+          accessToken = refreshed.session.access_token
+        }
+      }
+
+      // Keep the functions client in sync so any retry paths also use the fresh token
+      supabase.functions.setAuth(accessToken)
 
       const { data, error } = await supabase.functions.invoke<{
         success: boolean
@@ -213,13 +225,14 @@ export function OrgQRScanner() {
       })
 
       if (error) {
-        // FunctionsHttpError carries the response body — try to surface the reason
+        // FunctionsHttpError stores the raw Response as error.context (body unread).
+        // Read it to surface the actual gateway or function error message.
         let errorMessage = 'Scan failed. Try again.'
         try {
           const body = await (error as unknown as { context: Response }).context.json() as { error?: string; message?: string }
           if (body?.error) errorMessage = body.error
           else if (body?.message) errorMessage = body.message
-        } catch { /* ignore — fall back to generic message */ }
+        } catch { /* non-JSON body — keep generic message */ }
         showOverlay({ type: 'error', message: errorMessage })
         return
       }
