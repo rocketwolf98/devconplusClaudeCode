@@ -12,16 +12,19 @@ import logoVertical from './assets/logos/logo-vertical.svg'
 import AnimatedDice from './components/AnimatedDice'
 
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
-  <circle cx="0"  cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="60" cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="0"  cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
+  <circle cx="0"  cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="60" cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="0"  cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
 </svg>`
 
-const PATTERN_STYLE: React.CSSProperties = {
+const PATTERN_BASE_STYLE: React.CSSProperties = {
   backgroundColor: '#1152d4',
-  backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`,
+}
+
+const PATTERN_LAYER_STYLE: React.CSSProperties = {
+  backgroundImage: `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(TILE_SVG)}")`,
   backgroundSize: '60px 60px',
   backgroundRepeat: 'repeat',
 }
@@ -59,10 +62,20 @@ export default function App() {
     return (
       <div
         className="fixed inset-0 flex flex-col overflow-hidden"
-        style={PATTERN_STYLE}
+        style={PATTERN_BASE_STYLE}
       >
-        {/* Pattern opacity overlay */}
-        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.10, backgroundColor: 'transparent' }} />
+        {/* Animated Pattern Layer */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            ...PATTERN_LAYER_STYLE,
+            maskImage: 'radial-gradient(circle at center, black 40%, transparent 90%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 90%)',
+          }}
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 0.4, scale: 1 }}
+          transition={{ duration: 2, ease: "easeOut" }}
+        />
 
         {/* Logo — centered in remaining space */}
         <div className="flex-1 flex items-center justify-center">
@@ -77,7 +90,13 @@ export default function App() {
         </div>
         {/* Dice at bottom — same placement as SplashScreen */}
         <div className="flex flex-col items-center gap-3 pb-16">
-          <AnimatedDice />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            <AnimatedDice />
+          </motion.div>
           <AnimatePresence>
             {showLoadingText && (
               <motion.p 

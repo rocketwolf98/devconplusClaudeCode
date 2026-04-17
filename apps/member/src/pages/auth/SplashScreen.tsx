@@ -9,17 +9,20 @@ import AnimatedDice from '../../components/AnimatedDice'
 // Each 60×60 tile has 5 circles (4 corners + center) whose edges intersect,
 // creating the classic petal/leaf repeat when tiled.
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">
-  <circle cx="0"  cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="60" cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="0"  cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
-  <circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/>
+  <circle cx="0"  cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="60" cy="0"  r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="0"  cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
+  <circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.25" fill="none"/>
 </svg>`
 
-const PATTERN_DATA_URI = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
+const PATTERN_DATA_URI = `url("data:image/svg+xml;charset=utf-8,${encodeURIComponent(TILE_SVG)}")`
 
 const bgStyle: React.CSSProperties = {
   backgroundColor: '#1152d4',
+}
+
+const patternStyle: React.CSSProperties = {
   backgroundImage: PATTERN_DATA_URI,
   backgroundSize: '60px 60px',
   backgroundRepeat: 'repeat',
@@ -51,8 +54,18 @@ export default function SplashScreen() {
 
   return (
     <div className="h-screen flex flex-col relative overflow-hidden" style={bgStyle}>
-      {/* Pattern opacity overlay — matches App.tsx */}
-      <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.10, backgroundColor: 'transparent' }} />
+      {/* Animated Pattern Layer */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          ...patternStyle,
+          maskImage: 'radial-gradient(circle at center, black 40%, transparent 90%)',
+          WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 90%)',
+        }}
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={{ opacity: 0.4, scale: 1 }}
+        transition={{ duration: 2, ease: "easeOut" }}
+      />
 
       {/* Centered logo — takes up main body space */}
       <div className="flex-1 flex items-center justify-center">
