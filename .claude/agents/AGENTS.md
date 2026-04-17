@@ -1,5 +1,5 @@
 # DEVCON+ AI Agent System
-> Version: 1.2 | CLAUDE.md Synced: MVP 1.4 | Last Updated: March 30, 2026
+> Version: 1.3 | CLAUDE.md Synced: MVP 1.5 | Last Updated: April 15, 2026
 > Project: DEVCON Plus — Tech Community Unified Platform
 > Live App: https://devconplusbeta-v1.vercel.app
 > Cohort 3 Graduation: April 30, 2026
@@ -59,6 +59,8 @@ then switch to agents/PM_AGENT.md to help me update the remaining MVP checklist.
 - Tailwind CSS v3 + framer-motion
 - Supabase (Auth + DB + Edge Functions + Realtime)
 - Zustand v5 for state, React Hook Form + Zod for forms
+- Font: **Proxima Nova** (self-hosted woff2, 6 weights — `font-proxima` / `font-sans`)
+- MD3 type scale: 15 `text-md3-*` tokens in `tailwind.config.js`
 - Deployed on Vercel → https://devconplusbeta-v1.vercel.app
 
 ### Codebase Location
@@ -97,7 +99,7 @@ devcon-plus/
 7. **`spendable_points`** — NOT `total_points`. The field was renamed in v1.4.
    `total_points` no longer exists on the `profiles` table.
 
-### What's Already Done (as of March 30, 2026)
+### What's Already Done (as of April 15, 2026)
 - Full auth flow (SignIn, SignUp, Google OAuth, OrganizerCodeGate, password reset)
 - All member screens (Dashboard, Events, Jobs, Points, Rewards, Profile)
 - All organizer screens (Dashboard, EventCreate/Edit, QRScanner, RewardsManagement)
@@ -107,7 +109,7 @@ devcon-plus/
 - In-app organizer upgrade flow (`organizer_upgrade_requests` + admin review)
 - `event_announcements` table + `<SendAnnouncementSheet />` component
 - Volunteer system end-to-end (member apply + organizer approval queue)
-- All 4 Edge Functions deployed with QR token kinds `r` / `u` / `p`
+- All 4 Edge Functions + `generate-user-qr` deployed with QR token kinds `r` / `u` / `p`
 - `checked_in` atomic update on `event_registrations` (double-award prevention)
 - `username` field on profiles — unique, set on sign-up
 - Per-event theme overrides via `devcon_category` + `lib/eventTheme.ts`
@@ -115,14 +117,28 @@ devcon-plus/
 - CSP headers enforced, RLS policies applied, rate limiting on all endpoints
 - 17+ DB migrations applied
 - Responsive layouts (mobile pill nav + desktop sidebar for both MemberLayout and OrganizerLayout)
+- **Proxima Nova** font migration (self-hosted woff2, 6 weights — replaces Geist)
+- **MD3 type scale** — 15 `text-md3-*` tokens added to `tailwind.config.js` + applied across all UI components (PR #6)
+- **Form draft persistence** — `useFormDraft` hook (localStorage/sessionStorage) wired to sign-in, sign-up, event create/edit, volunteer form, custom registration fields
+- **5th program theme: purple** (`#7C3AED` / `#6D28D9`) added to theme system
+- Cloudflare Turnstile CAPTCHA on auth forms (commit 9ca7272)
+- XP Tier System — milestone definitions + progress bar wired to lifetime_points
+- `/qr` MyQR page + `generate-user-qr` edge function deployed
+- PWA manifest — icons 192/512/maskable, shortcuts, apple-touch-icon
+- Custom event registration fields — modular form schema + DB migration
+- Missions System — basic gamified missions flow
+- Event URL slugs — /events/:slug (human-readable) replacing /events/:uuid
 
-### What's Still Open
-- [ ] Remove test accounts — **Kenshin** (ongoing)
-- [x] Easter eggs removed — **Kenshin** ✅ (Konami restricted to hq_admin/super_admin, commit c8d926d)
-- [ ] PROMOTED badge audit on live Supabase data — **Kenshin**
+### What's Still Open (as of April 15, 2026 — Week 3)
+- [ ] Remove all test accounts from production Supabase — **Kenshin** (ongoing)
+- [x] Easter eggs — Konami restricted to hq_admin/super_admin only (commit c8d926d) ✅
+- [ ] PROMOTED badge audit on live Supabase data (Sui Foundation + 2nd Tech news post) — **Kenshin**
 - [ ] Final end-to-end QA pass on all flows — **Kenshin**
-- [ ] Google OAuth callback URL confirmed for production domain (plus.devcon.com) — **Kenshin**
+- [ ] Google OAuth (Task 4) — credentials + callback URL for `plus.devcon.com` — **Kenshin**
 - [ ] Add `plus.devcon.com` to Edge Function CORS allowlist — **Kenshin**
+- [ ] DNS + Cloudflare setup for `plus.devcon.com` — **Kenshin**
+- [~] Email SMTP (Resend) — edge function deployed Apr 6; end-to-end test still pending — **Kenshin**
+- [~] DB connection resilience — hardening applied; verify fix holds — **Kenshin**
 - [ ] Documentation: README, FEATURES, API, SECURITY, HANDOVER (all due April 26) — **Kenshin**
 
 ---

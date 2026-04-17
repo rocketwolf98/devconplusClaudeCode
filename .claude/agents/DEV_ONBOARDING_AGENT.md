@@ -1,7 +1,7 @@
 # DEVCON+ Dev Onboarding Agent
 > Persona: Senior Developer / Technical Mentor
 > Scope: Codebase walkthroughs, architecture explanations, onboarding new developers
-> CLAUDE.md Version: MVP 1.4 | Last Synced: March 30, 2026
+> CLAUDE.md Version: MVP 1.5 | Last Synced: April 15, 2026
 > Read AGENTS.md first for full project context before acting on any request.
 
 ---
@@ -309,7 +309,7 @@ All Edge Functions log structured JSON: `{ level, event, ts, ...data }` → Supa
 | File | What It Does |
 |------|--------------|
 | `supabase.ts` | Supabase client with navigator.locks auth + Realtime throttle (10 events/sec) |
-| `animation.ts` | framer-motion variants: staggerContainer, cardItem, fadeUp |
+| `animation.ts` | framer-motion variants: `fadeUp`, `fade`, `slideUp`, `backdrop`, `staggerContainer`, `cardItem`, `NAV_SPRING` |
 | `constants.ts` | VOLUNTEER_APPROVAL_POINTS, ROLE_DISPLAY_NAMES, WORK_TYPE_LABELS, CATEGORY_LABELS |
 | `dates.ts` | formatDate.compact(), formatDate.full(), formatDate.time() |
 | `eventTheme.ts` | getEventThemeStyle(devcon_category) — scoped inline CSS vars for per-event themes |
@@ -319,17 +319,44 @@ All Edge Functions log structured JSON: `{ level, event, ts, ...data }` → Supa
 
 | Hook | What It Does |
 |------|--------------|
-| `useRecoverOnFocus.ts` | Fires on visibilitychange (visible), window.online, and every 5 minutes. Use this hook in any screen that fetches Realtime data to ensure recovery after tab switches or network drops. |
-| `useKonamiCode.ts` | Easter egg detector — **remove before April 30** |
+| `useRecoverOnFocus.ts` | Fires on visibilitychange (visible), window.online, and every 5 minutes. Use in any screen that fetches Realtime data to ensure recovery after tab switches or network drops. |
+| `useFormDraft.ts` | Saves form state to localStorage (cross-tab) or sessionStorage (within-tab). Used in sign-in, sign-up, event create/edit, volunteer form, and custom registration fields. Pass `storage: 'session'` for sensitive forms. |
+| `useKonamiCode.ts` | Easter egg detector (restricted to hq_admin / super_admin) |
+
+---
+
+## Font and Typography
+
+The app uses **Proxima Nova** (self-hosted woff2, 6 weights: Light/Regular/Italic/Semibold/Bold/Black).
+- Files are in `/public/fonts/` and `./src/assets/fonts/`
+- Tailwind classes: `font-proxima` (explicit) or `font-sans` (default body)
+- Do not reference Geist — the font was migrated to Proxima Nova.
+
+The app has a **two-tier typography system**:
+
+**MD3 type scale** (preferred for new components):
+```
+text-md3-headline-lg — page titles               (32px)
+text-md3-title-lg    — card titles, sections     (22px)
+text-md3-body-md     — body text, descriptions   (14px)
+text-md3-label-md    — chips, badges, timestamps (12px)
+```
+All 15 MD3 tokens are in `tailwind.config.js` under the `fontSize` extension.
+
+**Legacy scale** (existing components — backward compatible):
+```
+text-sm / text-xs / text-[10px] / text-base
+```
+Prefer MD3 for any new component. Legacy classes remain valid in existing files.
 
 ---
 
 ## Design System: Rules That Cannot Break
 
 1. **Never hardcode a color.** Use `text-primary`, `bg-primary`, `text-slate-900`, etc.
-   Exception: `text-blue` / `bg-blue` for the non-themed DEVCON blue (#367BDD).
+   Exception: `text-blue` / `bg-blue` for the non-themed DEVCON blue (`#1152D4`).
 
-2. **Never use emoji in JSX.** Icons come from `lucide-react` only.
+2. **Never use emoji in JSX.** Icons come from `solar-icon-set` (outline variant) only.
 
 3. **Every interactive element needs `whileTap={{ scale: 0.95 }}`** from framer-motion.
 
@@ -381,14 +408,18 @@ These apply to every screen, store, and Edge Function you write.
 
 ### Program Themes
 ```
-DEVCON+       id=devcon   → #367BDD / #2962C4
-She is DEVCON id=she      → #EC4899 / #DB2777
-DEVCON Kids   id=kids     → #21C45D / #16A34A
-Campus        id=campus   → #F8C630 / #EAB308
+DEVCON+       id=devcon   → #1152D4 / #0D42AA  (default)
+She is DEVCON id=she      → #BE185D / #9D174D  (pink-700)
+DEVCON Kids   id=kids     → #059669 / #047857  (emerald-600)
+Campus        id=campus   → #D97706 / #B45309  (amber-600)
+DEVCON Purple id=purple   → #7C3AED / #6D28D9  (violet-600)
 ```
 Theme is persisted via `useThemeStore`. CSS custom properties `--color-primary` and
 `--color-primary-dark` are injected on `<html>` by MemberLayout on mount.
 Organizer routes do NOT apply program themes.
+
+Per-event override: when `events.devcon_category` is set, the event page applies
+`getEventThemeStyle(devcon_category)` as inline styles — scoped to that page only.
 
 Per-event override: when `events.devcon_category` is set, the event page applies
 `getEventThemeStyle(devcon_category)` as inline styles — scoped to that page only,

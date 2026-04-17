@@ -1,7 +1,7 @@
 # DEVCON+ QA Tester Agent
 > Persona: Senior QA Engineer
 > Scope: Test case writing, bug triage, regression testing, pre-demo QA checklist
-> CLAUDE.md Version: MVP 1.4 | Last Synced: March 30, 2026
+> CLAUDE.md Version: MVP 1.5 | Last Synced: April 15, 2026
 > Cohort 3 Graduation: April 30, 2026 | Public Preview: May 15, 2026
 > Read AGENTS.md first for full project context before acting on any request.
 
@@ -293,7 +293,8 @@ Fail: Missing transactions, wrong sign, total_points referenced anywhere in UI
 
 ### PROFILE-001: Profile and Theme
 - [ ] Correct name, email, username, avatar, chapter displayed
-- [ ] All 4 program themes apply on selection (DEVCON+ / She is DEVCON / DEVCON Kids / Campus)
+- [ ] All 5 program themes apply on selection (DEVCON+ / She is DEVCON / DEVCON Kids / Campus / DEVCON Purple)
+- [ ] DEVCON Purple theme: primary color changes to `#7C3AED` — verify nav pill and XP card change color
 - [ ] Theme persists after page refresh (Zustand localStorage persist)
 - [ ] ProfileEdit: photo upload updates avatar_url in Supabase Storage + profiles table
 - [ ] ProfileEdit: username edit → unique check → save
@@ -332,6 +333,16 @@ Fail: Missing transactions, wrong sign, total_points referenced anywhere in UI
 - [ ] AdminCMS (/admin/upgrades): shows pending organizer_upgrade_requests
 - [ ] Admin can approve/reject upgrade requests from the queue
 
+### FORMS-001: Form Draft Persistence
+- [ ] Sign-in page: type an email, close tab, reopen → email field restores (sessionStorage)
+- [ ] Sign-in page: password field does NOT restore (never persisted)
+- [ ] Sign-up page: fill name/email/username, navigate away, return → form restores (except password)
+- [ ] Event create: fill partial form, hard-refresh → draft restores on next visit
+- [ ] Event edit: modify fields, navigate away, return → edited values pre-fill form
+- [ ] Volunteer form: fill motivation text, navigate away → text restores
+- [ ] Custom registration fields: partially fill, navigate away → values restore
+- [ ] Submitting a form successfully → draft is cleared (no stale draft on re-open)
+
 ### ADMIN-002: Kiosk (super_admin only)
 - [ ] /admin/kiosk inaccessible to hq_admin → redirect (RBAC enforced)
 - [ ] super_admin can access and use kiosk screen
@@ -350,7 +361,11 @@ Fail: Missing transactions, wrong sign, total_points referenced anywhere in UI
 - [ ] No placeholder text, Lorem ipsum, or empty string visible anywhere
 - [ ] No emoji mixed with images in the same section
 - [ ] All dashboard banner images load (no broken icons)
-- [ ] Geist font renders on all screens
+- [ ] Proxima Nova font renders on all screens (no FOUT fallback to system-ui)
+      — Check in DevTools: Computed > font-family should show "Proxima Nova"
+- [ ] MD3 type scale renders at correct sizes:
+      `text-md3-title-lg` ≈ 22px, `text-md3-body-md` ≈ 14px, `text-md3-label-md` ≈ 12px
+      — Spot-check: EventCard title, PointsHistory row, JobCard company name
 
 ### DESIGN-002: Responsive Behavior
 - [ ] Mobile (390px): floating pill nav, full-screen scroll, pb-24 prevents nav overlap

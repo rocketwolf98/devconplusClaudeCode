@@ -1,0 +1,901 @@
+# DEVCON+ — Comprehensive Project Transition Documentation
+> Document Type: Developer & Stakeholder Handover  
+> Version: 1.0  
+> Last Updated: April 16, 2026  
+> Prepared by: Outgoing Development Team (DEVCON Jumpstart Internship, Cohort 3)  
+> Receiving Team: Incoming developers starting the week of April 21, 2026  
+> Live App: https://devconplusbeta-v1.vercel.app  
+> Repository: https://github.com/rocketwolf98/devconplusClaudeCode  
+
+---
+
+## Table of Contents
+
+1. [Project Overview & Scope](#1-project-overview--scope)
+2. [Product Requirements Document (PRD)](#2-product-requirements-document-prd)
+3. [Technical Architecture](#3-technical-architecture)
+4. [Current State & Limitations](#4-current-state--limitations)
+5. [Developer & Operations Documentation](#5-developer--operations-documentation)
+6. [Turnover Execution](#6-turnover-execution)
+7. [Handover Dos and Don'ts](#7-handover-dos-and-donts)
+8. [Annex](#8-annex)
+
+---
+
+---
+
+# 1. Project Overview & Scope
+
+## 1.1 Goals
+
+**DEVCON+** is the official unified platform for DEVCON Philippines — the country's largest volunteer tech community, comprising 11 nationwide chapters, 60,000+ registered members, and 14,000+ annual event attendees.
+
+**Tagline:** Sync. Support. Succeed.
+
+The platform solves a core operational gap: DEVCON runs 100+ events per year across 11 regional chapters with no centralized system for registration, attendance tracking, or member engagement. DEVCON+ replaces manual spreadsheets, form links, and disconnected tooling with a single mobile-first web application.
+
+**Primary Goals:**
+- **Event management** — Mandatory registration and QR-based check-in for all chapter events
+- **Member engagement** — Gamified points system (Points+) to reward attendance, volunteering, and contributions
+- **Career enablement** — Curated tech job opportunities for Filipino developers
+- **Officer tooling** — Chapter officer management layer for approvals, scanning, and event administration
+
+## 1.2 Target Audience
+
+| User Type | Description |
+|-----------|-------------|
+| **Members** | General DEVCON Philippines members across all 11 chapters. Mobile-first, primarily access on smartphones. |
+| **Chapter Officers** | Volunteer leaders who organize and manage chapter events. Use the Organizer flow on mobile and desktop. |
+| **HQ Admins** | National-level DEVCON administrators. Manage all chapters, rewards, and upgrade requests via Admin panel. |
+| **Super Admins** | Full platform access. Manage roles, platform config, and on-site kiosk operations. |
+
+## 1.3 Key Deliverables
+
+The following are fully delivered and live as of April 15, 2026:
+
+| Deliverable | Status |
+|-------------|--------|
+| Member app (registration, QR ticket, points, rewards, jobs, profile) | **Live** |
+| Organizer flow (event CRUD, registrant approval, QR scanner, announcements) | **Live** |
+| Admin panel (user management, org codes, chapters, upgrade review, kiosk) | **Live** |
+| Authentication (email/password + Google OAuth via Supabase) | **Live** |
+| QR check-in system with atomic double-award prevention | **Live** |
+| Points & XP Tier system (earn, history, milestones) | **Live** |
+| Gamified Missions system (scaffolded) | **Live** |
+| PWA manifest (add to home screen, shortcuts) | **Live** |
+| Custom event registration fields | **Live** |
+| Cloudflare Turnstile CAPTCHA on auth forms | **Live** |
+| Vercel deployment | **Live** |
+| Custom domain `plus-beta.devcon.ph` | **Pending** — blocked on DNS admin at DEVCON HQ |
+| Transactional email `no-reply-plus@devcon.ph` via Resend | **Pending** — blocked on domain DNS verification |
+| Google OAuth on production domain | **Pending** — requires GCP Console redirect URI update |
+
+## 1.4 Out of Scope for MVP
+
+The following features are intentionally deferred. Use `<ComingSoonModal />` if a user reaches any of these entry points:
+
+- Apple Sign-In (not supported — Google OAuth + email/password only)
+- Push notifications
+- Reward shipping / digital voucher delivery
+- Partner analytics dashboard
+- External Jobs API integration
+- DEVCON TV / video content
+- Developer Spotlight CMS
+- Multi-language support
+- Group Chat
+- Swipe Feed (TikTok-style content feed)
+- Full Supabase WebSocket resilience on mobile Safari (partial mitigation in place — full fix is Phase 2)
+
+## 1.5 Milestones
+
+| Date | Milestone |
+|------|-----------|
+| March 29, 2026 | Development started — auth, security foundations |
+| April 6, 2026 | QR system live; PWA manifest deployed; transactional email edge function deployed |
+| April 8, 2026 | Cloudflare Turnstile CAPTCHA added to auth forms |
+| April 15, 2026 | MD3 type scale applied across all UI; domain + email setup guide written |
+| **April 26, 2026** | **Claude Code AI subscription ends — last AI-assisted development day** |
+| April 30, 2026 | Development freeze — no new features after this date |
+| May 15, 2026 | Public preview target (Cohort 3 Graduation showcase) |
+
+---
+
+---
+
+# 2. Product Requirements Document (PRD)
+
+> Full PRD with additional context: https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/edit?usp=sharing
+
+## 2.1 User Stories
+
+### Member
+- As a member, I can register for any chapter event and receive a QR ticket for venue check-in.
+- As a member, I can see my DEVCON Points balance and transaction history, grouped by date.
+- As a member, I can browse the rewards catalog and understand the points cost of each reward.
+- As a member, I can browse open tech jobs and view job details.
+- As a member, I can apply to volunteer for events and track my application status.
+- As a member, I can customize my profile, including selecting a program theme (DEVCON+, She is DEVCON, DEVCON Kids, Campus, DEVCON Purple).
+- As a member, I can request an organizer upgrade by submitting an organizer code, subject to admin approval.
+- As a member, I can use the app as a PWA (add to home screen) for a native-like experience.
+
+### Chapter Officer
+- As an officer, I can create, edit, and manage events for my chapter.
+- As an officer, I can approve or reject event registrations.
+- As an officer, I can scan member QR codes at the venue to check in attendees and automatically award points.
+- As an officer, I can approve or reject volunteer applications for my events.
+- As an officer, I can broadcast announcements to all registrants of an event.
+- As an officer, I can view a post-event summary with attendance and points data.
+
+### HQ Admin
+- As an HQ admin, I can manage all chapters, users, and organizer upgrade requests.
+- As an HQ admin, I can generate and manage organizer codes (chapter-scoped and HQ-scoped).
+- As an HQ admin, I can manage the rewards catalog.
+- As an HQ admin, I can view all events across all chapters.
+
+## 2.2 User Flow & UX
+
+**UX Benchmark:** The nmblr+ app (pattern-match layout, card style, navigation feel, and points display format exactly).
+
+**UX Reference Prototype (Lovable):** https://devconplusrndprototype.lovable.app/  
+**Figma Prototype:** https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/DEVCON--v0.1-Concept-Prototype---16-years-anniversary?node-id=0-1&t=BSnfiQ0ygnfgn2Jh-1
+
+### Onboarding Flow (4 swipeable slides)
+```
+/ (SplashScreen) → /onboarding → /sign-up (new) OR /sign-in (returning)
+                                      ↓
+                         /organizer-code-gate
+                         YES code → /organizer (OrganizerLayout)
+                         NO code  → /home (MemberLayout)
+```
+
+### Event Registration Lifecycle
+```
+/events → /events/:id (detail) → /events/:id/register
+  → pre-filled form (name, email, school/org from profile)
+  → T&C + privacy consent checkbox
+
+IF requires_approval = false → instant QR Ticket → /events/:id/ticket
+IF requires_approval = true  → /events/:id/pending (Realtime subscription)
+                             → Officer approves in /organizer/events/:id/registrants
+                             → Member notified → /events/:id/ticket
+```
+
+### QR Check-In at Venue
+```
+Member: /events/:id/ticket → QR displayed (short-lived JWT via generate-qr-token)
+Officer: /organizer/scan → camera → scans QR → award-points-on-scan
+  → validates token (kind 'r' / 'u' / 'p')
+  → atomic checked_in: false → true (prevents double-award)
+  → inserts point_transaction row
+  → updates profiles.spendable_points + lifetime_points
+  → officer sees confirmation: "✓ Member Name — N pts awarded"
+```
+
+### Dashboard Layout (strict order — do not reorder)
+1. Sticky greeting bar (`bg-primary`, "Hi, {firstName}!") + DEVCON+ logo
+2. XP Card (white card, gold star, points total, progress bar, CTA)
+3. Quick Actions: Find Jobs | Volunteer (ComingSoon) | Redeem
+4. Rotating banner (4s crossfade: #SheIsDEVCON | Kids Hour of AI | 16 Years)
+5. Events For You (max 3 cards)
+6. Hot Jobs — horizontal scroll carousel (max 4; 2nd listing = PROMOTED badge)
+7. Updates — DEVCON / Tech tabs (2nd Tech post = PROMOTED badge)
+8. XP History preview (last 4 transactions)
+
+## 2.3 Functional Requirements
+
+| ID | Requirement | Priority |
+|----|-------------|----------|
+| FR-01 | Email/password and Google OAuth sign-up and sign-in | Must Have |
+| FR-02 | Supabase RLS enforces data isolation per user role | Must Have |
+| FR-03 | Event registration with optional officer approval gate | Must Have |
+| FR-04 | QR ticket generation (short-lived JWT, rate-limited) | Must Have |
+| FR-05 | QR scan → atomic check-in → points award (no double-award) | Must Have |
+| FR-06 | Points transaction log with grouped date display | Must Have |
+| FR-07 | XP Tier milestones based on `lifetime_points` (never decremented) | Must Have |
+| FR-08 | Rewards catalog (all items `is_coming_soon = true` for MVP) | Must Have |
+| FR-09 | Jobs board (manually seeded — no external API) | Must Have |
+| FR-10 | Organizer upgrade request flow (rate-limited, admin review) | Must Have |
+| FR-11 | Realtime registration status updates via Supabase Realtime | Must Have |
+| FR-12 | Volunteer application + officer approval queue | Should Have |
+| FR-13 | Event announcements via SendAnnouncementSheet | Should Have |
+| FR-14 | Custom event registration fields (modular schema) | Should Have |
+| FR-15 | Missions system (basic gamification) | Should Have |
+| FR-16 | In-app notifications (Realtime subscription) | Should Have |
+| FR-17 | Form draft persistence (localStorage/sessionStorage) | Should Have |
+| FR-18 | PWA manifest (add to home screen, shortcuts) | Should Have |
+
+## 2.4 Non-Functional Requirements
+
+| Category | Requirement |
+|----------|-------------|
+| **Security** | OWASP Top 10 compliance. CSP headers enforced. Cloudflare Turnstile CAPTCHA on all auth forms. Rate limiting on all sensitive endpoints via `check-rate-limit` edge function. |
+| **TypeScript** | Strict mode (`noImplicitAny`, `strictNullChecks`, `noUnusedLocals`, `noUnusedParameters`). No `any` types. No `@ts-ignore` without explanation. |
+| **Performance** | Vite production build. DB performance indexes applied (`20260324_performance_indexes.sql`). Lazy-loaded routes for QR scanner and all Admin pages. Realtime throttled at 10 events/sec. |
+| **Accessibility** | Mobile-first, 390px primary viewport. Desktop responsive (md+ breakpoint). All tappable targets meet minimum size requirements. |
+| **Reliability** | Two-layer Supabase Realtime recovery: `visibilitychange` + `window.online` + 5-minute polling interval. Atomic check-in prevents data corruption under concurrent scans. |
+| **Deployment** | Vercel CI/CD: `tsc -b && vite build`. Any TypeScript error is a deployment failure. All env vars must be set in Vercel project settings. |
+
+## 2.5 Key Performance Indicators (KPIs)
+
+| KPI | Target |
+|-----|--------|
+| Successful event registrations | Measurable via `event_registrations` table |
+| QR check-in rate (checked_in = true vs. registered) | Measurable per event |
+| Member sign-ups | Measurable via `profiles` table |
+| Points awarded per event | Measurable via `point_transactions` |
+| Organizer upgrade requests submitted vs. approved | Measurable via `organizer_upgrade_requests` |
+| App availability | Monitor via Vercel dashboard |
+
+---
+
+---
+
+# 3. Technical Architecture
+
+## 3.1 Frontend
+
+**Framework:** React 19 + Vite 7  
+**Language:** TypeScript (strict mode)  
+**Router:** React Router DOM v7 (flat `createBrowserRouter` in `apps/member/src/router.tsx`)  
+**Styling:** Tailwind CSS v3 with custom design tokens  
+**Animation:** framer-motion (workspace root dependency)  
+**State:** Zustand v5  
+**Forms:** React Hook Form v7 + Zod  
+**Font:** Proxima Nova (self-hosted woff2, 6 weights, loaded in `index.css`)  
+**Icons:** `solar-icon-set` outline variant only — no emoji in JSX  
+**QR Display:** `qrcode.react`  
+**QR Scanning:** `@zxing/browser` + `@zxing/library` (lazy-loaded)  
+
+> **This is a web app, not React Native.** There is no Expo, no NativeWind, no RN StyleSheet. All styling is Tailwind CSS.
+
+### Three Route Trees, One Codebase
+
+The app contains three distinct user experiences sharing one React application under `apps/member/`:
+
+| Layout | Route Prefix | Guard | Navigation |
+|--------|-------------|-------|------------|
+| `MemberLayout` | `/home`, `/events/*`, `/jobs/*`, `/points/*`, `/rewards`, `/profile/*` | Auth guard | Floating pill nav (mobile), sidebar with `bg-primary` (desktop) |
+| `OrganizerLayout` | `/organizer/*` | Organizer role guard | Floating pill nav (mobile), sidebar with `bg-blue` (desktop). Does NOT apply program themes. |
+| `AdminLayout` | `/admin/*` | `hq_admin` / `super_admin` guard | Desktop-only sidebar. All routes lazy-loaded. |
+
+**Rule:** Never mix layout components between route trees. Shared utility components (`<ComingSoonModal />`, `<Skeleton />`, `<StatusPill />`, etc.) are safe to share.
+
+### Design System Summary
+
+- **Primary color** is a CSS custom property (`rgb(var(--color-primary))`). Always use `text-primary`, `bg-primary` — never hardcode hex for the primary color.
+- **5 program themes** (devcon, she, kids, campus, purple) — user-selectable, persisted via `useThemeStore` to localStorage key `devcon-theme`.
+- **Per-event theme overrides** — `events.devcon_category` triggers `getEventThemeStyle()` from `lib/eventTheme.ts`, returning inline CSS vars scoped to the event page only. Does not mutate global state.
+- **MD3 type scale** — 15 `text-md3-*` tokens in `tailwind.config.js`. Preferred for new components. Legacy scale (`text-sm`, `text-xs`, etc.) remains valid for existing components.
+- **Tailwind slate** — only steps 50/100/200/300/400/500/700/900 exist. Do not use 600 or 800.
+
+### Animation System
+
+All framer-motion variants are exported from `apps/member/src/lib/animation.ts`. Never redefine variants inline.
+
+| Variant | Use Case |
+|---------|----------|
+| `fadeUp` | Page entrances, card list entry |
+| `fade` | Page-level opacity transitions |
+| `slideUp` | Bottom sheets, modals |
+| `backdrop` | Backdrop fade |
+| `staggerContainer` + `cardItem` | List sections (staggered entry) |
+| `NAV_SPRING` | Nav tab indicator spring |
+
+**Critical:** Stagger container `animate` key is `"visible"` — never `"show"`. Spring values: cards `scale: 0.97, damping: 25`; buttons `scale: 0.95, damping: 25`; nav items `scale: 0.88, damping: 20`.
+
+## 3.2 Backend
+
+**Platform:** Supabase (Postgres + Auth + Realtime + Edge Functions)  
+**Auth methods:** Email/password + Google OAuth  
+**Custom auth behavior:** `navigator.locks` lock with no timeout (prevents concurrent auth operations) + Realtime throttle at 10 events/sec  
+**Edge Function runtime:** Deno  
+
+### Edge Functions
+
+All deployed to the live Supabase project:
+
+| Function | Purpose | Rate Limit |
+|----------|---------|------------|
+| `generate-qr-token` | Creates short-lived JWT QR token for a registration (kind `r`) | 10 req/user/60s (fail closed) |
+| `award-points-on-scan` | Validates QR scan, atomically checks in member, awards points | 60 scans/organizer/60s |
+| `approve-at-door` | Officer approves or rejects a pending member at the venue | — |
+| `check-rate-limit` | IP/user-keyed rate limit buckets for all sensitive flows | — |
+| `generate-user-qr` | Creates user identity QR token (kind `u`) for `/qr` MyQR page | — |
+
+**QR Token kinds (discriminated by `k` claim):**
+- `k='r'` — registration token (`sub` = registration_id): standard check-in
+- `k='u'` — user identity token (`sub` = user_id): finds most imminent approved event in chapter
+- `k='p'` — pending door-approval token (`sub` = registration_id): returns pending state for Approve/Reject UI
+
+**CORS allowlist** (in `supabase/functions/_shared/cors.ts`):
+```
+http://localhost:5173
+https://devconplusbeta-v1.vercel.app
+```
+> When `plus-beta.devcon.ph` is live, add it to the allowlist and redeploy all functions.
+
+**Shared utilities** in `supabase/functions/_shared/`:
+- `logger.ts` — structured JSON logger. Format: `{ level, event, ts, ...data }` → stdout → Supabase Dashboard Logs.
+
+### Rate Limit Reference
+
+| Bucket | Key Type | Window | Limit |
+|--------|----------|--------|-------|
+| `login` | IP | 300s | 5 attempts |
+| `signup` | IP | 3600s | 1 attempt |
+| `username_check` | IP | 60s | 10 checks |
+| `org_upgrade` | User (JWT) | 90000s (25h) | 1 request |
+| `qr_generate` | User | 60s | 10 requests |
+| `qr_scan` | Organizer | 60s | 60 scans |
+| `password_reset` | IP | — | Configured |
+
+## 3.3 Database
+
+**Engine:** PostgreSQL (managed by Supabase)  
+**Schema:** 13 tables with Row Level Security enabled on all sensitive tables  
+**Types:** Generated from live DB → `packages/supabase/src/database.types.ts`  
+**Migrations:** `supabase/migrations/` — applied via `supabase db push` or SQL editor  
+
+### Table Overview
+
+| Table | Purpose |
+|-------|---------|
+| `chapters` | 11 DEVCON chapters across Luzon, Visayas, Mindanao |
+| `profiles` | User profiles (extends `auth.users`). Key fields: `spendable_points`, `lifetime_points`, `role`, `chapter_id`, `referral_code` |
+| `organizer_codes` | Codes used to assign organizer roles at sign-up or via upgrade request |
+| `events` | All chapter events. `devcon_category` drives per-event theme overrides |
+| `event_registrations` | Member registrations. `checked_in` is updated atomically to prevent double-award |
+| `event_announcements` | Organizer broadcasts to event registrants |
+| `point_transactions` | Full ledger of all points earned and redeemed |
+| `rewards` | Rewards catalog. All items `is_coming_soon = true` for MVP |
+| `reward_redemptions` | Record of reward redemption requests |
+| `jobs` | Manually seeded tech jobs (8 entries for MVP) |
+| `news_posts` | DEVCON and Tech Community news content |
+| `programs` | Program definitions (DEVCON, She, Kids, Campus) |
+| `xp_tiers` | XP milestone tier definitions (Bronze, Silver, Gold, etc.) |
+| `volunteer_applications` | Member volunteer applications + officer approval queue |
+| `referrals` | Referral tracking |
+| `organizer_upgrade_requests` | In-app organizer upgrade requests for admin review |
+
+**Critical field note:** The points field on `profiles` is `spendable_points` (decremented on redemptions) and `lifetime_points` (never decremented — used for tier tracking). The legacy name `total_points` does not exist in the live DB.
+
+### Role-Based Access Control
+
+| Role | Capabilities |
+|------|-------------|
+| `member` | Register for events, earn/redeem points, browse jobs, view own QR ticket, request organizer upgrade |
+| `chapter_officer` | All member + create/edit events, approve/reject registrations, scan QR at door |
+| `hq_admin` | All officer + manage rewards, all chapters, review upgrade requests, Admin panel |
+| `super_admin` | Full system access, role assignment, platform config, kiosk access |
+
+## 3.4 Infrastructure
+
+### Vercel
+- **Project:** `devconplusbeta-v1`
+- **Build command:** `tsc -b && vite build` (runs from `apps/member/`)
+- **Root directory:** `apps/member`
+- **Environment variables:** Set in Vercel project Settings → Environment Variables (must match `.env.local` keys)
+- **CI/CD:** Every push to `master` triggers a production deploy. TypeScript errors abort the deploy.
+
+### Cloudflare (DNS)
+- DNS provider for `devcon.ph`
+- Required records for `plus-beta.devcon.ph`: CNAME → `cname.vercel-dns.com` with proxy **OFF** (DNS only, grey cloud)
+- Required records for Resend email: SPF (TXT), DKIM (CNAMEs), DMARC (TXT)
+
+### Resend (Transactional Email)
+- Transactional emails (confirm signup, reset password) sent from `no-reply-plus@devcon.ph`
+- Configured in Supabase Dashboard → Authentication → SMTP Settings
+- Status: **Pending** — blocked on DNS domain verification
+
+## 3.5 Third-Party APIs & Services
+
+| Service | Purpose | Status |
+|---------|---------|--------|
+| Supabase | Database, Auth, Realtime, Edge Functions | Live |
+| Vercel | Hosting, CI/CD, custom domain | Live |
+| Google OAuth (GCP) | Social sign-in | Live (on `devconplusbeta-v1.vercel.app`). Needs redirect URI update for custom domain. |
+| Cloudflare Turnstile | Bot protection on auth forms | Live |
+| Resend | Transactional email | Pending DNS verification |
+| Cloudflare DNS | Domain management for `devcon.ph` | Managed by DEVCON HQ IT |
+
+---
+
+---
+
+# 4. Current State & Limitations
+
+## 4.1 Handover Summary
+
+As of April 16, 2026, the DEVCON+ MVP is **functionally complete and deployed to production** at https://devconplusbeta-v1.vercel.app. All core user flows (member registration, QR check-in, points, organizer tools, admin panel) are working end-to-end on the live Supabase project.
+
+**MVP Completion: ~90%**
+
+The remaining 10% consists of infrastructure configuration items (custom domain, email SMTP, Google OAuth redirect URI update) that are blocked on external access (DNS admin, Google Cloud Console), plus final QA and data cleanup tasks.
+
+### Development Loom Videos (oldest to recent)
+
+| Date | Link |
+|------|------|
+| Mar 16 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 |
+| Mar 17 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 |
+| Mar 18 (pt 1) | https://www.loom.com/share/55eca950c6e64f1c93f76717363612a5 |
+| Mar 18 (pt 2) | https://www.loom.com/share/24dbdbfb239646febcdc2706f63c8581 |
+| Mar 24 | https://www.loom.com/share/42bd477c7301465ebc0db4803272d168 |
+| Apr 06 | https://www.loom.com/share/ea88bcd374db42d79fd0c3d2d1bffb65 |
+
+## 4.2 Immediate Handover Checklist (Must Complete Before April 30)
+
+### L1 — Blocking (Must Resolve)
+
+| Item | Blocker | Action Required |
+|------|---------|----------------|
+| Custom domain `plus-beta.devcon.ph` | DEVCON HQ DNS admin must add CNAME record in Cloudflare | See `.claude/DOMAIN_AND_EMAIL_SETUP.md` Part 1 |
+| Google OAuth on production domain | GCP Console needs new redirect URI | Add `https://plus-beta.devcon.ph/auth/v1/callback` to OAuth 2.0 client |
+| Transactional email `no-reply-plus@devcon.ph` | Resend domain DNS verification pending | See `.claude/DOMAIN_AND_EMAIL_SETUP.md` Part 2 |
+| Edge Function CORS update | After domain goes live | Add `https://plus-beta.devcon.ph` to `ALLOWED_ORIGINS` in `_shared/cors.ts`, redeploy all 5 functions |
+| Supabase redirect URL | After domain goes live | Add `https://plus-beta.devcon.ph/**` in Supabase Auth → URL Configuration |
+| Remove test accounts | Test accounts may appear in officer/admin views | Manual cleanup: Supabase Dashboard → Authentication → Users |
+| Remove Easter egg code | `<KonamiCodeWrapper />` + `<KonamiModal />` must be deleted from production | Remove components from codebase. Currently guarded by `hq_admin/super_admin` but must be fully deleted. |
+| OWASP Top 10 security pass | Required before public launch | Work through OWASP Top 10 checklist. Fix critical + high severity findings. |
+| PROMOTED badge data audit | 2nd job (Sui Foundation) + 2nd Tech news post must be `is_promoted = true` in live DB | Verify in Supabase Dashboard → Table Editor |
+| Final QA (all flows) | Required before public preview | Test member, organizer, and admin flows on a real mobile device |
+
+### L2 — Should Complete (Bandwidth Permitting)
+
+| Item | Notes |
+|------|-------|
+| Announcements end-to-end verification | `<SendAnnouncementSheet />` is built. Verify `event_announcements` rows are created and members see them in notifications. |
+| Missions system end-to-end | Scaffolded flow needs verification with real data |
+| Boosted / Promoted Events | Flag and surface promoted events in events list |
+| Custom event fields end-to-end | Organizer creates a field; member fills it on registration |
+| Auto-apply chapter theme on login | Currently manual in Profile. Could auto-apply based on member's `chapter_id`. |
+
+## 4.3 Known Technical Limitations
+
+### Supabase WebSocket Resilience (Mobile Safari)
+**Severity:** Low-Medium (mitigated)  
+**Description:** Aggressive background tab killing on mobile Safari can cause Supabase Realtime channels to silently enter a `CLOSED` state. The two-layer recovery pattern (`visibilitychange` + `window.online` + 5-minute polling interval) handles the common cases. Under extreme conditions (long idle + Safari), stale data may appear until user interactions trigger a refetch.  
+**Mitigation in place:** `MemberLayout.tsx` and `OrganizerLayout.tsx` implement both `recover()` (HTTP refetch) and `resubscribe()` (channel teardown + recreation) on all three trigger points.  
+**Full fix:** Deferred to Phase 2. See `.claude/rules/db-connection-resilience.md`.
+
+### Email SMTP Not End-to-End Tested
+**Severity:** Medium (pre-launch blocker)  
+**Description:** The edge function and Resend SMTP configuration are deployed, but end-to-end email delivery (confirm signup, reset password) has not been verified because the `devcon.ph` domain DNS verification is pending.  
+**Action:** Test immediately after domain DNS records are applied.
+
+### Jobs Board is Manually Seeded
+**Severity:** Low (by design for MVP)  
+**Description:** The jobs board contains 8 manually seeded listings in Supabase. There is no external API integration. Adding new jobs requires direct Supabase table access.  
+**Phase 2:** External jobs API integration is on the roadmap.
+
+## 4.4 Constraints
+
+### Technical
+- `npm install` **must** use `--legacy-peer-deps` due to a peer dependency conflict introduced by React 19. This is a known issue with the React 19 ecosystem and is expected to resolve as packages update.
+- `tsc -b` is stricter than the Vite dev server. The flags `noUnusedLocals` and `noUnusedParameters` are enforced. Any unused import or variable will fail the Vercel build. Always run `npm run typecheck` before committing.
+- Vercel `.ph` TLDs are not sold through Vercel's domain marketplace. The domain is already registered — only a DNS CNAME record is needed.
+- Cloudflare's orange-cloud proxy must be **disabled** (DNS only, grey cloud) for the Vercel CNAME and all Resend DKIM records. Proxying blocks SSL certificate provisioning and DKIM lookups.
+
+### External / Access
+- The `devcon.ph` DNS panel is managed by DEVCON HQ IT. The outgoing team cannot apply DNS records unilaterally.
+- Google Cloud Console OAuth client configuration requires access to the GCP project used for DEVCON+.
+- The Supabase project (URL, anon key, service role key) and Vercel project credentials must be transferred to the receiving team by the outgoing team lead.
+
+### Resource
+- **Claude Code AI subscription ends April 26, 2026.** Development after this date must proceed without AI-assisted code generation. The codebase is thoroughly documented in `.claude/CLAUDE.md` to compensate.
+- The outgoing team (2 interns) will be unavailable after April 26 for active development. Limited async support may be available for critical questions through April 30.
+
+### Timeline
+- **April 30:** Development freeze. No new features after this date.
+- **May 15:** Public preview for Cohort 3 Graduation showcase. All L1 items must be resolved before this date.
+
+---
+
+---
+
+# 5. Developer & Operations Documentation
+
+## 5.1 Onboarding Guide
+
+### Prerequisites
+```
+Node.js 20+
+npm 10+
+Supabase CLI:  npm install -g supabase
+Git access to: https://github.com/rocketwolf98/devconplusClaudeCode
+```
+
+### First-Time Setup
+```bash
+# 1. Clone the repository
+git clone https://github.com/rocketwolf98/devconplusClaudeCode
+cd devconplusClaudeCode
+
+# 2. Install dependencies
+# --legacy-peer-deps is REQUIRED — React 19 peer conflict
+npm install --legacy-peer-deps
+
+# 3. Create environment file
+# Get actual values from the outgoing team lead
+cp apps/member/.env.local.example apps/member/.env.local
+# Fill in: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_GOOGLE_CLIENT_ID, VITE_APP_ENV
+
+# 4. Start the dev server
+npm run dev:member
+# → http://localhost:5173
+```
+
+### Environment Variables
+
+**`apps/member/.env.local`** (gitignored — do not commit)
+```env
+VITE_SUPABASE_URL=           # Supabase project URL
+VITE_SUPABASE_ANON_KEY=      # Supabase anon (public) key
+VITE_GOOGLE_CLIENT_ID=       # Google OAuth client ID (from GCP Console)
+VITE_APP_ENV=development
+```
+
+**`supabase/.env`** (gitignored — do not commit)
+```env
+SUPABASE_SERVICE_ROLE_KEY=   # Supabase service role key — keep secret, never expose to browser
+```
+
+> Always use `import.meta.env.VITE_*` in the app. Never use `process.env.*` — Vite does not expose it to the browser bundle.
+
+### Required Knowledge
+Before making any changes, read these files in order:
+1. `.claude/CLAUDE.md` — master technical reference (DB schema, routes, components, design system, stores)
+2. `.claude/rules/vercel-build-safety.md` — TypeScript flags that cause Vercel build failures
+3. `.claude/rules/db-connection-resilience.md` — Realtime recovery pattern requirements
+4. `PRD.md` — product context and developer handover summary
+
+## 5.2 Technical Documentation
+
+### Repository Structure
+```
+devcon-plus/
+├── apps/
+│   ├── member/                     React + Vite web app
+│   │   ├── src/
+│   │   │   ├── router.tsx          All routes (flat createBrowserRouter — the app map)
+│   │   │   ├── components/
+│   │   │   │   ├── MemberLayout.tsx        Member shell + auth guard + realtime recovery
+│   │   │   │   ├── OrganizerLayout.tsx     Organizer shell + role guard + realtime recovery
+│   │   │   │   └── AdminLayout.tsx         Admin shell + hq_admin/super_admin guard
+│   │   │   ├── pages/              All page components (member/, organizer/, admin/)
+│   │   │   ├── stores/             Zustand stores (one per domain)
+│   │   │   ├── lib/
+│   │   │   │   ├── animation.ts    framer-motion variants — import from here only
+│   │   │   │   ├── supabase.ts     Supabase client instance
+│   │   │   │   ├── eventTheme.ts   Per-event theme override utilities
+│   │   │   │   ├── constants.ts    App-wide constants (no magic strings)
+│   │   │   │   ├── dates.ts        Date formatting utilities
+│   │   │   │   └── validation.ts   Zod schemas and reusable validators
+│   │   │   └── hooks/
+│   │   │       ├── useFormDraft.ts         Form state persistence (localStorage/sessionStorage)
+│   │   │       └── useRecoverOnFocus.ts    Realtime recovery hook
+│   │   └── tailwind.config.js      Design tokens, MD3 type scale, color palette
+│   └── landing/                    Static landing page (index.html only)
+├── packages/
+│   └── supabase/
+│       └── src/
+│           └── database.types.ts   Generated DB types — regenerate after schema changes
+├── supabase/
+│   ├── functions/                  Edge Functions (Deno)
+│   │   ├── generate-qr-token/
+│   │   ├── award-points-on-scan/
+│   │   ├── approve-at-door/
+│   │   ├── check-rate-limit/
+│   │   ├── generate-user-qr/
+│   │   └── _shared/               Shared CORS config + logger
+│   └── migrations/                 SQL migration files (applied in order)
+├── package.json                    Workspace root — framer-motion dependency lives here
+└── turbo.json
+```
+
+### Zustand Stores Reference
+
+| Store | Domain | Key Methods |
+|-------|--------|-------------|
+| `useAuthStore` | User session, profile, auth | `initialize()`, `signIn()`, `signUp()`, `signOut()`, `updateProfile()`, `requestOrganizerUpgrade()` |
+| `useEventsStore` | Events + registrations | `fetchEvents()`, `register()`, `subscribeToChanges()`, `subscribeToEventChanges()` |
+| `useJobsStore` | Jobs board | `fetchJobs()`, `getById()` |
+| `usePointsStore` | Points ledger | `loadTotalPoints()`, `loadTransactions()` |
+| `useRewardsStore` | Rewards catalog | `fetchRewards()`, `subscribeToChanges()` |
+| `useNotificationsStore` | In-app notifications | `fetchRecent()`, `subscribe()`, `markRead()` |
+| `useVolunteerStore` | Member volunteer apps | `loadApplications()`, `applyToVolunteer()` |
+| `useOrgVolunteerStore` | Organizer approval queue | `loadApplications()`, `approveApplication()`, `rejectApplication()` |
+| `useThemeStore` | Active program theme | `setTheme()`, `activeTheme()` — persisted to `localStorage` key `devcon-theme` |
+
+### Coding Standards Summary
+
+| Rule | Detail |
+|------|--------|
+| TypeScript | Strict mode — no `any`, no `@ts-ignore` without explanation |
+| Naming | `PascalCase.tsx` for components, `camelCase.ts` for lib/store files |
+| Forms | React Hook Form + Zod for every form — no uncontrolled inputs |
+| Async calls | Every async call must have loading, error, and empty states |
+| Navigation | No dead-end routes — every path renders content or `<ComingSoonModal />` |
+| Animation | Import from `lib/animation.ts`. Use `motion.div` + `staggerContainer`/`cardItem` for lists. |
+| Icons | `solar-icon-set` outline variant only. No emoji in JSX. |
+| Constants | All constants in `lib/constants.ts`. No magic strings or numbers inline. |
+| Primary color | Always `text-primary` / `bg-primary`. Never hardcode hex for primary. |
+| Realtime | Every new layout/store with Realtime must implement the two-layer recovery pattern. |
+
+### After Any Database Schema Change
+```bash
+# Regenerate TypeScript types from the live DB
+supabase gen types typescript --project-id <supabase-project-ref-id> \
+  > packages/supabase/src/database.types.ts
+
+# Verify the build still passes
+npm run typecheck
+npm run build
+```
+
+## 5.3 Deployment Guide
+
+### Standard Deploy (Automatic)
+Every push to `master` on GitHub triggers an automatic Vercel production deploy.
+
+### Manual Deploy
+```bash
+# Verify locally first — this mirrors Vercel's exact build command
+npm run typecheck    # Must pass with zero errors
+npm run build        # Must complete successfully
+
+# Push triggers Vercel deploy automatically
+git push origin master
+```
+
+### Vercel Build Failure Triage
+
+If the Vercel deploy fails with exit code 2:
+
+1. Run `npm run typecheck` locally to surface all TypeScript errors
+2. Common causes: unused imports (`noUnusedLocals`), unused parameters (`noUnusedParameters`), `any` types
+3. Fix all errors before re-pushing — the dev server does NOT catch these, only `tsc -b` does
+
+See `.claude/rules/vercel-build-safety.md` for the complete checklist.
+
+### Deploying Edge Functions
+```bash
+# After any change to supabase/functions/
+supabase functions deploy generate-qr-token
+supabase functions deploy award-points-on-scan
+supabase functions deploy approve-at-door
+supabase functions deploy check-rate-limit
+supabase functions deploy generate-user-qr
+
+# If CORS allowlist was updated (e.g. after custom domain goes live),
+# ALL functions must be redeployed.
+```
+
+## 5.4 Environment Parity
+
+| Setting | Local Dev | Vercel Production |
+|---------|-----------|-------------------|
+| `VITE_SUPABASE_URL` | `.env.local` | Vercel environment variables |
+| `VITE_SUPABASE_ANON_KEY` | `.env.local` | Vercel environment variables |
+| `VITE_GOOGLE_CLIENT_ID` | `.env.local` | Vercel environment variables |
+| `VITE_APP_ENV` | `development` | `production` |
+| `VITE_SITE_URL` | `http://localhost:5173` | `https://plus-beta.devcon.ph` (after domain live) |
+| Supabase DB | Live production project (shared) | Same live production project |
+| Edge Functions | Live production (shared) | Same live production |
+
+> **Note:** Local development hits the same live Supabase production project as Vercel. There is no separate staging database. Exercise caution when testing with real member data. Consider creating a test account for development use.
+
+## 5.5 User Manuals
+
+### For Members
+- Visit https://devconplusbeta-v1.vercel.app (or `plus-beta.devcon.ph` when live)
+- Sign up with Google or email/password
+- Browse upcoming events → Register → Show QR ticket at venue
+- Earn points automatically when an officer scans your QR code
+- View points balance and transaction history under Points
+- Browse jobs, apply to volunteer, redeem rewards (catalog only — fulfillment coming in Phase 2)
+
+### For Chapter Officers
+- Sign in with an organizer code at sign-up, or request an upgrade via Profile
+- Access the Organizer flow at `/organizer`
+- Create events, set approval requirements, manage registrants
+- At the venue: open `/organizer/scan` on your phone → camera scans member QR → points awarded automatically
+- Broadcast announcements to registered members via the announcement sheet on any event page
+
+### For HQ Admins
+- Access the Admin panel at `/admin` (requires `hq_admin` role)
+- Manage users, org codes, chapters, and upgrade requests
+- The Kiosk (`/admin/kiosk`) is restricted to `super_admin` role
+- Generate organizer codes in `/admin/org-codes` → specify scope (chapter or HQ), role, and usage limits
+
+---
+
+---
+
+# 6. Turnover Execution
+
+## 6.1 Access Control
+
+The following credentials and accesses must be transferred from the outgoing team to the receiving team before April 26, 2026. All secrets must be transferred via a secure channel (not email or chat in plain text).
+
+| Credential / Access | Location | Transfer Method |
+|---------------------|----------|-----------------|
+| Supabase URL + anon key | `.env.local` | Secure credential share |
+| Supabase service role key | `supabase/.env` | Secure credential share |
+| Supabase dashboard access | supabase.com | Invite receiving team member as project collaborator |
+| Google OAuth client ID | `.env.local` / GCP Console | Secure credential share + GCP Console access |
+| Vercel project access | vercel.com | Invite receiving team member to the Vercel team/project |
+| GitHub repository access | https://github.com/rocketwolf98/devconplusClaudeCode | Add receiving team as collaborators |
+| Cloudflare DNS panel | Via DEVCON HQ IT officer | Coordinate through DEVCON HQ |
+| Resend account | resend.com | Via DEVCON HQ IT officer |
+| Figma file access | https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/ | Share link or invite |
+
+**Security requirements:**
+- Never commit secrets to the repository. Secrets live only in `.env.local` (local, gitignored) and Vercel environment settings.
+- Rotate any credentials that were shared insecurely.
+- Remove outgoing team member access from Supabase, Vercel, and GitHub after the handover window closes.
+
+## 6.2 Contact Matrix
+
+| Role | Responsibility | Contact |
+|------|----------------|---------|
+| Outgoing Dev Lead | Primary technical handover, credential transfer, Q&A | [Contact via DEVCON Jumpstart — anonymous for this document] |
+| Outgoing Dev (Backend/QR) | Edge functions, Supabase schema, QR system deep-dive | [Contact via DEVCON Jumpstart — anonymous for this document] |
+| DEVCON HQ IT Officer | DNS records (Cloudflare `devcon.ph`), Resend domain, Google Cloud Console access | Via DEVCON Philippines HQ |
+| DEVCON HQ Engineering Contact | Supabase project ownership, long-term platform direction | Via DEVCON Philippines HQ |
+
+## 6.3 Knowledge Transfer Plan
+
+### Week 1 (April 21–26) — Active Overlap Period
+The outgoing team is available for questions and pair sessions during this window. Claude Code AI assistance is also available until April 26.
+
+**Recommended sessions:**
+1. **Codebase walkthrough** (2–3 hours) — Walk through `router.tsx`, the three layouts, one store end-to-end, and one edge function. Use the Loom videos (Section 4.1) as pre-read.
+2. **QR system deep-dive** (1 hour) — `generate-qr-token` → member shows QR → `award-points-on-scan` → `approve-at-door`. The atomicity guarantee is critical.
+3. **Realtime recovery pattern** (30 min) — Read `.claude/rules/db-connection-resilience.md`, then review `MemberLayout.tsx` live. Any future layout or store must replicate this pattern.
+4. **Build and deploy walkthrough** (30 min) — Run `npm run typecheck`, `npm run build`, and trigger a Vercel deploy. Understand what fails and why.
+5. **Infrastructure walkthrough** (1 hour) — Supabase dashboard (tables, RLS, edge functions, auth settings), Vercel project settings, Cloudflare DNS (when access is available).
+
+### Pre-Handover Reading List (in order)
+
+| Document | Location | Priority |
+|----------|----------|----------|
+| Master architecture reference | `.claude/CLAUDE.md` | **Required** |
+| Developer handover + status | `PRD.md` | **Required** |
+| Vercel build safety rules | `.claude/rules/vercel-build-safety.md` | **Required** |
+| DB connection resilience rule | `.claude/rules/db-connection-resilience.md` | **Required** |
+| Domain + email setup guide | `.claude/DOMAIN_AND_EMAIL_SETUP.md` | Required for infra work |
+| Full PRD (Google Doc) | https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/ | Supplementary |
+| Figma prototype | https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/ | Supplementary |
+| Lovable prototype (UX reference) | https://devconplusrndprototype.lovable.app/ | Supplementary |
+
+---
+
+---
+
+# 7. Handover Dos and Don'ts
+
+## 7.1 DOs
+
+### For the Receiving Team
+
+- **Do read `.claude/CLAUDE.md` before touching any code.** It is the authoritative reference for every design decision, DB field name, route, component, and store in the codebase.
+- **Do run `npm run typecheck` before every commit.** Vercel's build fails on TypeScript errors. The dev server does not catch these.
+- **Do use `npm install --legacy-peer-deps`.** Plain `npm install` will fail with peer dependency conflicts from React 19.
+- **Do use `text-primary` / `bg-primary` for the primary color.** Never hardcode hex values for primary. The color is driven by a CSS custom property and changes with the user's selected theme.
+- **Do use the `solar-icon-set` outline variant** for all icons. No emoji in JSX. No other icon libraries.
+- **Do import animation variants from `lib/animation.ts`.** Never redefine `fadeUp`, `staggerContainer`, etc. inline.
+- **Do use the real Supabase client** for all data operations. The `MOCK_*` exports in `packages/supabase/` are reference data only — never import them into production components.
+- **Do implement the two-layer recovery pattern** (`recover()` + `resubscribe()` on all three trigger points) in any new layout or store that uses Supabase Realtime. See `.claude/rules/db-connection-resilience.md`.
+- **Do use `spendable_points`** (not `total_points`) for the user's redeemable balance. `total_points` does not exist in the live DB.
+- **Do use `<ComingSoonModal />`** for any incomplete feature rather than leaving a dead-end route or placeholder text.
+- **Do regenerate `database.types.ts`** after any schema change: `supabase gen types typescript --project-id <ref>`.
+- **Do add `https://plus-beta.devcon.ph` to the Edge Function CORS allowlist** and redeploy all 5 functions when the custom domain goes live.
+- **Do verify data in the Supabase Dashboard** after any seeding or migration. The PROMOTED badge relies on `is_promoted = true` in live data.
+- **Do test on a real mobile device** (iPhone Safari + Android Chrome) before marking any UI change complete.
+
+## 7.2 DON'Ts
+
+### For the Receiving Team
+
+- **Don't add Apple Sign-In.** Auth is Google OAuth + email/password only. This is a non-negotiable product decision.
+- **Don't mix `MemberLayout`, `OrganizerLayout`, and `AdminLayout` components.** These are three separate route trees. Shared utility components are safe; layout components are not.
+- **Don't use Tailwind `slate-600` or `slate-800`.** These steps do not exist in the configured scale. Use 500 or 700.
+- **Don't use `process.env.*` in the frontend.** Use `import.meta.env.VITE_*` — Vite does not expose `process.env` to the browser bundle.
+- **Don't commit secrets.** `.env.local` and `supabase/.env` are gitignored for a reason.
+- **Don't leave placeholder text** (`"Lorem ipsum"`, `"________"`, empty strings). Use `<ComingSoonModal />`.
+- **Don't create dead-end navigation.** Every route must render content or a `<ComingSoonModal />`.
+- **Don't hardcode hex values for the primary color.** The theme system sets these via CSS custom properties.
+- **Don't use `total_points` in Supabase queries.** The field is `spendable_points`. Using the old name will cause a TypeScript build error.
+- **Don't use `--no-verify` to skip git hooks** unless you understand exactly what you are bypassing.
+- **Don't build Phase 2 features** (KMP, Group Chat, Swipe Feed, Push Notifications, Reward fulfillment) before April 30. These are explicitly out of scope for MVP.
+- **Don't redefine framer-motion variants inline.** Always import from `lib/animation.ts`. Inline redefinitions cause stagger animate key mismatches (`"visible"` vs `"show"`).
+- **Don't rely on the Vite dev server for TypeScript correctness.** Vite is permissive. `tsc -b` is the source of truth.
+- **Don't enable Cloudflare's orange-cloud proxy** on the Vercel CNAME record or Resend DKIM CNAMEs. Proxying breaks SSL certificate provisioning and DKIM email authentication.
+- **Don't remove the `useRecoverOnFocus` pattern** from any layout that uses Supabase Realtime. Removing it causes stale data after device sleep or network switches.
+
+---
+
+---
+
+# 8. Annex
+
+## 8.1 Glossary
+
+| Term | Definition |
+|------|-----------|
+| **MemberLayout** | The React layout component wrapping all member-facing routes (`/home`, `/events/*`, etc.). Handles auth guard, bottom nav (mobile), sidebar (desktop), and Realtime recovery. |
+| **OrganizerLayout** | Layout for all organizer routes (`/organizer/*`). Separate from MemberLayout. Does not apply program themes. |
+| **AdminLayout** | Layout for all admin routes (`/admin/*`). Desktop-only sidebar. Guards for `hq_admin` and `super_admin` roles. |
+| **spendable_points** | The user's current redeemable point balance on the `profiles` table. Decremented when a reward is redeemed. |
+| **lifetime_points** | Cumulative points earned by the user, never decremented. Used for XP tier tracking. |
+| **QR token kinds** | `'r'` = registration (standard check-in), `'u'` = user identity (finds imminent event), `'p'` = pending door-approval |
+| **PROMOTED badge** | Orange `#F97316` badge applied to the 2nd job listing (Sui Foundation) and 2nd Tech news post. Data-driven via `is_promoted = true` in DB. |
+| **devcon_category** | Event field that triggers per-event theme overrides. Values: `'devcon'`, `'she'`, `'kids'`, `'campus'`. Processed by `getEventThemeStyle()` in `lib/eventTheme.ts`. |
+| **ComingSoonModal** | Reusable modal component for features not yet implemented. Every incomplete feature must route to this — never leave a dead-end. |
+| **Two-layer recovery** | The Realtime resilience pattern: Layer 1 = HTTP data refetch (`recover()`), Layer 2 = WebSocket channel re-subscription (`resubscribe()`). Both layers must be called on `visibilitychange`, `online`, and 5-min interval. |
+| **organizer_codes** | Codes stored in Supabase that, when submitted during sign-up or upgrade, assign a chapter officer or HQ admin role to a user. |
+| **edge function** | Serverless Deno functions deployed to Supabase. Used for QR token generation, points awarding, rate limiting, and door approval. |
+| **RLS** | Row Level Security. Postgres policies that restrict data access at the database level, enforced for every Supabase query. |
+| **MD3 type scale** | Material Design 3 typography tokens (`text-md3-*`) added to `tailwind.config.js`. Preferred for new components. Coexists with the legacy Tailwind scale. |
+| **Proxima Nova** | The app's primary typeface. Self-hosted woff2, 6 weights. Loaded in `index.css`. Referenced as `font-proxima` or `font-sans` in Tailwind. |
+| **program themes** | 5 user-selectable color themes (devcon, she, kids, campus, purple) that change the `--color-primary` CSS custom property. Persisted via `useThemeStore`. |
+| **Turbo** | Build system orchestrating the monorepo. `npm run dev:member` uses the Turbo filter `@devcon-plus/member`. |
+
+## 8.2 Asset Library
+
+| Asset | Location | Notes |
+|-------|----------|-------|
+| Onboarding photos (real chapter group photos) | `apps/member/public/photos/` | 4 photos: `devcon-summit-group.jpg`, `devcon-15-anniversary.jpg`, `devcon-certificate-ceremony.jpg`, `devcon-jumpstart-internships.jpg` |
+| Proxima Nova font files | `apps/member/public/fonts/` | 6 weights in woff2 format |
+| PWA icons | `apps/member/public/` | `icon-192.png`, `icon-512.png`, `icon-maskable.png`, `apple-touch-icon.png` |
+| DEVCON+ logo assets | `apps/member/public/` or `src/assets/` | Check both locations |
+| Figma design file | https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/ | v0.1 concept prototype — use as UX reference |
+| Lovable prototype | https://devconplusrndprototype.lovable.app/ | UX reference only — not the production codebase |
+
+## 8.3 Research & Reference Data
+
+| Resource | Link | Purpose |
+|----------|------|---------|
+| Live app | https://devconplusbeta-v1.vercel.app | Current production deployment |
+| GitHub repository | https://github.com/rocketwolf98/devconplusClaudeCode | Codebase |
+| Full PRD (Google Doc) | https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/ | Extended product requirements |
+| Figma prototype | https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/ | Design reference |
+| Lovable prototype | https://devconplusrndprototype.lovable.app/ | UX interaction reference |
+| OWASP Top 10 | https://owasp.org/www-project-top-ten/ | Security audit standard |
+| Vercel docs | https://vercel.com/docs/projects/domains | Custom domain setup |
+| Supabase custom SMTP docs | https://supabase.com/docs/guides/auth/auth-smtp | Email configuration |
+| Resend + Supabase guide | https://resend.com/docs/send-with-supabase-smtp | Transactional email setup |
+| Cloudflare DNS management | https://developers.cloudflare.com/dns/ | DNS record configuration |
+
+## 8.4 Development Session Videos (Loom Archive)
+
+These recordings capture the app at each major development checkpoint. Watch in order for full context on how the product evolved.
+
+| Date | Link | What Was Shown |
+|------|------|---------------|
+| March 16 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 | Early development |
+| March 17 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 | Continued development |
+| March 18 (pt 1) | https://www.loom.com/share/55eca950c6e64f1c93f76717363612a5 | Development progress |
+| March 18 (pt 2) | https://www.loom.com/share/24dbdbfb239646febcdc2706f63c8581 | Development progress |
+| March 24 | https://www.loom.com/share/42bd477c7301465ebc0db4803272d168 | Sprint checkpoint |
+| April 06 | https://www.loom.com/share/ea88bcd374db42d79fd0c3d2d1bffb65 | QR system live, PWA deployed |
+
+## 8.5 Phase 2 Roadmap (Post–May 15, 2026)
+
+These features are deferred and must not be built before April 30, 2026.
+
+| Feature | Description | Technical Notes |
+|---------|-------------|----------------|
+| **KMP Migration** | Port to Kotlin Multiplatform (Android + iOS + Web) | `supabase-kt` client maps to current stores. React architecture is already store-pattern friendly. |
+| **Group Chat** | Async chapter-scoped message board | New tables: `chat_threads`, `chat_messages`. Realtime broadcast channel. Moderation by officers. |
+| **Swipe Feed** | Vertical swipe content feed (events, news, jobs) | framer-motion `drag` + `dragConstraints`. Feed ranking logic. New data structures. |
+| **Push Notifications** | Native push for events and points | Requires service worker. Out of scope for web MVP. Native target via KMP. |
+| **Reward Fulfillment** | Physical shipping + digital voucher delivery | Logistics and third-party fulfillment integration. |
+| **WebSocket Resilience** | Full Supabase Realtime reconnect on mobile Safari | Exponential backoff, explicit `CLOSED` state banner, automated reconnect tests. See `.claude/rules/db-connection-resilience.md`. |
+
+---
+
+*End of DEVCON+ Transition Documentation — Version 1.0*  
+*Prepared by the DEVCON Jumpstart Internship Cohort 3 Development Team*  
+*April 16, 2026*

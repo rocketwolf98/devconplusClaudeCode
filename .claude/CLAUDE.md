@@ -1,6 +1,6 @@
 # DEVCON+ — Claude Code Master Context File
-> Last Updated: March 30, 2026
-> Version: MVP 1.4
+> Last Updated: April 15, 2026
+> Version: MVP 1.5
 > Team: 2 interns + Claude Code
 > Hard Deadline: April Week 1 (Cohort 3 Graduation)
 > Live App: https://devconplusbeta-v1.vercel.app
@@ -81,7 +81,7 @@ devcon-plus/
 | Icons | `solar-icon-set` outline variant (only — no emoji icons in JSX) |
 | Auth | Supabase Auth (Google OAuth + email/password) |
 | Language | TypeScript (strict) |
-| Font | **Geist** (loaded in `index.css`) |
+| Font | **Proxima Nova** (self-hosted woff2, 6 weights — loaded in `index.css`). Tailwind: `font-proxima` / `font-sans` |
 
 > This is a **web app**, not React Native. There is no Expo, no NativeWind, no RN StyleSheet. All styling is plain Tailwind CSS classes.
 
@@ -613,9 +613,9 @@ Group by date. Redemptions show negative. End with "That's it!" empty state.
 primary           → CSS var: rgb(var(--color-primary))   — driven by program theme
 primary-dark      → CSS var: rgb(var(--color-primary-dark))
 
-blue              #367BDD   legacy alias — non-themed blue (links, organizer nav, fallback)
-blue-dark         #2962C4
-blue-light        #5A9AEA
+blue              #1152D4   legacy alias — non-themed DEVCON blue (links, organizer nav, fallback)
+blue-dark         #0D42AA
+blue-light        #6099F4
 navy              #1E2A56   deep navy (banner dot indicator, dark text, organizer scan hero active)
 gold              #F8C630   XP bar fill, star icon fill
 promoted          #F97316   ONLY for PROMOTED badge
@@ -634,10 +634,11 @@ slate-900         #0F172A   primary text
 
 ### Program Themes (user-selectable in Profile)
 ```
-DEVCON+       id=devcon   primary=#367BDD   dark=#2962C4
-She is DEVCON id=she      primary=#EC4899   dark=#DB2777
-DEVCON Kids   id=kids     primary=#21C45D   dark=#16A34A
-Campus        id=campus   primary=#F8C630   dark=#EAB308
+DEVCON+       id=devcon   primary=#1152D4   dark=#0D42AA
+She is DEVCON id=she      primary=#BE185D   dark=#9D174D
+DEVCON Kids   id=kids     primary=#059669   dark=#047857
+Campus        id=campus   primary=#D97706   dark=#B45309
+DEVCON Purple id=purple   primary=#7C3AED   dark=#6D28D9
 ```
 Theme is persisted via `useThemeStore` (Zustand persist). CSS custom properties
 `--color-primary` and `--color-primary-dark` are injected on the `<html>` element
@@ -654,14 +655,33 @@ shadow-blue     0 4px 24px rgba(54,123,221,0.12)
 shadow-primary  var(--shadow-primary)   (driven by theme)
 ```
 
-### Typography (Geist font)
+### Typography (Proxima Nova font)
+
+**MD3 type scale** (preferred for new components — additive tokens in `tailwind.config.js`):
 ```
-Display: 32px bold       hero headers (text-3xl font-black)
-H1:      24px semibold   page titles
-H2:      20px semibold   section headers (text-base font-bold)
-Body:    14px regular    (text-sm)
-Caption: 12px regular    timestamps, refs (text-xs / text-[10px])
+text-md3-display-lg   57px  — hero sections only
+text-md3-headline-lg  32px  — page titles
+text-md3-headline-sm  24px  — section titles
+text-md3-title-lg     22px  — card titles, prominent labels
+text-md3-title-md     16px  — subheadings
+text-md3-body-lg      16px  — body (large)
+text-md3-body-md      14px  — standard body content
+text-md3-body-sm      12px  — small body
+text-md3-label-lg     14px  — button labels
+text-md3-label-md     12px  — chips, badges, timestamps
+text-md3-label-sm     11px  — compact metadata
 ```
+When using MD3 scale, pair with `font-proxima` and appropriate `font-weight`.
+
+**Legacy scale** (existing components — backward compatible, do not migrate unless reworking):
+```
+Display: text-3xl font-black   — hero headers
+H1:      text-2xl font-semibold — page titles
+H2:      text-base font-bold   — section headers
+Body:    text-sm               — body
+Caption: text-xs / text-[10px] — timestamps, refs
+```
+> MD3 tokens are additive — legacy classes remain valid. Prefer MD3 for any new component going forward.
 
 ### Spacing & Shape
 ```
@@ -673,12 +693,23 @@ Safe bottom:    pb-24 in scroll containers (clears floating nav)
 
 ### Animation (framer-motion)
 ```js
-// apps/member/src/lib/animation.ts
-staggerContainer   — staggerChildren 0.07s
-cardItem           — y: 12→0, opacity: 0→1
-fadeUp             — y: 8→0, opacity: 0→1
-whileTap={{ scale: 0.95 }}  — standard press feedback on all buttons/cards
+// apps/member/src/lib/animation.ts — always import from here, never redefine inline
+fadeUp            — page entrances, card list entry (y: 10→0, 0.22s)
+fade              — page-level opacity transitions (0.18s)
+slideUp           — bottom sheets and modals (y: 100%→0, custom easing)
+backdrop          — backdrop fade (0.2s)
+staggerContainer  — parent wrapper for staggered child lists
+cardItem          — individual staggered card/list item (y: 10→0, 0.2s)
+NAV_SPRING        — spring config for nav tab indicator (stiffness: 380, damping: 28)
 ```
+
+Spring values for interactive elements:
+```js
+Card (full tap area): whileTap={{ scale: 0.97 }}, type: 'spring', stiffness: 400, damping: 25
+Button / control:     whileTap={{ scale: 0.95 }}, type: 'spring', stiffness: 400, damping: 25
+Nav item:             whileTap={{ scale: 0.88 }}, type: 'spring', stiffness: 400, damping: 20
+```
+> Stagger container `animate` key is `"visible"` — never `"show"`. Match variant keys exactly.
 
 ### Core Components (built — reuse everywhere)
 ```
@@ -753,7 +784,8 @@ All stores use real Supabase queries via `apps/member/src/lib/supabase.ts`.
 ## 11. LIB UTILITIES (`apps/member/src/lib/`)
 
 ```
-animation.ts         — framer-motion variants: staggerContainer, cardItem, fadeUp
+animation.ts         — framer-motion variants: fadeUp, fade, slideUp, backdrop,
+                       staggerContainer, cardItem, NAV_SPRING
 constants.ts         — VOLUNTEER_APPROVAL_POINTS (35), ROLE_DISPLAY_NAMES,
                        WORK_TYPE_LABELS, CATEGORY_LABELS
 dates.ts             — formatDate.compact(), formatDate.full(), formatDate.time()
@@ -769,7 +801,14 @@ useRecoverOnFocus.ts — recovery hook: refetches + resubscribes on visibilitych
 
 ### Hooks (`apps/member/src/hooks/`)
 ```
-useKonamiCode.ts     — Konami code easter egg detector
+useRecoverOnFocus.ts — recovery hook: refetches + resubscribes on visibilitychange,
+                       online event, and 5-minute polling interval
+useFormDraft.ts      — saves form state to localStorage (cross-tab, default) or
+                       sessionStorage (within-tab, pass storage: 'session').
+                       Used in: sign-in email, sign-up form, event create/edit,
+                       volunteer form, custom registration fields.
+                       Clears draft on successful form submission.
+useKonamiCode.ts     — Konami code easter egg detector (restricted to hq_admin/super_admin)
 ```
 
 ---
@@ -949,6 +988,18 @@ npm run typecheck                     # tsc --noEmit across all packages
 - [x] NotFound (404) catch-all route
 - [x] CSP headers enforced (promoted from Report-Only)
 - [x] Deployed to Vercel → https://devconplusbeta-v1.vercel.app
+- [x] Proxima Nova font migrated (self-hosted woff2, 6 weights — replaces Geist)
+- [x] MD3 type scale tokens added to `tailwind.config.js` + applied across all UI components (PR #6)
+- [x] Form draft persistence — `useFormDraft` hook (localStorage/sessionStorage) for sign-in, sign-up, event create/edit, volunteer form, custom registration fields
+- [x] 5th program theme: DEVCON Purple (`#7C3AED` / `#6D28D9`) added to theme system
+- [x] Cloudflare Turnstile CAPTCHA on auth forms (commit 9ca7272, Apr 8)
+- [x] XP Tier System — milestone definitions + progress bar wired to lifetime_points
+- [x] `/qr` MyQR page + `generate-user-qr` edge function deployed
+- [x] PWA manifest — icons 192/512/maskable, shortcuts, apple-touch-icon
+- [x] Custom event registration fields — modular form schema + DB migration
+- [x] Missions System — basic gamified missions flow
+- [x] Event URL slugs — /events/:slug (human-readable) replacing /events/:uuid
+- [x] password_reset rate limit deployed
 
 ### Remaining for MVP
 - [ ] Deploy any remaining Edge Functions not yet live (verify via Supabase dashboard)
@@ -973,6 +1024,56 @@ Show `<ComingSoonModal />` if user reaches any of these:
 - Super Admin panel
 - Multi-language support
 
+
+---
+
+## 19. PHASE 2 ROADMAP (Post-Graduation — May 15, 2026+)
+
+These features are **not in scope for MVP**. Do not build them before April 30. After graduation, they define the next evolution of the platform. Use `<ComingSoonModal />` if a user reaches any of these entry points.
+
+### 19.1 Kotlin Multiplatform (KMP) Migration
+**Goal:** Port the React + Vite web app to a true cross-platform native app (Android + iOS + Web) using Kotlin Multiplatform and Compose Multiplatform.
+
+- Shared business logic in Kotlin (stores, API calls, validation)
+- Compose Multiplatform UI for Android and iOS
+- Web target retained via Kotlin/Wasm or a thin React wrapper
+- Supabase has a Kotlin client (`supabase-kt`) — direct migration path for all stores
+- Auth: Supabase Auth via `supabase-kt`, replacing `@supabase/supabase-js`
+- Points, events, registrations, QR scanning all need Kotlin equivalents
+
+**Why deferred:** Requires a full architecture rewrite. Not feasible before April 30.
+
+### 19.2 Group Chat
+**Goal:** Async chapter-scoped message board for members within the same chapter.
+
+- Minimum: chapter-scoped threads (topic + replies)
+- Stretch: real-time via Supabase Realtime (broadcast)
+- Moderation: officers can delete messages
+- Entry point: Dashboard quick action or Profile → Community
+- DB tables needed: `chat_threads`, `chat_messages`
+
+**Why deferred:** L2 item in current sprint. Only ship if Kenshin confirms bandwidth in Week 4.
+
+### 19.3 Swipe Left/Right Social Feed
+**Goal:** TikTok/Instagram Reels-style vertical swipe feed for DEVCON content (events, posts, spotlights).
+
+- Vertical swipe gesture (framer-motion `drag` + `dragConstraints`)
+- Cards: event promos, news highlights, chapter spotlights, job opportunities
+- Swipe right = save/bookmark, swipe left = dismiss
+- Feed algorithm: mix of upcoming events + recent news + hot jobs
+- Entry point: dedicated tab or Dashboard banner expansion
+
+**Why deferred:** High-complexity UX requiring gesture tuning, feed ranking logic, and new data structures. Post-KMP migration it would be built natively with Compose.
+
+### 19.4 App Persistence Debugging (Supabase WebSocket Resilience)
+**Goal:** Fully resolve the Supabase WebSocket connection drop that occurs when the app is backgrounded, the device sleeps, or the network switches.
+
+- Current state: Two-layer recovery pattern implemented (visibilitychange + online + 5-min poll) — hardening commits `2295df8`, `dd85baa`. Issue persists under some conditions.
+- Phase 2 work: audit channel lifecycle on mobile Safari (aggressive background tab kill), add exponential backoff on reconnect, add a visible "Reconnecting..." banner when channels are CLOSED, write automated tests for reconnect scenarios
+- Key files: `MemberLayout.tsx`, `OrganizerLayout.tsx`, `useEventsStore.ts`, `useRewardsStore.ts`, `useNotificationsStore.ts`
+- See also: `.claude/rules/db-connection-resilience.md` for the full resilience spec
+
+**Why deferred:** The current recovery pattern handles the common cases. Full native-level resilience is a Phase 2 / KMP migration concern.
 
 ---
 

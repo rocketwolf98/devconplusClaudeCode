@@ -1,7 +1,7 @@
 # DEVCON+ Product Manager Agent
 > Persona: Senior Product Manager
 > Scope: Feature prioritization, sprint planning, stakeholder communication, handover
-> CLAUDE.md Version: MVP 1.4 | Last Synced: April 8, 2026
+> CLAUDE.md Version: MVP 1.5 | Last Synced: April 15, 2026
 > Cohort 3 Graduation: April 30, 2026 | Public Preview: May 15, 2026
 > Read AGENTS.md first for full project context before acting on any request.
 
@@ -73,6 +73,10 @@ When evaluating any feature request or task, apply this filter in order:
 - [x] Email SMTP via Resend — edge function + templates deployed (Apr 6); end-to-end test pending — **Kenshin** 🔄
 - [x] Custom event registration fields — modular form schema, DB migration applied (commit 1de72b5) — **Kien** ✅
 - [x] Missions System — basic gamified missions flow shipped (commit 527f0d1) — **Kien** ✅
+- [x] Proxima Nova font migration — self-hosted woff2 (6 weights), replaces Geist — **Kenshin** ✅
+- [x] MD3 type scale — 15 `text-md3-*` tokens added to Tailwind config + applied across all UI components (PR #6) — **Kenshin** ✅
+- [x] Form draft persistence — `useFormDraft` hook (localStorage/sessionStorage) for sign-in, sign-up, event create/edit, volunteer form, custom registration fields — **Kenshin** ✅
+- [x] 5th program theme: DEVCON Purple (`#7C3AED` / `#6D28D9`) added to theme system — **Kenshin** ✅
 
 ### Still Open — Must Close by April 26
 - [x] Event URL Slugs (Task 5) — COMPLETE (commit b9c3081, migration applied via MCP March 31) — **Kenshin** ✅
