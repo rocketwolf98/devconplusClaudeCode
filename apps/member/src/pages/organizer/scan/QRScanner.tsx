@@ -187,6 +187,17 @@ export function OrgQRScanner() {
     isProcessingRef.current = true
 
     try {
+      // Always fetch a fresh session before invoking — this triggers an inline
+      // token refresh if the access token has expired, preventing stale-token 401s
+      // after the organizer leaves the scanner open past the 60-minute JWT TTL.
+      const { data: sessionData } = await supabase.auth.getSession()
+      const accessToken = sessionData.session?.access_token
+      if (!accessToken) {
+        showOverlay({ type: 'error', message: 'Session expired. Please sign in again.' })
+        isProcessingRef.current = false
+        return
+      }
+
       const { data, error } = await supabase.functions.invoke<{
         success: boolean
         pending?: boolean
@@ -196,10 +207,19 @@ export function OrgQRScanner() {
         event_title?: string
         already_checked_in?: boolean
         error?: string
-      }>('award-points-on-scan', { body: { token } })
+      }>('award-points-on-scan', {
+        body: { token },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
 
       if (error) {
-        showOverlay({ type: 'error', message: 'Scan failed. Try again.' })
+        // FunctionsHttpError carries the response body — try to surface the reason
+        let errorMessage = 'Scan failed. Try again.'
+        try {
+          const body = await (error as unknown as { context: Response }).context.json() as { error?: string }
+          if (body?.error) errorMessage = body.error
+        } catch { /* ignore — fall back to generic message */ }
+        showOverlay({ type: 'error', message: errorMessage })
         return
       }
 

@@ -127,7 +127,7 @@ Deno.serve(async (req: Request) => {
     if (orgError || !organizer) {
       return new Response(
         JSON.stringify({ success: false, error: 'Unauthorized: not an organizer.' }),
-        { status: 403, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -238,7 +238,7 @@ Deno.serve(async (req: Request) => {
     if (regError || !reg) {
       return new Response(
         JSON.stringify({ success: false, error: 'Invalid or unrecognized QR code.' }),
-        { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
@@ -252,7 +252,7 @@ Deno.serve(async (req: Request) => {
     if (eventError || !event) {
       return new Response(
         JSON.stringify({ success: false, error: 'Event not found.' }),
-        { status: 404, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       )
     }
 
