@@ -216,8 +216,9 @@ export function OrgQRScanner() {
         // FunctionsHttpError carries the response body — try to surface the reason
         let errorMessage = 'Scan failed. Try again.'
         try {
-          const body = await (error as unknown as { context: Response }).context.json() as { error?: string }
+          const body = await (error as unknown as { context: Response }).context.json() as { error?: string; message?: string }
           if (body?.error) errorMessage = body.error
+          else if (body?.message) errorMessage = body.message
         } catch { /* ignore — fall back to generic message */ }
         showOverlay({ type: 'error', message: errorMessage })
         return
