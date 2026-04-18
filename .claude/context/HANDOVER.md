@@ -104,8 +104,6 @@ The following features are intentionally deferred. Use `<ComingSoonModal />` if 
 
 # 2. Product Requirements Document (PRD)
 
-> Full PRD with additional context: https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/edit?usp=sharing
-
 ## 2.1 User Stories
 
 ### Member
@@ -406,22 +404,24 @@ https://devconplusbeta-v1.vercel.app
 
 ## 4.1 Handover Summary
 
-As of April 16, 2026, the DEVCON+ MVP is **functionally complete and deployed to production** at https://devconplusbeta-v1.vercel.app. All core user flows (member registration, QR check-in, points, organizer tools, admin panel) are working end-to-end on the live Supabase project.
+As of April 17, 2026, the DEVCON+ MVP is **functionally complete and deployed to production** at https://devconplusbeta-v1.vercel.app. All core user flows (member registration, QR check-in, points, organizer tools, admin panel) are working end-to-end on the live Supabase project.
 
 **MVP Completion: ~90%**
 
-The remaining 10% consists of infrastructure configuration items (custom domain, email SMTP, Google OAuth redirect URI update) that are blocked on external access (DNS admin, Google Cloud Console), plus final QA and data cleanup tasks.
+The remaining 10% consists of infrastructure configuration items (custom domain, email SMTP, Google OAuth redirect URI update) that are blocked on external access (DNS admin, Google Cloud Console), plus final QA, security audit, and data cleanup tasks.
 
 ### Development Loom Videos (oldest to recent)
 
-| Date | Link |
-|------|------|
-| Mar 16 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 |
-| Mar 17 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 |
-| Mar 18 (pt 1) | https://www.loom.com/share/55eca950c6e64f1c93f76717363612a5 |
-| Mar 18 (pt 2) | https://www.loom.com/share/24dbdbfb239646febcdc2706f63c8581 |
-| Mar 24 | https://www.loom.com/share/42bd477c7301465ebc0db4803272d168 |
-| Apr 06 | https://www.loom.com/share/ea88bcd374db42d79fd0c3d2d1bffb65 |
+These recordings are feature walkthroughs of DEVCON+ from early development to present. Watch in order to understand how the product evolved — each video shows the app at a real checkpoint.
+
+| Date | Link | What Was Shown |
+|------|------|---------------|
+| Mar 16 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 | Early feature walkthrough — app at initial development stage |
+| Mar 17 | https://www.loom.com/share/fb458b5cc6ec4ee1b8e0d5e9c89eb8b2 | Continued feature walkthrough — auth and core screens |
+| Mar 18 (pt 1) | https://www.loom.com/share/55eca950c6e64f1c93f76717363612a5 | Feature walkthrough pt 1 — member flow progress |
+| Mar 18 (pt 2) | https://www.loom.com/share/24dbdbfb239646febcdc2706f63c8581 | Feature walkthrough pt 2 — organizer flow progress |
+| Mar 24 | https://www.loom.com/share/42bd477c7301465ebc0db4803272d168 | Sprint checkpoint — Supabase live, stores migrated from mocks |
+| Apr 06 | https://www.loom.com/share/ea88bcd374db42d79fd0c3d2d1bffb65 | QR system live, PWA deployed, edge functions verified |
 
 ## 4.2 Immediate Handover Checklist (Must Complete Before April 30)
 
@@ -429,9 +429,9 @@ The remaining 10% consists of infrastructure configuration items (custom domain,
 
 | Item | Blocker | Action Required |
 |------|---------|----------------|
-| Custom domain `plus-beta.devcon.ph` | DEVCON HQ DNS admin must add CNAME record in Cloudflare | See `.claude/DOMAIN_AND_EMAIL_SETUP.md` Part 1 |
+| Custom domain `plus-beta.devcon.ph` | DEVCON HQ DNS admin must add CNAME record in Cloudflare | See `.claude/docs/DOMAIN_AND_EMAIL_SETUP.md` Part 1 |
 | Google OAuth on production domain | GCP Console needs new redirect URI | Add `https://plus-beta.devcon.ph/auth/v1/callback` to OAuth 2.0 client |
-| Transactional email `no-reply-plus@devcon.ph` | Resend domain DNS verification pending | See `.claude/DOMAIN_AND_EMAIL_SETUP.md` Part 2 |
+| Transactional email `no-reply-plus@devcon.ph` | Resend domain DNS verification pending | See `.claude/docs/DOMAIN_AND_EMAIL_SETUP.md` Part 2 |
 | Edge Function CORS update | After domain goes live | Add `https://plus-beta.devcon.ph` to `ALLOWED_ORIGINS` in `_shared/cors.ts`, redeploy all 5 functions |
 | Supabase redirect URL | After domain goes live | Add `https://plus-beta.devcon.ph/**` in Supabase Auth → URL Configuration |
 | Remove test accounts | Test accounts may appear in officer/admin views | Manual cleanup: Supabase Dashboard → Authentication → Users |
@@ -468,6 +468,39 @@ The remaining 10% consists of infrastructure configuration items (custom domain,
 **Description:** The jobs board contains 8 manually seeded listings in Supabase. There is no external API integration. Adding new jobs requires direct Supabase table access.  
 **Phase 2:** External jobs API integration is on the roadmap.
 
+### No Staging Database (Free Plan Limitation)
+**Severity:** Medium (workflow risk)  
+**Description:** The project uses Supabase Free Plan, which does not include the Branching feature. Local development hits the **same live production Supabase project** as the deployed app. There is no isolated staging environment.  
+**Risk:** A bad migration or seed script run locally will affect real members' data.  
+**Workaround for the receiving team:**
+- Create a dedicated **test user account** in Supabase Auth for development — never test with a real member's account.
+- Before applying any schema migration, paste the SQL into the Supabase **SQL Editor** preview to check for errors — do not run `supabase db push` without reviewing the migration first.
+- Consider upgrading to Supabase Pro ($25/month) to unlock DB Branching if the codebase becomes more actively developed post-MVP.
+
+### Security Audit Status (as of April 17, 2026)
+**Tool:** AgentShield scan on `.claude/` configuration directory  
+**Grade: B (78/100)**
+
+| Category | Score | Notes |
+|----------|-------|-------|
+| Secrets | 100 | No hardcoded secrets detected |
+| Permissions | 91 | No overly permissive allow lists |
+| Hooks | 100 | No dangerous hook patterns |
+| MCP Servers | 100 | Clean |
+| Agents | 0 | Agent files flagged for size (>5000 chars) — see below |
+
+**Findings breakdown:**
+
+6 HIGH findings — all **false positives** or **intentional**:
+- `CLAUDE.md` and `DEV_ONBOARDING_AGENT.md` flagged for the phrase "backward compatible" — this is a legitimate English description of the MD3/legacy typography coexistence, not an evasion technique.
+- `SECURITY_AGENT.md` flagged for HTML comments containing `DROP TABLE` test vectors — these are **intentional**. The security agent file contains SQL injection test vectors explicitly labeled "paste into a form field to test, do NOT execute." This is expected in a security testing agent.
+
+7 MEDIUM findings:
+- **No `PreToolUse` hooks** in `settings.json` / `settings.local.json` — legitimate recommendation. Adding pre-tool hooks would add a security layer before sensitive Bash or file operations. Not critical for MVP but worth adding post-launch.
+- **Large agent definition files** (5 files flagged, 5,000–15,000 effective chars each) — the scanner flags large agent docs as potential hidden-instruction vectors. These are legitimate comprehensive agent definitions, not security risks. Review the end of each agent file manually to verify.
+
+**Action required:** No critical or urgent security fixes from this scan. The `PreToolUse` hook recommendation is the only actionable medium finding. OWASP Top 10 pen test pass on the **application code** (not just config) is still required before May 15 — see L1 checklist in Section 4.2.
+
 ## 4.4 Constraints
 
 ### Technical
@@ -487,7 +520,7 @@ The remaining 10% consists of infrastructure configuration items (custom domain,
 
 ### Timeline
 - **April 30:** Development freeze. No new features after this date.
-- **May 15:** Public preview for Cohort 3 Graduation showcase. All L1 items must be resolved before this date.
+- **May 15:** Public preview (if followed). All L1 items must be resolved before this date.
 
 ---
 
@@ -737,14 +770,24 @@ The following credentials and accesses must be transferred from the outgoing tea
 
 ## 6.2 Contact Matrix
 
-| Role | Responsibility | Contact |
-|------|----------------|---------|
-| Outgoing Dev Lead | Primary technical handover, credential transfer, Q&A | [Contact via DEVCON Jumpstart — anonymous for this document] |
-| Outgoing Dev (Backend/QR) | Edge functions, Supabase schema, QR system deep-dive | [Contact via DEVCON Jumpstart — anonymous for this document] |
-| DEVCON HQ IT Officer | DNS records (Cloudflare `devcon.ph`), Resend domain, Google Cloud Console access | Via DEVCON Philippines HQ |
-| DEVCON HQ Engineering Contact | Supabase project ownership, long-term platform direction | Via DEVCON Philippines HQ |
+| Role | Person | Responsibility | Async Channel |
+|------|--------|----------------|---------------|
+| Outgoing Dev (Frontend) | **Kien** | All page components, auth UI, design system, animations, responsive layout | Viber · Telegram · GitHub |
+| Outgoing Dev (Backend) | **Kenshin** | Edge functions, Supabase schema, QR system, RLS, stores, credential transfer | Viber · Telegram · GitHub |
+| Project Manager | **Sir Dom** | Product direction, stakeholder coordination, milestone sign-off | Viber · Telegram |
+| DEVCON HQ IT Officer | TBD via DEVCON HQ | DNS (Cloudflare `devcon.ph`), Resend domain, Google Cloud Console | Via DEVCON Philippines HQ |
+| DEVCON HQ Engineering | TBD via DEVCON HQ | Supabase project ownership, long-term platform direction | Via DEVCON Philippines HQ |
 
 ## 6.3 Knowledge Transfer Plan
+
+### Async Support Channels
+
+After April 26, the outgoing team is available for async questions via:
+- **Viber** — fastest response, use for urgent questions
+- **Telegram** — preferred for longer technical threads
+- **GitHub** — open issues on the repo for code-specific questions or bugs
+
+Contact Kien or Kenshin directly. For product/scope decisions, loop in Sir Dom.
 
 ### Week 1 (April 21–26) — Active Overlap Period
 The outgoing team is available for questions and pair sessions during this window. Claude Code AI assistance is also available until April 26.
@@ -764,7 +807,7 @@ The outgoing team is available for questions and pair sessions during this windo
 | Developer handover + status | `PRD.md` | **Required** |
 | Vercel build safety rules | `.claude/rules/vercel-build-safety.md` | **Required** |
 | DB connection resilience rule | `.claude/rules/db-connection-resilience.md` | **Required** |
-| Domain + email setup guide | `.claude/DOMAIN_AND_EMAIL_SETUP.md` | Required for infra work |
+| Domain + email setup guide | `.claude/docs/DOMAIN_AND_EMAIL_SETUP.md` | Required for infra work |
 | Full PRD (Google Doc) | https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/ | Supplementary |
 | Figma prototype | https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/ | Supplementary |
 | Lovable prototype (UX reference) | https://devconplusrndprototype.lovable.app/ | Supplementary |
@@ -859,7 +902,7 @@ The outgoing team is available for questions and pair sessions during this windo
 |----------|------|---------|
 | Live app | https://devconplusbeta-v1.vercel.app | Current production deployment |
 | GitHub repository | https://github.com/rocketwolf98/devconplusClaudeCode | Codebase |
-| Full PRD (Google Doc) | https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/ | Extended product requirements |
+| Original PRD (Google Doc) | https://docs.google.com/document/d/1VUGu4t6M4QUHlljm1c6JmpINZxkN4gQUVJFceh71c8k/ | Extended product requirements |
 | Figma prototype | https://www.figma.com/design/sYDNlHmsHK5dZRHvNabfcn/ | Design reference |
 | Lovable prototype | https://devconplusrndprototype.lovable.app/ | UX interaction reference |
 | OWASP Top 10 | https://owasp.org/www-project-top-ten/ | Security audit standard |
@@ -881,14 +924,75 @@ These recordings capture the app at each major development checkpoint. Watch in 
 | March 24 | https://www.loom.com/share/42bd477c7301465ebc0db4803272d168 | Sprint checkpoint |
 | April 06 | https://www.loom.com/share/ea88bcd374db42d79fd0c3d2d1bffb65 | QR system live, PWA deployed |
 
-## 8.5 Phase 2 Roadmap (Post–May 15, 2026)
+## 8.5 Coming Soon — Confirmed Planned Features
+
+These three features are confirmed for development after MVP launch. They are **not in scope for April 30** but are expected deliverables in Phase 2. Use `<ComingSoonModal />` if a user reaches any of these entry points during MVP.
+
+### 1. Messaging / Group Chat System
+**Purpose:** Async chapter-scoped messaging so members in the same chapter can communicate, collaborate, and build community without leaving the app.
+
+**Scope:**
+- Chapter-scoped message threads (not 1:1 DM at launch — chapter board first)
+- Realtime delivery via Supabase Realtime broadcast channel
+- Officers can delete/moderate messages
+- Entry point: Dashboard quick action or Profile → Community
+
+**New DB tables needed:**
+```sql
+chat_threads (id, chapter_id, title, created_by, created_at)
+chat_messages (id, thread_id, author_id, content, created_at)
+```
+
+**Why deferred:** Requires moderation tooling, Realtime broadcast pattern (different from postgres_changes), and officer tooling integration. Not feasible before April 30.
+
+---
+
+### 2. Professional Friend / Connection System
+**Purpose:** A professional networking discovery layer — like Tinder swipe UX but for connecting with other DEVCON members. Think LinkedIn's "People You May Know" but contextual to your chapter and event attendance.
+
+**Scope:**
+- Swipe-based discovery UI (framer-motion `drag` + `dragConstraints`)
+- Match on: same chapter, attended same events, similar school/company
+- Mutual connection = both swiped right → connection established
+- Connection feed / list view on Profile
+- No messaging between connections at launch (Phase 3)
+
+**New DB tables needed:**
+```sql
+connection_requests (id, from_user_id, to_user_id, status, created_at)
+-- status: 'pending' | 'accepted' | 'rejected'
+connections (id, user_a_id, user_b_id, connected_at)
+```
+
+**Why deferred:** Swipe gesture UX requires careful tuning. Discovery algorithm needs event attendance data as a signal. Privacy considerations for member profile visibility.
+
+---
+
+### 3. Profile View (Separate from Settings)
+**Purpose:** A public-facing profile page that other members (and eventually connections) can view — separate from the current `/profile/edit` settings screen.
+
+**Scope:**
+- Public profile URL: `/profile/:username` (username is already unique in DB)
+- Shows: display name, chapter, XP tier/badge, events attended, volunteer history
+- Privacy controls: member can toggle what's visible (uses existing `Privacy` settings screen)
+- Own profile view accessible from nav Profile tab (before settings)
+
+**Implementation note:** The `username` field already exists on `profiles` and is unique — the foundation is in place. The `/profile/edit` screen already has photo upload. This feature mostly requires a new read-only display component and a route.
+
+**Why deferred:** Requires privacy policy review before exposing member data to other members. Scope agreed but timing deferred to Phase 2.
+
+---
+
+## 8.6 Phase 2 Roadmap (Post–May 15, 2026)
 
 These features are deferred and must not be built before April 30, 2026.
 
 | Feature | Description | Technical Notes |
 |---------|-------------|----------------|
 | **KMP Migration** | Port to Kotlin Multiplatform (Android + iOS + Web) | `supabase-kt` client maps to current stores. React architecture is already store-pattern friendly. |
-| **Group Chat** | Async chapter-scoped message board | New tables: `chat_threads`, `chat_messages`. Realtime broadcast channel. Moderation by officers. |
+| **Group Chat** | Async chapter-scoped message board | New tables: `chat_threads`, `chat_messages`. Realtime broadcast channel. Moderation by officers. See Section 8.5. |
+| **Professional Connections** | Swipe-to-connect discovery for DEVCON members | framer-motion `drag` UX, connection_requests table, match algorithm. See Section 8.5. |
+| **Public Profile View** | Read-only profile page at `/profile/:username` | Username field already exists. Needs privacy controls + new display component. See Section 8.5. |
 | **Swipe Feed** | Vertical swipe content feed (events, news, jobs) | framer-motion `drag` + `dragConstraints`. Feed ranking logic. New data structures. |
 | **Push Notifications** | Native push for events and points | Requires service worker. Out of scope for web MVP. Native target via KMP. |
 | **Reward Fulfillment** | Physical shipping + digital voucher delivery | Logistics and third-party fulfillment integration. |
