@@ -1,11 +1,15 @@
 -- supabase/migrations/20260419_interest_quiz.sql
 
+-- 0. intarray extension required for && overlap operator on integer[] columns
+CREATE EXTENSION IF NOT EXISTS intarray;
+
 -- 1. Lookup table for all pill options (seeded, read-only for members)
-CREATE TABLE interest_options (
+CREATE TABLE IF NOT EXISTS interest_options (
   id       serial PRIMARY KEY,
   category text NOT NULL CHECK (category IN ('interest', 'tech_stack', 'community_role')),
   label    text NOT NULL,
-  emoji    text  -- reserved for future use (push notifications, KMP native app); not rendered in web UI
+  emoji    text,  -- reserved for future use (push notifications, KMP native app); not rendered in web UI
+  UNIQUE (category, label)
 );
 
 ALTER TABLE interest_options ENABLE ROW LEVEL SECURITY;
@@ -17,14 +21,14 @@ CREATE POLICY "interest_options public read"
 --    '{}'  = user went through the quiz and skipped / selected nothing
 --    '{1,2,3}' = user made selections
 ALTER TABLE profiles
-  ADD COLUMN interests       integer[] DEFAULT NULL,
-  ADD COLUMN tech_stack      integer[] DEFAULT NULL,
-  ADD COLUMN community_roles integer[] DEFAULT NULL;
+  ADD COLUMN IF NOT EXISTS interests       integer[] DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS tech_stack      integer[] DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS community_roles integer[] DEFAULT NULL;
 
--- 3. GIN indexes for future overlap queries (Tinder-style matching)
-CREATE INDEX profiles_interests_gin       ON profiles USING GIN (interests);
-CREATE INDEX profiles_tech_stack_gin      ON profiles USING GIN (tech_stack);
-CREATE INDEX profiles_community_roles_gin ON profiles USING GIN (community_roles);
+-- 3. GIN indexes using gin__int_ops to support && overlap operator queries
+CREATE INDEX profiles_interests_gin       ON profiles USING GIN (interests gin__int_ops);
+CREATE INDEX profiles_tech_stack_gin      ON profiles USING GIN (tech_stack gin__int_ops);
+CREATE INDEX profiles_community_roles_gin ON profiles USING GIN (community_roles gin__int_ops);
 
 -- 4. Seed data — 12 interests + 12 tech_stack + 8 community_roles = 32 rows
 INSERT INTO interest_options (category, label, emoji) VALUES
@@ -59,4 +63,5 @@ INSERT INTO interest_options (category, label, emoji) VALUES
   ('community_role', 'Hackathon',  '💻'),
   ('community_role', 'Student',    '🌱'),
   ('community_role', 'Hiring',     '🏢'),
-  ('community_role', 'Job Seeker', '🔍');
+  ('community_role', 'Job Seeker', '🔍')
+ON CONFLICT (category, label) DO NOTHING;
