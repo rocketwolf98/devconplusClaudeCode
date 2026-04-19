@@ -11,17 +11,11 @@ import { staggerContainer, cardItem } from '../../../lib/animation'
 
 const MENU_ITEMS: { label: string; icon?: ComponentType<{ className?: string }>; path?: string; modal?: string }[] = [
   { label: 'Edit Profile',          path: '/organizer/profile/edit'           },
-  { label: 'Manage Co-Organizers',  path: '/organizer/profile/co-organizers' },
+  { label: 'Manage Co-Organizers',  modal: 'Manage Co-Organizers' },
   { label: 'Notifications',         path: '/organizer/profile/notifications'  },
   { label: 'Privacy & Security',    path: '/organizer/profile/privacy'        },
   { label: 'Help & Support',        modal: 'Help & Support'                   },
 ]
-
-const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  upcoming: { bg: 'bg-blue/10',    text: 'text-blue',       label: 'Upcoming' },
-  ongoing:  { bg: 'bg-green/10',   text: 'text-green',      label: 'Ongoing'  },
-  past:     { bg: 'bg-slate-100',  text: 'text-slate-500',  label: 'Past'     },
-}
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -118,7 +112,6 @@ export function OrgProfile() {
               animate="visible"
             >
               {chapterEvents.map((event) => {
-                const style = STATUS_STYLES[event.status] ?? STATUS_STYLES.past
                 const dateStr = event.event_date
                   ? new Date(event.event_date).toLocaleDateString('en-PH', {
                       month: 'short', day: 'numeric', year: 'numeric',
@@ -140,19 +133,16 @@ export function OrgProfile() {
                       <p className="text-md3-body-md font-semibold text-slate-900 leading-tight truncate">
                         {event.title}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-md3-label-md text-slate-400">{dateStr}</p>
+                      <div className="flex items-center gap-2 mt-1 min-w-0">
+                        <p className="text-md3-label-md text-slate-400 shrink-0">{dateStr}</p>
                         {event.location && (
-                          <p className="text-md3-label-md text-slate-400 flex items-center gap-0.5 truncate">
+                          <p className="text-md3-label-md text-slate-400 flex items-center gap-0.5 min-w-0">
                             <MapPointOutline className="w-2.5 h-2.5 shrink-0" />
-                            {event.location}
+                            <span className="truncate">{event.location}</span>
                           </p>
                         )}
                       </div>
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${style.bg} ${style.text}`}>
-                      {style.label}
-                    </span>
                   </motion.button>
                 )
               })}

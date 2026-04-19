@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { MapPointOutline, BoltOutline, ClockCircleOutline, AddCircleOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
+import { useAuthStore } from '../../../stores/useAuthStore'
 import { StatusBadge } from '../../../components/StatusBadge'
 import { staggerContainer, cardItem, fadeUp } from '../../../lib/animation'
 import { isEventArchived } from '../../../lib/dates'
@@ -14,10 +15,12 @@ const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
 export function OrgEventsList() {
   const navigate = useNavigate()
   const { events, fetchEvents } = useEventsStore()
+  const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming')
 
-  const upcomingEvents = events.filter((e) => !isEventArchived(e))
-  const pastEvents     = events.filter((e) => isEventArchived(e))
+  const chapterEvents  = events.filter((e) => e.chapter_id === (user?.chapter_id ?? null))
+  const upcomingEvents = chapterEvents.filter((e) => !isEventArchived(e))
+  const pastEvents     = chapterEvents.filter((e) => isEventArchived(e))
   const displayEvents  = activeTab === 'upcoming' ? upcomingEvents : pastEvents
 
   useEffect(() => { void fetchEvents() }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -137,15 +140,17 @@ export function OrgEventsList() {
                   <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
                     {event.title}
                   </p>
-                  <StatusBadge
-                    status={
-                      event.status === 'upcoming'
-                        ? 'pending'
-                        : event.status === 'ongoing'
-                        ? 'approved'
-                        : 'rejected'
-                    }
-                  />
+                  {!isEventArchived(event) && (
+                    <StatusBadge
+                      status={
+                        event.status === 'upcoming'
+                          ? 'pending'
+                          : event.status === 'ongoing'
+                          ? 'approved'
+                          : 'rejected'
+                      }
+                    />
+                  )}
                 </div>
 
                 <p className="text-[11px] text-slate-500 mb-0.5">

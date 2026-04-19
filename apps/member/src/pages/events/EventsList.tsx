@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useDeferredValue, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, ClockCircleOutline, CalendarMarkOutline, CheckCircleOutline, CloseCircleLineDuotone, FilterLinear } from 'solar-icon-set'
+import { UsersGroupRoundedOutline, MapPointOutline, AltArrowRightOutline, TicketOutline, ClockCircleOutline, CalendarMarkOutline, CheckCircleOutline, CloseCircleLineDuotone, FilterLinear, MagniferOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -9,6 +9,9 @@ import { SkeletonEventCard, SkeletonFeaturedEvent } from '../../components/Skele
 import { staggerContainer, cardItem, fadeUp } from '../../lib/animation'
 import { isEventArchived } from '../../lib/dates'
 import { supabase } from '../../lib/supabase'
+import { fuzzySearchFilter } from '../../lib/utils'
+import SearchBar from '../../components/SearchBar'
+import SearchEmptyState from '../../components/SearchEmptyState'
 import type { Event, EventRegistration, Chapter } from '@devcon-plus/supabase'
 
 // Flower-of-life pattern matching Rewards/Dashboard
@@ -40,6 +43,9 @@ export default function EventsList() {
   const { events, registrations, fetchEvents, fetchRegistrations, isLoading } = useEventsStore()
   const [tab, setTab] = useState<'discover' | 'tickets'>('discover')
 
+  const [isSearchVisible, setIsSearchVisible] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
   // Chapter filter state
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [selectedChapterId, setSelectedChapterId] = useState<string | null>(user?.chapter_id ?? null)
@@ -50,6 +56,8 @@ export default function EventsList() {
   useEffect(() => {
     void fetchEvents()
     if (user?.id) void fetchRegistrations(user.id)
+
+    if (!user?.id) return
 
     supabase
       .from('event_registrations')
@@ -87,28 +95,51 @@ export default function EventsList() {
       })
   }, [user?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Filter events by selected chapter, excluding archived events in Discover tab
-  const filteredEvents = selectedChapterId
-    ? events.filter((e) => e.chapter_id === selectedChapterId)
-    : events
+  const toggleSearch = () => {
+    setIsSearchVisible(!isSearchVisible)
+    if (isSearchVisible) {
+      setSearchQuery('')
+    }
+  }
 
-  const activeEvents = filteredEvents.filter((e) => !isEventArchived(e))
+  const trimmedQuery = searchQuery.trim()
+  const deferredQuery = useDeferredValue(trimmedQuery)
 
-  const featuredEvent = activeEvents.find((e) => e.is_featured) ?? activeEvents[0]
-  const listEvents = activeEvents.filter((e) => e.id !== featuredEvent?.id)
+  const { chapterFilteredEvents, activeEvents } = useMemo(() => {
+    const chapterFilteredEvents = selectedChapterId
+      ? events.filter((e) => e.chapter_id === selectedChapterId)
+      : events
+    return { chapterFilteredEvents, activeEvents: chapterFilteredEvents.filter((e) => !isEventArchived(e)) }
+  }, [events, selectedChapterId])
+
+  const { matchingEvents, featuredEvent, displayEvents, showHero } = useMemo(() => {
+    const matchingEvents = activeEvents.filter(event =>
+      fuzzySearchFilter(deferredQuery, event, ['title', 'description', 'location'])
+    )
+    const featuredEvent = activeEvents.find((e) => e.is_featured) ?? activeEvents[0]
+    const displayEvents = deferredQuery
+      ? matchingEvents
+      : activeEvents.filter((e) => e.id !== featuredEvent?.id)
+    return { matchingEvents, featuredEvent, displayEvents, showHero: !deferredQuery && !!featuredEvent }
+  }, [activeEvents, deferredQuery])
 
   const selectedChapterName = selectedChapterId
     ? (chapters.find((c) => c.id === selectedChapterId)?.name ?? null)
     : 'All Chapters'
 
-  // My Tickets: approved first, then pending; exclude rejected
-  const myTickets: TicketEntry[] = registrations
+  // We use events.find on the FULL list to ensure tickets show even if they are for a different chapter
+  const allTickets: TicketEntry[] = useMemo(() => registrations
     .filter((r) => r.status === 'approved' || r.status === 'pending')
     .map((r) => ({ reg: r, event: events.find((e) => e.id === r.event_id) }))
     .filter((item): item is TicketEntry => item.event !== undefined)
-    .sort((a, b) => (a.reg.status === 'approved' ? -1 : 1) - (b.reg.status === 'approved' ? -1 : 1))
+    .sort((a, b) => (a.reg.status === 'approved' ? -1 : 1) - (b.reg.status === 'approved' ? -1 : 1)),
+  [registrations, events])
 
-  const ticketCount = myTickets.length
+  const filteredTickets = useMemo(() => allTickets.filter(item =>
+    fuzzySearchFilter(deferredQuery, item.event, ['title', 'description', 'location'])
+  ), [allTickets, deferredQuery])
+
+  const ticketCount = allTickets.length
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -119,7 +150,7 @@ export default function EventsList() {
 
         {/* ── Blue Background Container ── */}
         <div 
-          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[64px]"
+          className="bg-primary relative overflow-hidden z-0 pointer-events-auto pb-[24px]"
           style={{ 
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -136,6 +167,13 @@ export default function EventsList() {
             
             <div className="flex items-center gap-[8px]">
               <button 
+                onClick={toggleSearch}
+                className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
+                aria-label="Search events"
+              >
+                <MagniferOutline className="w-[18px] h-[18px]" color="white" />
+              </button>
+              <button 
                 onClick={() => setShowChapterSheet(true)}
                 className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
                 aria-label="Filter events"
@@ -146,61 +184,13 @@ export default function EventsList() {
           </div>
         </div>
 
-        {/* ── Points/Chapter Card Overlay ── */}
-        <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
-          {tab === 'discover' && selectedChapterName && (
-            <motion.div 
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
-            >
-              <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <MapPointOutline className="size-[24px]" color="rgb(var(--color-primary))" />
-              </div>
-              <div className="flex flex-col justify-center translate-y-px">
-                <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
-                  Current Chapter
-                </p>
-                <p className="font-proxima font-extrabold text-[24px] text-[#1A1A1A] leading-tight line-clamp-1">
-                  {selectedChapterName}
-                </p>
-              </div>
-            </motion.div>
-          )}
-          
-          {tab === 'tickets' && (
-            <motion.div 
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="h-[100px] bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 flex items-center px-[21px] gap-4 pointer-events-auto"
-            >
-              <div className="size-[48px] rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <TicketOutline className="size-[24px]" color="rgb(var(--color-primary))" />
-              </div>
-              <div className="flex flex-col justify-center translate-y-px">
-                <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
-                  My Tickets
-                </p>
-                <div className="flex items-baseline gap-1.5">
-                  <p className="font-proxima font-extrabold text-[40px] text-[#1A1A1A] leading-none tracking-tight">
-                    {ticketCount}
-                  </p>
-                  <p className="font-proxima font-semibold text-[20px] text-[#1A1A1A] leading-none">
-                    Event{ticketCount !== 1 ? 's' : ''}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-
         {/* ── Tabs Wrapper ── */}
         <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px] overflow-x-auto no-scrollbar max-w-4xl mx-auto">
             {(['discover', 'tickets'] as const).map((t) => (
               <button
                 key={t}
-                onClick={() => setTab(t)}
+                onClick={() => { setTab(t); setSearchQuery('') }}
                 className={`whitespace-nowrap px-[12px] h-[32px] flex-1 flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all shrink-0 ${
                   tab === t
                     ? 'bg-primary text-white shadow-sm'
@@ -221,6 +211,14 @@ export default function EventsList() {
             ))}
           </div>
         </div>
+
+        <SearchBar
+          isVisible={isSearchVisible}
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onClear={() => setSearchQuery('')}
+          placeholder={tab === 'discover' ? 'Search events or locations...' : 'Search your tickets...'}
+        />
       </header>
 
       <AnimatePresence mode="wait">
@@ -259,8 +257,16 @@ export default function EventsList() {
               </div>
             )}
 
+            {!isLoading && deferredQuery && matchingEvents.length === 0 && (
+              <SearchEmptyState
+                headline="No events found"
+                body="Try adjusting your search query or chapter filter."
+                className="pt-20 pb-8"
+              />
+            )}
+
             {/* Empty state — chapter filter yields nothing */}
-            {!isLoading && events.length > 0 && filteredEvents.length === 0 && (
+            {!isLoading && !deferredQuery && events.length > 0 && chapterFilteredEvents.length === 0 && (
               <div className="flex flex-col items-center justify-center px-4 pt-20 pb-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <CalendarMarkOutline className="w-8 h-8" color="#0b46a3" />
@@ -281,7 +287,7 @@ export default function EventsList() {
             )}
 
             {/* Featured hero card */}
-            {!isLoading && featuredEvent && (
+            {!isLoading && showHero && (
               <div className="pt-4 pb-2">
                 <motion.div
                   variants={fadeUp}
@@ -299,14 +305,15 @@ export default function EventsList() {
             )}
 
             {/* Event list — staggered */}
-            {!isLoading && filteredEvents.length > 0 && (
+            {!isLoading && displayEvents.length > 0 && (
               <motion.div
+                key={`discover-grid-${deferredQuery}`}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
               >
-                {listEvents.map((event) => {
+                {displayEvents.map((event) => {
                   const dateParts = event.event_date ? formatEventDate(event.event_date) : null
                   const isArchived = isEventArchived(event)
                   return (
@@ -413,7 +420,7 @@ export default function EventsList() {
             transition={{ duration: 0.15 }}
           >
           <div className="md:max-w-4xl md:mx-auto px-4 pt-4 pb-28">
-            {myTickets.length === 0 ? (
+            {allTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center px-4 pt-24">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <TicketOutline className="w-8 h-8" color="#0b46a3" />
@@ -429,14 +436,21 @@ export default function EventsList() {
                   Browse Events
                 </button>
               </div>
+            ) : deferredQuery && filteredTickets.length === 0 ? (
+              <SearchEmptyState
+                headline="No tickets found"
+                body="Try adjusting your search query."
+                className="pt-20 pb-8"
+              />
             ) : (
               <motion.div
+                key={`tickets-grid-${deferredQuery}`}
                 className="pt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                 variants={staggerContainer}
                 initial="hidden"
                 animate="visible"
               >
-                {myTickets.map(({ reg, event: ev }) => {
+                {filteredTickets.map(({ reg, event: ev }) => {
                   const isApproved = reg.status === 'approved'
                   const destination = isApproved
                     ? `/events/${ev.slug}/ticket`

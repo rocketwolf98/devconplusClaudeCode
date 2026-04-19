@@ -333,24 +333,6 @@ export function OrgRewardsManagement() {
                 </p>
               </div>
             </div>
-
-            {/* Divider */}
-            <div className="w-px h-[50px] bg-slate-100" />
-
-            {/* Pending */}
-            <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
-              <div className="shrink-0 size-[40px] bg-amber-50 rounded-xl flex items-center justify-center">
-                <UserOutline className="size-5" color="#F59E0B" />
-              </div>
-              <div className="flex flex-col justify-center translate-y-px">
-                <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px] uppercase tracking-wide">
-                  Pending
-                </p>
-                <p className="font-proxima font-extrabold text-[24px] text-[#464646] leading-none tracking-tight">
-                  {pendingClaims.length}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -537,12 +519,12 @@ export function OrgRewardsManagement() {
             {/* PIN Search */}
             <div className="relative">
               <input
-                type="number"
+                type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
                 value={pinSearch}
-                onChange={(e) => setPinSearch(e.target.value.slice(0, 6))}
+                onChange={(e) => setPinSearch(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="Enter 6-digit claim PIN..."
                 className="w-full h-[44px] bg-white border border-slate-200 rounded-[12px] px-4 pr-10 text-[14px] font-proxima text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#1152d4] transition-colors"
               />

@@ -248,15 +248,17 @@ function EventRow({ event, onTap }: EventRowProps) {
           <p className="font-proxima font-bold text-[14px] text-slate-900 leading-tight truncate">
             {event.title}
           </p>
-          <StatusBadge
-            status={
-              event.status === 'upcoming'
-                ? 'pending'
-                : event.status === 'ongoing'
-                ? 'approved'
-                : 'rejected'
-            }
-          />
+          {!isExpired && (
+            <StatusBadge
+              status={
+                event.status === 'upcoming'
+                  ? 'pending'
+                  : event.status === 'ongoing'
+                  ? 'approved'
+                  : 'rejected'
+              }
+            />
+          )}
         </div>
 
         {/* Date Text */}

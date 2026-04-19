@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo, useDeferredValue } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CaseOutline, AltArrowDownOutline, MapPointOutline, ShareOutline, StarOutline, UsersGroupRoundedOutline, FileTextOutline, CodeSquareOutline, CupFirstOutline, BoltOutline, MagniferOutline } from 'solar-icon-set'
@@ -8,6 +8,9 @@ import { useAuthStore } from '../../stores/useAuthStore'
 import { SkeletonJobCard } from '../../components/Skeleton'
 import { WORK_TYPE_LABELS } from '../../lib/constants'
 import { staggerContainer, cardItem } from '../../lib/animation'
+import { fuzzySearchFilter } from '../../lib/utils'
+import SearchBar from '../../components/SearchBar'
+import SearchEmptyState from '../../components/SearchEmptyState'
 import type { MissionDifficulty } from '@devcon-plus/supabase'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -26,7 +29,7 @@ const DIFF_CONFIG: Record<MissionDifficulty, { label: string; bg: string; text: 
 
 // ── Jobs tab ──────────────────────────────────────────────────────────────────
 
-function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
+function JobsTab({ initialExpandId, searchQuery }: { initialExpandId: string | null; searchQuery: string }) {
   const { jobs, isLoading, error, fetchJobs } = useJobsStore()
   const [expandedId, setExpandedId] = useState<string | null>(initialExpandId)
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -54,6 +57,12 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
     }
   }, [initialExpandId, isLoading])
 
+  const filteredJobs = useMemo(() =>
+    jobs.filter(job =>
+      fuzzySearchFilter(searchQuery, job, ['title', 'description', 'company'])
+    ), [jobs, searchQuery]
+  )
+
   if (isLoading) return (
     <div className="space-y-3 px-4 pt-5">
       {Array.from({ length: 5 }).map((_, i) => <SkeletonJobCard key={i} />)}
@@ -77,9 +86,19 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
     </div>
   )
 
+  if (filteredJobs.length === 0 && searchQuery) return (
+    <SearchEmptyState headline="No results found" body="Try adjusting your search query." />
+  )
+
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-3 px-4 pt-5 pb-24">
-      {jobs.map(job => {
+    <motion.div
+      key={`jobs-grid-${searchQuery}`}
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="space-y-3 px-4 pt-5 pb-24"
+    >
+      {filteredJobs.map(job => {
         const isExpanded = expandedId === job.id
         return (
           <motion.div
@@ -166,7 +185,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
                       ? <p className="text-md3-body-md text-slate-600 leading-relaxed whitespace-pre-line">{job.description}</p>
                       : <p className="text-md3-body-md text-slate-400 italic">No description provided.</p>
                     }
-                    {job.apply_url && (
+                    {job.apply_url && (job.apply_url.startsWith('https://') || job.apply_url.startsWith('http://')) && (
                       <a href={job.apply_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center justify-center gap-2 w-full bg-primary text-white font-bold text-md3-body-md py-3 rounded-full shadow-sm">
                         Apply Now <ShareOutline className="w-4 h-4" />
@@ -185,7 +204,7 @@ function JobsTab({ initialExpandId }: { initialExpandId: string | null }) {
 
 // ── Missions tab ──────────────────────────────────────────────────────────────
 
-function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
+function MissionsTab({ initialExpandId, searchQuery }: { initialExpandId: string | null; searchQuery: string }) {
   const { missions, participants, submissions, isLoading, error, fetchAll, startMission, submitMission, subscribeToChanges } = useMissionsStore()
   const { user } = useAuthStore()
   const [expandedId, setExpandedId] = useState<string | null>(initialExpandId)
@@ -233,6 +252,10 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
       setSubmitErrors((p) => ({ ...p, [missionId]: 'Please enter your PR link.' }))
       return
     }
+    if (!link.startsWith('https://') && !link.startsWith('http://')) {
+      setSubmitErrors((p) => ({ ...p, [missionId]: 'Please enter a valid URL starting with https://.' }))
+      return
+    }
     setSubmitting((p) => ({ ...p, [missionId]: true }))
     setSubmitErrors((p) => ({ ...p, [missionId]: '' }))
     try {
@@ -244,6 +267,12 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
       setSubmitting((p) => ({ ...p, [missionId]: false }))
     }
   }
+
+  const filteredMissions = useMemo(() =>
+    missions.filter(mission =>
+      fuzzySearchFilter(searchQuery, mission, ['title', 'description'])
+    ), [missions, searchQuery]
+  )
 
   if (isLoading) return (
     <div className="space-y-3 px-4 pt-5">
@@ -268,9 +297,19 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
     </div>
   )
 
+  if (filteredMissions.length === 0 && searchQuery) return (
+    <SearchEmptyState headline="No results found" body="Try adjusting your search query." />
+  )
+
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-3 px-4 pt-5 pb-24">
-      {missions.map((mission) => {
+    <motion.div
+      key={`missions-grid-${searchQuery}`}
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+      className="space-y-3 px-4 pt-5 pb-24"
+    >
+      {filteredMissions.map((mission) => {
         const diff = DIFF_CONFIG[mission.difficulty]
         const isClaimed = mission.status === 'claimed'
         const isExpanded = expandedId === mission.id
@@ -371,7 +410,7 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                     )}
 
                     {/* GitHub link */}
-                    {mission.github_url && (
+                    {mission.github_url && (mission.github_url.startsWith('https://') || mission.github_url.startsWith('http://')) && (
                       <a href={mission.github_url} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-2 text-md3-body-md text-slate-500 hover:text-slate-800 transition-colors">
                         <CodeSquareOutline className="w-4 h-4 shrink-0" />
@@ -414,7 +453,9 @@ function MissionsTab({ initialExpandId }: { initialExpandId: string | null }) {
                               exit={{ height: 0, opacity: 0 }} className="overflow-hidden space-y-2"
                             >
                               <input
-                                type="url"
+                                type="text"
+                                inputMode="url"
+                                maxLength={2048}
                                 value={prDrafts[mission.id] ?? ''}
                                 onChange={(e) => setPrDrafts((p) => ({ ...p, [mission.id]: e.target.value }))}
                                 placeholder="https://github.com/your/repo/pull/123"
@@ -493,9 +534,19 @@ export default function JobsList() {
     tabParam === 'missions' ? 'missions' : 'jobs'
   )
 
+  const [isSearchVisible, setIsSearchVisible] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const deferredQuery = useDeferredValue(searchQuery.trim())
+
   const switchTab = (tab: 'jobs' | 'missions') => {
     setActiveTab(tab)
     setSearchParams(tab === 'missions' ? { tab: 'missions' } : {}, { replace: true })
+    setSearchQuery('')
+  }
+
+  const toggleSearch = () => {
+    setIsSearchVisible(!isSearchVisible)
+    if (isSearchVisible) setSearchQuery('')
   }
 
   return (
@@ -524,6 +575,7 @@ export default function JobsList() {
             
             <div className="flex items-center gap-[8px]">
               <button 
+                onClick={toggleSearch}
                 className="bg-white/20 backdrop-blur-md size-[42px] flex items-center justify-center rounded-full border border-white/30 transition-colors active:bg-white/30 shadow-lg"
                 aria-label="Search"
               >
@@ -551,11 +603,19 @@ export default function JobsList() {
             ))}
           </div>
         </div>
+
+        <SearchBar
+          isVisible={isSearchVisible}
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onClear={() => setSearchQuery('')}
+          placeholder={activeTab === 'jobs' ? 'Search jobs or companies...' : 'Search missions...'}
+        />
       </header>
 
       <div className="flex-1">
-        {activeTab === 'jobs'     && <JobsTab     initialExpandId={activeTab === 'jobs'     ? idParam : null} />}
-        {activeTab === 'missions' && <MissionsTab initialExpandId={activeTab === 'missions' ? idParam : null} />}
+        {activeTab === 'jobs'     && <JobsTab     initialExpandId={activeTab === 'jobs'     ? idParam : null} searchQuery={deferredQuery} />}
+        {activeTab === 'missions' && <MissionsTab initialExpandId={activeTab === 'missions' ? idParam : null} searchQuery={deferredQuery} />}
       </div>
     </div>
   )
