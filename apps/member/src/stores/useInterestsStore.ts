@@ -60,11 +60,14 @@ export const useInterestsStore = create<InterestsState>((set) => ({
 
     if (error) {
       console.error('[useInterestsStore] saveSelections error:', error)
-      // Still navigate — user can edit from Profile later
-      return
+      // Fall through — still patch in-memory state so the user isn't looped back
     }
 
-    // Re-initialize auth store so user.interests reflects the new values
-    await useAuthStore.getState().initialize()
+    // Directly patch the auth store user so MemberLayout's interests-null guard
+    // sees the updated value. initialize() has an isInitialized re-entry guard
+    // and is a no-op once the session is live — calling it won't re-fetch.
+    useAuthStore.setState((s) => ({
+      user: s.user ? { ...s.user, interests, tech_stack: techStack, community_roles: communityRoles } : null,
+    }))
   },
 }))

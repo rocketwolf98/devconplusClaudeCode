@@ -10,14 +10,13 @@ import { useEventsStore } from '../../stores/useEventsStore'
 import { useOrgVolunteerStore } from '../../stores/useOrgVolunteerStore'
 import { supabase } from '../../lib/supabase'
 import { fadeUp, staggerContainer, cardItem } from '../../lib/animation'
+import logoMark from '../../assets/logos/logo-mark.svg'
 
 type TabId = 'approvals' | 'volunteers'
 
 // Flower-of-life / Clover pattern matching Figma branding
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
 const PATTERN_BG = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`
-
-const imgGroup15 = "https://www.figma.com/api/mcp/asset/d47034ec-4ca5-47ee-b161-341ef687371e";
 export function OrgDashboard() {
   const user = useOrganizerUser()
   const { user: profile } = useAuthStore()
@@ -161,7 +160,7 @@ export function OrgDashboard() {
           <div className="relative z-10 flex items-center justify-between px-4 pt-6">
             <div className="flex items-center gap-2">
               <div className="h-[26px] w-[44px] relative">
-                <img src={imgGroup15} alt="DEVCON+" className="absolute inset-0 size-full" />
+                <img src={logoMark} alt="DEVCON+" className="absolute inset-0 size-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <h1 className="text-white text-[24px] font-bold font-proxima leading-none tracking-[0.4px]">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { createPortal } from 'react-dom'
-import { StarOutline, CupFirstOutline, LockOutline, GiftOutline, AltArrowRightOutline } from 'solar-icon-set'
+import { StarOutline, CupFirstOutline, LockOutline, GiftOutline, AltArrowRightOutline, MedalStarCircleBoldDuotone } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Reward, RewardRedemption } from '@devcon-plus/supabase'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -10,9 +10,6 @@ import { SkeletonRewardCard } from '../../components/Skeleton'
 import { staggerContainer, cardItem, slideUp, backdrop } from '../../lib/animation'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import { SwipeButton } from '../../components/SwipeButton'
-
-// Figma Assets - Using the same one as Dashboard/VolunteerXpCard
-const imgSolarMedalStarCircleBoldDuotone = "https://www.figma.com/api/mcp/asset/04489665-76af-4996-94c5-2fd03ef88f72";
 
 // Flower-of-life pattern matching Dashboard
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -553,12 +550,8 @@ export default function Rewards() {
         <div className="relative z-10 flex flex-col px-4 -mt-[40px] pointer-events-none">
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 px-[21px] py-6 flex items-center pointer-events-auto">
             <div className="flex items-center gap-[8px]">
-              <div className="shrink-0 size-[48px]">
-                <img 
-                  src={imgSolarMedalStarCircleBoldDuotone} 
-                  alt="Medal" 
-                  className="size-full object-contain"
-                />
+              <div className="shrink-0 size-[48px] flex items-center justify-center">
+                <MedalStarCircleBoldDuotone color="#F8C630" size={48} />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
                 <p className="font-proxima text-[#6b7280] text-[14px] leading-none mb-[6px]">
