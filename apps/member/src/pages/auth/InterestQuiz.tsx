@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeftOutline } from 'solar-icon-set'
@@ -39,15 +39,17 @@ export default function InterestQuiz() {
     [[], [], []]
   )
   const [isSaving, setIsSaving] = useState(false)
+  const didPrefillRef = useRef(false)
 
-  // Pre-fill from existing profile on re-entry
+  // Pre-fill from existing profile on re-entry — runs once only
   useEffect(() => {
-    if (user) {
+    if (user && !didPrefillRef.current) {
       setSelections([
         user.interests ?? [],
         user.tech_stack ?? [],
         user.community_roles ?? [],
       ])
+      didPrefillRef.current = true
     }
   }, [user])
 
@@ -75,8 +77,12 @@ export default function InterestQuiz() {
 
   async function commitAndExit(toSave: [number[], number[], number[]]) {
     setIsSaving(true)
-    await saveSelections(toSave[0], toSave[1], toSave[2])
-    navigate(fromProfile ? '/profile' : '/home', { replace: true })
+    try {
+      await saveSelections(toSave[0], toSave[1], toSave[2])
+      navigate(fromProfile ? '/profile' : '/home', { replace: true })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   async function handleNext() {
