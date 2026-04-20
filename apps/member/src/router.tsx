@@ -9,6 +9,7 @@ import Onboarding from './pages/auth/Onboarding'
 import SignIn from './pages/auth/SignIn'
 import SignUp from './pages/auth/SignUp'
 import OrganizerCodeGate from './pages/auth/OrganizerCodeGate'
+import InterestQuiz from './pages/auth/InterestQuiz'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import EmailSent from './pages/auth/EmailSent'
 import EmailConfirm from './pages/auth/EmailConfirm'
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
   { path: '/sign-in',              element: <SignIn /> },
   { path: '/sign-up',              element: <SignUp /> },
   { path: '/organizer-code-gate',  element: <OrganizerCodeGate /> },
+  { path: '/interests',            element: <InterestQuiz /> },
   { path: '/forgot-password',      element: <ForgotPassword /> },
   { path: '/email-sent',           element: <EmailSent /> },
   { path: '/reset-password',           element: <ResetPassword /> },

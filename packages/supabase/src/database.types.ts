@@ -1,6 +1,6 @@
 // AUTO-GENERATED — do not edit manually.
 // Regenerate with: mcp__supabase__generate_typescript_types
-// Last generated: 2026-04-07 (added icon + color_hex to xp_tiers)
+// Last generated: 2026-04-19 (added interests, tech_stack, community_roles to profiles; added interest_options table)
 
 export type Json =
   | string
@@ -239,6 +239,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      interest_options: {
+        Row: {
+          category: string
+          emoji: string | null
+          id: number
+          label: string
+        }
+        Insert: {
+          category: string
+          emoji?: string | null
+          id?: number
+          label: string
+        }
+        Update: {
+          category?: string
+          emoji?: string | null
+          id?: number
+          label?: string
+        }
+        Relationships: []
       }
       jobs: {
         Row: {
@@ -588,11 +609,13 @@ export type Database = {
         Row: {
           avatar_url: string | null
           chapter_id: string
+          community_roles: number[] | null
           created_at: string | null
           email: string
           full_name: string
           github_url: string | null
           id: string
+          interests: number[] | null
           lifetime_points: number | null
           linkedin_url: string | null
           pending_chapter_id: string | null
@@ -602,16 +625,19 @@ export type Database = {
           role: string | null
           school_or_company: string | null
           spendable_points: number | null
+          tech_stack: number[] | null
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
           chapter_id: string
+          community_roles?: number[] | null
           created_at?: string | null
           email: string
           full_name: string
           github_url?: string | null
           id: string
+          interests?: number[] | null
           lifetime_points?: number | null
           linkedin_url?: string | null
           pending_chapter_id?: string | null
@@ -621,16 +647,19 @@ export type Database = {
           role?: string | null
           school_or_company?: string | null
           spendable_points?: number | null
+          tech_stack?: number[] | null
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           chapter_id?: string
+          community_roles?: number[] | null
           created_at?: string | null
           email?: string
           full_name?: string
           github_url?: string | null
           id?: string
+          interests?: number[] | null
           lifetime_points?: number | null
           linkedin_url?: string | null
           pending_chapter_id?: string | null
@@ -640,6 +669,7 @@ export type Database = {
           role?: string | null
           school_or_company?: string | null
           spendable_points?: number | null
+          tech_stack?: number[] | null
           username?: string | null
         }
         Relationships: [
@@ -972,6 +1002,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      approve_reward_claim: {
+        Args: { p_organizer_id: string; p_redemption_id: string }
+        Returns: Json
+      }
       approve_volunteer_application: {
         Args: { p_application_id: string; p_organizer_id: string }
         Returns: Json
@@ -1028,6 +1062,10 @@ export type Database = {
       }
       redeem_reward: {
         Args: { p_reward_id: string; p_user_id: string }
+        Returns: Json
+      }
+      refund_reward_claim: {
+        Args: { p_organizer_id: string; p_redemption_id: string }
         Returns: Json
       }
       reject_organizer_upgrade: {

@@ -26,6 +26,7 @@ export default {
         },
         navy: '#1E2A56',
         gold: '#F8C630',
+        amber: '#D97706',
         promoted: '#F97316',
         green: '#21C45D',
         red: '#EF4444',

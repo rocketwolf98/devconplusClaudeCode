@@ -71,6 +71,9 @@ export interface Profile {
   linkedin_url: string | null
   github_url: string | null
   portfolio_url: string | null
+  interests: number[] | null
+  tech_stack: number[] | null
+  community_roles: number[] | null
   created_at: string
 }
 
