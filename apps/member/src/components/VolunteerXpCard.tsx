@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BellOutline } from 'solar-icon-set'
+import { BellOutline, BoltOutline, MedalStarOutline } from 'solar-icon-set'
 import { useAuthStore } from '../stores/useAuthStore'
 import { usePointsStore } from '../stores/usePointsStore'
 import { useNotificationsStore } from '../stores/useNotificationsStore'
-
-const imgGroup15 = "https://www.figma.com/api/mcp/asset/d47034ec-4ca5-47ee-b161-341ef687371e";
-const imgSolarMedalStarCircleBoldDuotone = "https://www.figma.com/api/mcp/asset/04489665-76af-4996-94c5-2fd03ef88f72";
-const imgSolarBoltBroken = "https://www.figma.com/api/mcp/asset/830e7e23-553e-4fe6-bc43-31e9a7a08703";
+import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 // Flower-of-life / Clover pattern matching Figma branding
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -56,7 +53,7 @@ export default function VolunteerXpCard() {
         <div className="relative z-10 flex items-center justify-between px-4 pt-6">
           <div className="flex items-center gap-2">
             <div className="h-[26px] w-[44px] relative">
-              <img src={imgGroup15} alt="DEVCON+" className="absolute inset-0 size-full" />
+              <img src={logoHorizontal} alt="DEVCON+" className="absolute inset-0 size-full object-contain" />
             </div>
             <h1 className="text-white text-[24px] font-bold font-proxima leading-none tracking-tight">
               Hi, {firstName}!
@@ -101,8 +98,8 @@ export default function VolunteerXpCard() {
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <div className="relative shrink-0 size-[48px]">
-                <img src={imgSolarMedalStarCircleBoldDuotone} alt="Medal" className="absolute block inset-0 max-w-none size-full" />
+              <div className="shrink-0 size-[48px] flex items-center justify-center">
+                <MedalStarOutline color="#F8C630" width={40} height={40} />
               </div>
               <p className="font-proxima leading-none text-[#464646] tracking-[-1.226px]">
                 <span className="font-extrabold text-[40.867px]">{spendablePoints.toLocaleString()}</span>
@@ -113,8 +110,8 @@ export default function VolunteerXpCard() {
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <div className="relative shrink-0 size-[16px]">
-                  <img src={imgSolarBoltBroken} alt="Points" className="absolute block inset-0 max-w-none size-full" />
+                <div className="shrink-0 size-[16px] flex items-center justify-center">
+                  <BoltOutline color="#94A3B8" width={14} height={14} />
                 </div>
                 <span className="font-proxima text-[14px] text-[#6b7280]">
                   {lifetimePoints.toLocaleString()} lifetime points

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AltArrowRightOutline, CalendarMarkOutline, CheckSquareOutline, StarOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
+import { AltArrowRightOutline, Bag2Outline, CalendarMarkOutline, CheckSquareOutline, GiftOutline, HandHeartOutline, StarOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useEventsStore } from '../../stores/useEventsStore'
@@ -27,10 +27,6 @@ const WELCOME_BANNER = {
   image: '/photos/devcon-summit-group.jpg',
 } as const
 
-// High-fidelity image assets for Quick Actions from Figma
-const imgJobsIcon = "https://www.figma.com/api/mcp/asset/7b48b817-a2d2-4482-85fe-66f2e3b75e47";
-const imgVolunteerIcon = "https://www.figma.com/api/mcp/asset/ab164d19-c141-42dd-b45e-3e1c9fd495aa";
-const imgRedeemIcon = "https://www.figma.com/api/mcp/asset/ea2da9dc-90d7-4b9c-b2bc-34d722113aa0";
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -197,7 +193,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <img src={imgJobsIcon} alt="" className="w-6 h-6" />
+                  <Bag2Outline color="rgb(127,8,255)" width={24} height={24} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Find Jobs</span>
               </motion.button>
@@ -210,7 +206,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <img src={imgVolunteerIcon} alt="" className="size-6" />
+                  <HandHeartOutline color="rgb(70,144,17)" width={24} height={24} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Volunteer</span>
               </motion.button>
@@ -223,7 +219,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <img src={imgRedeemIcon} alt="" className="size-6" />
+                  <GiftOutline color="#D2AD19" width={24} height={24} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Redeem</span>
               </motion.button>
