@@ -27,6 +27,7 @@ import {
 } from './eventFormConstants'
 import type { Json } from '@devcon-plus/supabase'
 import { useFormDraft } from '../../../hooks/useFormDraft'
+import { MarkdownEditor } from '../../../components/MarkdownEditor'
 
 type EventEditDraft = FormData & {
   tags: string[]
@@ -362,8 +363,17 @@ export function OrgEventEdit() {
             </div>
             <div>
               <label className={labelClass}>Description</label>
-              <textarea {...register('description')} rows={4} className={`${inputClass} resize-none`} placeholder="What is this event about?" />
-              {errors.description && <p className="text-md3-label-md text-red mt-1">{errors.description.message}</p>}
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <MarkdownEditor
+                    value={field.value}
+                    onChange={field.onChange as (value: string) => void}
+                    error={errors.description?.message}
+                  />
+                )}
+              />
             </div>
           </div>
         </motion.div>
