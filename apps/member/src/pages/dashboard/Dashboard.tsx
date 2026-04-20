@@ -193,7 +193,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <Bag2Outline color="rgb(127,8,255)" size={42} />
+                  <Bag2Outline color="rgb(127,8,255)" size={24} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Find Jobs</span>
               </motion.button>
@@ -206,7 +206,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <HandHeartOutline color="rgb(70,144,17)" size={42} />
+                  <HandHeartOutline color="rgb(70,144,17)" size={24} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Volunteer</span>
               </motion.button>
@@ -219,7 +219,7 @@ useEffect(() => {
                 whileTap={{ scale: 0.95 }}
               >
                 <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <GiftOutline color="#D2AD19" size={42} />
+                  <GiftOutline color="#D2AD19" size={24} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Redeem</span>
               </motion.button>
