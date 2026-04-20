@@ -213,8 +213,8 @@ export default function Profile() {
               {(user?.community_roles?.length ?? 0) > 0 && (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
-                      <UsersGroupRoundedOutline className="w-3.5 h-3.5 text-gold" />
+                    <div className="w-6 h-6 rounded-lg bg-amber/10 flex items-center justify-center shrink-0">
+                      <UsersGroupRoundedOutline className="w-3.5 h-3.5 text-amber" />
                     </div>
                     <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
                       Community
@@ -224,7 +224,7 @@ export default function Profile() {
                     {(user?.community_roles ?? []).map((id) => (
                       <span
                         key={id}
-                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-gold/10 text-gold"
+                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-amber/10 text-amber"
                       >
                         {labelForId(id)}
                       </span>
