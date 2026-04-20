@@ -99,7 +99,7 @@ export default function VolunteerXpCard() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <div className="shrink-0 size-[96px] flex items-center justify-center">
-                <MedalStarCircleBoldDuotone color="#F8C630" width={96} height={96} />
+                <MedalStarCircleBoldDuotone color="#F8C630" size={96} />
               </div>
               <p className="font-proxima leading-none text-[#464646] tracking-[-1.226px]">
                 <span className="font-extrabold text-[40.867px]">{spendablePoints.toLocaleString()}</span>
@@ -111,7 +111,7 @@ export default function VolunteerXpCard() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <div className="shrink-0 size-[16px] flex items-center justify-center">
-                  <BoltOutline color="#94A3B8" width={14} height={14} />
+                  <BoltOutline color="#94A3B8" size={14} />
                 </div>
                 <span className="font-proxima text-[14px] text-[#6b7280]">
                   {lifetimePoints.toLocaleString()} lifetime points
