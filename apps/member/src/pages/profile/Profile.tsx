@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, StarOutline } from 'solar-icon-set'
+import { CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, StarOutline, CPUBoltOutline, CodeOutline, UsersGroupRoundedOutline, AddCircleOutline } from 'solar-icon-set'
 import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
 import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -8,6 +8,7 @@ import { useThemeStore, PROGRAM_THEMES } from '../../stores/useThemeStore'
 import { ROLE_DISPLAY_NAMES } from '../../lib/constants'
 import ComingSoonModal from '../../components/ComingSoonModal'
 import ProfileExpCard from '../../components/ProfileExpCard'
+import { useInterestsStore } from '../../stores/useInterestsStore'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>
@@ -31,6 +32,7 @@ export default function Profile() {
   const { user, initials, signOut, chapterName } = useAuthStore()
   const { lifetimePoints, currentTier, loadTotalPoints } = usePointsStore()
   const { themeId, setTheme, isLocked } = useThemeStore()
+  const { options, fetchOptions } = useInterestsStore()
   const [showHelpModal, setShowHelpModal] = useState(false)
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null)
   const [canInstall, setCanInstall] = useState(false)
@@ -40,6 +42,14 @@ export default function Profile() {
   useEffect(() => {
     loadTotalPoints()
   }, [loadTotalPoints])
+
+  useEffect(() => {
+    void fetchOptions()
+  }, [fetchOptions])
+
+  function labelForId(id: number): string {
+    return options.find((o) => o.id === id)?.label ?? String(id)
+  }
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -115,6 +125,116 @@ export default function Profile() {
       <div className="px-4 pt-4 space-y-3 pb-24 md:max-w-4xl md:mx-auto">
 
         <ProfileExpCard />
+
+        {/* Interests & Stack card */}
+        <div className="bg-white rounded-2xl shadow-card p-4 text-left relative">
+          {/* Header row */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-md3-label-lg font-bold text-slate-900">
+              Interests &amp; Stack
+            </span>
+            {((user?.interests?.length ?? 0) > 0 ||
+              (user?.tech_stack?.length ?? 0) > 0 ||
+              (user?.community_roles?.length ?? 0) > 0) ? (
+              <button
+                onClick={() => navigate('/interests?from=profile')}
+                className="text-md3-label-md text-primary font-semibold"
+              >
+                Edit
+              </button>
+            ) : null}
+          </div>
+
+          {/* Empty state */}
+          {(user?.interests === null ||
+            ((user?.interests?.length ?? 0) === 0 &&
+              (user?.tech_stack?.length ?? 0) === 0 &&
+              (user?.community_roles?.length ?? 0) === 0)) ? (
+            <button
+              onClick={() => navigate('/interests?from=profile')}
+              className="flex items-center gap-2 text-md3-body-md text-slate-400 w-full"
+            >
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <AddCircleOutline className="w-4 h-4 text-primary" />
+              </div>
+              <span>Tell us about yourself</span>
+            </button>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {/* Tech Interests */}
+              {(user?.interests?.length ?? 0) > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <CPUBoltOutline className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
+                      Tech Interests
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-[6px]">
+                    {(user?.interests ?? []).map((id) => (
+                      <span
+                        key={id}
+                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-primary/10 text-primary"
+                      >
+                        {labelForId(id)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tech Stack */}
+              {(user?.tech_stack?.length ?? 0) > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-lg bg-green/10 flex items-center justify-center shrink-0">
+                      <CodeOutline className="w-3.5 h-3.5 text-green" />
+                    </div>
+                    <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
+                      Tech Stack
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-[6px]">
+                    {(user?.tech_stack ?? []).map((id) => (
+                      <span
+                        key={id}
+                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-green/10 text-green"
+                      >
+                        {labelForId(id)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Community Role */}
+              {(user?.community_roles?.length ?? 0) > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-6 h-6 rounded-lg bg-gold/10 flex items-center justify-center shrink-0">
+                      <UsersGroupRoundedOutline className="w-3.5 h-3.5 text-gold" />
+                    </div>
+                    <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
+                      Community
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-[6px]">
+                    {(user?.community_roles ?? []).map((id) => (
+                      <span
+                        key={id}
+                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-gold/10 text-gold"
+                      >
+                        {labelForId(id)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Theme */}
         <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
