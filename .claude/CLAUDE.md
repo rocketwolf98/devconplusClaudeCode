@@ -741,11 +741,12 @@ Nav item:             whileTap={{ scale: 0.88 }}, type: 'spring', stiffness: 400
 
 ### Icon Rules
 - Use `solar-icon-set` exclusively (outline variant) — no emoji icons in JSX. Import type `SolarIcon` from `lib/icons` for prop typing.
-- Icon in colored container: `<div className="w-10 h-10 rounded-xl bg-primary/10 ..."><Icon className="w-5 h-5 text-primary" /></div>`
+- **`solar-icon-set` does NOT support Tailwind `text-*` color classes.** Icons do not use `currentColor`, so `text-primary`, `text-slate-400`, etc. have zero effect. Use the `color` prop instead: `<HomeOutline color="rgb(var(--color-primary))" />`. See `.claude/rules/solar-icon-styling.md`.
+- Icon in colored container: `<div className="w-10 h-10 rounded-xl bg-primary/10 ..."><Icon color="rgb(var(--color-primary))" width={20} height={20} /></div>`
 - Back navigation: `<ArrowLeftOutline />`
 - Location: `<MapPointOutline />`
 - Events center tab: `<QRCodeOutline />`
-- Points: `<StarOutline className="fill-gold text-gold" />`
+- Points: `<StarOutline color="#F8C630" width={20} height={20} />`
 
 ---
 

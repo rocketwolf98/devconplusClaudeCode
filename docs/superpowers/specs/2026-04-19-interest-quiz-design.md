@@ -40,6 +40,7 @@ Three sequential sub-steps rendered within the single `/interests` route. A step
 - Body: `bg-slate-50 rounded-t-3xl`, pill grid
 - Title: "What excites you?" / sub: "Pick your tech interests"
 - Pills (12): AI / ML · Web Dev · DevOps · Cybersecurity · Mobile · Data Science · Cloud · Blockchain · UI / UX · Game Dev · Open Source · IoT
+- No emoji in pill labels — text only (`solar-icon-set` icons are not used inside pills; the pill label IS the full content)
 - CTA: "Next →" (`bg-navy rounded-2xl`)
 - Secondary: "Skip this step" (slate-400 text, clears local selection state for this step, advances to screen 2 — no DB write yet)
 
@@ -47,6 +48,7 @@ Three sequential sub-steps rendered within the single `/interests` route. A step
 - Same shell, step dots (2 of 3 active)
 - Title: "Your stack?" / sub: "Languages & frameworks you use"
 - Pills (12): React · Vue · Angular · TypeScript · JavaScript · Python · Go · Java · Flutter · Kotlin · Rust · PHP
+- Text only — no emoji
 - CTA: "Next →"
 - Secondary: "Skip this step"
 
@@ -54,6 +56,7 @@ Three sequential sub-steps rendered within the single `/interests` route. A step
 - Same shell, step dots (3 of 3 active)
 - Title: "Your role?" / sub: "How you give back to the community"
 - Pills (8): Speaker · Volunteer · Mentor · Blogger · Hackathon · Student · Hiring · Job Seeker
+- Text only — no emoji
 - CTA: "Save & Go to App →" — triggers save then navigates to `/home`
 - Secondary: "Skip this step" — clears local community_roles state, then triggers the same save + navigate as the CTA (one single DB write for all three arrays at this point)
 
@@ -88,6 +91,8 @@ CREATE TABLE interest_options (
 ```
 
 Seeded with all 32 options across the three screens (see seed values in Section: Seed Data below).
+
+The `emoji` column is kept for future use (push notifications, Kotlin Multiplatform native app). The web UI renders only `label` text — never the emoji field in JSX.
 
 ### Columns added to `profiles`
 
@@ -197,15 +202,16 @@ Add an "Interests & Stack" card section between the avatar card and the menu ite
 
 ```
 ┌─ Interests & Stack ──────────────────────── Edit → ┐
-│  🤖 AI / ML   🌐 Web Dev   📱 Mobile               │  ← blue pills
-│  ⚛️ React     🔷 TypeScript                         │  ← green pills
-│  🎤 Speaker                                         │  ← amber pills
+│  AI / ML   Web Dev   Mobile                         │  ← blue pills (bg-primary/10 text-primary)
+│  React     TypeScript                               │  ← green pills (bg-green/10 text-green)
+│  Speaker                                            │  ← amber pills (bg-amber/10 text-amber)
 └─────────────────────────────────────────────────────┘
 ```
 
+- No emoji anywhere — text labels only. `solar-icon-set` icons are used only in the section header row (e.g. `<CpuBoltOutline />` before "Interests", `<CodeOutline />` before "Stack", `<UsersGroupRoundedOutline />` before "Community") — icon in `bg-primary/10` container per visual-consistency rules, but these are row-level headers, not inside the pills.
 - If all three arrays are empty: show a "Tell us about yourself →" prompt that links to `/interests`
-- "Edit →" link navigates to `/interests` (quiz is re-entrant — existing selections are pre-filled)
-- Tag colors: interests = `bg-blue/10 text-blue`, stack = `bg-green/10 text-green`, roles = `bg-amber/10 text-amber` (uses Tailwind color aliases, not hex)
+- "Edit →" link navigates to `/interests?from=profile` (quiz is re-entrant — existing selections are pre-filled)
+- Tag colors: interests = `bg-primary/10 text-primary`, stack = `bg-green/10 text-green`, roles = `bg-amber/10 text-amber` (Tailwind aliases, never hardcoded hex)
 
 ---
 
