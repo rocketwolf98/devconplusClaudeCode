@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BellOutline, BoltOutline, MedalStarOutline } from 'solar-icon-set'
+import { BellOutline, BoltOutline, MedalStarCircleBoldDuotone } from 'solar-icon-set'
 import { useAuthStore } from '../stores/useAuthStore'
 import { usePointsStore } from '../stores/usePointsStore'
 import { useNotificationsStore } from '../stores/useNotificationsStore'
-import logoHorizontal from '../assets/logos/logo-horizontal.svg'
+import logoMark from '../assets/logos/logo-mark.svg'
 
 // Flower-of-life / Clover pattern matching Figma branding
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -53,7 +53,7 @@ export default function VolunteerXpCard() {
         <div className="relative z-10 flex items-center justify-between px-4 pt-6">
           <div className="flex items-center gap-2">
             <div className="h-[26px] w-[44px] relative">
-              <img src={logoHorizontal} alt="DEVCON+" className="absolute inset-0 size-full object-contain" />
+              <img src={logoMark} alt="DEVCON+" className="absolute inset-0 size-full object-contain" />
             </div>
             <h1 className="text-white text-[24px] font-bold font-proxima leading-none tracking-tight">
               Hi, {firstName}!
@@ -98,8 +98,8 @@ export default function VolunteerXpCard() {
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <div className="shrink-0 size-[48px] flex items-center justify-center">
-                <MedalStarOutline color="#F8C630" width={40} height={40} />
+              <div className="shrink-0 size-[96px] flex items-center justify-center">
+                <MedalStarCircleBoldDuotone color="#F8C630" width={96} height={96} />
               </div>
               <p className="font-proxima leading-none text-[#464646] tracking-[-1.226px]">
                 <span className="font-extrabold text-[40.867px]">{spendablePoints.toLocaleString()}</span>

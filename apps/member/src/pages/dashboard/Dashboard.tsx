@@ -192,8 +192,8 @@ useEffect(() => {
                 className="bg-[rgba(127,8,255,0.15)] border border-[rgba(127,8,255,0.1)] flex flex-col gap-2 items-center justify-center rounded-[16px] shadow-[0px_0px_8px_0px_rgba(27,0,56,0.1)] w-full py-4"
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <Bag2Outline color="rgb(127,8,255)" width={24} height={24} />
+                <div className="bg-white flex items-center justify-center rounded-full w-[56px] h-[56px] shadow-sm">
+                  <Bag2Outline color="rgb(127,8,255)" width={42} height={42} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Find Jobs</span>
               </motion.button>
@@ -205,8 +205,8 @@ useEffect(() => {
                 className="bg-[rgba(115,178,9,0.15)] border border-[rgba(70,144,17,0.1)] flex flex-col gap-2 items-center justify-center rounded-[16px] shadow-[0px_0px_8px_0px_rgba(25,39,0,0.1)] w-full py-4"
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <HandHeartOutline color="rgb(70,144,17)" width={24} height={24} />
+                <div className="bg-white flex items-center justify-center rounded-full w-[56px] h-[56px] shadow-sm">
+                  <HandHeartOutline color="rgb(70,144,17)" width={42} height={42} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Volunteer</span>
               </motion.button>
@@ -218,8 +218,8 @@ useEffect(() => {
                 className="bg-[rgba(234,179,8,0.15)] border border-[rgba(210,173,25,0.1)] flex flex-col gap-2 items-center justify-center rounded-[16px] shadow-[0px_0px_8px_0px_rgba(75,60,0,0.1)] w-full py-4"
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="bg-white flex items-center justify-center rounded-full w-[42px] h-[42px] shadow-sm">
-                  <GiftOutline color="#D2AD19" width={24} height={24} />
+                <div className="bg-white flex items-center justify-center rounded-full w-[56px] h-[56px] shadow-sm">
+                  <GiftOutline color="#D2AD19" width={42} height={42} />
                 </div>
                 <span className="font-proxima font-semibold text-[#0d121b] text-[10px]">Redeem</span>
               </motion.button>

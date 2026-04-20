@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BoltOutline, MedalStarOutline } from 'solar-icon-set'
+import { BoltOutline, MedalStarCircleBoldDuotone } from 'solar-icon-set'
 import { usePointsStore } from '../stores/usePointsStore'
 
 export default function ProfileExpCard() {
@@ -9,8 +9,8 @@ export default function ProfileExpCard() {
     <div className="bg-white rounded-[24px] border border-slate-400/30 p-[24px] flex flex-col gap-5 shadow-card">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <div className="shrink-0 size-[48px] flex items-center justify-center">
-            <MedalStarOutline color="#F8C630" width={40} height={40} />
+          <div className="shrink-0 size-[96px] flex items-center justify-center">
+            <MedalStarCircleBoldDuotone color="#F8C630" width={96} height={96} />
           </div>
           <p className="font-proxima leading-none text-[#464646] tracking-[-1.226px]">
             <span className="font-extrabold text-[40.867px]">{spendablePoints.toLocaleString()}</span>
