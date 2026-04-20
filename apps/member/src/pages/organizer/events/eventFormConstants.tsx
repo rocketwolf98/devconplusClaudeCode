@@ -36,7 +36,7 @@ export const TAG_MAX_LENGTH = 20
 export const schema = z
   .object({
     title: z.string().min(3, 'Title must be at least 3 characters').max(100, 'Title must be under 100 characters'),
-    description: z.string().min(10, 'Description must be at least 10 characters').max(5000, 'Description must be under 5000 characters'),
+    description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must be under 1,000 characters'),
     location: z.string().min(2, 'Location is required').max(200, 'Location must be under 200 characters'),
     event_date: z.string().min(1, 'Start date is required'),
     end_date: z.string().optional(),
