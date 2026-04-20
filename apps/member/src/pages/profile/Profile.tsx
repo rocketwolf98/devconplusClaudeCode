@@ -160,23 +160,18 @@ export default function Profile() {
               <span>Tell us about yourself</span>
             </button>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4 pt-1">
               {/* Tech Interests */}
               {(user?.interests?.length ?? 0) > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <CPUBoltOutline className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                    <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
-                      Tech Interests
-                    </span>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5" title="Tech Interests">
+                    <CPUBoltOutline className="w-4 h-4" color="rgb(var(--color-primary))" />
                   </div>
-                  <div className="flex flex-wrap gap-[6px]">
+                  <div className="flex flex-wrap gap-1.5">
                     {(user?.interests ?? []).map((id) => (
                       <span
                         key={id}
-                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-primary/10 text-primary"
+                        className="px-3 py-1.5 rounded-xl text-md3-label-sm font-bold bg-primary/5 text-primary border border-primary/10"
                       >
                         {labelForId(id)}
                       </span>
@@ -187,20 +182,15 @@ export default function Profile() {
 
               {/* Tech Stack */}
               {(user?.tech_stack?.length ?? 0) > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-green/10 flex items-center justify-center shrink-0">
-                      <CodeOutline className="w-3.5 h-3.5 text-green" />
-                    </div>
-                    <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
-                      Tech Stack
-                    </span>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-green/10 flex items-center justify-center shrink-0 mt-0.5" title="Tech Stack">
+                    <CodeOutline className="w-4 h-4" color="#21C45D" />
                   </div>
-                  <div className="flex flex-wrap gap-[6px]">
+                  <div className="flex flex-wrap gap-1.5">
                     {(user?.tech_stack ?? []).map((id) => (
                       <span
                         key={id}
-                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-green/10 text-green"
+                        className="px-3 py-1.5 rounded-xl text-md3-label-sm font-bold bg-green/5 text-green border border-green/10"
                       >
                         {labelForId(id)}
                       </span>
@@ -211,20 +201,15 @@ export default function Profile() {
 
               {/* Community Role */}
               {(user?.community_roles?.length ?? 0) > 0 && (
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-amber/10 flex items-center justify-center shrink-0">
-                      <UsersGroupRoundedOutline className="w-3.5 h-3.5 text-amber" />
-                    </div>
-                    <span className="text-md3-label-sm font-bold text-slate-400 uppercase tracking-wide">
-                      Community
-                    </span>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-amber/10 flex items-center justify-center shrink-0 mt-0.5" title="Community">
+                    <UsersGroupRoundedOutline className="w-4 h-4" color="#D97706" />
                   </div>
-                  <div className="flex flex-wrap gap-[6px]">
+                  <div className="flex flex-wrap gap-1.5">
                     {(user?.community_roles ?? []).map((id) => (
                       <span
                         key={id}
-                        className="px-3 py-[4px] rounded-full text-md3-label-md font-semibold bg-amber/10 text-amber"
+                        className="px-3 py-1.5 rounded-xl text-md3-label-sm font-bold bg-amber/5 text-amber border border-amber/10"
                       >
                         {labelForId(id)}
                       </span>
