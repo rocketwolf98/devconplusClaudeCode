@@ -44,6 +44,15 @@ export default function MemberLayout() {
     if (!user) navigate('/sign-in', { replace: true })
   }, [user, navigate])
 
+  // Redirect users who haven't completed the interest quiz yet.
+  // interests === null means never been through /interests.
+  // interests === [] means they skipped — don't redirect again.
+  useEffect(() => {
+    if (user && user.interests === null) {
+      navigate('/interests', { replace: true })
+    }
+  }, [user, navigate])
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
