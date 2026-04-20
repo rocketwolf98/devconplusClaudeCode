@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
+import { MarkdownContent } from '../../../components/MarkdownContent'
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -123,7 +124,7 @@ export function OrgEventDetail() {
 
           <div className="border-t border-slate-100 pt-4">
             <p className="text-md3-label-md font-bold uppercase tracking-wide text-slate-400 mb-2">About</p>
-            <p className="text-md3-body-md text-slate-600 leading-relaxed">{event.description}</p>
+            <MarkdownContent value={event.description ?? ''} />
           </div>
         </motion.div>
 
