@@ -1,27 +1,27 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import logoMark from '../../assets/logos/logo-mark.svg'
+import logoVertical from '../../assets/logos/logo-vertical.svg'
 
 const slides = [
   {
     image:    '/photos/devcon-summit-group.jpg',
-    subtitle: 'DEVCON Philippines',
-    title:    "The Philippines' Largest Volunteer Tech Community",
+    title:    "Your Portal to\nThe Philippines's Largest\nTech Volunteer Community!",
+    subtitle: 'Sync, Support, Succeed. Get instant access to the Philippines’s largest tech volunteer community!',
   },
   {
     image:    '/photos/devcon-15-anniversary.jpg',
-    subtitle: 'Nationwide community',
-    title:    '11 Chapters. 16 Years. 60,000+ Geeks for Good.',
+    title:    '11 Chapters. 16 Years.\n60,000+ Geeks for Good.',
+    subtitle: 'Join chapters across the country and make an impact locally and nationally.',
   },
   {
     image:    '/photos/devcon-certificate-ceremony.jpg',
-    subtitle: 'Points+ system',
-    title:    'Volunteer. Earn Points. Unlock Rewards.',
+    title:    'Volunteer. Earn Points.\nUnlock Rewards.',
+    subtitle: 'Participate in events, contribute to projects, and earn points for exclusive rewards.',
   },
   {
     image:    '/photos/devcon-jumpstart-internships.jpg',
-    subtitle: 'Jobs + Career',
-    title:    'Access Global Opportunities. Level Up Your Career.',
+    title:    'Access Global Opportunities.\nLevel Up Your Career.',
+    subtitle: 'Connect with industry leaders and discover exclusive opportunities for your career.',
   },
 ]
 
@@ -72,74 +72,76 @@ export default function Onboarding() {
               loading={i === 0 ? 'eager' : 'lazy'}
               draggable={false}
             />
-            {/* Subtle overlay — just enough to keep photo from clashing with header */}
-            <div className="absolute inset-0 bg-navy/30" />
+            {/* Dark gradient overlay matching Figma */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#092B6E]/20 via-[#092B6E]/50 to-[#1152D4]/90" />
           </div>
         ))}
       </div>
 
-      {/* ── Fixed header ─────────────────────────────────────── */}
-      <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 pt-5 pb-3">
-        <div className="flex items-center gap-2.5">
-          <img src={logoMark} alt="DEVCON+" className="h-7 w-auto" />
-        </div>
-        <button
-          onClick={() => navigate('/sign-up')}
-          className="text-white/75 text-md3-body-md font-medium px-1 py-1"
-        >
-          Skip
-        </button>
+      {/* ── Centered Logo at the top ─────────────────────────── */}
+      <div className="absolute top-[8vh] left-0 right-0 z-20 flex justify-center pointer-events-none">
+        <img src={logoVertical} alt="DEVCON+" className="h-[48px] w-auto" />
       </div>
 
-      {/* ── Fixed bottom panel ───────────────────────────────── */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 bg-blue rounded-t-[28px] px-4 pt-6 pb-10">
+      {/* ── Fixed bottom panel content ───────────────────────── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 px-4 pb-[6vh] flex flex-col items-center text-center">
         {/* Slide caption */}
-        <div key={current} className="mb-5 animate-[fadeIn_0.3s_ease-out]">
-          <p className="text-white/50 text-[11px] font-semibold uppercase tracking-widest mb-1.5">
-            {slides[current].subtitle}
-          </p>
-          <h2 className="text-white text-[22px] font-bold leading-snug">
+        <div key={current} className="mb-10 animate-[fadeIn_0.3s_ease-out] max-w-[320px]">
+          <h2 className="text-white text-[26px] font-bold leading-tight whitespace-pre-wrap mb-4 tracking-tight">
             {slides[current].title}
           </h2>
+          <p className="text-white/90 text-[15px] font-normal leading-[1.4]">
+            {slides[current].subtitle}
+          </p>
         </div>
 
         {/* Dot indicators */}
-        <div className="flex justify-center gap-2 mb-5">
+        <div className="flex justify-center gap-2.5 mb-8">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => goTo(i)}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === current ? 'w-6 bg-white' : 'w-1.5 bg-white/30'
+                i === current ? 'w-8 bg-white' : 'w-1.5 bg-white/30'
               }`}
             />
           ))}
         </div>
 
         {/* Action buttons */}
-        {isLast ? (
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate('/sign-up')}
-              className="w-full bg-white text-blue font-bold py-[15px] rounded-2xl text-[15px]"
-            >
-              Get Started
-            </button>
-            <button
-              onClick={() => navigate('/sign-in')}
-              className="w-full border border-white/20 text-white/80 font-semibold py-[15px] rounded-2xl text-[15px]"
-            >
-              I have an account
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setCurrent((c) => c + 1)}
-            className="w-full bg-white text-blue font-bold py-[15px] rounded-2xl text-[15px]"
-          >
-            Next
-          </button>
-        )}
+        <div className="w-full max-w-[360px] flex flex-col gap-4">
+          {isLast ? (
+            <>
+              <button
+                onClick={() => navigate('/sign-up')}
+                className="w-full h-[54px] bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold rounded-2xl text-[17px] flex items-center justify-center shadow-lg transition-all active:scale-[0.98] hover:bg-white/20"
+              >
+                Get Started
+              </button>
+              <button
+                onClick={() => navigate('/sign-in')}
+                className="text-white/80 text-[13px] font-medium transition-opacity hover:opacity-100 py-1"
+              >
+                I have an account
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setCurrent((c) => c + 1)}
+                className="w-full h-[54px] bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold rounded-2xl text-[17px] flex items-center justify-center shadow-lg transition-all active:scale-[0.98] hover:bg-white/20"
+              >
+                Next
+              </button>
+              <button
+                onClick={() => navigate('/sign-up')}
+                className="text-white/70 text-[13px] font-medium transition-opacity hover:opacity-100 py-1"
+              >
+                Skip
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
