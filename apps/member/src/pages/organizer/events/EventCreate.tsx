@@ -25,6 +25,7 @@ import {
   CustomFieldsBuilder,
 } from './eventFormConstants'
 import type { Json } from '@devcon-plus/supabase'
+import { MarkdownEditor } from '../../../components/MarkdownEditor'
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -308,15 +309,17 @@ export function OrgEventCreate() {
 
             <div>
               <label className={labelClass}>Description</label>
-              <textarea
-                {...register('description')}
-                rows={4}
-                className={`${inputClass} resize-none`}
-                placeholder="What is this event about?"
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <MarkdownEditor
+                    value={field.value}
+                    onChange={field.onChange as (value: string) => void}
+                    error={errors.description?.message}
+                  />
+                )}
               />
-              {errors.description && (
-                <p className="text-md3-label-md text-red mt-1">{errors.description.message}</p>
-              )}
             </div>
           </div>
         </motion.div>
