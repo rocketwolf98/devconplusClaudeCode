@@ -106,7 +106,7 @@ export default function OrganizerCodeGate() {
 
   const handleContinueAsMember = () => {
     setOrganizerSession(false)
-    navigate('/home')
+    navigate('/interests')
   }
 
   return (
