@@ -7,6 +7,7 @@ import { useVolunteerStore } from '../../stores/useVolunteerStore'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { supabase } from '../../lib/supabase'
 import NotFound from '../NotFound'
+import { MarkdownContent } from '../../components/MarkdownContent'
 
 // Flower-of-life pattern matching Rewards/Dashboard/Events
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -106,7 +107,7 @@ export default function EventDetail() {
         {event.description && (
           <div>
             <h2 className="text-md3-body-md font-bold text-slate-900 mb-1">About</h2>
-            <p className="text-md3-body-md text-slate-600 leading-relaxed">{event.description}</p>
+            <MarkdownContent value={event.description} />
           </div>
         )}
 
