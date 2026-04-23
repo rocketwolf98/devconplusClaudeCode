@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeftOutline, CheckCircleOutline, AltArrowDownOutline, ClipboardListOutline, UserSpeakOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, CheckCircleOutline, CloseCircleLineDuotone, CloseCircleOutline, RestartOutline, UserCheckOutline, ClipboardListOutline, UserSpeakOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { useOrganizerUser } from '../../../stores/useOrgAuthStore'
 import { ApprovalCard, type Registration } from '../../../components/ApprovalCard'
+import { StatusBadge } from '../../../components/StatusBadge'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
 
@@ -31,76 +32,232 @@ type RegistrantWithResponses = Registration & {
   form_responses?: Record<string, unknown> | null
 }
 
-// ── Local component: form responses panel ─────────────────────────────────────
+// ── Registrant Detail View ────────────────────────────────────────────────────
 
-function FormResponsesPanel({
-  schema,
-  responses,
-  isExpanded,
-  onToggle,
-}: {
-  schema: CustomFormField[]
-  responses: Record<string, unknown>
-  isExpanded: boolean
-  onToggle: () => void
-}) {
-  const answeredCount = schema.filter(f => {
-    const v = responses[f.id]
+interface RegistrantDetailViewProps {
+  registration: RegistrantWithResponses
+  formSchema: CustomFormField[]
+  eventTitle: string
+  onClose: () => void
+  onApprove: (id: string) => Promise<boolean>
+  onReject: (id: string) => Promise<boolean>
+  onRevert: (id: string) => Promise<boolean>
+  onCheckIn: (id: string) => Promise<boolean>
+}
+
+function RegistrantDetailView({
+  registration,
+  formSchema,
+  eventTitle,
+  onClose,
+  onApprove,
+  onReject,
+  onRevert,
+  onCheckIn,
+}: RegistrantDetailViewProps) {
+  const [localReg, setLocalReg] = useState(registration)
+
+  const initials = localReg.member_name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+
+  const firstName = localReg.member_name.split(' ')[0]
+  const lastInitial = localReg.member_name.split(' ')[1]?.[0]
+  const shortName = lastInitial ? `${firstName} ${lastInitial}.` : firstName
+
+  const formattedDate = new Date(localReg.registered_at).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  const hasResponses = formSchema.length > 0 && !!localReg.form_responses
+  const answeredCount = formSchema.filter(f => {
+    const v = localReg.form_responses?.[f.id]
     return v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0)
   }).length
 
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-card overflow-hidden">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3 text-md3-label-md font-bold text-slate-500 hover:text-slate-700 transition-colors"
-      >
-        <span className="flex items-center gap-1.5">
-          <ClipboardListOutline className="w-3.5 h-3.5" />
-          Registration Responses
-          <span className="ml-1 bg-slate-100 text-slate-500 rounded-full px-1.5 py-0.5 text-[10px] font-bold">
-            {answeredCount}/{schema.length}
-          </span>
-        </span>
-        <motion.div
-          animate={{ rotate: isExpanded ? 180 : 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        >
-          <AltArrowDownOutline className="w-3.5 h-3.5" />
-        </motion.div>
-      </button>
+  const handleApproveClick = async () => {
+    const ok = await onApprove(localReg.id)
+    if (ok) setLocalReg(prev => ({ ...prev, status: 'approved' as const }))
+  }
+  const handleRejectClick = async () => {
+    const ok = await onReject(localReg.id)
+    if (ok) setLocalReg(prev => ({ ...prev, status: 'rejected' as const }))
+  }
+  const handleRevertClick = async () => {
+    const ok = await onRevert(localReg.id)
+    if (ok) setLocalReg(prev => ({ ...prev, status: 'pending' as const }))
+  }
+  const handleCheckInClick = async () => {
+    const ok = await onCheckIn(localReg.id)
+    if (ok) setLocalReg(prev => ({ ...prev, checked_in: true }))
+  }
 
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 pt-1 border-t border-slate-100 space-y-3">
-              {schema.map(field => {
-                const answer = responses[field.id]
-                const isEmpty = answer === undefined || answer === null || answer === '' ||
+  return (
+    <motion.div
+      className="fixed inset-0 z-[60] bg-slate-50 flex flex-col"
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+    >
+      {/* Header */}
+      <div className="bg-[#1152d4] pt-14 pb-4 px-4 flex items-center gap-3 shrink-0">
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
+        >
+          <ArrowLeftOutline color="white" width={20} height={20} />
+        </button>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight truncate">
+            {shortName}
+          </h1>
+          <p className="text-white/70 text-[13px] font-proxima truncate leading-none mt-0.5">
+            {eventTitle}
+          </p>
+        </div>
+      </div>
+
+      {/* Scrollable body */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {/* Avatar hero */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-5 flex flex-col items-center gap-3 text-center">
+          <div className="w-16 h-16 rounded-full bg-blue/10 flex items-center justify-center text-blue text-2xl font-black">
+            {initials}
+          </div>
+          <div>
+            <p className="text-[24px] font-bold text-slate-900">{localReg.member_name}</p>
+            <p className="text-[12px] text-slate-400 mt-0.5">{localReg.member_email}</p>
+            {localReg.school_or_company && (
+              <p className="text-[12px] text-slate-400">{localReg.school_or_company}</p>
+            )}
+          </div>
+          <StatusBadge status={localReg.status} />
+        </div>
+
+        {/* Registration info */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4 space-y-3">
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">Registered</p>
+            <p className="text-[14px] text-slate-800">{formattedDate}</p>
+          </div>
+          {localReg.checked_in && (
+            <>
+              <div className="border-t border-slate-100" />
+              <p className="text-[12px] text-green font-semibold flex items-center gap-1.5">
+                <CheckCircleOutline color="#21C45D" width={14} height={14} />
+                Checked In
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* Custom form responses — always fully expanded */}
+        {hasResponses && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[14px] font-bold text-slate-500 flex items-center gap-1.5">
+                <ClipboardListOutline color="#94A3B8" width={14} height={14} />
+                Registration Responses
+              </p>
+              <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] font-bold">
+                {answeredCount}/{formSchema.length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {formSchema.map((field, i) => {
+                const answer = localReg.form_responses?.[field.id]
+                const isEmpty =
+                  answer === undefined || answer === null || answer === '' ||
                   (Array.isArray(answer) && answer.length === 0)
-                const display = isEmpty
-                  ? <span className="text-slate-300 italic">No answer</span>
-                  : <span className="text-slate-800">{Array.isArray(answer) ? answer.join(', ') : String(answer)}</span>
                 return (
                   <div key={field.id}>
+                    {i > 0 && <div className="border-t border-slate-100 mb-3" />}
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">
                       {field.label}{field.required ? ' *' : ''}
                     </p>
-                    <p className="text-md3-body-md">{display}</p>
+                    <p className="text-[14px]">
+                      {isEmpty
+                        ? <span className="text-slate-300 italic">No answer</span>
+                        : <span className="text-slate-800">{Array.isArray(answer) ? (answer as unknown[]).join(', ') : String(answer)}</span>
+                      }
+                    </p>
                   </div>
                 )
               })}
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
-    </div>
+      </div>
+
+      {/* Sticky action bar */}
+      <div className="bg-white border-t border-slate-100 px-4 py-3 shrink-0">
+        {localReg.status === 'pending' && (
+          <div className="flex gap-2">
+            <motion.button
+              onClick={handleRejectClick}
+              className="flex-1 py-3 text-[14px] font-semibold rounded-xl border border-slate-200 text-slate-500 hover:bg-red/5 hover:border-red hover:text-red transition-colors flex items-center justify-center gap-1.5"
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <CloseCircleLineDuotone color="#EF4444" width={16} height={16} />
+              Reject
+            </motion.button>
+            <motion.button
+              onClick={handleApproveClick}
+              className="flex-1 py-3 text-[14px] font-semibold rounded-xl bg-blue text-white hover:bg-blue-dark transition-colors flex items-center justify-center gap-1.5"
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <CheckCircleOutline color="white" width={16} height={16} />
+              Approve
+            </motion.button>
+          </div>
+        )}
+        {localReg.status === 'approved' && !localReg.checked_in && (
+          <motion.button
+            onClick={handleCheckInClick}
+            className="w-full py-3 text-[14px] font-semibold rounded-xl bg-green/10 text-green border border-green/20 hover:bg-green/20 transition-colors flex items-center justify-center gap-1.5"
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
+            <UserCheckOutline color="#21C45D" width={16} height={16} />
+            Check In
+          </motion.button>
+        )}
+        {localReg.status === 'approved' && localReg.checked_in && (
+          <p className="text-[14px] text-green font-semibold text-center py-3 flex items-center justify-center gap-1.5">
+            <CheckCircleOutline color="#21C45D" width={16} height={16} />
+            Checked In
+          </p>
+        )}
+        {localReg.status === 'rejected' && (
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[12px] text-red font-semibold flex items-center gap-1.5">
+              <CloseCircleOutline color="#EF4444" width={14} height={14} />
+              Registration rejected
+            </p>
+            <motion.button
+              onClick={handleRevertClick}
+              className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition-colors shrink-0"
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <RestartOutline color="#64748B" width={12} height={12} />
+              Undo
+            </motion.button>
+          </div>
+        )}
+      </div>
+    </motion.div>
   )
 }
 
@@ -136,16 +293,7 @@ export function OrgEventRegistrants() {
   const [volunteers, setVolunteers]     = useState<VolunteerApplication[]>([])
   const [volunteersLoading, setVolunteersLoading] = useState(false)
   const [formSchema, setFormSchema]     = useState<CustomFormField[]>([])
-  const [expandedResponseIds, setExpandedResponseIds] = useState<Set<string>>(new Set())
-  const [selectedRegId, setSelectedRegId] = useState<string | null>(null)
-
-  const toggleResponses = (regId: string) =>
-    setExpandedResponseIds(prev => {
-      const next = new Set(prev)
-      if (next.has(regId)) next.delete(regId)
-      else next.add(regId)
-      return next
-    })
+  const [selectedRegistrant, setSelectedRegistrant] = useState<RegistrantWithResponses | null>(null)
 
   // Fetch custom_form_schema for this event
   useEffect(() => {
@@ -303,11 +451,6 @@ export function OrgEventRegistrants() {
     return true
   }
 
-  const handleApproveAll = async () => {
-    const pending = registrants.filter((r) => r.status === 'pending')
-    await Promise.all(pending.map((r) => handleApprove(r.id)))
-  }
-
   const filtered = filter === 'all' ? registrants : registrants.filter((r) => r.status === filter)
 
   const counts = {
@@ -321,9 +464,9 @@ export function OrgEventRegistrants() {
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
         {/* ── Blue Background Container ── */}
-        <div 
+        <div
           className="bg-[#1152d4] relative overflow-hidden z-0 pointer-events-auto pb-[24px] pt-14"
-          style={{ 
+          style={{
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
             backgroundSize: '60px 60px',
@@ -414,23 +557,6 @@ export function OrgEventRegistrants() {
                 ))}
               </div>
 
-              <AnimatePresence>
-                {filter === 'pending' && counts.pending > 0 && (
-                  <motion.button
-                    variants={fadeUp}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    onClick={handleApproveAll}
-                    className="mb-4 px-4 py-2 bg-green text-white text-md3-body-md font-bold rounded-xl hover:bg-green/90 transition-colors flex items-center gap-2"
-                    whileTap={{ scale: 0.97 }}
-                  >
-                    <CheckCircleOutline className="w-4 h-4" />
-                    Approve All Pending ({counts.pending})
-                  </motion.button>
-                )}
-              </AnimatePresence>
-
               {isLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
@@ -474,19 +600,11 @@ export function OrgEventRegistrants() {
                       exit="exit"
                     >
                       {filtered.map((reg) => (
-                        <motion.div key={reg.id} variants={cardItem} className="space-y-1.5">
+                        <motion.div key={reg.id} variants={cardItem}>
                           <ApprovalCard
                             registration={reg}
-                            onClick={() => setSelectedRegId(reg.id)}
+                            onClick={() => setSelectedRegistrant(reg)}
                           />
-                          {formSchema.length > 0 && reg.form_responses && (
-                            <FormResponsesPanel
-                              schema={formSchema}
-                              responses={reg.form_responses}
-                              isExpanded={expandedResponseIds.has(reg.id)}
-                              onToggle={() => toggleResponses(reg.id)}
-                            />
-                          )}
                         </motion.div>
                       ))}
                     </motion.div>
@@ -593,14 +711,21 @@ export function OrgEventRegistrants() {
         />
       )}
 
-      {/* Task 3: replace this block with <RegistrantDetailView> that receives
-          selectedReg, onApprove, onReject, onRevert, onCheckIn, onClose */}
-      {selectedRegId !== null && (() => {
-        void handleReject
-        void handleRevert
-        void handleCheckIn
-        return null
-      })()}
+      <AnimatePresence>
+        {selectedRegistrant && (
+          <RegistrantDetailView
+            key={selectedRegistrant.id}
+            registration={selectedRegistrant}
+            formSchema={formSchema}
+            eventTitle={event?.title ?? ''}
+            onClose={() => setSelectedRegistrant(null)}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            onRevert={handleRevert}
+            onCheckIn={handleCheckIn}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
