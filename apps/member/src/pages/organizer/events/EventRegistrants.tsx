@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeftOutline, CheckCircleOutline, AltArrowDownOutline, ClipboardListOutline, UserSpeakOutline, UsersGroupRoundedOutline } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { useOrganizerUser } from '../../../stores/useOrgAuthStore'
@@ -136,6 +137,7 @@ export function OrgEventRegistrants() {
   const [volunteersLoading, setVolunteersLoading] = useState(false)
   const [formSchema, setFormSchema]     = useState<CustomFormField[]>([])
   const [expandedResponseIds, setExpandedResponseIds] = useState<Set<string>>(new Set())
+  const [selectedRegId, setSelectedRegId] = useState<string | null>(null)
 
   const toggleResponses = (regId: string) =>
     setExpandedResponseIds(prev => {
@@ -227,7 +229,7 @@ export function OrgEventRegistrants() {
     await fetchVolunteers()
   }
 
-  const handleApprove = async (regId: string) => {
+  const handleApprove = async (regId: string): Promise<boolean> => {
     const qrToken = 'DCN-' + crypto.randomUUID().slice(0, 8).toUpperCase()
     const { error } = await supabase
       .from('event_registrations')
@@ -237,30 +239,68 @@ export function OrgEventRegistrants() {
         qr_code_token: qrToken,
       })
       .eq('id', regId)
-    if (!error) {
-      setRegistrants((prev) =>
-        prev.map((r) => (r.id === regId ? { ...r, status: 'approved' as const } : r))
-      )
-      // Fire-and-forget approval email
-      const reg = registrants.find((r) => r.id === regId)
-      if (reg?.member_email) {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session && event) {
-          const eventDate = event.event_date
-            ? new Date(event.event_date).toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-            : 'Date TBA'
-          const ticketUrl = `${window.location.origin}/events/${event.slug ?? event.id}/ticket`
-          void supabase.functions.invoke('send-email', {
-            body: {
-              to: reg.member_email,
-              subject: `You're approved for ${event.title}!`,
-              html: buildApprovedEmail({ memberName: reg.member_name, eventTitle: event.title, eventDate, eventLocation: event.location ?? undefined, pointsValue: event.points_value ?? 100, ticketUrl }),
-            },
-            headers: { Authorization: `Bearer ${session.access_token}` },
-          })
-        }
+    if (error) return false
+    setRegistrants((prev) =>
+      prev.map((r) => (r.id === regId ? { ...r, status: 'approved' as const } : r))
+    )
+    const reg = registrants.find((r) => r.id === regId)
+    if (reg?.member_email) {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session && event) {
+        const eventDate = event.event_date
+          ? new Date(event.event_date).toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+          : 'Date TBA'
+        const ticketUrl = `${window.location.origin}/events/${event.slug ?? event.id}/ticket`
+        void supabase.functions.invoke('send-email', {
+          body: {
+            to: reg.member_email,
+            subject: `You're approved for ${event.title}!`,
+            html: buildApprovedEmail({ memberName: reg.member_name, eventTitle: event.title, eventDate, eventLocation: event.location ?? undefined, pointsValue: event.points_value ?? 100, ticketUrl }),
+          },
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
       }
     }
+    return true
+  }
+
+  const handleReject = async (regId: string): Promise<boolean> => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'rejected' })
+      .eq('id', regId)
+    if (error) return false
+    setRegistrants((prev) =>
+      prev.map((r) => (r.id === regId ? { ...r, status: 'rejected' as const } : r))
+    )
+    return true
+  }
+
+  const handleRevert = async (regId: string): Promise<boolean> => {
+    const { error } = await supabase
+      .from('event_registrations')
+      .update({ status: 'pending', approved_at: null, qr_code_token: null })
+      .eq('id', regId)
+    if (error) return false
+    setRegistrants((prev) =>
+      prev.map((r) => (r.id === regId ? { ...r, status: 'pending' as const } : r))
+    )
+    return true
+  }
+
+  const handleCheckIn = async (regId: string): Promise<boolean> => {
+    if (!organizerUser?.id) return false
+    const { data, error } = await supabase.rpc('manual_checkin', {
+      p_registration_id: regId,
+      p_organizer_id:    organizerUser.id,
+    })
+    if (error || !(data as unknown as { success?: boolean })?.success) return false
+    const result = data as unknown as { success: boolean; member_name: string; points_awarded: number }
+    setRegistrants((prev) =>
+      prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
+    )
+    toast.success(`${result.member_name} checked in — +${result.points_awarded} pts`)
+    return true
   }
 
   const handleApproveAll = async () => {
@@ -437,6 +477,7 @@ export function OrgEventRegistrants() {
                         <motion.div key={reg.id} variants={cardItem} className="space-y-1.5">
                           <ApprovalCard
                             registration={reg}
+                            onClick={() => setSelectedRegId(reg.id)}
                           />
                           {formSchema.length > 0 && reg.form_responses && (
                             <FormResponsesPanel
@@ -551,6 +592,15 @@ export function OrgEventRegistrants() {
           onClose={() => setShowAnnounce(false)}
         />
       )}
+
+      {/* Task 3: replace this block with <RegistrantDetailView> that receives
+          selectedReg, onApprove, onReject, onRevert, onCheckIn, onClose */}
+      {selectedRegId !== null && (() => {
+        void handleReject
+        void handleRevert
+        void handleCheckIn
+        return null
+      })()}
     </div>
   )
 }
