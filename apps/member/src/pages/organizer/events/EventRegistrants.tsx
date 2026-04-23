@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../../lib/supabase'
 import { useEventsStore } from '../../../stores/useEventsStore'
 import { useOrganizerUser } from '../../../stores/useOrgAuthStore'
-import { toast } from 'sonner'
 import { ApprovalCard, type Registration } from '../../../components/ApprovalCard'
 import { fadeUp, staggerContainer, cardItem } from '../../../lib/animation'
 import SendAnnouncementSheet from '../../../components/SendAnnouncementSheet'
@@ -264,44 +263,6 @@ export function OrgEventRegistrants() {
     }
   }
 
-  const handleReject = async (regId: string) => {
-    const { error } = await supabase
-      .from('event_registrations')
-      .update({ status: 'rejected' })
-      .eq('id', regId)
-    if (!error) {
-      setRegistrants((prev) =>
-        prev.map((r) => (r.id === regId ? { ...r, status: 'rejected' as const } : r))
-      )
-    }
-  }
-
-  const handleRevert = async (regId: string) => {
-    const { error } = await supabase
-      .from('event_registrations')
-      .update({ status: 'pending', approved_at: null, qr_code_token: null })
-      .eq('id', regId)
-    if (!error) {
-      setRegistrants((prev) =>
-        prev.map((r) => (r.id === regId ? { ...r, status: 'pending' as const } : r))
-      )
-    }
-  }
-
-  const handleCheckIn = async (regId: string) => {
-    if (!organizerUser?.id) return
-    const { data, error } = await supabase.rpc('manual_checkin', {
-      p_registration_id: regId,
-      p_organizer_id:    organizerUser.id,
-    })
-    if (error || !(data as unknown as { success?: boolean })?.success) return
-    const result = data as unknown as { success: boolean; member_name: string; points_awarded: number }
-    setRegistrants((prev) =>
-      prev.map((r) => r.id === regId ? { ...r, checked_in: true } : r)
-    )
-    toast.success(`${result.member_name} checked in — +${result.points_awarded} pts`)
-  }
-
   const handleApproveAll = async () => {
     const pending = registrants.filter((r) => r.status === 'pending')
     await Promise.all(pending.map((r) => handleApprove(r.id)))
@@ -476,10 +437,6 @@ export function OrgEventRegistrants() {
                         <motion.div key={reg.id} variants={cardItem} className="space-y-1.5">
                           <ApprovalCard
                             registration={reg}
-                            onApprove={handleApprove}
-                            onReject={handleReject}
-                            onRevert={handleRevert}
-                            onCheckIn={handleCheckIn}
                           />
                           {formSchema.length > 0 && reg.form_responses && (
                             <FormResponsesPanel

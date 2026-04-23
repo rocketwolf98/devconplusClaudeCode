@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { CheckCircleOutline, CloseCircleLineDuotone, CloseCircleOutline, RestartOutline, UserCheckOutline } from 'solar-icon-set'
+import { AltArrowRightOutline, CheckCircleOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import { StatusBadge } from './StatusBadge'
 
@@ -16,14 +16,10 @@ export interface Registration {
 
 interface ApprovalCardProps {
   registration: Registration
-  onApprove?: (id: string) => void
-  onReject?: (id: string) => void
-  onRevert?: (id: string) => void
-  onCheckIn?: (id: string) => void
-  readOnly?: boolean
+  onClick?: () => void
 }
 
-function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, onCheckIn, readOnly = false }: ApprovalCardProps) {
+function ApprovalCardComponent({ registration, onClick }: ApprovalCardProps) {
   const initials = registration.member_name
     .split(' ')
     .map((n) => n[0])
@@ -39,7 +35,12 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
   })
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card">
+    <motion.div
+      className="bg-white rounded-2xl border border-slate-200 p-4 shadow-card cursor-pointer"
+      onClick={onClick}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+    >
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-full bg-blue/10 flex items-center justify-center text-blue text-md3-body-md font-bold shrink-0">
           {initials}
@@ -49,76 +50,25 @@ function ApprovalCardComponent({ registration, onApprove, onReject, onRevert, on
           <p className="text-md3-label-md text-slate-400 truncate">{registration.member_email}</p>
           <p className="text-md3-label-md text-slate-400 truncate">{registration.school_or_company}</p>
         </div>
-        <StatusBadge status={registration.status} />
+        <div className="flex items-center gap-2 shrink-0">
+          <StatusBadge status={registration.status} />
+          <AltArrowRightOutline color="#CBD5E1" className="w-4 h-4" />
+        </div>
       </div>
 
-      <div className="bg-slate-50 rounded-xl px-3 py-2 mb-3">
+      <div className="bg-slate-50 rounded-xl px-3 py-2">
         <p className="text-md3-label-md text-slate-400 mb-0.5">Event</p>
         <p className="text-md3-body-md font-semibold text-slate-700 truncate">{registration.event_title}</p>
         <p className="text-md3-label-md text-slate-400 mt-1">Registered {formattedDate}</p>
       </div>
 
-      {!readOnly && registration.status === 'pending' && (
-        <div className="flex gap-2">
-          <motion.button
-            onClick={() => onReject?.(registration.id)}
-            className="flex-1 py-2 text-md3-body-md font-semibold rounded-xl border border-slate-200 text-slate-500 hover:bg-red/5 hover:border-red hover:text-red transition-colors flex items-center justify-center gap-1.5"
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
-            Reject
-          </motion.button>
-          <motion.button
-            onClick={() => onApprove?.(registration.id)}
-            className="flex-1 py-2 text-md3-body-md font-semibold rounded-xl bg-blue text-white hover:bg-blue-dark transition-colors flex items-center justify-center gap-1.5"
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <CheckCircleOutline className="w-3.5 h-3.5" />
-            Approve
-          </motion.button>
-        </div>
-      )}
-
-      {!readOnly && registration.status === 'approved' && !registration.checked_in && (
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          onClick={() => onCheckIn?.(registration.id)}
-          className="w-full py-2 text-md3-body-md font-semibold rounded-xl bg-green/10 text-green border border-green/20 hover:bg-green/20 transition-colors flex items-center justify-center gap-1.5"
-        >
-          <UserCheckOutline className="w-3.5 h-3.5" />
-          Check In
-        </motion.button>
-      )}
       {registration.status === 'approved' && registration.checked_in && (
-        <p className="text-md3-label-md text-green font-semibold text-center py-1 flex items-center justify-center gap-1">
-          <CheckCircleOutline className="w-3.5 h-3.5" />
+        <p className="text-md3-label-md text-green font-semibold text-center pt-3 flex items-center justify-center gap-1">
+          <CheckCircleOutline color="#21C45D" className="w-3.5 h-3.5" />
           Checked In
         </p>
       )}
-
-      {registration.status === 'rejected' && (
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-md3-label-md text-red font-semibold flex items-center gap-1">
-            <CloseCircleOutline className="w-3.5 h-3.5 shrink-0" />
-            Registration rejected
-          </p>
-          {!readOnly && (
-            <motion.button
-              onClick={() => onRevert?.(registration.id)}
-              className="flex items-center gap-1 text-md3-label-md font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <RestartOutline className="w-3 h-3" />
-              Undo
-            </motion.button>
-          )}
-        </div>
-      )}
-    </div>
+    </motion.div>
   )
 }
 

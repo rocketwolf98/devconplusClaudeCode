@@ -238,7 +238,7 @@ export function OrgEventSummary() {
               >
                 {filtered.map((reg) => (
                   <motion.div key={reg.id} variants={cardItem}>
-                    <ApprovalCard registration={reg} readOnly />
+                    <ApprovalCard registration={reg} />
                   </motion.div>
                 ))}
               </motion.div>

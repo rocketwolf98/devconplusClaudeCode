@@ -102,43 +102,6 @@ export function OrgDashboard() {
   const pendingVolunteers = volunteerApps.filter((a) => a.status === 'pending')
   const totalPending = pendingRegistrations.length + pendingVolunteers.length
 
-  const handleApprove = async (id: string) => {
-    const qrToken = 'DCN-' + crypto.randomUUID().slice(0, 8).toUpperCase()
-    const { error } = await supabase
-      .from('event_registrations')
-      .update({ status: 'approved', approved_at: new Date().toISOString(), qr_code_token: qrToken })
-      .eq('id', id)
-    if (!error) {
-      setRegistrations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: 'approved' as const } : r))
-      )
-    }
-  }
-
-  const handleReject = async (id: string) => {
-    const { error } = await supabase
-      .from('event_registrations')
-      .update({ status: 'rejected' })
-      .eq('id', id)
-    if (!error) {
-      setRegistrations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: 'rejected' as const } : r))
-      )
-    }
-  }
-
-  const handleRevert = async (id: string) => {
-    const { error } = await supabase
-      .from('event_registrations')
-      .update({ status: 'pending', approved_at: null, qr_code_token: null })
-      .eq('id', id)
-    if (!error) {
-      setRegistrations((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: 'pending' as const } : r))
-      )
-    }
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       <header className="sticky top-0 z-50 flex flex-col pointer-events-none">
@@ -300,9 +263,6 @@ export function OrgDashboard() {
                     <motion.div key={reg.id} variants={cardItem}>
                       <ApprovalCard
                         registration={reg}
-                        onApprove={handleApprove}
-                        onReject={handleReject}
-                        onRevert={handleRevert}
                       />
                     </motion.div>
                   ))}
