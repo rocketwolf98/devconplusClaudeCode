@@ -345,3 +345,4 @@ You will need the following to work on this project. Ask Kenshin (Dev A) or the 
 | Domain + email setup | [`.claude/docs/DOMAIN_AND_EMAIL_SETUP.md`](.claude/docs/DOMAIN_AND_EMAIL_SETUP.md) | Step-by-step DNS, Vercel, Supabase, and Google OAuth configuration |
 | DB connection resilience | [`.claude/rules/db-connection-resilience.md`](.claude/rules/db-connection-resilience.md) | Realtime recovery pattern — required reading before touching layout or store files |
 | Vercel build safety | [`.claude/rules/vercel-build-safety.md`](.claude/rules/vercel-build-safety.md) | TypeScript flags that cause build failures and how to avoid them |
+| Architectural Decision Records | [`docs/adr/`](docs/adr/README.md) | Why the codebase is structured the way it is — retroactive + forward-looking decisions |
