@@ -238,7 +238,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Supabase adds an 'email' identity when updateUser({ password }) is called,
         // so this stays accurate after the user sets a password.
         const identities = session.user.identities ?? []
-        const isOAuthOnly = identities.length > 0 && !identities.some(id => id.provider === 'email')
+        const isOAuthOnly = !identities.some(id => id.provider === 'email')
         set({ isOAuthOnly })
 
         const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
@@ -268,7 +268,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       if (event === 'USER_UPDATED' && session) {
         const identities = session.user.identities ?? []
-        set({ isOAuthOnly: identities.length > 0 && !identities.some(id => id.provider === 'email') })
+        set({ isOAuthOnly: !identities.some(id => id.provider === 'email') })
       }
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
@@ -477,7 +477,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (error) throw error
     // updateUser returns the updated user with refreshed identities.
     const updatedIdentities = data.user?.identities ?? []
-    set({ isOAuthOnly: updatedIdentities.length > 0 && !updatedIdentities.some(id => id.provider === 'email') })
+    set({ isOAuthOnly: !updatedIdentities.some(id => id.provider === 'email') })
   },
 
   requestOrganizerUpgrade: async (code) => {
