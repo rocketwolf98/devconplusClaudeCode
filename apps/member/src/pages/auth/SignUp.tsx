@@ -78,6 +78,8 @@ export default function SignUp() {
   const turnstileRef = useRef<TurnstileInstance>(null)
   const usernameTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [chapters, setChapters] = useState<Chapter[]>([])
+  const [isOAuthMode, setIsOAuthMode] = useState(false)
+  const [oauthEmail, setOauthEmail] = useState('')
 
   const { draft, saveDraft, clearDraft } = useFormDraft<Omit<FormData, 'password'>>(
     'sign-up',
@@ -91,7 +93,7 @@ export default function SignUp() {
     })
   }, [])
 
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       full_name:         (draft.full_name         as string) ?? '',
@@ -108,11 +110,62 @@ export default function SignUp() {
 
   useEffect(() => {
     const { unsubscribe } = watch((values) => {
+      if (isOAuthMode) return   // session is authoritative in OAuth mode
       const { password: _omit, ...rest } = values
       saveDraft(rest as Omit<FormData, 'password'>)
     })
     return unsubscribe
-  }, [watch, saveDraft])
+  }, [watch, saveDraft, isOAuthMode])
+
+  // OAuth completion mode detection — fires when OAuthCallback redirects here
+  useEffect(() => {
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) return
+      const provider = session.user.app_metadata?.provider as string | undefined
+      if (!provider || provider === 'email') return  // normal email signup
+
+      const identities = session.user.identities ?? []
+      const isOAuthOnly = !identities.some(id => id.provider === 'email')
+
+      void supabase
+        .from('profiles')
+        .select('full_name, username, email, school_or_company, chapter_id, linkedin_url, github_url, portfolio_url')
+        .eq('id', session.user.id)
+        .maybeSingle()
+        .then(({ data: profile }) => {
+          const isComplete = Boolean(profile?.chapter_id && profile?.username)
+
+          if (isComplete && !isOAuthOnly) {
+            // Fully set up — redirect away
+            navigate('/home', { replace: true })
+            return
+          }
+
+          // Enter OAuth completion mode
+          setIsOAuthMode(true)
+          setOauthEmail(session.user.email ?? '')
+          const meta = session.user.user_metadata
+
+          if (profile) {
+            // Existing user with no password — pre-fill all fields from DB profile
+            setValue('full_name',         profile.full_name ?? '')
+            setValue('username',          profile.username ?? '')
+            setValue('school_or_company', profile.school_or_company ?? '')
+            setValue('chapter_id',        profile.chapter_id ?? '')
+            setValue('linkedin_url',      profile.linkedin_url ?? '')
+            setValue('github_url',        profile.github_url ?? '')
+            setValue('portfolio_url',     profile.portfolio_url ?? '')
+          } else {
+            // New user — pre-fill name from Google metadata
+            const googleName = (meta.full_name as string | undefined)
+              ?? (meta.name as string | undefined)
+              ?? ''
+            setValue('full_name', googleName)
+          }
+          setValue('email', session.user.email ?? '')
+        })
+    })
+  }, [setValue, navigate])
 
   const handleUsernameChange = useCallback((value: string) => {
     if (usernameTimerRef.current) clearTimeout(usernameTimerRef.current)
@@ -137,6 +190,54 @@ export default function SignUp() {
       return
     }
     setFormError(null)
+
+    // ── OAuth completion mode ─────────────────────────────────────────────────
+    if (isOAuthMode) {
+      try {
+        // 1. Set local password (no re-auth needed — OAuth session is active)
+        const { error: pwErr } = await supabase.auth.updateUser({ password: data.password })
+        if (pwErr) {
+          setFormError('Failed to set password. Please try again.')
+          return
+        }
+
+        // 2. Upsert profile (creates or updates — handles both new and existing users)
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) { navigate('/sign-in', { replace: true }); return }
+        const meta = session.user.user_metadata
+
+        const { error: profileErr } = await supabase.from('profiles').upsert({
+          id:                session.user.id,
+          full_name:         data.full_name,
+          username:          data.username.toLowerCase(),
+          email:             session.user.email ?? '',
+          chapter_id:        data.chapter_id,
+          school_or_company: data.school_or_company || null,
+          avatar_url:        (meta.avatar_url as string | undefined) ?? null,
+          linkedin_url:      data.linkedin_url  || null,
+          github_url:        data.github_url    || null,
+          portfolio_url:     data.portfolio_url || null,
+          role:              'member',
+        }, { onConflict: 'id', ignoreDuplicates: false })
+
+        if (profileErr) {
+          setFormError('Something went wrong saving your profile. Please try again.')
+          return
+        }
+
+        // 3. Initialize store so the rest of the app has the correct user + isOAuthOnly=false
+        await useAuthStore.getState().initialize()
+        clearDraft()
+        navigate('/organizer-code-gate', { replace: true })
+      } catch (err) {
+        const raw = err instanceof Error ? err.message : 'Sign-up failed. Please try again.'
+        setFormError(friendlyAuthError(raw))
+      }
+      return
+    }
+    // ── END OAuth completion mode ─────────────────────────────────────────────
+
+    // Normal email/password signup (unchanged below)
     try {
       const { emailConfirmationPending } = await signUp(
         data.email, data.password, data.full_name, data.username, data.chapter_id,
@@ -194,31 +295,35 @@ export default function SignUp() {
         >
           <img src={logoHorizontal} alt="DEVCON+" className="h-8 w-auto mx-auto relative z-10" />
           <p className="text-white/60 mt-3 text-md3-body-md font-proxima relative z-10 uppercase tracking-widest font-bold">
-            Create your account
+            {isOAuthMode ? 'Complete your profile' : 'Create your account'}
           </p>
         </div>
       </header>
 
       {/* Floating card */}
       <div className="px-4 pt-10 pb-10 overflow-y-auto">
-        <button
-          type="button"
-          disabled={googleLoading}
-          onClick={async () => {
-            setGoogleLoading(true)
-            try { await signInWithGoogle() } catch { setGoogleLoading(false) }
-          }}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-md3-body-md font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
-        >
-          <GoogleIcon />
-          {googleLoading ? 'Redirecting…' : 'Continue with Google'}
-        </button>
+        {!isOAuthMode && (
+          <>
+            <button
+              type="button"
+              disabled={googleLoading}
+              onClick={async () => {
+                setGoogleLoading(true)
+                try { await signInWithGoogle() } catch { setGoogleLoading(false) }
+              }}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white border border-slate-200 rounded-xl text-md3-body-md font-semibold text-slate-700 hover:bg-slate-50 transition-colors mb-5 shadow-card disabled:opacity-60"
+            >
+              <GoogleIcon />
+              {googleLoading ? 'Redirecting…' : 'Continue with Google'}
+            </button>
 
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex-1 h-px bg-slate-200" />
-          <span className="text-md3-label-md text-slate-400 font-medium">or email</span>
-          <div className="flex-1 h-px bg-slate-200" />
-        </div>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-md3-label-md text-slate-400 font-medium">or email</span>
+              <div className="flex-1 h-px bg-slate-200" />
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
@@ -256,13 +361,22 @@ export default function SignUp() {
 
           <div>
             <label className="text-md3-body-md font-medium text-slate-700 block mb-1">Email</label>
-            <input
-              {...register('email')}
-              type="email"
-              placeholder="juan@devcon.ph"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
-            />
-            {errors.email && <p className="text-red text-md3-label-md mt-1">{errors.email.message}</p>}
+            {isOAuthMode ? (
+              <div className="w-full border border-slate-200 bg-slate-50 rounded-xl px-4 py-3 text-md3-body-md text-slate-500 flex items-center gap-2">
+                <GoogleIcon />
+                <span>{oauthEmail}</span>
+              </div>
+            ) : (
+              <>
+                <input
+                  {...register('email')}
+                  type="email"
+                  placeholder="juan@devcon.ph"
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-md3-body-md focus:outline-none focus:ring-2 focus:ring-blue"
+                />
+                {errors.email && <p className="text-red text-md3-label-md mt-1">{errors.email.message}</p>}
+              </>
+            )}
           </div>
 
           <div>
@@ -364,28 +478,34 @@ export default function SignUp() {
             </p>
           )}
 
-          <Turnstile
-            ref={turnstileRef}
-            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
-            onSuccess={(token) => setTurnstileToken(token)}
-            onExpire={() => setTurnstileToken(null)}
-            onError={() => setTurnstileToken(null)}
-            options={{ theme: 'light', size: 'normal' }}
-          />
+          {!isOAuthMode && (
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+              options={{ theme: 'light', size: 'normal' }}
+            />
+          )}
 
           <button
             type="submit"
-            disabled={isSubmitting || !turnstileToken}
+            disabled={isSubmitting || (!isOAuthMode && !turnstileToken)}
             className="w-full bg-[#1152d4] text-white font-bold py-4 rounded-2xl disabled:opacity-60 hover:bg-blue-dark transition-colors"
           >
-            {isSubmitting ? 'Creating account…' : 'Create Account'}
+            {isSubmitting
+              ? (isOAuthMode ? 'Completing sign-up…' : 'Creating account…')
+              : (isOAuthMode ? 'Complete Sign Up' : 'Create Account')}
           </button>
         </form>
 
-        <p className="text-center text-md3-body-md text-slate-500 mt-6">
-          Already have an account?{' '}
-          <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
-        </p>
+        {!isOAuthMode && (
+          <p className="text-center text-md3-body-md text-slate-500 mt-6">
+            Already have an account?{' '}
+            <Link to="/sign-in" className="text-blue font-semibold">Sign In</Link>
+          </p>
+        )}
       </div>
     </div>
   )
