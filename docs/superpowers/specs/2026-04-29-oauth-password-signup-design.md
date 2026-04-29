@@ -59,16 +59,44 @@ setPassword: (newPassword: string) => Promise<void>
 
 ---
 
-### 2. OAuthCallback.tsx — one-line redirect change
+### 2. OAuthCallback.tsx — redirect logic
 
-When the OAuth user's profile is incomplete (`!chapter_id || !username`), redirect to `/sign-up` instead of `/oauth-profile-complete`:
+Replace the two-branch redirect (`/oauth-profile-complete` vs `/home`/`/organizer`) with a three-branch check:
 
 ```ts
-// Before
-navigate('/oauth-profile-complete', { replace: true })
-// After
-navigate('/sign-up', { replace: true })
+async function redirect(userId: string, session: Session) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('chapter_id, username, role')
+    .eq('id', userId)
+    .maybeSingle()
+
+  // Branch 1: incomplete profile (new user)
+  if (!profile || !profile.chapter_id || !profile.username) {
+    const rl = await callRateLimit('oauth_signup')
+    if (!rl.allowed) { /* sign out + setError('rate_limited') */ return }
+    navigate('/sign-up', { replace: true })
+    return
+  }
+
+  // Branch 2: complete profile but no local password (existing OAuth user)
+  const identities = session.user.identities ?? []
+  const isOAuthOnly = !identities.some(id => id.provider === 'email')
+  if (isOAuthOnly) {
+    navigate('/sign-up', { replace: true })
+    return
+  }
+
+  // Branch 3: fully set up user
+  if (ORGANIZER_ROLES.includes(profile.role ?? '')) {
+    navigate('/organizer', { replace: true })
+  } else {
+    navigate('/home', { replace: true })
+  }
+}
 ```
+
+The `redirect` function now receives `session` so it can inspect `identities` without an extra network call.
 
 ---
 
@@ -76,40 +104,65 @@ navigate('/sign-up', { replace: true })
 
 #### OAuth detection (on mount)
 
+Two new local state fields: `isOAuthMode: boolean`, `oauthEmail: string`.
+
 ```ts
 useEffect(() => {
   void supabase.auth.getSession().then(({ data: { session } }) => {
     if (!session) return
     const provider = session.user.app_metadata?.provider
-    if (!provider || provider === 'email') return          // normal email signup
+    if (!provider || provider === 'email') return   // normal email signup — do nothing
 
-    // OAuth session — check if profile is already complete
+    // Determine if user has a local password
+    const identities = session.user.identities ?? []
+    const isOAuthOnly = !identities.some(id => id.provider === 'email')
+
+    // Fetch existing profile (may or may not exist)
     void supabase
       .from('profiles')
-      .select('chapter_id, username')
+      .select('*')
       .eq('id', session.user.id)
       .maybeSingle()
       .then(({ data: profile }) => {
-        if (profile?.chapter_id && profile?.username) {
-          // Already complete — redirect away (MemberLayout auth guard handles
-          // further routing to /organizer for organizer roles)
+        const isComplete = profile?.chapter_id && profile?.username
+
+        if (isComplete && !isOAuthOnly) {
+          // Fully set up — redirect away
           navigate('/home', { replace: true })
           return
         }
-        // Incomplete — enter OAuth completion mode
+
+        // Enter OAuth completion mode:
+        // - New user (no profile): pre-fill from Google metadata
+        // - Existing user (has profile, no password): pre-fill from profile
         setIsOAuthMode(true)
+        setOauthEmail(session.user.email ?? '')
         const meta = session.user.user_metadata
-        const googleName = (meta.full_name as string | undefined)
-          ?? (meta.name as string | undefined)
-          ?? ''
-        setValue('full_name', googleName)
+
+        if (profile) {
+          // Existing user — pre-fill all fields from saved profile
+          setValue('full_name', profile.full_name)
+          setValue('username',  profile.username ?? '')
+          setValue('school_or_company', profile.school_or_company ?? '')
+          setValue('chapter_id', profile.chapter_id ?? '')
+          setValue('linkedin_url',  profile.linkedin_url  ?? '')
+          setValue('github_url',    profile.github_url    ?? '')
+          setValue('portfolio_url', profile.portfolio_url ?? '')
+        } else {
+          // New user — pre-fill name from Google only
+          const googleName = (meta.full_name as string | undefined)
+            ?? (meta.name as string | undefined)
+            ?? ''
+          setValue('full_name', googleName)
+        }
+
         setValue('email', session.user.email ?? '')
       })
   })
 }, [setValue, navigate])
 ```
 
-New local state: `isOAuthMode: boolean`, `oauthEmail: string`.
+When the profile already exists (existing OAuth user with no password), all form fields arrive pre-filled from the DB. The user only needs to type a password — all other fields are already populated.
 
 #### Visual changes in OAuth mode
 
@@ -213,7 +266,8 @@ Reuse the existing `passwordSchema` (min 8 chars, must match). No new schema nee
 | `updateUser({ password })` fails in SignUp OAuth submit | Show inline error: "Failed to set password. Please try again." |
 | Profile upsert fails in SignUp OAuth submit | Show inline error: "Something went wrong saving your profile. Please try again." |
 | `setPassword()` fails in ProfileEdit | Throw propagates to the form handler; show inline error below the button |
-| User lands on `/sign-up` with complete OAuth profile | Silently redirect to `/home` or `/organizer` on mount |
+| User lands on `/sign-up` with complete OAuth profile AND has local password | Silently redirect to `/home` on mount |
+| Existing OAuth user (complete profile, no password) lands on `/sign-up` | Enters OAuth completion mode with all fields pre-filled from DB profile |
 | `isOAuthOnly` cannot be computed (identities unavailable) | Default `false` — user sees existing "Change Password" flow; worst case they get an auth error from PasswordConfirmModal which they can dismiss |
 
 ---
@@ -223,7 +277,7 @@ Reuse the existing `passwordSchema` (min 8 chars, must match). No new schema nee
 | File | Change |
 |---|---|
 | `apps/member/src/stores/useAuthStore.ts` | Add `isOAuthOnly`, `setPassword` |
-| `apps/member/src/pages/auth/OAuthCallback.tsx` | Redirect new users to `/sign-up` |
+| `apps/member/src/pages/auth/OAuthCallback.tsx` | Three-branch redirect: new user → `/sign-up`; existing OAuth-only → `/sign-up`; complete → `/home`/`/organizer` |
 | `apps/member/src/pages/auth/SignUp.tsx` | Add OAuth detection + dual-mode UI + OAuth submit handler |
 | `apps/member/src/pages/profile/ProfileEdit.tsx` | Fork Change Email + Change Password sections on `isOAuthOnly` |
 
