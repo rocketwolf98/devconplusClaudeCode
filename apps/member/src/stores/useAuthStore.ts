@@ -52,6 +52,7 @@ interface AuthState {
   isLoading: boolean
   isInitialized: boolean
   isOrganizerSession: boolean
+  isOAuthOnly: boolean
   error: string | null
 
   initialize: () => Promise<void>
@@ -79,6 +80,7 @@ interface AuthState {
   requestOrganizerUpgrade: (code: string) => Promise<UpgradeResult>
   checkUsernameAvailable: (username: string) => Promise<boolean>
   signInWithGoogle: () => Promise<void>
+  setPassword: (newPassword: string) => Promise<void>
 }
 
 async function fetchProfileById(userId: string): Promise<Profile | null> {
@@ -206,6 +208,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   isInitialized: false,
   isOrganizerSession: false,
+  isOAuthOnly: false,
   error: null,
 
   initialize: async () => {
@@ -231,6 +234,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return
       }
       if (session?.user) {
+        // Detect OAuth-only users (no local password) from the identities array.
+        // Supabase adds an 'email' identity when updateUser({ password }) is called,
+        // so this stays accurate after the user sets a password.
+        const identities = session.user.identities ?? []
+        const isOAuthOnly = identities.length > 0 && !identities.some(id => id.provider === 'email')
+        set({ isOAuthOnly })
+
         const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
         const profile = await ensureProfile(session.user.id, meta)
         if (profile) await applyProfile(profile, set)
@@ -456,6 +466,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (authErr) throw new Error('Incorrect password')
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) throw error
+  },
+
+  setPassword: async (newPassword) => {
+    const { error, data } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+    // updateUser returns the updated user with refreshed identities.
+    const hasEmailIdentity = data.user?.identities?.some(id => id.provider === 'email') ?? false
+    set({ isOAuthOnly: !hasEmailIdentity })
   },
 
   requestOrganizerUpgrade: async (code) => {
