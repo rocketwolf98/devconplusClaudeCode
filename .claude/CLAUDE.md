@@ -1,8 +1,8 @@
 # DEVCON+ — Claude Code Master Context File
-> Last Updated: April 15, 2026
-> Version: MVP 1.5
+> Last Updated: April 21, 2026
+> Version: MVP 1.6
 > Team: 2 interns + Claude Code
-> Hard Deadline: April Week 1 (Cohort 3 Graduation)
+> Hard Deadline: April 30, 2026 (Cohort 3 Graduation)
 > Live App: https://devconplusbeta-v1.vercel.app
 > Lovable Prototype (UX Reference ONLY): https://devconplusrndprototype.lovable.app/onboarding
 
@@ -25,6 +25,22 @@ These rules are non-negotiable. Read before generating anything.
 11. **The member app is a mobile-first web app** (React + Vite, not Expo). All UI must be designed for a 390px-wide mobile viewport. On desktop (md+), `MemberLayout` and `OrganizerLayout` switch to a sidebar + main card layout — they are fully responsive, not blocked. `<DesktopGuard />` is a pass-through no-op.
 12. **Primary color is CSS-custom-property driven** (`rgb(var(--color-primary))`). Always use `text-primary`, `bg-primary`, etc. — not hardcoded hex. Only use `text-blue` / `bg-blue` when you explicitly need the non-themed DEVCON blue alias.
 13. **Supabase is now live.** All stores use the real Supabase client (`apps/member/src/lib/supabase.ts`). The `MOCK_*` exports in `@devcon-plus/supabase` are kept for reference but are no longer used by the app. Always use the Supabase client for new data calls.
+14. **Figma MCP: Claude Code supports it (native claude.ai integration — no setup needed) but captures elements poorly per developer observation. Gemini CLI is preferred when available.** Both tools can connect to Figma MCP. Claude Code has a built-in Figma integration via claude.ai (tools: `get_design_context`, `get_screenshot`, `get_metadata`, etc. — available in any claude.ai/code session without `.mcp.json` config). However, per developer observation, Claude Code does not read Figma elements accurately — layouts and tokens are often misread. Gemini CLI produces better design-to-code results. Use Gemini CLI for Figma work if access is provisioned; otherwise use Claude Code + Figma MCP with manual verification, or fall back to the human Figma Inspect panel method. **Figma MCP is free; Figma Dev Mode (recommended for accurate specs) requires a paid Figma plan.**
+15. **MCPs are recommended for automated workflows.** Supabase MCP is already configured in `.mcp.json`. Figma MCP (local server) and Vercel MCP should be added when the corresponding tokens are available. Note: Figma MCP is also available natively in claude.ai sessions without any `.mcp.json` setup. See `README.md` Section 15 for setup instructions.
+
+---
+
+> **Addendum — Tool Recommendation & MCP Clarification (April 21, 2026)**
+>
+> **Figma MCP facts (as of April 21, 2026):**
+> - Claude Code has **native Figma MCP** via claude.ai integration (tools: `get_design_context`, `get_screenshot`, `get_metadata`, etc.) — no `.mcp.json` config needed when running in a claude.ai/code session.
+> - Per developer observation, Claude Code does not capture Figma elements accurately — layouts and tokens are often misread.
+> - Gemini CLI is preferred for Figma design work — better element capture.
+> - Gemini CLI requires organizational access not provisioned to DEVCON Philippines by default.
+> - Figma MCP server is free. Figma Dev Mode (provides precise layout specs to the model) requires a paid Figma plan.
+>
+> **Recommended MCPs (add to `.mcp.json` for local/automated use):** Figma (local server), Supabase (already configured), Vercel.
+> MCPs enable automated workflows: Supabase (schema/migrations), Figma (design-to-code), Vercel (deploy/build inspection).
 
 ---
 

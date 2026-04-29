@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, StarOutline, CPUBoltOutline, CodeOutline, UsersGroupRoundedOutline, AddCircleOutline } from 'solar-icon-set'
+import { CheckCircleOutline, AltArrowRightOutline, DownloadOutline, LogoutOutline, ShieldOutline, LockOutline, CPUBoltOutline, CodeOutline, UsersGroupRoundedOutline, AddCircleOutline } from 'solar-icon-set'
 import { useAuthStore, ORGANIZER_ROLES } from '../../stores/useAuthStore'
 import type { OrganizerRole } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
@@ -232,17 +232,18 @@ export default function Profile() {
                 <button
                   key={theme.id}
                   onClick={() => !locked && setTheme(theme.id)}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${locked ? 'opacity-40 cursor-not-allowed grayscale' : 'hover:scale-105 active:scale-95'}`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all relative overflow-hidden ${locked ? 'cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
                   style={{
                     backgroundColor: theme.hex,
                     boxShadow: isActive ? `0 0 0 2px white, 0 0 0 4px ${theme.hex}` : 'none',
                   }}
                   title={locked ? `Unlocks at ${theme.unlockPoints} XP` : theme.label}
                 >
+                  {locked && <div className="absolute inset-0 rounded-full bg-black/25" />}
                   {isActive ? (
                     <CheckCircleOutline className="w-4 h-4" color="white" />
                   ) : locked ? (
-                    <StarOutline className="w-4 h-4" color="white" />
+                    <LockOutline className="w-4 h-4" color="white" />
                   ) : null}
                 </button>
               )

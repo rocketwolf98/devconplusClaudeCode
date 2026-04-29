@@ -15,6 +15,7 @@ import { useMissionsStore } from '../stores/useMissionsStore'
 import { supabase, onRealtimeDisconnect } from '../lib/supabase'
 
 import DesktopGuard from './DesktopGuard'
+import ScrollToTop from './ScrollToTop'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 export default function MemberLayout() {
@@ -201,6 +202,7 @@ export default function MemberLayout() {
 
   return (
     <DesktopGuard>
+      <ScrollToTop />
       {/* ── MOBILE layout (< md) ── */}
       <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden md:hidden">
         <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24 no-scrollbar">

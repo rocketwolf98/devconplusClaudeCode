@@ -1,16 +1,21 @@
 # DEVCON+ — Developer Setup Guide
 
+> **Last Updated:** April 21, 2026 · **Version:** MVP 1.6
 > **Tagline:** Sync. Support. Succeed.
 > Platform for DEVCON Philippines — 11 chapters, 60,000+ members.
 >
 > **Live app:** https://devconplusbeta-v1.vercel.app
 > **Repo:** https://github.com/rocketwolf98/devconplusClaudeCode
+> **Deadline:** April 30, 2026 — Cohort 3 Graduation
 
 ---
 
-## Quick Start for AI (Claude Code)
+## Quick Start for AI (Claude Code / Gemini CLI)
 
-If you are a new Claude instance picking up this codebase, read these files **in order** before generating a single line of code:
+> **Tool split:** Use **Claude Code** for implementation (logic, stores, Supabase, TypeScript). For UI/UX design from Figma, **Gemini CLI is preferred** — both tools support the Figma MCP, but developer observation shows Claude Code does not capture Figma elements accurately. See Section 15 for the full MCP and tool guide.
+> **Access note:** Gemini CLI requires organizational Gemini access not provisioned to DEVCON Philippines by default. If unavailable, Claude Code + Figma MCP is the fallback (with known element-capture limitations). See Section 15.
+
+If you are a new AI instance picking up this codebase, read these files **in order** before generating a single line of code:
 
 | Priority | File | Why |
 |----------|------|-----|
@@ -209,11 +214,22 @@ import { fadeUp, staggerContainer, cardItem } from '@/lib/animation'
 // Always solar-icon-set outline variant — no lucide-react, no emoji
 import { HomeOutline } from 'solar-icon-set'
 
-// In a colored container:
-<div className="w-10 h-10 rounded-xl bg-primary/10">
-  <HomeOutline className="w-5 h-5 text-primary" />
+// ❌ WRONG — solar-icon-set ignores text-* classes (no currentColor)
+<HomeOutline className="text-primary w-5 h-5" />
+
+// ✅ CORRECT — use the color prop directly
+<HomeOutline color="rgb(var(--color-primary))" width={20} height={20} />
+
+// ✅ CORRECT — in a colored container:
+<div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+  <HomeOutline color="rgb(var(--color-primary))" width={20} height={20} />
 </div>
+
+// ✅ Inactive nav icon (slate-400):
+<HomeOutline color="#94A3B8" width={20} height={20} />
 ```
+
+> See [`.claude/rules/solar-icon-styling.md`](.claude/rules/solar-icon-styling.md) — `text-*` classes silently do nothing on solar icons.
 
 ---
 
@@ -231,6 +247,7 @@ These rules are enforced by CLAUDE.md Section 0. Violating them breaks the produ
 8. **Icons** — `solar-icon-set` outline variant only, no emoji in JSX
 9. **Real Supabase client only** — `MOCK_*` exports in `packages/supabase/` are reference data, never import in production components
 10. **Two-layer Realtime recovery** — any new layout/store with Supabase Realtime must implement `recover()` + `resubscribe()` on `visibilitychange`, `online`, and 5-min interval
+11. **Use Gemini CLI for Figma MCP design tasks** — do not guess or approximate Figma specs in Claude Code; use Gemini CLI to inspect frames and extract tokens directly from the source file
 
 ---
 
@@ -336,10 +353,90 @@ Env vars are set in Vercel project Settings → Environment Variables.
 | Domain + email setup | [`.claude/docs/DOMAIN_AND_EMAIL_SETUP.md`](.claude/docs/DOMAIN_AND_EMAIL_SETUP.md) | Step-by-step DNS, Supabase, GCP config |
 | DB connection resilience | [`.claude/rules/db-connection-resilience.md`](.claude/rules/db-connection-resilience.md) | Realtime recovery pattern |
 | Vercel build safety | [`.claude/rules/vercel-build-safety.md`](.claude/rules/vercel-build-safety.md) | TS flags that cause deploy failures |
-| Agentic workflows | [`.claude/context/agentic-workflows.md`](.claude/context/agentic-workflows.md) | Claude Code workflows for common tasks |
+| Agentic workflows | [`.claude/context/agentic-workflows.md`](.claude/context/agentic-workflows.md) | Claude Code workflows + Skill 6 (Figma MCP design via Gemini CLI) |
 | Context anchor | [`.claude/context/memory.md`](.claude/context/memory.md) | Decision log, architecture evolution, state of play |
 
 ---
 
+## 15. AI Tool Recommendations & MCP Setup
+
+### Tool Clarifications
+
+| Claim | Reality |
+|-------|---------|
+| "Claude Code cannot use Figma MCP" | **False.** Claude Code has **native Figma MCP** built into claude.ai sessions — tools include `get_design_context`, `get_screenshot`, `get_metadata`, and more. No `.mcp.json` config needed. However, per developer observation, element capture is often inaccurate. Gemini CLI produces better results. |
+| "Figma MCP requires payment" | **Partially true.** The Figma MCP server itself is **free**. However, **Figma Dev Mode** — which passes precise layout specs, CSS values, and component context to the model — requires a **paid Figma plan**. Without Dev Mode, accuracy suffers for both Claude Code and Gemini CLI. |
+| "Gemini CLI is always available" | **False.** Gemini CLI requires organizational Google/Gemini access. **DEVCON Philippines does not have this provisioned by default.** Confirm with the team lead before using it. |
+
+### Recommended MCPs
+
+MCPs (Model Context Protocol servers) automate common workflows by giving the AI direct access to external services. These three are recommended for this project:
+
+| MCP | Status | Cost | What it enables |
+|-----|--------|------|-----------------|
+| **Supabase MCP** | Configured in `.mcp.json` | Free | Schema inspection, query execution, migration assistance directly from the AI session |
+| **Figma MCP** (claude.ai native) | Built into claude.ai/code sessions | Free (Dev Mode needs paid Figma plan) | Available without any setup — `get_design_context`, `get_screenshot`, `get_metadata`, etc. Per developer observation: element capture accuracy is limited. |
+| **Figma MCP** (local server) | Not configured in `.mcp.json` | Free (Dev Mode needs paid Figma plan) | Local Figma MCP server — alternative to the native integration. Requires a Figma PAT. |
+| **Vercel MCP** | Not configured in `.mcp.json` | Free | Trigger deploys, check build logs, inspect env vars, manage project settings from the AI session |
+
+To add the local Figma MCP server or Vercel MCP, append to [`.mcp.json`](.mcp.json):
+
+```json
+"figma": {
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "figma-mcp"],
+  "env": { "FIGMA_API_KEY": "<your-figma-personal-access-token>" }
+},
+"vercel": {
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@vercel/mcp-adapter"],
+  "env": { "VERCEL_TOKEN": "<your-vercel-token>" }
+}
+```
+
+> Figma personal access tokens: Figma → Account Settings → Personal Access Tokens.
+> Dev Mode requires the file owner to have a paid Figma plan (Professional or Organization).
+
+> **Note (April 21, 2026):** Claude Code (claude.ai/code) already has Figma MCP built in — no token or `.mcp.json` entry is needed. The local Figma MCP server in `.mcp.json` is only needed for non-claude.ai environments or automated pipelines.
+
+### AI Tool Decision Table
+
+| Task | Best tool | Notes |
+|------|-----------|-------|
+| Implement features, fix bugs, wire stores | **Claude Code** | Primary tool for all code work |
+| Supabase schema, Edge Functions, RLS | **Claude Code + Supabase MCP** | Supabase MCP already configured in `.mcp.json` |
+| Vercel deploys, build inspection | **Claude Code + Vercel MCP** | Add Vercel MCP to `.mcp.json` first |
+| UI/UX design from Figma *(Gemini CLI available)* | **Gemini CLI + Figma MCP** | Best accuracy for element capture |
+| UI/UX design from Figma *(no Gemini access)* | **Claude Code + Figma MCP** | Works but element capture is less accurate; use Figma Inspect panel to supplement |
+| UI/UX design *(no MCP at all)* | **Claude Code + human Figma Inspect** | Manual — human copies values from Figma Inspect panel into the AI session |
+
+### Figma MCP Workflow *(Gemini CLI + Dev Mode — highest accuracy)*
+
+```
+1. Gemini CLI  — open Figma frame via MCP, extract layout / colors / spacing / typography
+2. Gemini CLI  — generate React + Tailwind skeleton using project MD3 tokens
+3. Claude Code — replace any hardcoded values with correct Tailwind/CSS-var tokens
+4. Claude Code — wire real store data, add framer-motion variants, solar icons (color prop)
+5. Gemini CLI  — compare finished component to Figma frame for fidelity check
+6. Claude Code — npm run typecheck && npm run build
+```
+
+### Fallback Workflow *(no Gemini CLI — Claude Code + Figma MCP or manual)*
+
+```
+1. Claude Code — connect Figma MCP, read the frame (note: element capture may be inaccurate)
+   OR Human    — open Figma in browser, copy values from Inspect panel manually
+2. Claude Code — map extracted values to project tokens (no hardcoded hex, no magic px)
+3. Claude Code — build component with framer-motion variants, solar icons (color prop), CSS vars
+4. Human       — visually compare rendered component at 390px against Figma frame
+5. Claude Code — npm run typecheck && npm run build
+```
+
+> Full workflow + checklist: [`.claude/context/agentic-workflows.md`](.claude/context/agentic-workflows.md) — Skill 6: `FigmaMCPDesign`.
+
+---
+
 *DEVCON Philippines · React 19 + Vite 7 · Supabase · Deployed on Vercel*
-*MVP target: May 15, 2026 — Cohort 3 Graduation Showcase*
+*MVP 1.6 · Last updated April 21, 2026 · Deadline April 30, 2026 — Cohort 3 Graduation Showcase*

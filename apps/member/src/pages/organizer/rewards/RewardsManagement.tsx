@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PenOutline, TrashBinTrashOutline, AddCircleOutline, GiftOutline, BoxOutline, CheckCircleOutline, CloseCircleLineDuotone, UserOutline } from 'solar-icon-set'
+import { PenOutline, TrashBinTrashOutline, AddCircleOutline, GiftOutline, BoxOutline, CheckCircleOutline, CloseCircleLineDuotone } from 'solar-icon-set'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createPortal } from 'react-dom'
 import { useRewardsStore } from '../../../stores/useRewardsStore'
@@ -22,10 +22,18 @@ interface RefundConfirmSheetProps {
 
 function RefundConfirmSheet({ claim, onConfirm, onClose, isLoading }: RefundConfirmSheetProps) {
   const [visible, setVisible] = useState(true)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current)
+    }
+  }, [])
+
   const handleClose = () => {
     if (isLoading) return
     setVisible(false)
-    setTimeout(onClose, 220)
+    timerRef.current = setTimeout(onClose, 220)
   }
 
   return createPortal(
@@ -48,7 +56,6 @@ function RefundConfirmSheet({ claim, onConfirm, onClose, isLoading }: RefundConf
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
             <h3 className="text-[18px] font-proxima font-bold text-slate-900 mb-2">Refund this claim?</h3>
             <p className="text-[14px] text-slate-500 mb-6">
               This will restore{' '}
@@ -61,7 +68,7 @@ function RefundConfirmSheet({ claim, onConfirm, onClose, isLoading }: RefundConf
                 onClick={handleClose}
                 disabled={isLoading}
                 className="flex-1 py-3.5 rounded-[14px] border border-slate-200 text-slate-600 text-[15px] font-proxima font-bold disabled:opacity-50"
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
                 Cancel
@@ -70,7 +77,7 @@ function RefundConfirmSheet({ claim, onConfirm, onClose, isLoading }: RefundConf
                 onClick={() => { void onConfirm() }}
                 disabled={isLoading}
                 className="flex-1 py-3.5 rounded-[14px] bg-red text-white text-[15px] font-proxima font-bold disabled:opacity-60"
-                whileTap={{ scale: 0.97 }}
+                whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
                 {isLoading ? 'Refunding...' : 'Yes, Refund'}
@@ -116,7 +123,7 @@ function ClaimCard({ claim, onApprove, onRefund, actionLoadingId, isHighlighted 
     <motion.div
       variants={cardItem}
       className={`bg-white rounded-[16px] border-2 shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] p-4 transition-colors ${
-        isHighlighted ? 'border-[#1152d4]' : 'border-[rgba(156,163,175,0.3)]'
+        isHighlighted ? 'border-blue' : 'border-[rgba(156,163,175,0.3)]'
       }`}
     >
       {/* Member row */}
@@ -141,7 +148,7 @@ function ClaimCard({ claim, onApprove, onRefund, actionLoadingId, isHighlighted 
           {claim.reward_image_url ? (
             <img src={claim.reward_image_url} alt={claim.reward_name} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-[#1152d4]">
+            <div className="w-full h-full flex items-center justify-center bg-blue">
               <GiftOutline className="size-5" color="white" />
             </div>
           )}
@@ -157,7 +164,7 @@ function ClaimCard({ claim, onApprove, onRefund, actionLoadingId, isHighlighted 
         <div className="text-right shrink-0">
           <p className="text-[13px] font-proxima font-bold text-slate-900">{claim.reward_points_cost.toLocaleString()} pts</p>
           {claim.claim_pin != null && isPending && (
-            <p className="text-[10px] font-proxima font-black text-[#1152d4] tracking-widest">PIN {claim.claim_pin}</p>
+            <p className="text-[10px] font-proxima font-black text-blue tracking-widest">PIN {claim.claim_pin}</p>
           )}
         </div>
       </div>
@@ -169,7 +176,7 @@ function ClaimCard({ claim, onApprove, onRefund, actionLoadingId, isHighlighted 
             onClick={() => onRefund(claim.id)}
             disabled={isLoading}
             className="flex-1 py-2.5 text-[13px] font-proxima font-bold rounded-[12px] border border-slate-200 text-slate-500 hover:bg-red/5 hover:border-red hover:text-red transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
             <CloseCircleLineDuotone className="w-3.5 h-3.5" color="#EF4444" />
@@ -179,15 +186,46 @@ function ClaimCard({ claim, onApprove, onRefund, actionLoadingId, isHighlighted 
             onClick={() => onApprove(claim.id)}
             disabled={isLoading}
             className="flex-1 py-2.5 text-[13px] font-proxima font-bold rounded-[12px] bg-blue text-white hover:bg-blue-dark transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50"
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <CheckCircleOutline className="w-3.5 h-3.5" />
+            <CheckCircleOutline color="white" size={14} />
             {isLoading ? 'Processing...' : 'Approve'}
           </motion.button>
         </div>
       )}
     </motion.div>
+  )
+}
+
+// ── TabButton ─────────────────────────────────────────────────────────────────
+
+type TabId = 'rewards' | 'claims'
+
+function TabButton({
+  id, label, activeTab, onSelect, badge,
+}: {
+  id: TabId
+  label: string
+  activeTab: TabId
+  onSelect: (t: TabId) => void
+  badge?: number
+}) {
+  const isActive = activeTab === id
+  return (
+    <button
+      onClick={() => onSelect(id)}
+      className={`flex-1 h-[32px] flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all relative ${
+        isActive ? 'bg-blue text-white shadow-sm' : 'bg-blue/10 text-blue'
+      }`}
+    >
+      {label}
+      {badge != null && badge > 0 && (
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          {badge > 9 ? '9+' : badge}
+        </span>
+      )}
+    </button>
   )
 }
 
@@ -206,7 +244,7 @@ export function OrgRewardsManagement() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const [activeTab, setActiveTab] = useState<'rewards' | 'claims'>('rewards')
+  const [activeTab, setActiveTab] = useState<TabId>('rewards')
   const [pinSearch, setPinSearch] = useState('')
   const [refundTargetId, setRefundTargetId] = useState<string | null>(null)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
@@ -237,30 +275,53 @@ export function OrgRewardsManagement() {
   const handleApprove = async (claimId: string) => {
     setActionLoadingId(claimId)
     setActionError(null)
-    const result = await approveClaim(claimId)
-    if (!result.success) setActionError(result.error ?? 'Failed to approve')
-    setActionLoadingId(null)
+    try {
+      const result = await approveClaim(claimId)
+      if (!result.success) setActionError(result.error ?? 'Failed to approve')
+    } catch {
+      setActionError('Failed to approve')
+    } finally {
+      setActionLoadingId(null)
+    }
   }
 
   const handleRefundConfirm = async () => {
     if (!refundTargetId) return
     setActionLoadingId(refundTargetId)
     setActionError(null)
-    const result = await refundClaim(refundTargetId)
-    if (!result.success) setActionError(result.error ?? 'Failed to refund')
-    setActionLoadingId(null)
-    setRefundTargetId(null)
+    try {
+      const result = await refundClaim(refundTargetId)
+      if (!result.success) setActionError(result.error ?? 'Failed to refund')
+    } catch {
+      setActionError('Failed to refund')
+    } finally {
+      setActionLoadingId(null)
+      setRefundTargetId(null)
+    }
   }
 
-  const activeCount = allRewards.filter((r) => r.is_active).length
-  const pendingClaims = allRedemptions.filter((r) => r.status === 'pending')
-  const resolvedClaims = allRedemptions.filter((r) => r.status !== 'pending')
-  const refundTarget = allRedemptions.find((r) => r.id === refundTargetId) ?? null
+  const activeCount = useMemo(
+    () => allRewards.filter((r) => r.is_active).length,
+    [allRewards]
+  )
+  const pendingClaims = useMemo(
+    () => allRedemptions.filter((r) => r.status === 'pending'),
+    [allRedemptions]
+  )
+  const resolvedClaims = useMemo(
+    () => allRedemptions.filter((r) => r.status !== 'pending'),
+    [allRedemptions]
+  )
+  const refundTarget = useMemo(
+    () => allRedemptions.find((r) => r.id === refundTargetId) ?? null,
+    [allRedemptions, refundTargetId]
+  )
 
   const searchTrimmed = pinSearch.trim()
-  const matchedClaimId = searchTrimmed.length > 0
-    ? (pendingClaims.find((r) => r.claim_pin === searchTrimmed || r.claim_pin?.startsWith(searchTrimmed))?.id ?? null)
-    : null
+  const matchedClaimId = useMemo(() => {
+    if (searchTrimmed.length !== 6) return null
+    return pendingClaims.find((r) => r.claim_pin === searchTrimmed)?.id ?? null
+  }, [searchTrimmed, pendingClaims])
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
@@ -271,7 +332,7 @@ export function OrgRewardsManagement() {
 
         {/* ── Blue Background Container ── */}
         <div
-          className="bg-[#1152d4] relative z-0 pointer-events-auto pb-[64px]"
+          className="bg-blue relative z-0 pointer-events-auto pb-[64px]"
           style={{
             clipPath: 'ellipse(100% 100% at 50% 0%)',
             backgroundImage: PATTERN_BG,
@@ -307,10 +368,10 @@ export function OrgRewardsManagement() {
                 <GiftOutline className="size-5" color="#1152d4" />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
-                <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px] uppercase tracking-wide">
+                <p className="font-proxima text-slate-500 text-[12px] leading-none mb-[6px] uppercase tracking-wide">
                   Total
                 </p>
-                <p className="font-proxima font-extrabold text-[24px] text-[#464646] leading-none tracking-tight">
+                <p className="font-proxima font-extrabold text-[24px] text-slate-700 leading-none tracking-tight">
                   {allRewards.length}
                 </p>
               </div>
@@ -325,10 +386,10 @@ export function OrgRewardsManagement() {
                 <BoxOutline className="size-5" color="#21C45D" />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
-                <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px] uppercase tracking-wide">
+                <p className="font-proxima text-slate-500 text-[12px] leading-none mb-[6px] uppercase tracking-wide">
                   Active
                 </p>
-                <p className="font-proxima font-extrabold text-[24px] text-[#464646] leading-none tracking-tight">
+                <p className="font-proxima font-extrabold text-[24px] text-slate-700 leading-none tracking-tight">
                   {activeCount}
                 </p>
               </div>
@@ -336,34 +397,10 @@ export function OrgRewardsManagement() {
           </div>
         </div>
 
-        {/* ── Tab bar ── */}
         <div className="pt-4 pb-2 px-4 pointer-events-auto">
           <div className="flex gap-[6px]">
-            <button
-              onClick={() => setActiveTab('rewards')}
-              className={`flex-1 h-[32px] flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all ${
-                activeTab === 'rewards'
-                  ? 'bg-[#1152d4] text-white shadow-sm'
-                  : 'bg-[#1152d4]/10 text-[#1152d4]'
-              }`}
-            >
-              Rewards
-            </button>
-            <button
-              onClick={() => setActiveTab('claims')}
-              className={`flex-1 h-[32px] flex items-center justify-center rounded-[128px] text-[14px] font-proxima font-bold transition-all relative ${
-                activeTab === 'claims'
-                  ? 'bg-[#1152d4] text-white shadow-sm'
-                  : 'bg-[#1152d4]/10 text-[#1152d4]'
-              }`}
-            >
-              Claims
-              {unseenClaimCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {unseenClaimCount > 9 ? '9+' : unseenClaimCount}
-                </span>
-              )}
-            </button>
+            <TabButton id="rewards" label="Rewards" activeTab={activeTab} onSelect={setActiveTab} />
+            <TabButton id="claims" label="Claims" activeTab={activeTab} onSelect={setActiveTab} badge={unseenClaimCount} />
           </div>
         </div>
       </header>
@@ -412,7 +449,7 @@ export function OrgRewardsManagement() {
                             />
                           ) : (
                             <div
-                              className="w-full h-full flex items-center justify-center bg-[#1152d4]"
+                              className="w-full h-full flex items-center justify-center bg-blue"
                               style={{
                                 backgroundImage: PATTERN_BG,
                                 backgroundSize: '40px 40px',
@@ -456,7 +493,7 @@ export function OrgRewardsManagement() {
 
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span className="text-[9px] font-bold text-blue bg-blue/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <GiftOutline className="w-2.5 h-2.5" />
+                              <GiftOutline color="#1152D4" size={10} />
                               {reward.points_cost.toLocaleString()} pts
                             </span>
 
@@ -526,14 +563,14 @@ export function OrgRewardsManagement() {
                 value={pinSearch}
                 onChange={(e) => setPinSearch(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="Enter 6-digit claim PIN..."
-                className="w-full h-[44px] bg-white border border-slate-200 rounded-[12px] px-4 pr-10 text-[14px] font-proxima text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#1152d4] transition-colors"
+                className="w-full h-[44px] bg-white border border-slate-200 rounded-[12px] px-4 pr-10 text-[14px] font-proxima text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue transition-colors"
               />
               {pinSearch && (
                 <button
                   onClick={() => setPinSearch('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  <CloseCircleLineDuotone className="w-4 h-4 text-slate-400" />
+                  <CloseCircleLineDuotone color="#94A3B8" size={16} />
                 </button>
               )}
             </div>

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { UsersGroupRoundedOutline, KeyOutline, CalendarOutline, BuildingsOutline, WidgetOutline, LogoutOutline, ShieldCheckOutline, ScannerOutline, ArrowLeftOutline } from 'solar-icon-set'
 import { useAuthStore } from '../stores/useAuthStore'
+import ScrollToTop from './ScrollToTop'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const NAV_ITEMS = [
@@ -10,7 +11,7 @@ const NAV_ITEMS = [
   { path: '/admin/org-codes', label: 'Org Codes',  Icon: KeyOutline,        end: false, superOnly: false },
   { path: '/admin/events',    label: 'Events',     Icon: CalendarOutline,    end: false, superOnly: false },
   { path: '/admin/chapters',  label: 'Chapters',   Icon: BuildingsOutline,       end: false, superOnly: false },
-  { path: '/admin/upgrades',  label: 'CMS',        Icon: ShieldCheckOutline,     end: false, superOnly: false },
+  { path: '/admin/upgrades',  label: 'Chapter Management',        Icon: ShieldCheckOutline,     end: false, superOnly: false },
   { path: '/admin/kiosk',     label: 'Kiosk',      Icon: ScannerOutline,        end: false, superOnly: true  },
 ]
 
@@ -51,6 +52,7 @@ export default function AdminLayout() {
 
   return (
     <div className="flex h-screen bg-slate-100 font-sans p-4 gap-4">
+      <ScrollToTop />
       {/* Floating sidebar */}
       <aside className="w-56 shrink-0 bg-blue rounded-2xl shadow-card flex flex-col overflow-hidden">
         <div className="px-5 py-5 border-b border-white/10">
@@ -101,7 +103,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main content area — floating card */}
-      <main className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-y-auto">
+      <main data-scroll-container className="flex-1 bg-white rounded-2xl shadow-card border border-slate-100 overflow-y-auto">
         <Outlet key={recoveryKey} />
       </main>
     </div>

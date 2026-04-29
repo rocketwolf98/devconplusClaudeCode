@@ -93,7 +93,6 @@ export default function AddToCalendarSheet({ event, isOpen, onClose }: Props) {
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
             <h3 className="text-md3-body-lg font-bold text-slate-900 mb-1">Add to Calendar</h3>
             <p className="text-md3-body-md text-slate-400 mb-5">{event.title}</p>
 

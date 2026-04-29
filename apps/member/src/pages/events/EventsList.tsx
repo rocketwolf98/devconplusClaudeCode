@@ -580,9 +580,6 @@ export default function EventsList() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             >
-              {/* Handle */}
-              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-4" />
-
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-md3-body-lg font-bold text-slate-900">Filter by Chapter</h2>

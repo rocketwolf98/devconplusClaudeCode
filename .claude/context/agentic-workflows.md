@@ -1,4 +1,6 @@
 # DEVCON+ — Agentic Skills
+> Last Updated: April 21, 2026
+> Version: MVP 1.6
 > Structured Claude Code workflows for common recurring tasks.
 > When asked to perform one of these operations, execute the full workflow below — don't improvise.
 
@@ -347,3 +349,103 @@ npm run build
 - [ ] `subscribeToChanges()` teardown + recreation is in layout's `resubscribe()` function
 - [ ] `resubscribe()` is called on `visibilitychange`, `online` event, and `setInterval`
 - [ ] `npm run typecheck` passes
+
+---
+
+## Skill 6: `FigmaMCPDesign` — UI/UX Design with Figma MCP via Gemini CLI
+
+> **Tool clarification (as of April 21, 2026):**
+> - **Claude Code has native Figma MCP** built into claude.ai sessions — tools available include `get_design_context`, `get_screenshot`, `get_metadata`, and more. No `.mcp.json` config is needed when using Claude Code via claude.ai/code.
+> - **Despite native support, per developer observation, Claude Code does not capture Figma elements accurately** — layouts and tokens are often misread. Gemini CLI produces better design-to-code results.
+> - **Gemini CLI is preferred** for Figma design work when access is available.
+> - **Gemini CLI requires organizational access** not provisioned to DEVCON Philippines by default — confirm with the team lead before using it.
+> - **Figma MCP is free.** However, **Figma Dev Mode** — which passes precise CSS values, layout specs, and component context to the model — requires a **paid Figma plan**. Without Dev Mode, MCP accuracy is reduced for both tools.
+> - If Gemini CLI is unavailable, use Claude Code + Figma MCP natively (claude.ai session) or via local `.mcp.json` setup, with awareness of accuracy limits. Supplement with the manual Figma Inspect panel method.
+
+Use when: translating a Figma frame to a React component, extracting design tokens from Figma, verifying design fidelity, or generating component skeletons from Figma specs.
+
+### When to use Gemini CLI vs Claude Code
+
+| Task | Tool |
+|------|------|
+| Read a Figma frame / inspect design | **Gemini CLI** (preferred) / Claude Code + Figma MCP (lower accuracy) |
+| Extract spacing, color, typography tokens from Figma | **Gemini CLI** (preferred) — Claude Code Figma MCP captures elements less accurately |
+| Generate initial component skeleton from Figma spec | **Gemini CLI** (preferred) / Claude Code + manual Figma Inspect fallback |
+| Verify finished component against Figma design | **Gemini CLI** (preferred) / human visual QA at 390px |
+| Implement logic, stores, Supabase queries | **Claude Code** |
+| Wire Tailwind tokens, animation, TypeScript types | **Claude Code** |
+| Fix build errors, run typecheck | **Claude Code** |
+
+### Workflow
+
+**Step 1 — Inspect in Gemini CLI (Figma MCP)**
+
+In Gemini CLI, with the Figma MCP server active:
+```
+# Point Gemini at the Figma frame URL or node ID
+# Ask it to extract: layout structure, spacing, colors, font sizes, component hierarchy
+# Have it output a React + Tailwind skeleton using the project's MD3 type scale and design tokens
+```
+
+Key things to extract from Figma:
+- Layout: flex direction, gap, padding, alignment
+- Colors: map to existing Tailwind tokens (`bg-primary`, `text-slate-900`, etc.)
+- Typography: map to MD3 scale (`text-md3-title-lg`, `text-md3-body-md`, etc.)
+- Radius: map to Tailwind (`rounded-xl`, `rounded-2xl`, `rounded-3xl`)
+- Shadows: map to project tokens (`shadow-card`, `shadow-blue`, `shadow-primary`)
+
+**Step 2 — Hand off skeleton to Claude Code**
+
+Paste the Gemini-generated skeleton into Claude Code and ask it to:
+- Replace any hardcoded hex/px values with proper Tailwind/CSS-var tokens
+- Wire real data from the appropriate Zustand store
+- Add `framer-motion` animation variants from `lib/animation.ts`
+- Add `whileTap` spring values per the design system
+- Ensure `solar-icon-set` icons use `color` prop (not `text-*` classes)
+- Run `npm run typecheck` to confirm no TS errors
+
+**Step 3 — Verify design fidelity in Gemini CLI**
+
+Return to Gemini CLI to compare the finished component screenshot against the original Figma frame. Ask Gemini to flag any spacing, color, or typography mismatches.
+
+**Step 4 — Final build check in Claude Code**
+```bash
+npm run typecheck
+npm run build
+```
+
+### Fallback Workflow *(when Gemini CLI access is not provisioned)*
+
+If DEVCON Philippines has not been granted Gemini CLI access, use this human-assisted path instead:
+
+**Step 1 — Human extracts specs from Figma Inspect panel**
+
+In Figma (browser), select each frame/layer and copy values from the Inspect panel:
+- Layout: flex direction, gap, padding
+- Colors: hex values → map manually to project tokens
+- Typography: font size, weight → map to MD3 scale
+- Border radius: px → map to Tailwind (`rounded-xl`, `rounded-2xl`, etc.)
+
+**Step 2 — Paste specs into Claude Code**
+
+Paste the extracted values and ask Claude Code to build the component using the correct project tokens (no hardcoded hex, no magic px values).
+
+**Step 3 — Human visual QA**
+
+Open the running dev server (`npm run dev:member`) at `localhost:5173`, set DevTools to 390px width, and compare the component side-by-side with the Figma frame.
+
+**Step 4 — Claude Code final check**
+```bash
+npm run typecheck
+npm run build
+```
+
+### Checklist before done
+- [ ] Gemini CLI used for Figma inspection OR human manually extracted specs from Figma Inspect panel
+- [ ] All colors mapped to project Tailwind tokens — no hardcoded hex
+- [ ] All font sizes mapped to MD3 scale or legacy scale
+- [ ] Solar icons use `color` prop, not `text-*` classes
+- [ ] `framer-motion` variants imported from `lib/animation.ts`
+- [ ] `whileTap` spring applied to all tappable elements
+- [ ] `npm run typecheck` passes with zero errors
+- [ ] `npm run build` succeeds

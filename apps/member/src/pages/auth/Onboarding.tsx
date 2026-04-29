@@ -5,8 +5,8 @@ import logoVertical from '../../assets/logos/logo-vertical.svg'
 const slides = [
   {
     image:    '/photos/devcon-summit-group.jpg',
-    title:    "Your Portal to\nThe Philippines's Largest\nTech Volunteer Community!",
-    subtitle: 'Sync, Support, Succeed. Get instant access to the Philippines’s largest tech volunteer community!',
+    title:    "Your Portal to\nThe Philippines’ Largest\nTech Volunteer Community!",
+    subtitle: "Sync, Support, Succeed. Get instant access to the Philippines’ largest tech volunteer community!",
   },
   {
     image:    '/photos/devcon-15-anniversary.jpg',

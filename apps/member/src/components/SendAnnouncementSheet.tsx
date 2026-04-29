@@ -62,7 +62,6 @@ export default function SendAnnouncementSheet({ eventId, eventTitle, isOpen, onC
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
             <div className="flex items-center gap-2 mb-1">
               <UserSpeakOutline className="w-4 h-4" color="rgb(var(--color-primary))" />
               <h3 className="text-md3-body-lg font-bold text-slate-900">Send Announcement</h3>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { HomeOutline, CalendarOutline, ScannerOutline, GiftOutline, UserOutline } from 'solar-icon-set'
 import { motion } from 'framer-motion'
 import type { SolarIcon } from '../lib/icons'
@@ -9,6 +9,7 @@ import { useRewardsStore } from '../stores/useRewardsStore'
 import { useOrgVolunteerStore } from '../stores/useOrgVolunteerStore'
 import { supabase } from '../lib/supabase'
 import DesktopGuard from './DesktopGuard'
+import ScrollToTop from './ScrollToTop'
 import logoHorizontal from '../assets/logos/logo-horizontal.svg'
 
 const LEFT_TABS: { path: string; label: string; Icon: SolarIcon; end: boolean }[] = [
@@ -32,7 +33,6 @@ const ORGANIZER_ROLES = ['chapter_officer', 'hq_admin', 'super_admin'] as const
 export default function OrganizerLayout() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
-  const location = useLocation()
   const scrollRef = useRef<HTMLDivElement>(null)
   const fetchEvents = useEventsStore((s) => s.fetchEvents)
   const subscribeToEventChanges = useEventsStore((s) => s.subscribeToChanges)
@@ -49,10 +49,6 @@ export default function OrganizerLayout() {
       navigate('/home', { replace: true })
     }
   }, [user, navigate])
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
-  }, [location.pathname])
 
   // Data management for the organizer session.
   // Fetches data and subscribes to realtime on mount; recovers and re-subscribes
@@ -124,6 +120,7 @@ export default function OrganizerLayout() {
 
   return (
     <DesktopGuard>
+      <ScrollToTop />
       {/* ── MOBILE layout (< md) ── */}
       <div className="flex flex-col h-dvh bg-slate-50 overflow-hidden md:hidden">
         <div ref={scrollRef} data-scroll-container className="flex-1 overflow-y-auto pb-24">

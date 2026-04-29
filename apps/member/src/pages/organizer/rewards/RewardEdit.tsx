@@ -81,7 +81,6 @@ export function RewardEdit() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
             >
-              <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />
               <div className="flex flex-col items-center text-center mb-6">
                 <div className="w-14 h-14 rounded-full bg-red/10 flex items-center justify-center mb-4">
                   <DangerTriangleOutline className="w-7 h-7" color="#EF4444" />

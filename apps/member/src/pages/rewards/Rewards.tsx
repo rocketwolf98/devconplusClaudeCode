@@ -88,7 +88,6 @@ function RedemptionModal({ reward, spendablePoints, onClose }: RedemptionModalPr
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1 absolute top-0 left-1/2 -translate-x-1/2 z-20" />
             {sheetState === 'confirm' || sheetState === 'loading' || sheetState === 'error' ? (
               <>
                 {/* Header Image Part */}
@@ -257,13 +256,15 @@ function RewardCard({ reward, spendablePoints, onRedeem }: RewardCardProps) {
 
         {/* Locked / OOS Overlay */}
         {(!canAfford || isOutOfStock) && (
-          <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-[10px] p-4 text-center z-10">
-            <div className="size-[42px] bg-white rounded-full flex items-center justify-center overflow-hidden shadow-sm">
-               <LockOutline className="size-6" color="#F8C630" />
+          <div className="absolute inset-0 bg-[#7C3AED]/20 flex flex-col items-center justify-center gap-[10px] p-4 text-center z-10">
+            <div className="size-[42px] bg-white rounded-full flex items-center justify-center shadow-sm">
+              <LockOutline className="size-6" color="#7C3AED" />
             </div>
-            <p className="text-white text-[12px] font-proxima font-semibold drop-shadow-sm leading-tight">
-              {isOutOfStock ? 'Sold Out' : 'Not Enough Points'}
-            </p>
+            <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+              <p className="text-[11px] font-proxima font-semibold text-[#7C3AED] leading-tight">
+                {isOutOfStock ? 'Sold Out' : 'Not Enough Points'}
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -338,7 +339,6 @@ function ClaimReceiptSheet({ redemption, reward, onClose }: ClaimReceiptSheetPro
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-3 mb-1" />
             <div className="flex flex-col items-center text-center px-4 pb-8 pt-4 gap-3">
               <h2 className="text-[20px] font-proxima font-bold text-slate-900">Claim Receipt</h2>
               <p className="text-[13px] text-slate-500">Show this PIN to the organizer at the rewards booth</p>

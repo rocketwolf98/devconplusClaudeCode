@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeftOutline, BoltOutline } from 'solar-icon-set'
+import { ArrowLeftOutline, BoltOutline, StarOutline } from 'solar-icon-set'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { usePointsStore } from '../../stores/usePointsStore'
 import TransactionRow from '../../components/TransactionRow'
 import { SkeletonTransactionGroup } from '../../components/Skeleton'
 import type { PointTransaction } from '@devcon-plus/supabase'
-
-// Figma Assets - Using the same one as Dashboard/VolunteerXpCard
-const imgSolarMedalStarCircleBoldDuotone = "https://www.figma.com/api/mcp/asset/04489665-76af-4996-94c5-2fd03ef88f72";
 
 // Flower-of-life pattern matching Rewards/Dashboard
 const TILE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><circle cx="0" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="0" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="0" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="60" cy="60" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/><circle cx="30" cy="30" r="30" stroke="white" stroke-width="0.8" stroke-opacity="0.10" fill="none"/></svg>`
@@ -118,12 +115,8 @@ export default function PointsHistory() {
           <div className="bg-white rounded-[24px] shadow-[0px_0px_8px_0px_rgba(0,0,0,0.1)] border border-slate-400/30 h-[100px] flex items-center pointer-events-auto">
             {/* Spendable */}
             <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
-              <div className="shrink-0 size-[40px]">
-                <img 
-                  src={imgSolarMedalStarCircleBoldDuotone} 
-                  alt="Medal" 
-                  className="size-full object-contain"
-                />
+              <div className="shrink-0 size-[40px] bg-gold/10 rounded-full flex items-center justify-center">
+                <StarOutline color="#F8C630" width={22} height={22} />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
                 <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px]">

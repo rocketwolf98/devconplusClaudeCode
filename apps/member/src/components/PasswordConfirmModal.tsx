@@ -60,15 +60,14 @@ export default function PasswordConfirmModal({
 
           {/* Sheet */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl px-4 pt-6 pb-10"
+            className="fixed bottom-0 left-0 right-0 z-[70] bg-white rounded-t-2xl p-6 pb-10"
             variants={slideUp}
             initial="hidden"
             animate="visible"
             exit="exit"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-6" />
-
+            <div className="text-center">
             <h2 className="text-md3-body-lg font-bold text-slate-900 mb-1">{title}</h2>
             <p className="text-md3-body-md text-slate-500 mb-5">{description}</p>
 
@@ -113,6 +112,7 @@ export default function PasswordConfirmModal({
               >
                 {isLoading ? 'Verifying…' : confirmLabel}
               </button>
+            </div>
             </div>
           </motion.div>
         </>
