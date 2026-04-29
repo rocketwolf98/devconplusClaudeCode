@@ -116,7 +116,7 @@ export default function PointsHistory() {
             {/* Spendable */}
             <div className="flex-1 flex items-center gap-[10px] pl-[20px]">
               <div className="shrink-0 size-[40px] bg-gold/10 rounded-full flex items-center justify-center">
-                <StarOutline color="#F8C630" width={22} height={22} />
+                <StarOutline color="#F8C630" size={22} />
               </div>
               <div className="flex flex-col justify-center translate-y-px">
                 <p className="font-proxima text-[#6b7280] text-[12px] leading-none mb-[6px]">

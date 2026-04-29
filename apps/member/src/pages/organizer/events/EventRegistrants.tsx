@@ -114,7 +114,7 @@ function RegistrantDetailView({
           onClick={onClose}
           className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center active:bg-white/40 transition-colors shadow-sm shrink-0"
         >
-          <ArrowLeftOutline color="white" width={20} height={20} />
+          <ArrowLeftOutline color="white" size={20} />
         </button>
         <div className="flex-1 min-w-0">
           <h1 className="text-white text-[24px] font-semibold font-proxima leading-none tracking-tight truncate">
@@ -153,7 +153,7 @@ function RegistrantDetailView({
             <>
               <div className="border-t border-slate-100" />
               <p className="text-[12px] text-green font-semibold flex items-center gap-1.5">
-                <CheckCircleOutline color="#21C45D" width={14} height={14} />
+                <CheckCircleOutline color="#21C45D" size={14} />
                 Checked In
               </p>
             </>
@@ -165,7 +165,7 @@ function RegistrantDetailView({
           <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-[14px] font-bold text-slate-500 flex items-center gap-1.5">
-                <ClipboardListOutline color="#94A3B8" width={14} height={14} />
+                <ClipboardListOutline color="#94A3B8" size={14} />
                 Registration Responses
               </p>
               <span className="bg-slate-100 text-slate-500 rounded-full px-2 py-0.5 text-[10px] font-bold">
@@ -208,7 +208,7 @@ function RegistrantDetailView({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <CloseCircleLineDuotone color="#EF4444" width={16} height={16} />
+              <CloseCircleLineDuotone color="#EF4444" size={16} />
               Reject
             </motion.button>
             <motion.button
@@ -217,7 +217,7 @@ function RegistrantDetailView({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <CheckCircleOutline color="white" width={16} height={16} />
+              <CheckCircleOutline color="white" size={16} />
               Approve
             </motion.button>
           </div>
@@ -229,20 +229,20 @@ function RegistrantDetailView({
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <UserCheckOutline color="#21C45D" width={16} height={16} />
+            <UserCheckOutline color="#21C45D" size={16} />
             Check In
           </motion.button>
         )}
         {localReg.status === 'approved' && localReg.checked_in && (
           <p className="text-[14px] text-green font-semibold text-center py-3 flex items-center justify-center gap-1.5">
-            <CheckCircleOutline color="#21C45D" width={16} height={16} />
+            <CheckCircleOutline color="#21C45D" size={16} />
             Checked In
           </p>
         )}
         {localReg.status === 'rejected' && (
           <div className="flex items-center justify-between gap-3">
             <p className="text-[12px] text-red font-semibold flex items-center gap-1.5">
-              <CloseCircleOutline color="#EF4444" width={14} height={14} />
+              <CloseCircleOutline color="#EF4444" size={14} />
               Registration rejected
             </p>
             <motion.button
@@ -251,7 +251,7 @@ function RegistrantDetailView({
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <RestartOutline color="#64748B" width={12} height={12} />
+              <RestartOutline color="#64748B" size={12} />
               Undo
             </motion.button>
           </div>

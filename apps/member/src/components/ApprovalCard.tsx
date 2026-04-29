@@ -52,7 +52,7 @@ function ApprovalCardComponent({ registration, onClick }: ApprovalCardProps) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <StatusBadge status={registration.status} />
-          <AltArrowRightOutline color="#CBD5E1" width={16} height={16} />
+          <AltArrowRightOutline color="#CBD5E1" size={16} />
         </div>
       </div>
 
@@ -64,7 +64,7 @@ function ApprovalCardComponent({ registration, onClick }: ApprovalCardProps) {
 
       {registration.status === 'approved' && registration.checked_in && (
         <p className="text-md3-label-md text-green font-semibold text-center pt-3 flex items-center justify-center gap-1">
-          <CheckCircleOutline color="#21C45D" width={14} height={14} />
+          <CheckCircleOutline color="#21C45D" size={14} />
           Checked In
         </p>
       )}
