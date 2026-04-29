@@ -263,8 +263,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return
       }
       if (event === 'SIGNED_OUT' || !session) {
-        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false })
+        set({ user: null, initials: '', chapterName: null, isOrganizerSession: false, isOAuthOnly: false })
         return
+      }
+      if (event === 'USER_UPDATED' && session) {
+        const identities = session.user.identities ?? []
+        set({ isOAuthOnly: identities.length > 0 && !identities.some(id => id.provider === 'email') })
       }
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const meta = { ...session.user.user_metadata, email: session.user.email ?? null } as Record<string, string | null>
@@ -472,8 +476,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { error, data } = await supabase.auth.updateUser({ password: newPassword })
     if (error) throw error
     // updateUser returns the updated user with refreshed identities.
-    const hasEmailIdentity = data.user?.identities?.some(id => id.provider === 'email') ?? false
-    set({ isOAuthOnly: !hasEmailIdentity })
+    const updatedIdentities = data.user?.identities ?? []
+    set({ isOAuthOnly: updatedIdentities.length > 0 && !updatedIdentities.some(id => id.provider === 'email') })
   },
 
   requestOrganizerUpgrade: async (code) => {
