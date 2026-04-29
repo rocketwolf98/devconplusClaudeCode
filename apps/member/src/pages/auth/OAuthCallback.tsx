@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { DangerTriangleOutline } from 'solar-icon-set'
 import { supabase } from '../../lib/supabase'
+import type { Session } from '@supabase/supabase-js'
 import { callRateLimit } from '../../stores/useAuthStore'
 import logoHorizontal from '../../assets/logos/logo-horizontal.svg'
 
@@ -31,7 +32,7 @@ export default function OAuthCallback() {
     // If there's already an error in the URL, don't wait for a session
     if (error) return
 
-    async function redirect(userId: string) {
+    async function redirect(userId: string, session: Session) {
       if (navigated.current) return
       navigated.current = true
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -42,17 +43,29 @@ export default function OAuthCallback() {
         .eq('id', userId)
         .maybeSingle()
 
+      // Branch 1: incomplete profile → new user, gate with rate limit
       if (!profile || !profile.chapter_id || !profile.username) {
-        // New user — gate account creation with an IP-based rate limit
         const rl = await callRateLimit('oauth_signup')
         if (!rl.allowed) {
           await supabase.auth.signOut()
-          navigated.current = false  // allow error state to render
+          navigated.current = false
           setError('rate_limited')
           return
         }
-        navigate('/oauth-profile-complete', { replace: true })
-      } else if (ORGANIZER_ROLES.includes(profile.role ?? '')) {
+        navigate('/sign-up', { replace: true })
+        return
+      }
+
+      // Branch 2: complete profile but no local password → existing OAuth-only user
+      const identities = session.user.identities ?? []
+      const isOAuthOnly = !identities.some(id => id.provider === 'email')
+      if (isOAuthOnly) {
+        navigate('/sign-up', { replace: true })
+        return
+      }
+
+      // Branch 3: fully set up user
+      if (ORGANIZER_ROLES.includes(profile.role ?? '')) {
         navigate('/organizer', { replace: true })
       } else {
         navigate('/home', { replace: true })
@@ -68,12 +81,12 @@ export default function OAuthCallback() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        void redirect(session.user.id)
+        void redirect(session.user.id, session)
       }
     })
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) void redirect(session.user.id)
+      if (session?.user) void redirect(session.user.id, session)
     })
 
     return () => {
